@@ -30,7 +30,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -57,8 +57,8 @@ public class FormValidation {
         }
     }
 
-    private final @Nonnull Kind kind;
-    private final @Nonnull String message;
+    private final @NonNull Kind kind;
+    private final @NonNull String message;
 
     public static FormValidation await(Control control) {
         WebElement element = control.resolve();
@@ -114,7 +114,7 @@ public class FormValidation {
         }
     }
 
-    private @Nonnull Kind extractKind(WebElement element) {
+    private @NonNull Kind extractKind(WebElement element) {
         String kindClass = element.getAttribute("class");
         try {
             return Kind.get(kindClass);
@@ -126,11 +126,11 @@ public class FormValidation {
         }
     }
 
-    public @Nonnull Kind getKind() {
+    public @NonNull Kind getKind() {
         return kind;
     }
 
-    public @Nonnull String getMessage() {
+    public @NonNull String getMessage() {
         return message;
     }
 

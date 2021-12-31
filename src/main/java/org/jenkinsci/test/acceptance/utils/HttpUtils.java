@@ -10,14 +10,14 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
 
 class HttpUtils {
     private HttpUtils() {}
 
-    public static HttpClientContext buildHttpClientContext(@Nonnull URL url, @CheckForNull Credentials credentials) {
+    public static HttpClientContext buildHttpClientContext(@NonNull URL url, @CheckForNull Credentials credentials) {
         HttpClientContext context = HttpClientContext.create();
         if (credentials != null) {
             HttpHost targetHost = new HttpHost(url.getHost(), url.getPort(), url.getProtocol());

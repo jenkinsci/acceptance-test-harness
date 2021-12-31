@@ -15,8 +15,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
@@ -50,7 +50,7 @@ public class FormElementPath {
     @Inject
     private AccessTokenGenerator accessToken;
 
-    public void ensure(@Nonnull URL url, @CheckForNull Credentials credentials) {
+    public void ensure(@NonNull URL url, @CheckForNull Credentials credentials) {
         if (SKIP_PLUGIN_CHECK) {
             return;
         }

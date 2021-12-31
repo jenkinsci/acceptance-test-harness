@@ -25,7 +25,7 @@
 package org.jenkinsci.test.acceptance.utils.pluginreporter;
 
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 /**
  * Exercised Plugin Reporter that logs to console

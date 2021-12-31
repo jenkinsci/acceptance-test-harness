@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
 import java.util.concurrent.TimeUnit;
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;

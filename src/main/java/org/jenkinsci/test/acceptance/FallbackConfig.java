@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.inject.Named;
 import java.io.Closeable;
 import java.io.File;
