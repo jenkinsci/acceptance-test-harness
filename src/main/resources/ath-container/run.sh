@@ -46,7 +46,7 @@ if [ ! -f $war ]; then
         "latest")
             war=jenkins-latest.war
 	    # https://github.com/jenkinsci/jenkins/pull/6084
-            url=https://repo.jenkins-ci.org/incrementals/org/jenkins-ci/main/jenkins-war/2.332-rc32038.7ef9976b_7d6d/
+            url=https://repo.jenkins-ci.org/incrementals/org/jenkins-ci/main/jenkins-war/2.332-rc32038.7ef9976b_7d6d/jenkins-war-2.332-rc32038.7ef9976b_7d6d.war
         ;;
         "latest-rc")
             war=jenkins-latest-rc.war
