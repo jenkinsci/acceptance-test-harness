@@ -958,7 +958,15 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(view, containsColumnHeader("Last Success"));
         assertThat(view, containsColumnHeader("Last Failure"));
         assertThat(view, containsColumnHeader("Last Duration"));
-        assertThat(view, containsLinkWithTooltip("Schedule a Build for " + job1.name));
+
+        String searchText = "Schedule a Build for " + job1.name;
+        // behaviour change in https://github.com/jenkinsci/jenkins/pull/6084
+        WebElement webElement = view.getElement(By.cssSelector(String.format("a[tooltip='%s']", searchText)));
+        if (webElement != null) {
+            assertThat(view, containsLinkWithTooltip(searchText));
+        } else {
+            assertThat(view, containsSvgWithText(searchText));
+        }
     }
 
     /**
