@@ -434,7 +434,7 @@ public class Job extends TopLevelItem {
 
     public Job shouldBeTiedToLabel(final String label) {
         visit("/label/" + label); // TODO: this doesn't work correctly if the URL has non-empty context path
-        assertThat(driver, hasContent(name));
+        assertTrue(control(by.css("a[href$='job/" + name + "/']")).exists());
         return this;
     }
 

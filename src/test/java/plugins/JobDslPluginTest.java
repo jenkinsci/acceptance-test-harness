@@ -958,7 +958,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(view, containsColumnHeader("Last Success"));
         assertThat(view, containsColumnHeader("Last Failure"));
         assertThat(view, containsColumnHeader("Last Duration"));
-        assertThat(view, containsSvgWithText("Schedule a Build for " + job1.name));
+        assertThat(view, containsLinkWithTooltip("Schedule a Build for " + job1.name));
     }
 
     /**
