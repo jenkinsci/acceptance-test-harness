@@ -825,7 +825,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "            link('%s', '%s')",
                 "        }",
                 "    };",
-                "    wrappers { buildName('custom-build-name') }",
+                "    wrappers { buildName('custom-name') }",
                 "    concurrentBuild();",
                 "    steps {",
                 "        shell('sleep 10')",
@@ -860,7 +860,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         }
 
         build.open();
-        assertThat(build.getDisplayName(), containsString("custom-build-name"));
+        assertThat(build.getDisplayName(), containsString("custom-name"));
 
         build.open();
         driver.findElement(By.partialLinkText("Environment Variables")).click();

@@ -63,19 +63,14 @@ public class PriorityConfig extends Action {
         }
 
         public void pattern(String pattern) {
-            control("").select("Jobs included in a View");
+            control("").select("Jobs included in a view");
             control("jobGroupStrategy/viewName").select("All");
             control("jobGroupStrategy/jobFilter").check();
             control("jobGroupStrategy/jobFilter/jobPattern", "jobGroupStrategy/jobPattern").set(pattern);
         }
 
         public void byView(String name) {
-            try {
-                control("view").set(name);
-                return;
-            } catch (NoSuchElementException ex) {}
-
-            control("").select("Jobs included in a View");
+            control("").select("Jobs included in a view");
             control("jobGroupStrategy/viewName").select(name);
         }
     }
