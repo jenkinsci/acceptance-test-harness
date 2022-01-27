@@ -25,6 +25,7 @@ package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -52,6 +53,7 @@ public class PluginManagerTest extends AbstractJUnitTest {
         jenkins.getPluginManager().visit("installed");
         WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
         form.submit();
+        waitFor(form).until(CapybaraPortingLayerImpl::isStale);
         clickButton("Yes");
         jenkins.restart();
         jenkins.getPluginManager().visit("installed");
