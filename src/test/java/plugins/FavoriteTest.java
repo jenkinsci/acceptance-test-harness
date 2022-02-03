@@ -1,18 +1,15 @@
 package plugins;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
-import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
-import java.time.Duration;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 @WithPlugins({"favorite", "mock-security-realm"})
 public class FavoriteTest extends AbstractJUnitTest {
@@ -30,19 +27,17 @@ public class FavoriteTest extends AbstractJUnitTest {
 
         jenkins.login().doLogin(USER);
 
-        jenkins.open();
-        WebElement project_fav = waitFor(by.id("fav_my-project"));
-        project_fav.click();
-        waitFor(project_fav).withTimeout(Duration.ofSeconds(5)).until(Control::isStale);
+        waitFor(by.id("fav_my-project")).click();
+        waitFor(by.css(".icon-fav-active"));
 
         final User user = new User(jenkins, USER);
         jenkins.visit(user.getConfigUrl().toString());
-        assertTrue(waitFor(by.id("favorites")).isDisplayed());
-        WebElement project_unfav = waitFor(by.id("fav_my-project"));
-        project_unfav.click();
-        waitFor(project_unfav).withTimeout(Duration.ofSeconds(5)).until(Control::isStale);
+        waitFor(by.id("favorites"));
+        waitFor(by.id("fav_my-project")).click();
+        waitFor(by.css(".icon-fav-inactive"));
 
         jenkins.visit(user.getConfigUrl().toString());
-        assertTrue(waitFor(by.id("favorites")).getText().isEmpty());
+        waitFor(driver).until(Matchers.hasContent("Favorites"));
+        assertFalse(findIfNotVisible(by.id("favorites")).isDisplayed());
     }
 }
