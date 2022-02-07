@@ -28,12 +28,14 @@ public class FavoriteTest extends AbstractJUnitTest {
         jenkins.login().doLogin(USER);
 
         waitFor(by.id("fav_my-project")).click();
+        // ensure the project is now a favourite
         waitFor(by.css(".icon-fav-active"));
 
         final User user = new User(jenkins, USER);
         jenkins.visit(user.getConfigUrl().toString());
         waitFor(by.id("favorites"));
         waitFor(by.id("fav_my-project")).click();
+        // ensure the project is no longer a favourite
         waitFor(by.css(".icon-fav-inactive"));
 
         jenkins.visit(user.getConfigUrl().toString());
