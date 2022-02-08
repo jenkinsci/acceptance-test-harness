@@ -33,6 +33,7 @@ public class FavoriteTest extends AbstractJUnitTest {
 
         final User user = new User(jenkins, USER);
         jenkins.visit(user.getConfigUrl().toString());
+        // will fail if the project has not been favourited
         waitFor(by.id("favorites"));
         waitFor(by.id("fav_my-project")).click();
         // ensure the project is no longer a favourite
