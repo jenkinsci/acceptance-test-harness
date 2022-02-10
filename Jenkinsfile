@@ -30,7 +30,7 @@ for (int i = 0; i < splits.size(); i++) {
       for (String v in ["lts", "latest"]) {
           int javaVersion = j
           String jenkinsUnderTest = v
-          def name = "java-${javaVersion}-jenkins-${jenkinsUnderTest}split${index}"
+          def name = "java-${javaVersion}-jenkins-${jenkinsUnderTest}-split${index}"
           branches[name] = {
               stage(name) {
                   node('docker-highmem') {
