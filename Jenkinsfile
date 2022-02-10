@@ -53,7 +53,8 @@ for (int i = 0; i < splits.size(); i++) {
                                   set-java.sh $javaVersion
                                   eval \$(vnc.sh)
                                   java -version
-
+                              """ + (jenkinsUnderTest == "lts" ? " export FORM_ELEMENT_PATH_VERSION=1.11" : "") + 
+                              """
                                   run.sh firefox ${jenkinsUnderTest} -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                               """
                           }
