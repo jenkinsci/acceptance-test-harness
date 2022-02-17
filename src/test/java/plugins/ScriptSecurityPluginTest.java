@@ -92,12 +92,12 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
 
     @Test
     public void signatureNeedsApproval() throws Exception {
-        final FreeStyleJob job = createFailedJob("def h = java.lang.System.identityHashCode(0)", true);
+        final FreeStyleJob job = createFailedJob("def h = java.lang.System.getProperties()", true);
         login(ADMIN);
         {
             ScriptApproval sa = new ScriptApproval(jenkins);
             sa.open();
-            sa.findSignature("identityHashCode").approve();
+            sa.findSignature("getProperties").approve();
         }
         shouldSucceed(job); // Script approved
     }

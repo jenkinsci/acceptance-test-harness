@@ -33,6 +33,7 @@ import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.inject.Injector;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
@@ -83,9 +84,8 @@ public class Job extends TopLevelItem {
         check(radio);
 
         try {
-            // from radio label get input contained inside it
-            String path = radio.findElement(By.tagName("input")).getAttribute("path");
-            return newInstance(type, this, path);
+            String path = radio.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH)).getAttribute("path");
+            return newInstance(type, this, requireNonNull(path));
         } catch (NoSuchElementException e) {
             return newInstance(type, this, radio.getAttribute("path"));
         }
@@ -221,7 +221,9 @@ public class Job extends TopLevelItem {
     public <T extends Trigger> T addTrigger(Class<T> type) {
         ensureConfigPage();
         T trigger = newInstance(type, this);
-        trigger.enabled.check();
+        WebElement checkbox = trigger.enabled.resolve();
+        WebElement label = checkbox.findElement(by.xpath("../label"));
+        check(label);
         return trigger;
     }
 
@@ -369,7 +371,7 @@ public class Job extends TopLevelItem {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        control("/properties/hudson-model-ParametersDefinitionProperty/specified").check();
+        control(by.checkbox("This project is parameterized")).check();
 
         control(by.xpath("//button[normalize-space(.)='Add Parameter']")).selectDropdownMenu(type);
 
@@ -397,7 +399,7 @@ public class Job extends TopLevelItem {
     }
 
     public void disable() {
-        check("disable");
+        check("Disable this project");
     }
 
     public int getNextBuildNumber() {
@@ -432,7 +434,7 @@ public class Job extends TopLevelItem {
 
     public Job shouldBeTiedToLabel(final String label) {
         visit("/label/" + label); // TODO: this doesn't work correctly if the URL has non-empty context path
-        assertThat(driver, hasContent(name));
+        assertTrue(control(by.css("a[href$='job/" + name + "/']")).exists());
         return this;
     }
 

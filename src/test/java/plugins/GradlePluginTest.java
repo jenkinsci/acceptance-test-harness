@@ -31,14 +31,11 @@ import org.jenkinsci.test.acceptance.plugins.gradle.GradleWrapper;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 import static org.jenkinsci.test.acceptance.Matchers.containsString;
 import static org.jenkinsci.test.acceptance.plugins.gradle.GradleTask.HELLO;
-import static org.jenkinsci.test.acceptance.plugins.gradle.GradleTask.FIRST;
 import static org.jenkinsci.test.acceptance.plugins.gradle.GradleTask.SECOND;
-import static org.jenkinsci.test.acceptance.plugins.gradle.GradleTask.JOB_PARAM_AS_PROJECT_PROPERTIES;
-import static org.jenkinsci.test.acceptance.plugins.gradle.GradleTask.JOB_PARAM_AS_SYSTEM_PROPERTIES;
-import static org.junit.Assert.assertThat;
 
 @WithPlugins("gradle")
 public class GradlePluginTest extends AbstractJUnitTest {

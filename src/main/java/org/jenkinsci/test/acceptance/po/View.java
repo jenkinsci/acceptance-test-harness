@@ -157,4 +157,16 @@ public abstract class View extends ContainerPageObject {
             }
         };
     }
+
+    public static Matcher<View> containsLinkWithTooltip(String text) {
+        return new Matcher<View>("Contains link with tooltip " + text) {
+            @Override
+            public boolean matchesSafely(View item) {
+                WebElement webElement = item.getElement(
+                        By.cssSelector(String.format("a[tooltip='%s']", text))
+                );
+                return webElement != null;
+            }
+        };
+    }
 }

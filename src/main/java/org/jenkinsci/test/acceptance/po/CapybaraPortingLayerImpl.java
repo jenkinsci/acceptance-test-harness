@@ -15,6 +15,7 @@ import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -35,6 +36,7 @@ import static java.util.Arrays.*;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
+    public static final String LABEL_TO_INPUT_XPATH = "input | ../input | ../../div/input | ../../input | preceding-sibling::div/input";
     /**
      * {@link org.openqa.selenium.WebDriver} that subtypes use to talk to the server.
      */
@@ -260,18 +262,20 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public void check(WebElement e, boolean state) {
-        if (e.isSelected() != state) {
+        // we click the label but need to check the input's status
+        WebElement input = e;
+        if (e.getTagName().equals("label")) {
+            input = e.findElement(By.xpath(LABEL_TO_INPUT_XPATH));
+        }
+
+        if (input.isSelected() != state) {
             try {
                 e.click();
-            } catch (ElementClickInterceptedException ex) {
+            } catch (ElementNotInteractableException ex) {
                 // tooltip can make an element not clickable.
+                // or if an input doesn't have a label (which we normally click) like in matrix-auth
                 executeScript("arguments[0].click();", e);
             }
-        }
-        // It seems like Selenium sometimes has issues when trying to click elements that are out of view.
-        // We use the following javascript as a workaround if the previous click failed.
-        if (e.isSelected() != state) {
-            executeScript("arguments[0].click();", e);
         }
     }
 

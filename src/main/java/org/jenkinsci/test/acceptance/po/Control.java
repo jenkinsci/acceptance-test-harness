@@ -270,7 +270,10 @@ public class Control extends CapybaraPortingLayerImpl {
                     ");"
             );
 
-            Select context = new Select(findElement(menuButton, by.xpath("ancestor-or-self::*[contains(@class,'setting-input dropdownList')]")));
+            Select context = new Select(findElement(menuButton, by.xpath(
+                    "ancestor-or-self::*[contains(@class,'setting-input dropdownList')] | " +
+                            "ancestor-or-self::*[contains(@class,'jenkins-select__input dropdownList')]"
+            )));
             context.selectByVisibleText(caption);
             WebElement e = context.getFirstSelectedOption();
             return e;
@@ -283,8 +286,6 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void select(String option) {
         WebElement e = resolve();
-        // Make sure the select is scrolled into view before interacting with its options that has got special handling by scroller.
-        new Scroller().scrollIntoView(e, driver);
         findElement(e, by.option(option)).click();
     }
 
