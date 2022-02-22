@@ -53,7 +53,7 @@ public class ConfigFileProvider extends PageObject {
 
         check(radio);
 
-        clickButton("Submit");
+        clickButton("Next");
         String id = getElement(by.name("config.id")).getAttribute("value");
         return newInstance(type, this, id);
     }
