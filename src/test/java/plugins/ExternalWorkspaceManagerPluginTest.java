@@ -21,16 +21,25 @@ import java.util.concurrent.ExecutionException;
 import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
 import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertThat;
 
 /**
  * Acceptance tests for External Workspace Manager Plugin.
  *
  * @author Alexandru Somai
  */
-@WithPlugins({"workflow-aggregator", "external-workspace-manager", "run-selector", "ws-cleanup", "git"})
+@WithPlugins({
+        "external-workspace-manager",
+        "git",
+        "run-selector",
+        "workflow-basic-steps",
+        "workflow-cps",
+        "workflow-durable-task-step",
+        "workflow-job",
+        "ws-cleanup",
+})
 public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @ClassRule

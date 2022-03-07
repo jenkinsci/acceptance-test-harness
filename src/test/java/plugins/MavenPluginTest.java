@@ -45,6 +45,7 @@ import org.jvnet.hudson.test.Issue;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -208,7 +209,13 @@ public class MavenPluginTest extends AbstractJUnitTest {
         assertThat(build.module(name), pageObjectExists());
 
         job.visit("modules");
-        find(by.xpath("//a[@href='%s/']", name)).click();
+        WebElement webElement = find(by.xpath("//a[@href='%s/']", name));
+        webElement.click();
+        // a menu pops out with how selenium clicks this, an actual user will not have an issue with this
+        // clicking a second time fixes it
+        if (!driver.getCurrentUrl().equals(job.module(name).url.toExternalForm())) {
+            webElement.click();
+        }
         assertThat(driver.getCurrentUrl(), equalTo(job.module(name).url.toExternalForm()));
 
         build.open();
