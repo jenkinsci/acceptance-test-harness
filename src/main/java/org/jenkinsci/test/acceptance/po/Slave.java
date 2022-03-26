@@ -55,7 +55,7 @@ public class Slave extends Node {
 
     public String getLog() {
         visit("log");
-        return find(by.css("pre#out pre")).getText();
+        return find(by.css("pre#out")).getText();
     }
 
     public boolean isOffline() {
