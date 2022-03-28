@@ -66,9 +66,7 @@ public class WinstoneController extends LocalController {
     @Override
     public void startNow() throws IOException {
         if (httpPort == 0) {
-            JarFile warFile = new JarFile(war);
-            VersionNumber version = new VersionNumber(warFile.getManifest().getMainAttributes().getValue("Jenkins-Version"));
-            if (version.compareTo(v2339) < 0) {
+            if (!supportsPortFileName()) {
                 httpPort = IOUtil.randomTcpPort();
             }
         }
@@ -104,10 +102,7 @@ public class WinstoneController extends LocalController {
         cb.addAll(JAVA_OPTS);
         cb.add("-Duser.language=en",
                 "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
-        JarFile warFile = new JarFile(war);
-        String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
-        VersionNumber version = new VersionNumber(jenkinsVersion);
-        if (version.compareTo(v2339) >= 0) {
+        if (supportsPortFileName()) {
             portFile = File.createTempFile("jenkins-port", ".txt");
             portFile.deleteOnExit();
             cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
@@ -121,6 +116,13 @@ public class WinstoneController extends LocalController {
         cb.env.putAll(commonLaunchEnv());
         LOGGER.info("Starting Jenkins: " + cb.toString());
         return cb.popen();
+    }
+
+    private boolean supportsPortFileName() throws IOException {
+        JarFile warFile = new JarFile(war);
+        String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
+        VersionNumber version = new VersionNumber(jenkinsVersion);
+        return version.compareTo(v2339) >= 0;
     }
 
     @Override
