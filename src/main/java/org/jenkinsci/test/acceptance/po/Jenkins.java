@@ -46,6 +46,7 @@ import java.util.logging.Level;
  */
 public class Jenkins extends Node implements Container {
     private VersionNumber version;
+    private JenkinsController controller;
 
     public final JobsMixIn jobs;
     public final ViewsMixIn views;
@@ -66,6 +67,7 @@ public class Jenkins extends Node implements Container {
 
     public Jenkins(Injector injector, JenkinsController controller) {
         this(injector, startAndGetUrl(controller));
+        this.controller = controller;
     }
 
     private static URL startAndGetUrl(JenkinsController controller) {
@@ -164,21 +166,17 @@ public class Jenkins extends Node implements Container {
         return new PluginManager(this);
     }
 
-    /** 
-     * Some tests require they restart Jenkins - but depending on how the SUT is launched this is not always possible
-     * so tests that require this should wrap this call in an {@link org.junit.Assume#assumeTrue(String, boolean)}
-     * @return true if the Jenkins under test can restart itself.
-     */
     public boolean canRestart() {
-        visit("restart");
-        return getElement(by.button("Yes")) != null;
+        return true;
     }
 
     public void restart() {
-        visit("restart");
-        clickButton("Yes");
-
-        waitForLoad(JenkinsController.STARTUP_TIMEOUT);
+        try {
+            controller.restart();
+            waitForLoad(JenkinsController.STARTUP_TIMEOUT);
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not restart Jenkins", e);
+        }
     }
 
     public void waitForLoad(int seconds){
