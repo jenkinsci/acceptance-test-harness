@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import hudson.util.VersionNumber;
 import java.nio.charset.StandardCharsets;
+import java.util.jar.JarFile;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +35,8 @@ public class WinstoneController extends LocalController {
     // options to the JVM that can be added on a testcase basis in code
     private final List<String> JAVA_OPTS = new ArrayList<>();
 
+    private static final VersionNumber v2339 = new VersionNumber("2.339");
+
     private File portFile;
 
     protected static List<String> envVarOpts(String jenkins_opts) {
@@ -53,7 +55,7 @@ public class WinstoneController extends LocalController {
 
     @Inject
     public WinstoneController(Injector i) {
-        this(i, IOUtil.randomTcpPort()); // TODO Change to 0 when Jenkins has https://github.com/jenkinsci/jenkins/pull/5928
+        this(i, 0);
     }
 
     public WinstoneController(Injector i, int httpPort) {
@@ -64,43 +66,52 @@ public class WinstoneController extends LocalController {
     @Override
     public void startNow() throws IOException {
         super.startNow();
-        if (this.httpPort == 0) {
-            this.httpPort = readPort(portFile);
-        }
+        this.httpPort = readPort();
     }
 
     @Override
     protected void onReady() throws IOException {
+        this.httpPort = readPort();
+    }
+
+    private int readPort() throws IOException {
         if (this.httpPort == 0) {
-            this.httpPort = readPort(portFile);
+            if (portFile != null) {
+                String s = FileUtils.readFileToString(portFile, StandardCharsets.UTF_8);
+                try {
+                    return Integer.parseInt(s);
+                } catch (NumberFormatException e) {
+                    // Should not happen assuming this is called after a successful start.
+                    throw new IOException("Unable to parse port from " + s + ". Jenkins did not start.");
+                }
+            } else {
+                return IOUtil.randomTcpPort();
+            }
+        } else {
+            return this.httpPort;
         }
     }
-
-    private static int readPort(File portFile) throws IOException {
-        String s = FileUtils.readFileToString(portFile, StandardCharsets.UTF_8);
-        try {
-            return Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            // Should not happen assuming this is called after a successful start.
-            throw new IOException("Unable to parse port from " + s + ". Jenkins did not start.");
-        }
-    }
-
 
     @Override
     public ProcessInputStream startProcess() throws IOException{
-        portFile = File.createTempFile("jenkins-port", ".txt");
-        portFile.deleteOnExit();
+        JarFile warFile = new JarFile(war);
+        String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
+        VersionNumber version = new VersionNumber(jenkinsVersion);
+        if (version.compareTo(v2339) >= 0) {
+            portFile = File.createTempFile("jenkins-port", ".txt");
+            portFile.deleteOnExit();
+        }
         File javaHome = getJavaHome();
         String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java);
         cb.addAll(JENKINS_JAVA_OPTS);
         cb.addAll(JAVA_OPTS);
-        cb.add(
-                "-Duser.language=en",
-                "-Dwinstone.portFileName=" + portFile.getAbsolutePath(),
-                "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true",
-                "-jar", war,
+        cb.add("-Duser.language=en",
+                "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
+        if (version.compareTo(v2339) >= 0) {
+            cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
+        }
+        cb.add("-jar", war,
                 "--ajp13Port=-1",
                 "--httpPort=" + httpPort
         );
