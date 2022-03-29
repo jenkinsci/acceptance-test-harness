@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -94,13 +95,14 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         Build build = job.scheduleBuild().shouldSucceed();
         job.open();
         WebElement link = job.find(By.partialLinkText("Last build (#1)"));
-        link.click();
-
-        assertThat(driver, hasContent("Build #1"));
-        assertThat(driver, hasContent("No changes"));
-
-        WebElement successIcon = build.find(By.xpath("//h1/img"));
-        assertThat(successIcon.getAttribute("tooltip"), is("Success"));
+        String expectedUrl = link.getAttribute("href");
+        
+        Build b = new Build(job, "lastBuild");
+        b.open();
+        assertThat("Permalink link is current URL", driver.getCurrentUrl(), is(expectedUrl));
+        assertThat("Build number is correct", b.getNumber(), is(1));
+        assertThat("Build has no changes", driver, hasContent("No changes"));
+        assertThat("Build is success", b.getResult(), is(Build.Result.SUCCESS.name()));
     }
 
     @Test @Issue("JENKINS-38928")

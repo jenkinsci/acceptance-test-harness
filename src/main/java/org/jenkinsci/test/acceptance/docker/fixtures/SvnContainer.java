@@ -22,9 +22,9 @@ public class SvnContainer extends DockerContainer {
 
     private static final String PROTOCOL_HTTP = "http://";
     private static final String PROTOCOL_SVN = "svn://";
-    private static final String UNSAVE_REPO = "/svn";
-    private static final String User_PWD_SAVE_REPO = "/svn_pwd";
-    private static final String WEB_SVN = "/websvn/listing.php?repname=svn";
+    private static final String UNAUTHENTICATED_REPO_PATH = "/svn/myrepo";
+    private static final String AUTHENTICATED_REPO_PATH = "/svn_pwd/myrepo";
+    private static final String VIEWVC_PATH = "/viewvc/myrepo/";
 
     /**
      * BaseHttpUrl of the Dockercontainer. Uses http protocol
@@ -49,24 +49,24 @@ public class SvnContainer extends DockerContainer {
     }
 
     /**
-     * Http Url to an unsave SVN repo
+     * Http Url to an un-restricted SVN repo
      *
      * @return URL
      * @throws SubversionPluginTestException e
      */
-    public URL getUrlUnsaveRepo() throws SubversionPluginTestException {
-        String url = getHttpUrl().toString() + UNSAVE_REPO;
+    public URL getUrlUnauthenticatedRepo() throws SubversionPluginTestException {
+        String url = getHttpUrl().toString() + UNAUTHENTICATED_REPO_PATH;
         return createUrl(url);
     }
 
     /**
-     * Http Url to an unsave SVN repo at a special revision
+     * Http Url to an un-restricted SVN repo at a special revision
      *
      * @return URL
      * @throws SubversionPluginTestException e
      */
-    public URL getUrlUnsaveRepoAtRevision(int revision) throws SubversionPluginTestException {
-        String url = getUrlUnsaveRepo().toString() + "@" + revision;
+    public URL getUrlUnauthenticatedRepoAtRevision(int revision) throws SubversionPluginTestException {
+        String url = getUrlUnauthenticatedRepo().toString() + "@" + revision;
         return createUrl(url);
     }
 
@@ -76,13 +76,13 @@ public class SvnContainer extends DockerContainer {
      * @return URL
      * @throws SubversionPluginTestException e
      */
-    public URL getUrlUserPwdSaveRepo() throws SubversionPluginTestException {
-        String url = getHttpUrl().toString() + User_PWD_SAVE_REPO;
+    public URL getUrlAuthenticatedRepo() throws SubversionPluginTestException {
+        String url = getHttpUrl().toString() + AUTHENTICATED_REPO_PATH;
         return createUrl(url);
     }
 
-    public URI getUrlWebSVN() throws SubversionPluginTestException {
-        String url = getHttpUrl().toString() + WEB_SVN;
+    public URI getUrlViewVC() throws SubversionPluginTestException {
+        String url = getHttpUrl().toString() + VIEWVC_PATH;
         return createUri(url);
     }
 

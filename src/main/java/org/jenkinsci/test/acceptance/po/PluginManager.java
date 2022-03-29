@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.time.temporal.ChronoUnit;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +23,7 @@ import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.NoSuchElementException;
@@ -36,7 +35,6 @@ import hudson.util.VersionNumber;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -93,7 +91,7 @@ public class PluginManager extends ContainerPageObject {
      */
     public void checkForUpdates() {
         mockUpdateCenter.ensureRunning(jenkins);
-        visit("advanced");
+        visit("index");
         final String current = getCurrentUrl();
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
@@ -285,7 +283,19 @@ public class PluginManager extends ContainerPageObject {
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(name);
-        check(waitFor(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name), 10));
+
+        // the target plugin web element becomes stale due to the dynamic behaviour of the plugin
+        // manager UI which ends up with StaleElementReferenceException.
+        // This is re-trying until the element can be properly checked.
+        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+            try {
+                check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return false;
+            }
+            return true;
+        });
+
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
             final VersionNumber availableVersion = getAvailableVersionForPlugin(name);
@@ -303,7 +313,8 @@ public class PluginManager extends ContainerPageObject {
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(pluginName);
-        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[3]", pluginName)).getText();
+        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[2]//span[contains(@class, 'jenkins-label')] | " +
+                "//input[starts-with(@name,'plugin.%s.')]/../../td[3]", pluginName, pluginName)).getText();
         return new VersionNumber(v);
     }
 
@@ -318,7 +329,7 @@ public class PluginManager extends ContainerPageObject {
     public void installPlugin(File localFile) throws IOException {
 
         try (CloseableHttpClient httpclient = new DefaultHttpClient()) {
-            HttpGet getCrumb = null;
+            HttpGet getCrumb;
             try {
                 getCrumb = new HttpGet(jenkins.url("crumbIssuer/api/xml?xpath=/*/crumb/text()").toURI());
             } catch (URISyntaxException e) {
@@ -332,6 +343,7 @@ public class PluginManager extends ContainerPageObject {
             post.addHeader("Jenkins-Crumb",crumbValue);
             HttpEntity e = MultipartEntityBuilder.create()
                     .addBinaryBody("name", localFile, APPLICATION_OCTET_STREAM, "x.jpi")
+                    .addTextBody("pluginUrl", "")
                     .build();
             post.setEntity(e);
 

@@ -28,15 +28,19 @@ import java.util.function.Consumer;
 
 import org.jenkinsci.test.acceptance.po.BatchCommandBuildStep;
 import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Injector;
+
+import static java.util.Objects.requireNonNull;
 
 @Describable("hudson.maven.MavenModuleSet")
 public class MavenModuleSet extends Job {
@@ -103,7 +107,13 @@ public class MavenModuleSet extends Job {
             }
         });
         checkbox.click();
-        T bs = newInstance(type, this, checkbox.getAttribute("path"));
+
+        WebElement input = checkbox;
+        if (checkbox.getTagName().equals("label")) {
+            input = checkbox.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH));
+        }
+
+        T bs = newInstance(type, this, requireNonNull(input.getAttribute("path")));
 
         publishers.add(bs);
         return bs;

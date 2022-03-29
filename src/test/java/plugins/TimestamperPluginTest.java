@@ -22,7 +22,7 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
     public void setUp() {
         job = jenkins.jobs.create();
         job.configure();
-        job.find(by.path("/hudson-plugins-timestamper-TimestamperBuildWrapper")).click();
+        job.find(by.checkbox("Add timestamps to the Console Output")).click();
         job.save();
     }
 
@@ -45,13 +45,13 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
     public void display() {
         job.startBuild().waitUntilFinished();
 
-        setTimestamp("timestamper-none");
+        setTimestamp("None");
         assertThatTimeStampMatchesRegexp("^$");
 
-        setTimestamp("timestamper-systemTime");
+        setTimestamp("System clock time");
         assertThatTimeStampMatchesRegexp("^\\d\\d:\\d\\d:\\d\\d$");
 
-        setTimestamp("timestamper-elapsedTime");
+        setTimestamp("Elapsed time");
         assertThatTimeStampMatchesRegexp("^\\d\\d:\\d\\d:\\d\\d.\\d\\d\\d$");
     }
 
@@ -63,10 +63,10 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
         jenkins.save();
         job.startBuild().waitUntilFinished();
 
-        setTimestamp("timestamper-systemTime");
+        setTimestamp("System clock time");
         assertThatTimeStampMatchesRegexp("^At \\d\\d:\\d\\d:\\d\\d system time$");
 
-        setTimestamp("timestamper-elapsedTime");
+        setTimestamp("Elapsed time");
         assertThatTimeStampMatchesRegexp("^Exactly \\d\\d:\\d\\d:\\d\\d.\\d\\d\\d after launch$");
     }
 }

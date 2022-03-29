@@ -82,7 +82,7 @@ if [ ! -f $war ]; then
     if [ ! -f $war ]; then
 
         mvn -B org.apache.maven.plugins:maven-dependency-plugin:2.7:get\
-            -DremoteRepositories=repo.jenkins-ci.org::::http://repo.jenkins-ci.org/public/\
+            -DremoteRepositories=repo.jenkins-ci.org::::https://repo.jenkins-ci.org/public/\
             -Dartifact=org.jenkins-ci.main:jenkins-war:$2:war
     fi
 
@@ -98,4 +98,4 @@ shift 2
 
 set -x
 
-BROWSER=$browser JENKINS_WAR=$war mvn --show-version test "$@"
+BROWSER=$browser JENKINS_WAR=$war mvn --show-version --no-transfer-progress test "$@"

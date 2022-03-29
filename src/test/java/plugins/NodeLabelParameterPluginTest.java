@@ -65,13 +65,13 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         visit(j.getBuildUrl());
         assertThat("Default node is selected", find(by.option(s.getName())).isSelected(), is(true));
 
-        WebElement wbElement = find(by.xpath("//select[@name='labels']"));
+        WebElement wbElement = find(by.xpath("//select[@name='value']"));
         List<WebElement> availableNodes = wbElement.findElements(by.tagName("option"));
 
-        assertThat("master", is(availableNodes.get(0).getText()));
-        assertThat(s.getName(), is(availableNodes.get(1).getText()));
+        assertThat(availableNodes.get(0).getText(), is("built-in"));
+        assertThat(availableNodes.get(1).getText(), is(s.getName()));
         Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
-        assertThat(b.getNode(), is(s));
+        assertThat(s, is(b.getNode()));
     }
 
     @Test

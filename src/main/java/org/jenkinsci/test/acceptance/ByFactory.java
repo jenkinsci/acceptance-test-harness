@@ -138,17 +138,17 @@ public class ByFactory {
      * Finds checkbox.
      *
      * @param locator
-     *      Text, id, title.
+     *      Text
      */
     public By checkbox(String locator) {
-        return xpath(fieldXPath("input[@type='checkbox']",locator));
+        return xpath(String.format(".//label[contains(normalize-space(.), '%1$s')]", locator));
     }
 
     /**
-     * Select radio button by its name, id, or label text.
+     * Select radio button by its label text.
      */
     public By radioButton(String locator) {
-        return xpath(fieldXPath("input[@type='radio']",locator));
+        return xpath(String.format(".//label[contains(normalize-space(.), '%1$s')]", locator));
     }
 
     /**

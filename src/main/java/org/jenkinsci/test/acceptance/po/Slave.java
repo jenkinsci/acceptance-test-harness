@@ -55,7 +55,7 @@ public class Slave extends Node {
 
     public String getLog() {
         visit("log");
-        return find(by.css("pre#out pre")).getText();
+        return find(by.css("pre#out")).getText();
     }
 
     public boolean isOffline() {
@@ -72,12 +72,13 @@ public class Slave extends Node {
                 slave.visit("builds");
                 //Jobs table may take a little to be populated, give it some time
                 slave.elasticSleep(2000);
-                String list = slave.find(by.id("projectStatus")).getText();
+                String list = slave.find(by.id("projectStatus")).getText()
+                        .replaceAll("\n", "");
 
                 StringBuilder sb = new StringBuilder(".*");
                 for (Job j: jobs) {
-                    sb.insert(0, j.name);
-                    sb.insert(0, ".*");
+                    sb.append(j.name);
+                    sb.append(".*");
                 }
 
                 return Pattern.compile(sb.toString(), Pattern.DOTALL)

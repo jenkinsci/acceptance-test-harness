@@ -35,12 +35,12 @@ public class ArtifactoryGlobalConfig extends PageAreaImpl {
 
     public Server addServer() {
         control("repeatable-add").click();
-        return new Server(this, "artifactoryServer");
+        return new Server(this, "jfrogInstances");
     }
 
     public static class Server extends PageAreaImpl {
-        public final Control id = control("serverId");
-        public final Control url = control("artifactoryUrl");
+        public final Control id = control("instanceId");
+        public final Control url = control("platformUrl");
         public final Control username = control("deployerCredentialsConfig/username");
         public final Control password = control("deployerCredentialsConfig/password");
         public final Control testConnectionButton =  control("validate-button");

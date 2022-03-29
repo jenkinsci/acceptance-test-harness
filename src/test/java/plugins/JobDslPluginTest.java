@@ -825,7 +825,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
                 "            link('%s', '%s')",
                 "        }",
                 "    };",
-                "    wrappers { buildName('custom-build-name') }",
+                "    wrappers { buildName('custom-name') }",
                 "    concurrentBuild();",
                 "    steps {",
                 "        shell('sleep 10')",
@@ -860,7 +860,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         }
 
         build.open();
-        assertThat(build.getDisplayName(), containsString("custom-build-name"));
+        assertThat(build.getDisplayName(), containsString("custom-name"));
 
         build.open();
         driver.findElement(By.partialLinkText("Environment Variables")).click();
@@ -958,7 +958,15 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(view, containsColumnHeader("Last Success"));
         assertThat(view, containsColumnHeader("Last Failure"));
         assertThat(view, containsColumnHeader("Last Duration"));
-        assertThat(view, containsImage("clock.png"));
+
+        String searchText = "Schedule a Build for " + job1.name;
+        // behaviour change in https://github.com/jenkinsci/jenkins/pull/6084
+        WebElement webElement = view.getElement(By.cssSelector(String.format("a[tooltip='%s']", searchText)));
+        if (webElement != null) {
+            assertThat(view, containsLinkWithTooltip(searchText));
+        } else {
+            assertThat(view, containsSvgWithText(searchText));
+        }
     }
 
     /**

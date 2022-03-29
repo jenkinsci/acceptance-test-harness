@@ -57,6 +57,7 @@ public class GitRepo implements Closeable {
 
     public GitRepo() {
         dir = initDir();
+        git("config", "--global", "init.defaultBranch", "master");
         git("init");
         setIdentity(dir);
     }
@@ -145,7 +146,7 @@ public class GitRepo implements Closeable {
 
             int r = p.waitFor();
             if (r != 0) {
-                throw new AssertionError(errorMessage);
+                throw new AssertionError(errorMessage + " " + builder);
             }
 
             return builder.toString();

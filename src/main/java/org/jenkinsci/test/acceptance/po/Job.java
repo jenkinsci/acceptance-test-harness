@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -24,12 +26,14 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
 
 import com.google.inject.Injector;
 
+import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
@@ -79,7 +83,12 @@ public class Job extends TopLevelItem {
 
         check(radio);
 
-        return newInstance(type, this, radio.getAttribute("path"));
+        try {
+            String path = radio.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH)).getAttribute("path");
+            return newInstance(type, this, requireNonNull(path));
+        } catch (NoSuchElementException e) {
+            return newInstance(type, this, radio.getAttribute("path"));
+        }
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
@@ -212,7 +221,9 @@ public class Job extends TopLevelItem {
     public <T extends Trigger> T addTrigger(Class<T> type) {
         ensureConfigPage();
         T trigger = newInstance(type, this);
-        trigger.enabled.check();
+        WebElement checkbox = trigger.enabled.resolve();
+        WebElement label = checkbox.findElement(by.xpath("../label"));
+        check(label);
         return trigger;
     }
 
@@ -360,19 +371,27 @@ public class Job extends TopLevelItem {
     public <T extends Parameter> T addParameter(Class<T> type) {
         ensureConfigPage();
 
-        control("/properties/hudson-model-ParametersDefinitionProperty/specified",
-                "/properties/hudson-model-ParametersDefinitionProperty/parameterized" // 1.636-
-        ).check();
+        control(by.checkbox("This project is parameterized")).check();
 
         control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
 
-//        find(xpath("//button[text()='Add Parameter']")).click();
-//        find(xpath("//a[text()='%s']",displayName)).click();
-
+        // TODO selectDropdownMenu should not need this sleep - try and remove it
         elasticSleep(500);
 
-        // 1.636-: …/parameter (or …/parameter[1] etc.); 1.637+: …/parameterDefinitions
-        String path = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameter')]")).getAttribute("path");
+        // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions  for the first
+        // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions[n] for subsequent ones
+        // if we have another descriptor inside the descriptor inside the parameterDefinition we select the that instead of the actual parameter. (e.g NodeParameter)
+        // as all browsers do not support matches in xpath 2.0 we need to do this ourselves (find the last match and then extract the correct part even if we match the wrong thing originally
+        String path = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions')]")).getAttribute("path");
+
+        Pattern pattern = Pattern.compile("^(/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions([^/]*))(/.*)?$");
+        Matcher m = pattern.matcher(path);
+        // for some as yet unknown reason the matcher sometimes failed to match throwing an illegalStateException with no information to help diagnose
+        // after I added this I never reproduced the issue - but still having what failed to match will at least help in the future
+        if (!m.matches()) {
+            throw new IllegalStateException("No match for path in regexp : " + path);
+        }
+        path = m.group(1);
 
         T p = newInstance(type, this, path);
         parameters.add(p);
@@ -380,7 +399,7 @@ public class Job extends TopLevelItem {
     }
 
     public void disable() {
-        check("disable");
+        check("Disable this project");
     }
 
     public int getNextBuildNumber() {
@@ -415,7 +434,7 @@ public class Job extends TopLevelItem {
 
     public Job shouldBeTiedToLabel(final String label) {
         visit("/label/" + label); // TODO: this doesn't work correctly if the URL has non-empty context path
-        assertThat(driver, hasContent(name));
+        assertTrue(control(by.css("a[href$='job/" + name + "/']")).exists());
         return this;
     }
 

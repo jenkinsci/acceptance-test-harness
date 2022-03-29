@@ -25,14 +25,16 @@ package core;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
 
 public class PluginManagerTest extends AbstractJUnitTest {
@@ -49,12 +51,12 @@ public class PluginManagerTest extends AbstractJUnitTest {
     public void uninstall_plugin() throws InterruptedException, ExecutionException {
         assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         jenkins.getPluginManager().visit("installed");
-        check(find(by.url("plugin/gerrit-trigger")), false);
         WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
         form.submit();
+        waitFor(form).until(CapybaraPortingLayerImpl::isStale);
+        clickButton("Yes");
         jenkins.restart();
         jenkins.getPluginManager().visit("installed");
-        WebElement trigger = find(by.url("plugin/gerrit-trigger"));
-        assertFalse(trigger.isSelected());
+        assertThrows(NoSuchElementException.class, () -> find(by.url("plugin/gerrit-trigger")));
     }
 }

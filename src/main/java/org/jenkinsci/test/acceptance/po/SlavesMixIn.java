@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.NoSuchElementException;
+
 import java.io.File;
 
 /**
@@ -30,8 +32,12 @@ public class SlavesMixIn extends MixIn {
         visit("computer/new");
 
         find(by.input("name")).sendKeys(name);
-        find(by.xpath(".//INPUT[@type='radio'][@value='hudson.slaves.DumbSlave']")).click();
-        clickButton("OK");
+        find(by.radioButton("Permanent Agent")).click();
+        try {
+            clickButton("Create");
+        } catch (NoSuchElementException e) {
+            clickButton("OK");
+        }
         // This form submission will drop us on the configure page
 
         S s = newInstance(type, jenkins, name);

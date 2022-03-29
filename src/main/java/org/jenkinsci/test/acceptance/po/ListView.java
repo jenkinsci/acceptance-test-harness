@@ -75,7 +75,10 @@ public class ListView extends View {
 
     public void scheduleJob(String name) {
         open();
-        find(by.xpath("//a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a')]", name)).click();
+
+        find(by.xpath("//a[contains(@href, '/%1$s/build?') and contains(@title, 'Schedule a')]/.." +
+                "| //a[contains(@href, '/%1$s/build?')]/span[contains(text(), 'Schedule a')]/.." +
+                "| //a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a')]", name)).click();
     }
 
     public void scheduleJob(String name, Map<String, Object> params) {

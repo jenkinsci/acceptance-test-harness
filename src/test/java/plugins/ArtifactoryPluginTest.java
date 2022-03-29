@@ -35,7 +35,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven;
 
 /**
- * Checks the successfully integration of Artifactory plugin.
+ * Checks the successful integration of Artifactory plugin.
  */
 @WithPlugins("artifactory")
 @Category(DockerTest.class)
@@ -65,7 +65,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
         waitFor(hasContent(Pattern.compile("Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")));
     }
 
-    @Test @WithPlugins("maven-plugin")
+    @Test @WithPlugins("maven-plugin") @Ignore @Issue("JENKINS-66791")
     public void maven_integration() {
         installSomeMaven(jenkins);
         final ArtifactoryContainer artifactory = artifactoryContainer.get();

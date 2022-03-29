@@ -17,10 +17,10 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
     }
 
     /**
-     * Adds a new user/group to this matrix.
+     * Adds a new user to this matrix.
      */
     public MatrixRow addUser(String name) {
-        runThenHandleAlert(() -> this.name.resolve().findElement(by.parent()).findElement(by.button("Add user or group…")).click(),
+        runThenHandleAlert(() -> this.name.resolve().findElement(by.xpath("../span/span/button")).click(),
                 a -> {
             a.sendKeys(name);
             a.accept();
@@ -32,6 +32,6 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Picks up the existing user in the table.
      */
     public MatrixRow getUser(String name) {
-        return new MatrixRow(this,"data/"+name);
+        return new MatrixRow(this,"data/USER:"+name);
     }
 }

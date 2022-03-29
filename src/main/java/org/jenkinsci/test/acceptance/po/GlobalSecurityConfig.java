@@ -26,8 +26,11 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
+import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Global security configuration UI.
@@ -91,7 +94,12 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         } catch (NoSuchElementException x) { // prior to https://github.com/jenkinsci/jenkins/pull/5417
             WebElement radio = findCaption(type, caption -> getElement(by.radioButton(caption)));
             radio.click();
-            return newInstance(type, this, radio.getAttribute("path"));
+            try {
+                String path = radio.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH)).getAttribute("path");
+                return newInstance(type, this, requireNonNull(path));
+            } catch (NoSuchElementException e) {
+                return newInstance(type, this, radio.getAttribute("path"));
+            }
         }
     }
 

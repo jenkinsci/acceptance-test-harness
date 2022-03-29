@@ -1,6 +1,7 @@
 package plugins;
 
 import com.google.inject.Inject;
+import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
@@ -112,12 +113,21 @@ public class MatrixPluginTest extends AbstractJUnitTest {
 
         job.configure();
         LabelAxis a = job.addAxis(LabelAxis.class);
-        a.select("master");
+        String builtInNodeName;
+        String builtInNodeDescription;
+        if (jenkins.getVersion().isOlderThan(new VersionNumber("2.307"))) {
+            builtInNodeName = "master";
+            builtInNodeDescription = "master";
+        } else {
+            builtInNodeName = "built-in";
+            builtInNodeDescription = "the built-in node";
+        }
+        a.select(builtInNodeName);
         a.select("label1");
         job.save();
 
         MatrixBuild b = job.startBuild().waitUntilFinished().as(MatrixBuild.class);
-        b.getConfiguration("label=master").shouldContainsConsoleOutput("(Building|Building remotely) on master");
+        b.getConfiguration("label=" + builtInNodeName).shouldContainsConsoleOutput("(Building|Building remotely) on " + builtInNodeDescription);
         b.getConfiguration("label=label1").shouldContainsConsoleOutput("(Building|Building remotely) on " + s.getName());
     }
 

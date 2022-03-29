@@ -22,7 +22,7 @@ public class HarRecorderTest {
         Description desc = description();
         HarRecorder harRecorder = rule(desc);
         HarRecorder.CAPTURE_HAR = HarRecorder.State.FAILURES_ONLY;
-        BrowserUpProxy proxy = HarRecorder.getProxy();
+        BrowserUpProxy proxy = HarRecorder.getProxy(null);
         proxy.newHar("jenkins");
 
         System.out.println("Good Bye World");

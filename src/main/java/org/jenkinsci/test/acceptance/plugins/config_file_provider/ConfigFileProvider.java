@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.WebElement;
 
 public class ConfigFileProvider extends PageObject {
 
@@ -42,8 +43,17 @@ public class ConfigFileProvider extends PageObject {
      */
     public <T extends ProvidedFile> T addFile(Class<T> type) {
         visit(url("selectProvider"));
-        control(by.name("providerId")).choose(type);
-        clickButton("Submit");
+
+        WebElement radio = findCaption(type, new Finder<WebElement>() {
+            @Override
+            protected WebElement find(String caption) {
+                return outer.find(by.radioButton(caption));
+            }
+        });
+
+        check(radio);
+
+        clickButton("Next");
         String id = getElement(by.name("config.id")).getAttribute("value");
         return newInstance(type, this, id);
     }

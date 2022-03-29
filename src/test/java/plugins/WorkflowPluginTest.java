@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
@@ -172,7 +173,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         }
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
-            "node('master') {\n" +
+            "node('built-in || master') {\n" +
             // TODO could be switched to multibranch, in which case this initial `node` is unnecessary, and each branch can just `checkout scm`
             "  git 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
             "  stash 'sources'\n" +
@@ -247,11 +248,14 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
                 find(by.button("Save")).click();
             }
             WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
+            String networkOptions = StringUtils.isNotBlank(System.getenv("DOCKER_FIXTURES_NETWORK")) ? " --network=" + System.getenv("DOCKER_FIXTURES_NETWORK") : "";
+            String options = "--link=" + gitContainer.getCid() + ":git" + networkOptions;
+            String repoUrl = StringUtils.isNotBlank(System.getenv("DOCKER_FIXTURES_NETWORK")) ? gitContainer.getRepoUrlInsideDocker() : gitContainer.getRepoUrlInsideDocker("git");
             job.script.set(
                 "node('" + slave.getName() + "') {\n" +
-                "  docker.image('cloudbees/java-build-tools').inside('--link=" + gitContainer.getCid() + ":git') {\n" +
+                "  docker.image('cloudbees/java-build-tools').inside('" + options + "') {\n" +
                 // TODO JENKINS-30600: "    git url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds'\n" +
-                "    checkout([$class: 'GitSCM', userRemoteConfigs: [[url: '" + gitContainer.getRepoUrlInsideDocker("git") + "', credentialsId: 'gitcreds']], gitTool: 'jgit'])\n" +
+                "    checkout([$class: 'GitSCM', userRemoteConfigs: [[url: '" + repoUrl + "', credentialsId: 'gitcreds']], gitTool: 'jgit'])\n" +
                 "    sh 'mkdir ~/.ssh && echo StrictHostKeyChecking no > ~/.ssh/config'\n" +
                 "    sshagent(['gitcreds']) {sh 'ls -l $SSH_AUTH_SOCK && git pull origin master'}\n" +
                 "  }\n" +
@@ -287,11 +291,11 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Test public void subversion() throws Exception {
         final SvnContainer svnContainer = svn.get();
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(1) + "'}");
+        job.script.set("node {svn '" + svnContainer.getUrlUnauthenticatedRepoAtRevision(1) + "'}");
         job.save();
         job.startBuild().shouldSucceed();
         job.configure();
-        job.script.set("node {svn '" + svnContainer.getUrlUnsaveRepoAtRevision(2) + "'}");
+        job.script.set("node {svn '" + svnContainer.getUrlUnauthenticatedRepoAtRevision(2) + "'}");
         job.save();
         Build b2 = job.startBuild().shouldSucceed();
         assertTrue(b2.getChanges().hasChanges());

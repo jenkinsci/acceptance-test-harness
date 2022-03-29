@@ -137,10 +137,34 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsImage(String imageName) {
-        return new Matcher<View>("Contains ToolTip " + imageName) {
+        return new Matcher<View>("Contains image " + imageName) {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(By.xpath("//img[contains(@src, '" + imageName + "')]"));
+                return webElement != null;
+            }
+        };
+    }
+
+    public static Matcher<View> containsSvgWithText(String text) {
+        return new Matcher<View>("Contains svg with text " + text) {
+            @Override
+            public boolean matchesSafely(View item) {
+                WebElement webElement = item.getElement(
+                        By.xpath(String.format("//span[@class = 'jenkins-visually-hidden'][text() = '%s']", text))
+                );
+                return webElement != null;
+            }
+        };
+    }
+
+    public static Matcher<View> containsLinkWithTooltip(String text) {
+        return new Matcher<View>("Contains link with tooltip " + text) {
+            @Override
+            public boolean matchesSafely(View item) {
+                WebElement webElement = item.getElement(
+                        By.cssSelector(String.format("a[tooltip='%s']", text))
+                );
                 return webElement != null;
             }
         };
