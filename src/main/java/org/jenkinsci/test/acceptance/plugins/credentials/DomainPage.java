@@ -4,6 +4,7 @@ import java.net.URL;
 
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.openqa.selenium.NoSuchElementException;
 
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -43,7 +44,12 @@ public class DomainPage extends ConfigurablePageObject {
         if (this.onDomainConfigurationPage()) {
             clickButton("Save");
         } else {
-            clickButton("OK");
+            try {
+                clickButton("Create");
+            } catch (NoSuchElementException e) {
+                // prior to credentials:1105.vb_4e24a_c78b_81 once it makes it to LTS remove fallback
+                clickButton("OK");
+            }
         }
 
         assertThat(driver, not(hasContent("This page expects a form submission")));
