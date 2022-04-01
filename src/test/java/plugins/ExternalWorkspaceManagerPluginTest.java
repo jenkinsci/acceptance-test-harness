@@ -30,7 +30,16 @@ import static org.hamcrest.core.StringContains.containsString;
  *
  * @author Alexandru Somai
  */
-@WithPlugins({"workflow-aggregator", "external-workspace-manager", "run-selector", "ws-cleanup", "git"})
+@WithPlugins({
+        "external-workspace-manager",
+        "git",
+        "run-selector",
+        "workflow-basic-steps",
+        "workflow-cps",
+        "workflow-durable-task-step",
+        "workflow-job",
+        "ws-cleanup",
+})
 public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @ClassRule

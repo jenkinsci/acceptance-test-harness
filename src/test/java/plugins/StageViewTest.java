@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.*;
  * needs adaption for future blue ocean
  * @author Boris Dippolter
  */
-@WithPlugins("workflow-aggregator")
+@WithPlugins({"pipeline-stage-view", "workflow-durable-task-step", "workflow-basic-steps"})
 public class StageViewTest extends AbstractJUnitTest {
 
     public static final String SINGLE_JOB = "stageview_plugin/single_job.txt";

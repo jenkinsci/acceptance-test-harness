@@ -1,32 +1,27 @@
 package plugins;
 
+import java.util.Arrays;
+import java.util.List;
+import javax.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.DashboardView;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.LatestBuildsPortlet;
-import org.jenkinsci.test.acceptance.plugins.dashboard_view.TestStatisticsChartPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.UnstableJobsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
 
-import javax.inject.Inject;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertEquals;
 
@@ -195,126 +190,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         v.open();
         assertThat(latestBuilds.hasBuild(1), is(false));
-    }
-
-    @Test
-    public void testStatisticsChart_success() throws IOException {
-        DashboardView v = createDashboardView();
-        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
-        v.save();
-
-        FreeStyleJob successJob = createFreeStyleJob(job -> {
-            String resultFileName = "status.xml";
-            job.addShellStep(
-                "echo '<testsuite><testcase classname=\"\">" +
-                    "</testcase></testsuite>'>" + resultFileName
-            );
-            job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
-        });
-
-        buildSuccessfulJob(successJob);
-
-        v.open();
-
-        Map<Integer, Integer> colorsOccurrences = getColorDistributionOfSignificantColors(chart.getImage());
-
-        assertThat(colorsOccurrences.size(), is(1));
-
-        Integer color = colorsOccurrences.keySet().iterator().next();
-        int blueComp = (color << 24) >>> 24;
-        int greenComp = (color << 16) >>> 24;
-        int redComp = (color << 8) >>> 24;
-
-        assertThat(blueComp, greaterThan(150));
-        assertThat(blueComp, greaterThan(greenComp));
-        assertThat(blueComp, greaterThan(redComp));
-    }
-
-    @Test
-    public void testStatisticsChart_failure() throws IOException {
-        DashboardView v = createDashboardView();
-        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
-        v.save();
-
-        FreeStyleJob unstableFreeStyleJob = createUnstableFreeStyleJob();
-
-        buildUnstableJob(unstableFreeStyleJob);
-
-        v.open();
-
-        Map<Integer, Integer> colorsOccurrences = getColorDistributionOfSignificantColors(chart.getImage());
-
-        assertThat(colorsOccurrences.size(), is(1));
-
-        Integer color = colorsOccurrences.keySet().iterator().next();
-        int blueComp = (color << 24) >>> 24;
-        int greenComp = (color << 16) >>> 24;
-        int redComp = (color << 8) >>> 24;
-
-        assertThat(redComp, greaterThan(150));
-        assertThat(redComp, greaterThan(blueComp));
-        assertThat(redComp, greaterThan(greenComp));
-    }
-
-    @Test
-    public void testStatisticsChart_failureAndSuccess() throws IOException {
-        DashboardView v = createDashboardView();
-        TestStatisticsChartPortlet chart = v.addBottomPortlet(TestStatisticsChartPortlet.class);
-        v.save();
-
-        FreeStyleJob unstableFreeStyleJob = createUnstableFreeStyleJob();
-        FreeStyleJob successJob = createFreeStyleJob(job -> {
-            String resultFileName = "status.xml";
-            job.addShellStep(
-                "echo '<testsuite><testcase classname=\"\">" +
-                    "</testcase></testsuite>'>" + resultFileName
-            );
-            job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
-        });
-
-        buildSuccessfulJob(successJob);
-        buildUnstableJob(unstableFreeStyleJob);
-
-        v.open();
-
-        Map<Integer, Integer> colorsOccurrences = getColorDistributionOfSignificantColors(chart.getImage());
-
-        assertThat(colorsOccurrences.size(), is(2));
-
-        Iterator<Integer> colorIt = colorsOccurrences.values().iterator();
-
-        double failureSuccessRatio = Math.abs(((double) colorIt.next() / (double) colorIt.next() ) - 1);
-        assertThat(failureSuccessRatio , lessThan(0.10));
-    }
-
-    /**
-     * Gets the distribution of the most significant colors from an image.
-     * A color is significant if it occupies more than 10% of the image.
-     * As White & Black aren't colors, they get filtered.
-     *
-     * The key of the returned map is the color and the value is the occurrence count.
-     *
-     * @param image to analyze
-     * @return map with most significant colors and their occurrence count
-     */
-    private Map<Integer, Integer> getColorDistributionOfSignificantColors(BufferedImage image) {
-
-        Map<Integer, Integer> colormap = new HashMap<>();
-
-        for (int x = 0; x < image.getWidth(); x++) {
-            for (int y = 0; y < image.getHeight(); y++) {
-                Integer colorCount = colormap.containsKey(image.getRGB(x, y))?colormap.get(image.getRGB(x, y))+1:1;
-                colormap.put(image.getRGB(x, y),colorCount);
-            }
-        }
-
-        long significanceGate = Math.round(image.getWidth() * image.getHeight() * 0.1);
-
-        return colormap.entrySet().stream()
-            .filter(entry -> entry.getValue() > significanceGate)
-            .filter(entry -> entry.getKey() != 0xFFFFFFFF)
-            .filter(entry -> entry.getKey() != 0x00000000)
-            .collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue));
     }
 
     @Test
