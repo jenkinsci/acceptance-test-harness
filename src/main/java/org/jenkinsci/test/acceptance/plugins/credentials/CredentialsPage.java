@@ -62,7 +62,7 @@ public class CredentialsPage extends ConfigurablePageObject {
     }
 
     public void create(){
-        clickButton("OK");
+        find(by.name("Submit")).click();
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
 
