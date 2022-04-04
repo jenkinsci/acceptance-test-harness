@@ -40,7 +40,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
             String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
                     + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
-                    + "/span[contains(@class,'yuimenuitemlabel') and contains(text(), 'Jenkins')]";
+                    + "/span[contains(@class,'yuimenuitemlabel') and contains(@title, 'Jenkins Credentials Provider')]";
 
             find(by.xpath(providerXpathExpr)).click();
         }
