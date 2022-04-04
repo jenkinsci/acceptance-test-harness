@@ -84,7 +84,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
         } catch (NoSuchElementException e) {
             // Ignore, this is likely because this is the first installation of this tool
         }
-        final Control button = page.control(by.button("Add " + name));
+        final Control button = page.control(by.xpath("//button[contains(text(), 'Add " + name + "')]"));
 
         String pathPrefix = button.resolve().getAttribute("path").replaceAll("repeatable-add", "tool");
         String path = page.createPageArea(pathPrefix, button::click);
