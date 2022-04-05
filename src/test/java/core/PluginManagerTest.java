@@ -35,7 +35,6 @@ import org.openqa.selenium.WebElement;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
 
 public class PluginManagerTest extends AbstractJUnitTest {
 
@@ -49,7 +48,6 @@ public class PluginManagerTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("gerrit-trigger")
     public void uninstall_plugin() throws InterruptedException, ExecutionException {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         jenkins.getPluginManager().visit("installed");
         WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
         form.submit();

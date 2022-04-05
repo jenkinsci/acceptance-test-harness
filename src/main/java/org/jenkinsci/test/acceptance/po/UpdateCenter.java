@@ -91,7 +91,6 @@ public class UpdateCenter extends ContainerPageObject {
 
         Jenkins jenkins = getJenkins();
         if (restartRequired) {
-            assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
             System.out.println("Restarting Jenkins to finish plugin installation");
             jenkins.restart();
         }

@@ -166,6 +166,11 @@ public class Jenkins extends Node implements Container {
         return new PluginManager(this);
     }
 
+    /**
+     * This method always return true.
+     * @deprecated Why would you call a method that always returns true?
+     */
+    @Deprecated
     public boolean canRestart() {
         return true;
     }

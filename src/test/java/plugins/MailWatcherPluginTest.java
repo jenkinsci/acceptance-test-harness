@@ -43,8 +43,6 @@ import org.jvnet.hudson.test.Issue;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
-import static org.junit.Assume.assumeTrue;
-
 @WithPlugins("mail-watcher-plugin")
 @Category(DockerTest.class)
 @WithDocker
@@ -64,7 +62,6 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
 
     @Test
     public void notify_slave_on_restart() throws Exception {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         Future<Slave> futureSlave = slaveController.install(jenkins);
 
         Slave slave = futureSlave.get();
@@ -85,8 +82,6 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
     @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin@1.7")
     @Ignore("Flaky test, passes sometimes on CI")
     public void notify_master_on_jenkins_restart() throws Exception {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
-
         jenkins.configure();
         {
             OnlineStatusNotification notification = new OnlineStatusNotification(jenkins);
