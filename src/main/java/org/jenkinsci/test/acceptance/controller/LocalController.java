@@ -237,9 +237,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * Called when the Jenkins instance is ready to be used.
      */
-    protected void onReady() throws IOException {
-
-    }
+    protected void onReady() throws IOException {}
 
     @Override
     public void stopNow() throws IOException{
