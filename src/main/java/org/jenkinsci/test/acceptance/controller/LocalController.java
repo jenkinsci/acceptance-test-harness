@@ -225,7 +225,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile, getLogPrinter());
         logWatcher.start();
         try {
-            LOGGER.info("Waiting for Jenkins to become running "+ this);
+            LOGGER.info("Waiting for Jenkins to become running in "+ this);
             this.logWatcher.waitTillReady();
             onReady();
             LOGGER.info("Jenkins is running in " + this);
