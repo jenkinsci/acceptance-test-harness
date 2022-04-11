@@ -4,6 +4,7 @@
 
 End to end test suite for Jenkins automation server and its plugins.
 
+
 The scenarios are described in the form of tests controlling Jenkins under test (JUT) through UI / REST APIs. Clean instances
 are started for individual tests to isolate the tests. The harness provides convenient docker support so integration tests
 can be written easily.
