@@ -41,7 +41,7 @@ fi
 browser=$1
 war=$2
 if [ ! -f $war ]; then
-    mirrors=http://mirrors.jenkins-ci.org
+    mirrors=https://get.jenkins.io
     case "$war" in
         "latest")
             war=jenkins-latest.war
