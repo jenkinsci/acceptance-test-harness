@@ -399,7 +399,12 @@ public class Job extends TopLevelItem {
     }
 
     public void disable() {
-        check("Disable this project");
+        try {
+            check("Disable this project");
+        } catch (NoSuchElementException exception) {
+            // Newer versions of Jenkins use a toggle switch with the active state as its label
+            check("Enabled");
+        }
     }
 
     public int getNextBuildNumber() {
