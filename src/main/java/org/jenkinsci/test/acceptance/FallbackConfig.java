@@ -276,6 +276,9 @@ public class FallbackConfig extends AbstractModule {
         InetAddress proxyAddr = null;
         if (name != null) {
             proxyAddr = InetAddress.getByName(name);
+        } else {
+            // bind to the loopback to prevent exposing the proxy to the world.
+            proxyAddr = InetAddress.getLoopbackAddress();
         }
         BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr);
         proxy.newHar(testName);
