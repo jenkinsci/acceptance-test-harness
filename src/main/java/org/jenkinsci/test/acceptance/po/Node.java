@@ -86,7 +86,7 @@ public abstract class Node extends ContainerPageObject {
         cm.set(String.format(script, args));
         clickButton("Run");
 
-        waitFor(by.xpath("//h2[text() = 'Result']"), timeoutSeconds);
+        waitFor(by.xpath("//h2[contains(text(), 'Result')]"), timeoutSeconds);
 
         try {
             return find(by.css("h2 + pre")).getText().replaceAll("^Result: ", "");

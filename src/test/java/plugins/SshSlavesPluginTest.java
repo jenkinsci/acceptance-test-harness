@@ -78,8 +78,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Test
     @Since("1.560")
-    public void newSlave() {
-        // Just to make sure the dumb slave is set up properly, we should seed it
+    public void newAgent() {
+        // Just to make sure the permanent agent is set up properly, we should seed it
         // with a FS root and executors
         final DumbSlave s = jenkins.slaves.create(DumbSlave.class);
         {

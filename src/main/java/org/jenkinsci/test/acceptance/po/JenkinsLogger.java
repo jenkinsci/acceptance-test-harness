@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import java.util.Map;
@@ -25,7 +26,11 @@ public class JenkinsLogger extends PageObject {
     public static JenkinsLogger create(Jenkins j, String name, Map<String, Level> levels) {
         j.visit("log/new");
         j.find(by.path("/name")).sendKeys(name);
-        j.clickButton("OK");
+        try {
+            j.clickButton("Create");
+        } catch (NoSuchElementException e) {
+            j.clickButton("OK");
+        }
 
         for (Entry<String, Level> e : levels.entrySet()) {
             j.clickButton("Add");
