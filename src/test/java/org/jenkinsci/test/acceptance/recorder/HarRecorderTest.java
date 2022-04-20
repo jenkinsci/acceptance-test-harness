@@ -8,10 +8,11 @@ import org.junit.rules.TestName;
 import org.junit.runner.Description;
 
 import java.io.File;
+import java.net.InetAddress;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.existingFile;
-import static org.junit.Assert.assertThat;
 
 public class HarRecorderTest {
     @Rule
@@ -19,20 +20,24 @@ public class HarRecorderTest {
 
     @Test
     public void shouldRecordFailingTestExecutionByDefault() {
-        Description desc = description();
-        HarRecorder harRecorder = rule(desc);
-        HarRecorder.CAPTURE_HAR = HarRecorder.State.FAILURES_ONLY;
-        BrowserUpProxy proxy = HarRecorder.getProxy(null);
-        proxy.newHar("jenkins");
+        HarRecorder.State orgValue = HarRecorder.CAPTURE_HAR;
+        try {
+            Description desc = description();
+            HarRecorder harRecorder = rule(desc);
+            HarRecorder.CAPTURE_HAR = HarRecorder.State.FAILURES_ONLY;
+            BrowserUpProxy proxy = HarRecorder.getProxy(InetAddress.getLoopbackAddress());
+            proxy.newHar("jenkins");
 
-        System.out.println("Good Bye World");
-        harRecorder.failed(new Exception(),desc);
+            System.out.println("Good Bye World");
+            harRecorder.failed(new Exception(), desc);
 
-        File outputFile = outputFile(desc);
-        assertThat(outputFile, is(existingFile()));
+            File outputFile = outputFile(desc);
+            assertThat(outputFile, is(existingFile()));
 
-        //Clean the field
-        outputFile.delete();
+            outputFile.delete();
+        } finally {
+            HarRecorder.CAPTURE_HAR = orgValue;
+        }
     }
 
     private HarRecorder rule(Description desc) {
