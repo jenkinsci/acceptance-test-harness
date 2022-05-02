@@ -50,7 +50,7 @@ public class FormValidationTest extends AbstractJUnitTest {
         lv.configure();
 
         lv.matchJobs(".*");
-        assertThat(lv.includeRegex.getFormValidation(), silent());
+        assertThat(lv.includeRegex.getSilentFormValidation(), silent());
 
         lv.matchJobs("[");
         assertThat(lv.includeRegex.getFormValidation().getKind(), equalTo(Kind.ERROR));
@@ -60,14 +60,13 @@ public class FormValidationTest extends AbstractJUnitTest {
         JenkinsConfig c = jenkins.getConfigPage();
         c.configure();
         c.numExecutors.set(16);
-        FormValidation formValidation = c.numExecutors.getFormValidation();
+        FormValidation formValidation = c.numExecutors.getSilentFormValidation();
         assertThat(formValidation, silent());
 
         c.numExecutors.set(-16);
         formValidation = c.numExecutors.getFormValidation();
 
-        //support older jenkins versions
-        String errorMessage = jenkins.getVersion().isNewerThan(new VersionNumber("2.295")) ? "Not a non-negative integer": "Not a non-negative number";
+        String errorMessage = "Not a non-negative integer";
         assertThat(formValidation, reports(Kind.ERROR, errorMessage));
     }
 
