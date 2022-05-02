@@ -114,6 +114,7 @@ public class FormValidation {
 
     public FormValidation(WebElement element) {
         List<WebElement> divs = element.findElements(by.xpath("div"));
+        // TODO the divs.get(1) part is old form validation, remove once not in current LTS line
         WebElement outcome = divs.size() == 1 ? divs.get(0) : divs.get(1).findElement(by.xpath("div"));
         this.kind = extractKind(outcome);
         this.message = outcome.getText();
