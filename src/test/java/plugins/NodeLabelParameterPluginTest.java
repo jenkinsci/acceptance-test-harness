@@ -223,7 +223,11 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(j.getLastBuild().waitUntilFinished().getNumber(), is(equalTo(1)));
         assertThat(s1.getBuildHistory().getBuildsOf(j), contains(b));
 
-        assertThat(j.open(), Matchers.hasContent(s2.getName() + " is offline"));
+        try {
+            assertThat(j.open(), Matchers.hasContent(s2.getName() + "\nis offline"));
+        } catch (AssertionError e) {
+            assertThat(j.open(), Matchers.hasContent(s2.getName() + " is offline"));
+        }
 
         //bring second slave online again
         s2.markOnline();
@@ -481,7 +485,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     private void shouldBeTriggeredWithoutOnlineNode(Build build, String nodename) {
         String pendingBuildText = getPendingBuildText(build);
 
-        assertThat(pendingBuildText, containsString(nodename + " is offline"));
+        String text = pendingBuildText.replace("\nis offline", " is offline");
+        assertThat(text, containsString(nodename + " is offline"));
         assertThat(build, not(started()));
     }
 
