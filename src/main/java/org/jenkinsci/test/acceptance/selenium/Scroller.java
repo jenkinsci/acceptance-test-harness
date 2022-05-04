@@ -74,10 +74,13 @@ public class Scroller extends AbstractWebDriverEventListener {
     private Logger LOGGER = Logger.getLogger(Scroller.class.getName());
 
     private final String scrollJs;
+    private final String scrollJs2;
 
     public Scroller() {
         try {
             scrollJs = IOUtils.toString(Scroller.class.getResourceAsStream("scroller.js"));
+            // TODO - rename this
+            scrollJs2 = IOUtils.toString(Scroller.class.getResourceAsStream("scroller2.js"));
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
@@ -91,6 +94,13 @@ public class Scroller extends AbstractWebDriverEventListener {
     @Override
     public void beforeChangeValueOf(WebElement element, WebDriver driver, CharSequence[] keysToSend) {
         scrollIntoView(element, driver);
+    }
+
+    @Override
+    public void afterNavigateTo(String url, WebDriver driver) {
+        super.afterNavigateTo(url, driver);
+        final JavascriptExecutor executor = (JavascriptExecutor) driver;
+        executor.executeScript(scrollJs2);
     }
 
     /**
