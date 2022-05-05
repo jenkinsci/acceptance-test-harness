@@ -401,7 +401,7 @@ public class Job extends TopLevelItem {
     public void disable() {
         try {
             check("Disable this project");
-        } catch (NoSuchElementException exception) {
+        } catch (org.openqa.selenium.NoSuchElementException exception) {
             // Newer versions of Jenkins use a toggle switch with the active state as its label
             check("Enabled");
         }
