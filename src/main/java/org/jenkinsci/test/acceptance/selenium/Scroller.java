@@ -99,6 +99,10 @@ public class Scroller extends AbstractWebDriverEventListener {
     @Override
     public void afterNavigateTo(String url, WebDriver driver) {
         super.afterNavigateTo(url, driver);
+        disableStickyElements(driver);
+    }
+
+    public void disableStickyElements(WebDriver driver) {
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         executor.executeScript(scrollJs2);
     }
