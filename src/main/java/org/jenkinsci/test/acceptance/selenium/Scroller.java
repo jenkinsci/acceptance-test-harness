@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -71,16 +72,17 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  */
 public class Scroller extends AbstractWebDriverEventListener {
 
-    private Logger LOGGER = Logger.getLogger(Scroller.class.getName());
+    private final Logger LOGGER = Logger.getLogger(Scroller.class.getName());
 
     private final String scrollJs;
-    private final String scrollJs2;
+    private final String disableStickyElementsJs;
 
     public Scroller() {
         try {
-            scrollJs = IOUtils.toString(Scroller.class.getResourceAsStream("scroller.js"));
-            // TODO - rename this
-            scrollJs2 = IOUtils.toString(Scroller.class.getResourceAsStream("scroller2.js"));
+            scrollJs = IOUtils.toString(getClass()
+                    .getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
+            disableStickyElementsJs = IOUtils.toString(getClass()
+                    .getResourceAsStream("disable-sticky-elements.js"), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
@@ -102,9 +104,14 @@ public class Scroller extends AbstractWebDriverEventListener {
         disableStickyElements(driver);
     }
 
+    /**
+     * Sometimes sticky elements (elements that are fixed in position on the page, such as the bottom app bar),
+     * appear on top of other elements, making those elements inaccessible. This method removes the sticky
+     * nature of these elements meaning that they'll no longer appear on top of other elements.
+     */
     public void disableStickyElements(WebDriver driver) {
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
-        executor.executeScript(scrollJs2);
+        executor.executeScript(disableStickyElementsJs);
     }
 
     /**

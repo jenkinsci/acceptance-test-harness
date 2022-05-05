@@ -1,5 +1,5 @@
 // Disable smooth scrolling so scrolling is instantaneous
-document.querySelector("html").style.scrollBehavior = "initial"
+document.querySelector("html").style.scrollBehavior = "initial";
 
 // Disable common sticky elements
 const breadcrumbBar = document.querySelector("#breadcrumbBar");
