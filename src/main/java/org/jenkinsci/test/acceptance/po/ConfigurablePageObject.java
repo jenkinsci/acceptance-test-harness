@@ -29,6 +29,7 @@ import java.util.concurrent.Callable;
 import com.google.inject.Injector;
 
 import groovy.lang.Closure;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -102,6 +103,10 @@ public abstract class ConfigurablePageObject extends PageObject {
      * @see #getConfigUrl()
      */
     public void configure() {
+        // Automatic disabling of sticky elements doesn't seem to occur after a redirect,
+        // so force it after the configuration page has loaded
+        new Scroller().disableStickyElements(driver);
+
         if (!driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
             visit(getConfigUrl());
         }
