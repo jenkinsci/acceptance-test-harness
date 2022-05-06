@@ -53,10 +53,7 @@ public class TriggerRemoteBuildsTest extends AbstractJUnitTest {
         subject.addParameter(StringParameter.class).setName("ID");
         // Trigger builds remotely (e.g., from scripts)")
         // TODO move to page area
-
-        WebElement label = jenkins.control("/pseudoRemoteTrigger").resolve().findElement(by.xpath("../label"));
-        new Scroller().scrollIntoView(label, driver);
-        label.click();
+        jenkins.control("/pseudoRemoteTrigger").resolve().findElement(by.xpath("../label")).click();
         jenkins.control("/pseudoRemoteTrigger/authToken").fillIn("authToken", "TOKEN");
         subject.addShellStep("test 'id_to_pass' = $ID");
         subject.save();
