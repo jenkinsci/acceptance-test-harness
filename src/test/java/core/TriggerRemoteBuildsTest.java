@@ -29,10 +29,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.ServletSecurityRealm;
 import org.jenkinsci.test.acceptance.po.StringParameter;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.openqa.selenium.WebElement;
 
 /**
  * Test to trigger builds remotely.
