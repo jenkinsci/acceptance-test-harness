@@ -110,7 +110,6 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "pipeline-input-step", "junit@1.18", "git@2.3"})
     @Test public void linearFlow() throws Exception {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         MavenInstallation.installMaven(jenkins, "M3", "3.5.0");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
         slave.configure(() -> slave.labels.set("remote"));
