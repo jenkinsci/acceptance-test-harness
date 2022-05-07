@@ -11,7 +11,9 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
@@ -101,7 +103,14 @@ public class Scroller extends AbstractWebDriverEventListener {
     @Override
     public void afterNavigateTo(String url, WebDriver driver) {
         super.afterNavigateTo(url, driver);
-        disableStickyElements(driver);
+        try {
+            // if there's an alert we can't run JavaScript
+            // if we catch the exception from running JavaScript then FormValidationTest hangs
+            // not the nicest hack, but it works
+            driver.switchTo().alert();
+        } catch (NoAlertPresentException e) {
+            disableStickyElements(driver);
+        }
     }
 
     /**
@@ -111,7 +120,11 @@ public class Scroller extends AbstractWebDriverEventListener {
      */
     public void disableStickyElements(WebDriver driver) {
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
-        executor.executeScript(disableStickyElementsJs);
+        try {
+            executor.executeScript(disableStickyElementsJs);
+        } catch (UnhandledAlertException ignored) {
+            // if we're in the process of navigating but an alert is in the way we can't run JS
+        }
     }
 
     /**
