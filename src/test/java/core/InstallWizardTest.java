@@ -96,8 +96,8 @@ public class InstallWizardTest extends AbstractJUnitTest {
         WizardCustomizeJenkins wizardCustomize = new WizardCustomizeJenkins(jenkins);
         wizardCustomize.doSelectPluginsToInstall();
         wizardCustomize.deselectAll();
-        wizardCustomize.searchPlugin("pipeline");
-        wizardCustomize.selectPlugin("workflow-aggregator");
+        wizardCustomize.searchPlugin("Locale");
+        wizardCustomize.selectPlugin("locale");
         wizardCustomize.startInstall();
 
         wizardCustomize.shouldFinishInstallSuccessfully();

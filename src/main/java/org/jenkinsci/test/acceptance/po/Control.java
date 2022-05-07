@@ -334,6 +334,10 @@ public class Control extends CapybaraPortingLayerImpl {
         return FormValidation.await(this);
     }
 
+    public FormValidation getSilentFormValidation() {
+        return FormValidation.await(this, true);
+    }
+
     /**
      * Determines whether an object is existing on the current page
      * @return TRUE if it exists

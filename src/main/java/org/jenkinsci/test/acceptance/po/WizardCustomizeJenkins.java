@@ -65,7 +65,7 @@ public class WizardCustomizeJenkins extends PageObject {
     @SuppressWarnings("deprecation") // FIXME: change the detection method when we have id or name in the frame.
     public void shouldFinishInstallSuccessfully() {
         waitFor()
-                .withTimeout(300, TimeUnit.SECONDS)
+                .withTimeout(400, TimeUnit.SECONDS)
                 .ignoring(NoSuchElementException.class, NoSuchFrameException.class)
                 .until(() -> {
                     try {

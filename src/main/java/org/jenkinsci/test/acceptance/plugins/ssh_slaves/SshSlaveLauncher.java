@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Describable("hudson.plugins.sshslaves.SSHLauncher")
+@Describable({"Launch agents via SSH", "hudson.plugins.sshslaves.SSHLauncher"})
 public class SshSlaveLauncher extends ComputerLauncher {
     public final Control host = control("host");
     public final Control credentialsId = control("credentialsId");
