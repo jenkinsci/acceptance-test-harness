@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -41,6 +43,10 @@ public class JobsMixIn extends MixIn {
         clickButton("OK");
         // Sometimes job creation is not fast enough, so make sure it's finished before continue
         waitFor(by.name("config"), 10);
+
+        // Automatic disabling of sticky elements doesn't seem to occur after a redirect,
+        // so force it after the configuration page has loaded
+        new Scroller().disableStickyElements(driver);
 
         final T j = get(type, name);
 
