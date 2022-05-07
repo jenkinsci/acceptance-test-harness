@@ -44,8 +44,8 @@ if [ ! -f $war ]; then
     mirrors=https://get.jenkins.io
     case "$war" in
         "latest")
-            war=jenkins-latest.war
-            url=$mirrors/war/latest/jenkins.war
+            #war=jenkins-latest.war
+            url=https://ci.jenkins.io/job/Core/job/jenkins/job/PR-6527/lastSuccessfulBuild/artifact/org/jenkins-ci/main/jenkins-war/2.347-rc32357.891f43b_fd2c4/jenkins-war-2.347-rc32357.891f43b_fd2c4.war
         ;;
         "latest-rc")
             war=jenkins-latest-rc.war
