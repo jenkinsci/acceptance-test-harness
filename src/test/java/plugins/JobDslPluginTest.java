@@ -43,7 +43,6 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.View.*;
 import static org.jenkinsci.test.acceptance.utils.IOUtil.multiline;
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
 
 /**
  * Acceptance tests for the Job DSL plugin.
@@ -454,7 +453,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_fail_on_missing_plugin() {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         // check if plugin is installed. if true, disable plugin
         PluginSpec pluginSpec = new PluginSpec("chucknorris");
         PluginManager pm = jenkins.getPluginManager();

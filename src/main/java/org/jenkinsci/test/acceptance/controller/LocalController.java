@@ -227,11 +227,17 @@ public abstract class LocalController extends JenkinsController implements LogLi
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+ this);
             this.logWatcher.waitTillReady();
+            onReady();
             LOGGER.info("Jenkins is running in " + this);
         } catch (Exception e) {
             diagnoseFailedLoad(e);
         }
     }
+
+    /**
+     * Called when the Jenkins instance is ready to be used.
+     */
+    protected void onReady() throws IOException {}
 
     @Override
     public void stopNow() throws IOException{
