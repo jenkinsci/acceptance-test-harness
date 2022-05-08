@@ -313,8 +313,8 @@ public class PluginManager extends ContainerPageObject {
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(pluginName);
-        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/../../td[2]//span[contains(@class, 'jenkins-label')] | " +
-                "//input[starts-with(@name,'plugin.%s.')]/../../td[3]", pluginName, pluginName)).getText();
+        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/ancestor::tr/td[2]//span[contains(@class, 'jenkins-label')] | " +
+                "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr/td[3]", pluginName, pluginName)).getText();
         return new VersionNumber(v);
     }
 
