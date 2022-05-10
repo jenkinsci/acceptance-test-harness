@@ -10,6 +10,5 @@ if (breadcrumbBar) {
 }
 
 if (bottomAppBar) {
-    bottomAppBar.style.removeProperty('left')
-    bottomAppBar.style.right = "0"
+    breadcrumbBar.style.position = "static";
 }
