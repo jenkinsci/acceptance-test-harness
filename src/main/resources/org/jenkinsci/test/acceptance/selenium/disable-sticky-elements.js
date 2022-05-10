@@ -10,5 +10,6 @@ if (breadcrumbBar) {
 }
 
 if (bottomAppBar) {
-    bottomAppBar.style.position = "relative";
+    bottomAppBar.style.removeProperty('left')
+    bottomAppBar.style.right = "0"
 }

@@ -110,7 +110,7 @@ public abstract class ConfigurablePageObject extends PageObject {
         if (!driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
             visit(getConfigUrl());
         }
-        waitFor(By.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
+        WebElement webElement = waitFor(By.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
         waitFor(By.xpath("//span[contains(@class, 'submit-button')]//button[contains(text(), '" + getSubmitButtonText() + "')]"), 5);
     }
 
