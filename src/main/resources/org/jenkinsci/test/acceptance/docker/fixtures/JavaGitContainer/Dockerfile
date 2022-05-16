@@ -3,15 +3,16 @@
 # and prepares for execution of Java compile jobs on slaves.
 #
 
-FROM ubuntu:xenial
+FROM ubuntu:jammy
 
 RUN mkdir -p /var/run/sshd
 
-# install SSHD, Git and zip
-RUN apt-get update && apt-get install -y \
+# install SSHD, Git, zip and the JDK
+RUN apt-get update && apt-get install --no-install-recommends -y \
     openssh-server \
     git \
     zip \
+    openjdk-11-jdk \
     && rm -rf /var/lib/apt/lists/*
 
 # create a git user and create .ssh dir
@@ -28,10 +29,3 @@ CMD /usr/sbin/sshd -D -e
 
 # give the whole /home/git back to the git user
 RUN chown -R git /home/git
-
-RUN apt-get update -y && apt-get install --no-install-recommends -y software-properties-common
-
-RUN add-apt-repository ppa:openjdk-r/ppa
-RUN apt-get update
-RUN apt-get install --no-install-recommends -y \
-    openjdk-8-jdk
