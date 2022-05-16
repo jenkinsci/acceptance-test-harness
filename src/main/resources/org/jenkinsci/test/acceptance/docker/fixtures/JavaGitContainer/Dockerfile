@@ -3,7 +3,7 @@
 # and prepares for execution of Java compile jobs on slaves.
 #
 
-FROM ubuntu:jammy
+FROM ubuntu:22.04
 
 RUN mkdir -p /var/run/sshd
 
