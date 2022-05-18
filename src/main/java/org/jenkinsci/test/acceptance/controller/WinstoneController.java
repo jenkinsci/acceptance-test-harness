@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.controller;
 
 import hudson.util.VersionNumber;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.jar.JarFile;
 import javax.inject.Inject;
 import java.io.File;
@@ -98,15 +99,33 @@ public class WinstoneController extends LocalController {
             portFile.deleteOnExit();
             cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
         }
+        cb.addAll(getAdditionalJavaOptions());
         cb.add("-jar", war,
                 "--ajp13Port=-1",
                 "--httpPort=" + httpPort
         );
         cb.addAll(JENKINS_OPTS);
+        cb.addAll(getAdditionalJenkinsOptions());
 
         cb.env.putAll(commonLaunchEnv());
-        LOGGER.info("Starting Jenkins: " + cb.toString());
+        LOGGER.info("Starting Jenkins: " + cb);
         return cb.popen();
+    }
+
+    /**
+     * Returns additional options to the JVM.
+     * @return additional options to the JVM.
+     */
+    protected Collection<String> getAdditionalJavaOptions() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Returns additional Jenkins options that subclasses can provide.
+     * @return additional Jenkins options that subclasses can provide
+     */
+    protected Collection<String> getAdditionalJenkinsOptions() {
+        return Collections.emptyList();
     }
 
     private boolean supportsPortFileName() throws IOException {
