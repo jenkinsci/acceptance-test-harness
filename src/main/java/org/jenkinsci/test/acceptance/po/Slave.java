@@ -10,9 +10,9 @@ import com.google.common.base.Joiner;
 import org.openqa.selenium.NoSuchElementException;
 
 /**
- * A slave page object.
+ * An agent page object.
  *
- * To create a new slave into a test, use {@link SlaveController}.
+ * To create a new agent into a test, use {@link SlaveController}.
  *
  * @author Kohsuke Kawaguchi
  * @see Jenkins#slaves
@@ -39,7 +39,7 @@ public class Slave extends Node {
      * @see #isOnline
      */
     public Slave waitUntilOnline() {
-        waitFor().withMessage("Slave is online")
+        waitFor().withMessage("Agent is online")
                 .until(new Wait.Predicate<Boolean>() {
                     @Override public Boolean apply() {
                         return isOnline();
@@ -47,7 +47,7 @@ public class Slave extends Node {
 
                     @Override
                     public String diagnose(Throwable lastException, String message) {
-                        return "Slave log:\n" + getLog();
+                        return "Agent log:\n" + getLog();
                     }
         });
         return this;
@@ -67,7 +67,7 @@ public class Slave extends Node {
     }
 
     public static Matcher<Slave> runBuildsInOrder(final Job... jobs) {
-        return new Matcher<Slave>("slave run build in order: %s", Joiner.on(' ').join(jobs)) {
+        return new Matcher<Slave>("agent run build in order: %s", Joiner.on(' ').join(jobs)) {
             @Override public boolean matchesSafely(Slave slave) {
                 slave.visit("builds");
                 //Jobs table may take a little to be populated, give it some time
@@ -90,7 +90,7 @@ public class Slave extends Node {
     }
 
     /**
-     * If the slave is online, this method will mark it offline for testing purpose.
+     * If the agent is online, this method will mark it offline for testing purpose.
      */
     public void markOffline() {
         markOffline("Just for testing... be right back...");
@@ -110,7 +110,7 @@ public class Slave extends Node {
     }
 
     /**
-     * If the slave has been marked offline, this method will bring it up again
+     * If the agent has been marked offline, this method will bring it up again
      */
 
     public void markOnline(){
@@ -122,7 +122,7 @@ public class Slave extends Node {
     }
 
     /**
-     * If the slave is online, this method will disconnect for testing purpose.
+     * If the agent is online, this method will disconnect for testing purpose.
      */
     public void disconnect(String message) {
         if (isOnline()) {
@@ -136,26 +136,27 @@ public class Slave extends Node {
 
     public void delete() {
         open();
-        try {
-            clickLink("Delete Agent");
-        } catch (NoSuchElementException ex) {
-            clickLink("Delete Slave");
-        }
-
+        clickLink("Delete Agent");
         clickButton("Yes");
     }
 
     /**
-     * If the slave is offline, this method will launch the slave agent.
+     * If the agent is offline, this method will launch it.
+     * @deprecated Prefer {@link #launch()}.
      */
+    @Deprecated
     public void launchSlaveAgent() {
+        launch();
+    }
+
+    /**
+     * If the agent is offline, this method will launch it.
+     * @deprecated Prefer {@link #launch()}.
+     */
+    public void launch() {
         if (isOffline()) {
             open();
-            try {
-                clickButton("Launch agent");
-            } catch (NoSuchElementException ex) {
-                clickButton("Launch slave agent");
-            }
+            clickButton("Launch agent");
         }
     }
 }
