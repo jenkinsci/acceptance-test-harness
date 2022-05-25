@@ -83,12 +83,7 @@ public class Job extends TopLevelItem {
 
         check(radio);
 
-        try {
-            String path = radio.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH)).getAttribute("path");
-            return newInstance(type, this, requireNonNull(path));
-        } catch (NoSuchElementException e) {
-            return newInstance(type, this, radio.getAttribute("path"));
-        }
+        return newInstance(type, this, requireNonNull(getPath(radio)));
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {

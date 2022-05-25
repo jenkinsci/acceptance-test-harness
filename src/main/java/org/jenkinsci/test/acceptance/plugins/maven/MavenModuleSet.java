@@ -107,13 +107,7 @@ public class MavenModuleSet extends Job {
             }
         });
         checkbox.click();
-
-        WebElement input = checkbox;
-        if (checkbox.getTagName().equals("label")) {
-            input = checkbox.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH));
-        }
-
-        T bs = newInstance(type, this, requireNonNull(input.getAttribute("path")));
+        T bs = newInstance(type, this, requireNonNull(getPath(checkbox)));
 
         publishers.add(bs);
         return bs;
