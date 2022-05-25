@@ -75,13 +75,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
             }
         });
         radio.click();
-
-        try {
-            String path = radio.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH)).getAttribute("path");
-            return newInstance(type, this.context, requireNonNull(path));
-        } catch (NoSuchElementException e) {
-            return newInstance(type, this.context, radio.getAttribute("path"));
-        }
+        return newInstance(type, this.context, requireNonNull(getPath(radio)));
     }
 
     /**
