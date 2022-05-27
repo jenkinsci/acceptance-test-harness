@@ -25,7 +25,7 @@ public class CachedUpdateCenterMetadataLoader implements UpdateCenterMetadataPro
     File cacheBase = new File(System.getProperty("java.io.tmpdir"), "update-center");
 
     @Inject(optional=true) @Named("update_center_url")
-    String url = "https://updates.jenkins-ci.org/update-center.json"; // TODO consider using update-center.actual.json so we do not need to strip preamble/postamble
+    String url = "https://updates.jenkins.io/update-center.json"; // TODO consider using update-center.actual.json so we do not need to strip preamble/postamble
 
     @Inject
     ExtensionList<UpdateCenterMetadataDecorator> decorators;
