@@ -9,7 +9,6 @@ import com.cloudbees.sdk.extensibility.Extension;
 import com.google.inject.Injector;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.jenkinsci.test.acceptance.utils.FormElementPath;
 
 /**
  * Run test against existing Jenkins instance.
@@ -25,9 +24,6 @@ public class ExistingJenkinsController extends JenkinsController {
      */
     @CheckForNull
     private Credentials initialCredentials;
-
-    @Inject
-    private FormElementPath formElementPath;
 
     public ExistingJenkinsController(Injector i, String url) {
         this(i, url, null, false);
@@ -46,9 +42,6 @@ public class ExistingJenkinsController extends JenkinsController {
 
     @Override
     public void startNow() {
-        if (!skipCheck) {
-            formElementPath.ensure(url, initialCredentials);
-        }
     }
 
     @Override
