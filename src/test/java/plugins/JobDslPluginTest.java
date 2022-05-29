@@ -623,45 +623,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
     /**
      * Verifies that if script security for Job DSL scripts is enabled,
-     * scripts saved by non administrators that not run in a Groovy sandbox
-     * wont be executed.
-     * If a administrator saves the seed job, any DSL scripts it contains
-     * will be automatically approved. Afterwards the script
-     * can be executed.
-     */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm"})
-    public void should_approve_administrator_script_automatically() {
-        setUpSecurity();
-
-        jenkins.login().doLogin(USER);
-        FreeStyleJob seedJob = createSeedJob();
-        JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("job('New_Job')");
-        jobDsl.setUseSandbox(false);
-        seedJob.save();
-
-        // Build should fail because script is saved from non administrator an not yet approved
-        Build build = seedJob.scheduleBuild().shouldFail();
-        assertThat(build.getConsole(), containsString("script not yet approved for use"));
-
-        jenkins.logout();
-        jenkins.login().doLogin(ADMIN);
-
-        // Build should fail because script is saved from non administrator an not yet approved
-        Build build2 = seedJob.scheduleBuild().shouldFail();
-        assertThat(build2.getConsole(), containsString("script not yet approved for use"));
-        seedJob.configure();
-        seedJob.save();
-
-        jenkins.logout();
-        jenkins.login().doLogin(USER);
-
-        // Build should succeed because job was saved from administrator
-        seedJob.scheduleBuild().shouldSucceed();
-    }
-
-    /**
-     * Verifies that if script security for Job DSL scripts is enabled,
      * scripts saved by non administrators can run in a Groovy sandbox
      * without approval. All Job DSL methods are whitelisted by default.
      */
