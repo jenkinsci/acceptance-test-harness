@@ -574,7 +574,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Build should fail because importing Groovy classes not allowed if script security is enabled
         Build build = seedJob.scheduleBuild().shouldFail();
-        assertThat(build.getConsole(), containsString("unable to resolve class utilities.MyUtilities"));
+        assertThat(build.getConsole(), containsString("ERROR: script not yet approved for use"));
 
         sc.configure(() -> sc.setJobDslScriptSecurity(false));
 
