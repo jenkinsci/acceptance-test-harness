@@ -151,7 +151,6 @@ public class Slave extends Node {
 
     /**
      * If the agent is offline, this method will launch it.
-     * @deprecated Prefer {@link #launch()}.
      */
     public void launch() {
         if (isOffline()) {
