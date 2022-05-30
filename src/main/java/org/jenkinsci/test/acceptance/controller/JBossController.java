@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -59,6 +60,15 @@ public class JBossController extends LocalController {
         if(jbossLog.exists()){
             FileUtils.forceDelete(jbossLog);
         }
+
+        File context =  new File(jbossHome,"conf/context.xml");
+        if(context.exists()){
+            org.apache.commons.io.FileUtils.forceDelete(context);
+        }
+        org.apache.commons.io.FileUtils.write(context, "<Context>\n" +
+                "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n" +
+                "</Context>", StandardCharsets.UTF_8);
+
 
         CommandBuilder cb = new CommandBuilder(jbossHome+"/bin/standalone.sh");
         cb.env.putAll(commonLaunchEnv());
