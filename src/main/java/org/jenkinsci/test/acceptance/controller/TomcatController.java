@@ -4,11 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -53,6 +54,16 @@ public class TomcatController extends LocalController {
             if(tomcatLog.exists()){
                 FileUtils.forceDelete(tomcatLog);
             }
+
+            File context =  new File(catalinaHome,"conf/context.xml");
+            if(context.exists()){
+                FileUtils.forceDelete(context);
+            }
+            FileUtils.write(context, "<Context>\n" +
+                    "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n" +
+                    "</Context>", StandardCharsets.UTF_8);
+
+
 
             CommandBuilder cb = new CommandBuilder(catalinaHome+"/bin/startup.sh");
             cb.env.putAll(commonLaunchEnv());

@@ -66,9 +66,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     private final File logFile;
 
-    @Inject @Named("form-element-path.hpi")
-    private File formElementPathPlugin;
-
     @Inject
     private Injector injector;
 
@@ -130,22 +127,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
         LOGGER.info("Running with given plugins: " + Arrays.toString(pluginDir.list()));
     }
 
-    private void installFormElementPath(File pluginDir) {
-        if (runInstallWizard) {
-            out.println("Skipping installation of form-element-path.jpi");
-        } else {
-            out.println("Installing form-element-path.jpi");
-            try {
-                FileUtils.copyFile(formElementPathPlugin, new File(pluginDir, "form-element-path.jpi"));
-            } catch (IOException e) {
-                String msg = String.format(
-                        "Failed to copy form-element-path file %s to plugin dir %s.", formElementPathPlugin, pluginDir
-                );
-                throw new RuntimeException(msg, e);
-            }
-        }
-    }
-
     @Override
     public void addLogListener(LogListener l) {
         logWatcher.addLogListener(l);
@@ -192,8 +173,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         }
-
-        installFormElementPath(new File(jenkinsHome, "plugins"));
     }
 
     public File getJavaHome() {
@@ -227,11 +206,17 @@ public abstract class LocalController extends JenkinsController implements LogLi
         try {
             LOGGER.info("Waiting for Jenkins to become running in "+ this);
             this.logWatcher.waitTillReady();
+            onReady();
             LOGGER.info("Jenkins is running in " + this);
         } catch (Exception e) {
             diagnoseFailedLoad(e);
         }
     }
+
+    /**
+     * Called when the Jenkins instance is ready to be used.
+     */
+    protected void onReady() throws IOException {}
 
     @Override
     public void stopNow() throws IOException{

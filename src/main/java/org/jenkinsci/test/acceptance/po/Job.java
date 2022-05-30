@@ -83,12 +83,7 @@ public class Job extends TopLevelItem {
 
         check(radio);
 
-        try {
-            String path = radio.findElement(By.xpath(CapybaraPortingLayerImpl.LABEL_TO_INPUT_XPATH)).getAttribute("path");
-            return newInstance(type, this, requireNonNull(path));
-        } catch (NoSuchElementException e) {
-            return newInstance(type, this, radio.getAttribute("path"));
-        }
+        return newInstance(type, this, requireNonNull(getPath(radio)));
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
@@ -399,7 +394,12 @@ public class Job extends TopLevelItem {
     }
 
     public void disable() {
-        check("Disable this project");
+        try {
+            // Newer versions of Jenkins use a toggle switch with the active state as its label
+            check(find(by.id("toggle-switch-enable-disable-project")));
+        } catch (org.openqa.selenium.NoSuchElementException exception) {
+            check("Disable this project");
+        }
     }
 
     public int getNextBuildNumber() {

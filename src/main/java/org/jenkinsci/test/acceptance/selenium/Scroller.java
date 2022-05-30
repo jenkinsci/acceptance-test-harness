@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -10,7 +11,9 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
@@ -71,13 +74,17 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  */
 public class Scroller extends AbstractWebDriverEventListener {
 
-    private Logger LOGGER = Logger.getLogger(Scroller.class.getName());
+    private final Logger LOGGER = Logger.getLogger(Scroller.class.getName());
 
     private final String scrollJs;
+    private final String disableStickyElementsJs;
 
     public Scroller() {
         try {
-            scrollJs = IOUtils.toString(Scroller.class.getResourceAsStream("scroller.js"));
+            scrollJs = IOUtils.toString(getClass()
+                    .getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
+            disableStickyElementsJs = IOUtils.toString(getClass()
+                    .getResourceAsStream("disable-sticky-elements.js"), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
@@ -91,6 +98,33 @@ public class Scroller extends AbstractWebDriverEventListener {
     @Override
     public void beforeChangeValueOf(WebElement element, WebDriver driver, CharSequence[] keysToSend) {
         scrollIntoView(element, driver);
+    }
+
+    @Override
+    public void afterNavigateTo(String url, WebDriver driver) {
+        super.afterNavigateTo(url, driver);
+        try {
+            // if there's an alert we can't run JavaScript
+            // if we catch the exception from running JavaScript then FormValidationTest hangs
+            // not the nicest hack, but it works
+            driver.switchTo().alert();
+        } catch (NoAlertPresentException e) {
+            disableStickyElements(driver);
+        }
+    }
+
+    /**
+     * Sometimes sticky elements (elements that are fixed in position on the page, such as the bottom app bar),
+     * appear on top of other elements, making those elements inaccessible. This method removes the sticky
+     * nature of these elements meaning that they'll no longer appear on top of other elements.
+     */
+    public void disableStickyElements(WebDriver driver) {
+        final JavascriptExecutor executor = (JavascriptExecutor) driver;
+        try {
+            executor.executeScript(disableStickyElementsJs);
+        } catch (UnhandledAlertException ignored) {
+            // if we're in the process of navigating but an alert is in the way we can't run JS
+        }
     }
 
     /**

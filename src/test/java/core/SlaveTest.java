@@ -25,15 +25,12 @@ package core;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
 import java.util.concurrent.ExecutionException;
 
@@ -45,41 +42,41 @@ import static org.hamcrest.MatcherAssert.assertThat;
  */
 public class SlaveTest extends AbstractJUnitTest {
     @Inject
-    SlaveController slaveController;
-    Slave slave;
+    SlaveController agentController;
+    Slave agent;
 
     @Before
     public void setUp() throws ExecutionException, InterruptedException {
-        slave = slaveController.install(jenkins).get();
+        agent = agentController.install(jenkins).get();
     }
 
     /** Bring slave offline and then online. */
     @Test
     public void slave_offline_online() {
-        slave.markOffline("Test - slave goes offline.");
-        assert(slave.isOffline());
-        slave.markOnline();
-        assert(slave.isOnline());
+        agent.markOffline("Test - slave goes offline.");
+        assert(agent.isOffline());
+        agent.markOnline();
+        assert(agent.isOnline());
     }
 
     /** Disconnect a slave, logout - login and then reconnect the slave. */
     @Test
     public void slave_disconnect_reconnect() throws ExecutionException, InterruptedException {
-        slave.disconnect("Test - slave is disconnected");
-        assert(slave.isOffline());
+        agent.disconnect("Test - slave is disconnected");
+        assert(agent.isOffline());
         jenkins.logout();
         jenkins.login();
-        slave.launchSlaveAgent();
-        slave.waitUntilOnline();
-        assert(slave.isOnline());
+        agent.launch();
+        agent.waitUntilOnline();
+        assert(agent.isOnline());
     }
 
     @Test
     public void tie_job_to_specified_label() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
-        slave.configure();
-        slave.setLabels("test");
-        slave.save();
+        agent.configure();
+        agent.setLabels("test");
+        agent.save();
 
         j.configure();
         j.setLabelExpression("test");
@@ -87,6 +84,6 @@ public class SlaveTest extends AbstractJUnitTest {
 
         Build b = j.startBuild().shouldSucceed();
         j.shouldBeTiedToLabel("test");
-        assertThat(b.getNode(), is(slave));
+        assertThat(b.getNode(), is(agent));
     }
 }

@@ -43,7 +43,6 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.View.*;
 import static org.jenkinsci.test.acceptance.utils.IOUtil.multiline;
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
 
 /**
  * Acceptance tests for the Job DSL plugin.
@@ -454,7 +453,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void should_fail_on_missing_plugin() {
-        assumeTrue("This test requires a restartable Jenkins", jenkins.canRestart());
         // check if plugin is installed. if true, disable plugin
         PluginSpec pluginSpec = new PluginSpec("chucknorris");
         PluginManager pm = jenkins.getPluginManager();
@@ -576,7 +574,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         // Build should fail because importing Groovy classes not allowed if script security is enabled
         Build build = seedJob.scheduleBuild().shouldFail();
-        assertThat(build.getConsole(), containsString("unable to resolve class utilities.MyUtilities"));
+        assertThat(build.getConsole(), containsString("ERROR: script not yet approved for use"));
 
         sc.configure(() -> sc.setJobDslScriptSecurity(false));
 
@@ -620,45 +618,6 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin(USER);
 
         // Build should succeed because script is approved now
-        seedJob.scheduleBuild().shouldSucceed();
-    }
-
-    /**
-     * Verifies that if script security for Job DSL scripts is enabled,
-     * scripts saved by non administrators that not run in a Groovy sandbox
-     * wont be executed.
-     * If a administrator saves the seed job, any DSL scripts it contains
-     * will be automatically approved. Afterwards the script
-     * can be executed.
-     */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm"})
-    public void should_approve_administrator_script_automatically() {
-        setUpSecurity();
-
-        jenkins.login().doLogin(USER);
-        FreeStyleJob seedJob = createSeedJob();
-        JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("job('New_Job')");
-        jobDsl.setUseSandbox(false);
-        seedJob.save();
-
-        // Build should fail because script is saved from non administrator an not yet approved
-        Build build = seedJob.scheduleBuild().shouldFail();
-        assertThat(build.getConsole(), containsString("script not yet approved for use"));
-
-        jenkins.logout();
-        jenkins.login().doLogin(ADMIN);
-
-        // Build should fail because script is saved from non administrator an not yet approved
-        Build build2 = seedJob.scheduleBuild().shouldFail();
-        assertThat(build2.getConsole(), containsString("script not yet approved for use"));
-        seedJob.configure();
-        seedJob.save();
-
-        jenkins.logout();
-        jenkins.login().doLogin(USER);
-
-        // Build should succeed because job was saved from administrator
         seedJob.scheduleBuild().shouldSucceed();
     }
 
