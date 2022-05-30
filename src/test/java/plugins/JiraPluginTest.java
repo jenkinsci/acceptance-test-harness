@@ -44,12 +44,15 @@ public class JiraPluginTest extends AbstractJUnitTest {
     @Before
     public void setUp() throws Exception {
         git = new GitRepo();
+        jenkins.runScript("hudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT = true");
     }
 
     @After
     public void tearDown() throws Exception {
         if (git!=null)
             git.close();
+
+        jenkins.runScript("hudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT = false");
     }
 
     @Test
