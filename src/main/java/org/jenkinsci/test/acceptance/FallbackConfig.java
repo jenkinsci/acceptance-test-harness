@@ -414,19 +414,6 @@ public class FallbackConfig extends AbstractModule {
         return new Jenkins(injector, controller);
     }
 
-    /**
-     * Provides the path to the form elements plug-in. Uses the Maven repository to obtain the plugin.
-     *
-     * @return the path to the form elements plug-in
-     */
-    @Named("form-element-path.hpi") @Provides
-    public File getFormElementsPathFile(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
-        ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
-        String version = System.getenv("FORM_ELEMENT_PATH_VERSION");
-        version = version == null ? "1.12" : version;
-        ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.plugins", "form-element-path", "hpi", version));
-        return resolvedArtifact.getArtifact().getFile();
-    }
 
     /**
      * Returns whether Jenkins should be quite and should not report any logging information.

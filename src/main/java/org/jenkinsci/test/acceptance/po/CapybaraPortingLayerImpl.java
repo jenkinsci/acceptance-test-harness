@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import javax.annotation.CheckForNull;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -278,6 +279,20 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 executeScript("arguments[0].click();", e);
             }
         }
+    }
+
+    /**
+     * Resolves the path attribute from the element, handling radio buttons and checkboxes.
+     * @param e the element to retrieve the path from.
+     * @return the path attribute if it exists.
+     */
+    @CheckForNull
+    public String getPath(WebElement e) {
+        WebElement input = e;
+        if (e.getTagName().equals("label")) {
+            input = e.findElement(By.xpath(LABEL_TO_INPUT_XPATH));
+        }
+        return input.getAttribute("path");
     }
 
     /** {@inheritDoc} */
