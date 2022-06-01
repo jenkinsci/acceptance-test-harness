@@ -31,7 +31,6 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
-import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
@@ -66,6 +65,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
@@ -172,19 +172,27 @@ public class FallbackConfig extends AbstractModule {
             if (StringUtils.isBlank(u)) {
                 throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
             }
-            return new RemoteWebDriver(
-                    new URL(u), //http://192.168.99.100:4444/wd/hub
-                    buildFirefoxOptions(testName)
-            );
+            {
+                RemoteWebDriver driver =  new RemoteWebDriver(
+                        new URL(u), //http://192.168.99.100:4444/wd/hub
+                        buildFirefoxOptions(testName)
+                );
+                driver.setFileDetector(new LocalFileDetector());
+                return driver;
+            }
         case "remote-webdriver-chrome":
             u = System.getenv("REMOTE_WEBDRIVER_URL");
             if (StringUtils.isBlank(u)) {
                 throw new Error("remote-webdriver-chrome requires REMOTE_WEBDRIVER_URL to be set");
             }
-            return new RemoteWebDriver(
-                    new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.chrome()
-            );
+            {
+                RemoteWebDriver driver = new RemoteWebDriver(
+                        new URL(u), //http://192.168.99.100:4444/wd/hub
+                        DesiredCapabilities.chrome()
+                );
+                driver.setFileDetector(new LocalFileDetector());
+                return driver;
+            }
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
