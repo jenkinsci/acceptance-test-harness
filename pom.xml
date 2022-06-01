@@ -35,7 +35,7 @@
     <selenium.version>3.141.59</selenium.version>
     <guava.version>29.0-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>0.9.0.v20140226</aether.version>
-    <jackson.version>2.12.1</jackson.version>
+    <jackson.bom.version>2.12.1</jackson.bom.version>
     <maven.version>3.1.0</maven.version>
     <groovy.version>2.3.1</groovy.version>
     <monte.version>0.7.7.0</monte.version>
@@ -56,6 +56,16 @@
     </pluginRepository>
   </pluginRepositories>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-parent</artifactId>
+        <version>2.13.3</version>
+      </dependency>
+    </dependencies>
+
+  </dependencyManagement>
   <dependencies>
     <!-- Aether -->
     <dependency>
@@ -243,7 +253,6 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -446,7 +455,6 @@
       <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
