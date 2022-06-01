@@ -56,16 +56,6 @@
     </pluginRepository>
   </pluginRepositories>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-parent</artifactId>
-        <version>2.13.3</version>
-      </dependency>
-    </dependencies>
-
-  </dependencyManagement>
   <dependencies>
     <!-- Aether -->
     <dependency>
@@ -437,6 +427,13 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.13.3</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>jcl-over-slf4j</artifactId>
