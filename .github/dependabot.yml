@@ -1,0 +1,11 @@
+---
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    ignore:
+      # Selenium requires co-ordinated changes in consuming projects also due to the use of containers for webdriver
+      - dependency-name: "org.seleniumhq.selenium:*"
