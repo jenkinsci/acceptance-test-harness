@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -31,7 +32,6 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
-import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
@@ -50,6 +50,7 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.Statement;
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.Proxy;
@@ -66,6 +67,7 @@ import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
@@ -168,28 +170,27 @@ public class FallbackConfig extends AbstractModule {
             capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
             return new PhantomJSDriver(capabilities);
         case "remote-webdriver-firefox":
-            String u = System.getenv("REMOTE_WEBDRIVER_URL");
-            if (StringUtils.isBlank(u)) {
-                throw new Error("remote-webdriver-firefox requires REMOTE_WEBDRIVER_URL to be set");
-            }
-            return new RemoteWebDriver(
-                    new URL(u), //http://192.168.99.100:4444/wd/hub
-                    buildFirefoxOptions(testName)
-            );
+            return buildRemoteWebDriver(buildFirefoxOptions(testName));
         case "remote-webdriver-chrome":
-            u = System.getenv("REMOTE_WEBDRIVER_URL");
-            if (StringUtils.isBlank(u)) {
-                throw new Error("remote-webdriver-chrome requires REMOTE_WEBDRIVER_URL to be set");
-            }
-            return new RemoteWebDriver(
-                    new URL(u), //http://192.168.99.100:4444/wd/hub
-                    DesiredCapabilities.chrome()
-            );
+            return buildRemoteWebDriver(buildChromeOptions(testName));
         default:
             throw new Error("Unrecognized browser type: "+browser);
         }
     }
 
+    private RemoteWebDriver buildRemoteWebDriver(Capabilities options) throws MalformedURLException {
+        String u = System.getenv("REMOTE_WEBDRIVER_URL");
+        if (StringUtils.isBlank(u)) {
+            throw new Error("remote-webdriver type browsers require REMOTE_WEBDRIVER_URL to be set");
+        }
+        RemoteWebDriver driver =  new RemoteWebDriver(
+                new URL(u), //http://192.168.99.100:4444/wd/hub
+                options
+        );
+        driver.setFileDetector(new LocalFileDetector());
+        return driver;
+
+    }
     private String getBrowser() {
         String browser = System.getenv("BROWSER");
         if (browser==null) browser = "firefox";
@@ -211,6 +212,14 @@ public class FallbackConfig extends AbstractModule {
             firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
         }
         return firefoxOptions;
+    }
+
+    private ChromeOptions buildChromeOptions(TestName testName) throws IOException {
+        ChromeOptions chromeOptions = new ChromeOptions();
+        if (isCaptureHarEnabled()) {
+            chromeOptions.setProxy(createSeleniumProxy(testName.get()));
+        }
+        return chromeOptions;
     }
 
     private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
