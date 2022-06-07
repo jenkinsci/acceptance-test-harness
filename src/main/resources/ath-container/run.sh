@@ -53,7 +53,7 @@ if [ ! -f $war ]; then
         ;;
         "lts")
             war=jenkins-lts.war
-            url=$mirrors/war-stable/latest/jenkins.war
+            url=https://ci.jenkins.io/job/Core/job/jenkins/job/PR-6485/48/artifact/org/jenkins-ci/main/jenkins-war/2.350-rc32444.a_49359dd01a_f/jenkins-war-2.350-rc32444.a_49359dd01a_f.war
         ;;
         "lts-rc")
             war=jenkins-lts-rc.war
