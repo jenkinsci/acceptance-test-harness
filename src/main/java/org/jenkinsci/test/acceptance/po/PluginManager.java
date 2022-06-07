@@ -86,15 +86,10 @@ public class PluginManager extends ContainerPageObject {
         this.jenkins = jenkins;
     }
 
-    public void checkForUpdates() {
-        checkForUpdates(30L);
-    }
-
     /**
      * Force update the plugin update center metadata.
-     * @param timeOutSeconds seconds to wait before timeout.
      */
-    public void checkForUpdates(long timeOutSeconds) {
+    public void checkForUpdates() {
         mockUpdateCenter.ensureRunning(jenkins);
         visit("index");
         final String current = getCurrentUrl();
@@ -104,7 +99,7 @@ public class PluginManager extends ContainerPageObject {
         WebElement checkButton = find(by.link("Check now"));
         checkButton.click();
         // The wait criteria is: we have left the current page and returned to the same one
-        waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(timeOutSeconds), ChronoUnit.MILLIS)).until(webElement -> {
+        waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
             try {
                 // We interact with the element just to detect if it is stale
                 webElement.findElement(by.id("it does not matter"));
