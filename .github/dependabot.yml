@@ -9,3 +9,7 @@ updates:
     ignore:
       # Selenium requires co-ordinated changes in consuming projects also due to the use of containers for webdriver
       - dependency-name: "org.seleniumhq.selenium:*"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/"
+    schedule:
+      interval: "weekly"
