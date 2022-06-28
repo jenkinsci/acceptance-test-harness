@@ -10,6 +10,59 @@ updates:
       # Selenium requires co-ordinated changes in consuming projects also due to the use of containers for webdriver
       - dependency-name: "org.seleniumhq.selenium:*"
   - package-ecosystem: "docker"
-    directory: "src/main/resources/"
+    directory: src/main/resources/ath-container/Dockerfile"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/ArtifactoryContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/DockerAgentContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/FtpdContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JabberContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JavaGitContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JiraContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/LdapContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/MailhogContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/SMBContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/SshAgentContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/SvnContainer/Dockerfile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/Tomcat7Container/Dockerfile"
+    schedule:
+      interval: "weekly"
+
