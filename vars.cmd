@@ -10,7 +10,7 @@ set JENKINS_JAVA_OPTS=-Xmx1280m
 @REM Jenkins binds to 0.0.0.0 (OMG) so we can use any network but the docker network.
 @REM but we may as well use the default network
 @echo off
-FOR /F "tokens=* USEBACKQ" %%F IN (`netsh interface ipv4 show addresses "vEthernet (WSL)" ^| grep "IP Address:" ^| gawk '{print $3}'`) DO (
+FOR /F "tokens=3" %%F in ('netsh interface ipv4 show addresses "vEthernet (WSL)" ^| findstr "IP Address:"') DO (
 SET IP=%%F
 )
 @echo on
