@@ -10,9 +10,14 @@ set JENKINS_JAVA_OPTS=-Xmx1280m
 @REM Jenkins binds to 0.0.0.0 (OMG) so we can use any network but the docker network.
 @REM but we may as well use the default network
 @echo off
-FOR /F "tokens=3" %%F in ('netsh interface ipv4 show addresses "vEthernet (WSL)" ^| findstr "IP Address:"') DO (
+FOR /f "tokens=3" %%F in ('netsh interface ipv4 show addresses "vEthernet (WSL)" ^| findstr /c:"IP Address:"') DO (
 SET IP=%%F
 )
+IF NOT DEFINED IP (
+  echo "*** ERROR could not find the docker interface - is docker started?"
+  exit /b 1
+)
+
 @echo on
 set SELENIUM_PROXY_HOSTNAME=%IP%
 set JENKINS_LOCAL_HOSTNAME=%IP%
