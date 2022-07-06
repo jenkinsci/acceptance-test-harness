@@ -45,7 +45,8 @@ if [ ! -f $war ]; then
     case "$war" in
         "latest")
             war=jenkins-latest.war
-            url=$mirrors/war/latest/jenkins.war
+	    # Run tests for https://github.com/jenkinsci/jenkins/pull/6783
+            url=https://repo.jenkins-ci.org/incrementals/org/jenkins-ci/main/jenkins-war/2.358-rc32569.d74a_ea_e50d2b_/jenkins-war-2.358-rc32569.d74a_ea_e50d2b_.war
         ;;
         "latest-rc")
             war=jenkins-latest-rc.war
