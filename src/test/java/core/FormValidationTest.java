@@ -23,13 +23,12 @@
  */
 package core;
 
-import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
-import org.openqa.selenium.Alert;
+import org.openqa.selenium.Keys;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -64,6 +63,8 @@ public class FormValidationTest extends AbstractJUnitTest {
         assertThat(formValidation, silent());
 
         c.numExecutors.set(-16);
+        c.numExecutors.resolve().sendKeys(Keys.TAB);
+        c.numExecutors.sleep(100L);
         formValidation = c.numExecutors.getFormValidation();
 
         String errorMessage = "Not a non-negative integer";
