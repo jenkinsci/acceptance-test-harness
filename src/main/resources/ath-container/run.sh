@@ -41,24 +41,14 @@ fi
 browser=$1
 war=$2
 if [ ! -f $war ]; then
-    mirrors=https://get.jenkins.io
     case "$war" in
         "latest")
             war=jenkins-latest.war
-	    # Run tests for https://github.com/jenkinsci/jenkins/pull/6783
             url=https://repo.jenkins-ci.org/incrementals/org/jenkins-ci/main/jenkins-war/2.358-rc32569.d74a_ea_e50d2b_/jenkins-war-2.358-rc32569.d74a_ea_e50d2b_.war
-        ;;
-        "latest-rc")
-            war=jenkins-latest-rc.war
-            url=$mirrors/war-rc/latest/jenkins.war
         ;;
         "lts")
             war=jenkins-lts.war
-            url=$mirrors/war-stable/latest/jenkins.war
-        ;;
-        "lts-rc")
-            war=jenkins-lts-rc.war
-            url=$mirrors/war-stable-rc/latest/jenkins.war
+            url=https://updates.jenkins.io/stable/latest/jenkins.war
         ;;
     esac
 
