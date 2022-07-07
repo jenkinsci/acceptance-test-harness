@@ -1,4 +1,5 @@
-FROM jenkins/java:d93654cc6239
+# curl -s https://raw.githubusercontent.com/jenkinsci/docker-fixtures/master/src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JavaContainer/Dockerfile | sha1sum | cut -c 1-12
+FROM jenkins/java:387404da3ce7
 RUN apt-get update && apt-get install -y vnc4server imagemagick
 
 # So it is owned by root and has the permissions vncserver seems to require:

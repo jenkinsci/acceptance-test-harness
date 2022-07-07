@@ -33,6 +33,7 @@ for (int i = 0; i < splits.size(); i++) {
       def name = "java-${javaVersion}-jenkins-${jenkinsUnderTest}-split${index}"
       branches[name] = {
         stage(name) {
+         retry(count: 2, conditions: [agent(), nonresumable()]) {
           node('docker-highmem') {
             checkout scm
             def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
@@ -58,6 +59,7 @@ for (int i = 0; i < splits.size(); i++) {
               }
             }
           }
+         }
         }
       }
     }
