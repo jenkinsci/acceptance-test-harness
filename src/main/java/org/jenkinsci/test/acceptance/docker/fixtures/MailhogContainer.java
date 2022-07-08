@@ -29,7 +29,6 @@ import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 
-import javax.mail.MessagingException;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
