@@ -5,7 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 20
     ignore:
       # Selenium requires co-ordinated changes in consuming projects also due to the use of containers for webdriver
       - dependency-name: "org.seleniumhq.selenium:*"
