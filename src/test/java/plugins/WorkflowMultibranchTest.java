@@ -13,7 +13,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.mail.MessagingException;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.containsString;
