@@ -40,7 +40,7 @@
     <groovy.version>2.3.1</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
-    <slf4j.version>1.7.30</slf4j.version>
+    <slf4j.version>1.7.33</slf4j.version>
   </properties>
 
   <repositories>
