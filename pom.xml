@@ -33,7 +33,7 @@
     <findbugs.skip>true</findbugs.skip>
 
     <selenium.version>3.141.59</selenium.version>
-    <guava.version>29.0-jre</guava.version> <!-- aligned with selenium -->
+    <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <jackson.bom.version>2.12.1</jackson.bom.version>
     <maven.version>3.1.0</maven.version>
