@@ -210,7 +210,7 @@
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.6</version>
+      <version>3.8.0</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -319,7 +319,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>crypto-util</artifactId>
-      <version>1.4</version>
+      <version>1.7</version>
     </dependency>
     <dependency>
       <groupId>args4j</groupId>
@@ -349,7 +349,7 @@
     <dependency>
       <groupId>xmlunit</groupId>
       <artifactId>xmlunit</artifactId>
-      <version>1.5</version>
+      <version>1.6</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
