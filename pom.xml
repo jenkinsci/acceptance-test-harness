@@ -379,7 +379,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20080701</version>
+      <version>20220320</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -512,7 +512,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>appassembler-maven-plugin</artifactId>
-        <version>1.8</version>
+        <version>2.1.0</version>
         <executions>
           <execution>
             <phase>package</phase>
