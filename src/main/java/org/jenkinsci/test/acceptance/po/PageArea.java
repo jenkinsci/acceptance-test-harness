@@ -4,7 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * @author christian.fritz
@@ -63,5 +63,5 @@ public interface PageArea extends CapybaraPortingLayer, Control.Owner {
      * @param action An action that triggers the page area creation. Clicking the button, etc.
      * @return The surrounding path of the area, exception thrown when not able to find out.
      */
-    @Nonnull String createPageArea(String name, Runnable action) throws TimeoutException;
+    @NonNull String createPageArea(String name, Runnable action) throws TimeoutException;
 }

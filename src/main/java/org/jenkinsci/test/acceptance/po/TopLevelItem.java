@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.CheckReturnValue;
+import edu.umd.cs.findbugs.annotations.CheckReturnValue;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
