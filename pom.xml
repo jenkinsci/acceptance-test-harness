@@ -15,21 +15,19 @@
   <licenses>
     <license>
       <name>MIT License</name>
-      <url>http://opensource.org/licenses/MIT</url>
+      <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
+    <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <properties>
-    <java.level>8</java.level>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
-    <java.level>8</java.level>
     <findbugs.skip>true</findbugs.skip>
 
     <selenium.version>3.141.59</selenium.version>
