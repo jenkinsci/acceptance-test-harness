@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.controller;
 
 import java.util.logging.Level;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.ByteArrayOutputStream;
@@ -290,7 +290,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * Common environment variables to put to {@link CommandBuilder} when launching Jenkins.
      */
-    protected @Nonnull Map<String, String> commonLaunchEnv() {
+    protected @NonNull Map<String, String> commonLaunchEnv() {
         HashMap<String, String> env = new HashMap<>();
         env.put("JENKINS_HOME", getJenkinsHome().getAbsolutePath());
         File javaHome = getJavaHome();

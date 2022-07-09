@@ -4,7 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Special kind of page object that maps to a portion of a page with multiple INPUT controls.
@@ -117,7 +117,7 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
         return new Control(injector, selector);
     }
 
-    public @Nonnull String createPageArea(String name, Runnable action) throws TimeoutException {
+    public @NonNull String createPageArea(String name, Runnable action) throws TimeoutException {
         String pathPrefix = getPath() + '/' + name;
         return getPage().createPageArea(pathPrefix, action);
     }

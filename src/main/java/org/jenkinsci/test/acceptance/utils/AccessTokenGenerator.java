@@ -14,7 +14,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class AccessTokenGenerator {
         om = new ObjectMapper();
     }
 
-    public Credentials generate(@Nonnull URL url, @Nonnull Credentials credentials) throws IOException {
+    public Credentials generate(@NonNull URL url, @NonNull Credentials credentials) throws IOException {
         String name = credentials.getUserPrincipal().getName();
         CacheKey key = new CacheKey(url, name);
         if (!tokenCache.containsKey(key)) {
@@ -49,7 +49,7 @@ public class AccessTokenGenerator {
         return tokenCache.get(key);
     }
 
-    private ApiTokenResponse generateApiToken(@Nonnull URL url, @Nonnull Credentials credentials, CloseableHttpClient httpClient, Crumb crumb) throws IOException {
+    private ApiTokenResponse generateApiToken(@NonNull URL url, @NonNull Credentials credentials, CloseableHttpClient httpClient, Crumb crumb) throws IOException {
         HttpPost post = new HttpPost(new URL(url, "me/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken").toExternalForm());
         post.setHeader(crumb.getCrumbRequestField(), crumb.getCrumb());
         List<NameValuePair> parameters = new ArrayList<>();
@@ -60,7 +60,7 @@ public class AccessTokenGenerator {
         return om.readValue(postResponse.getEntity().getContent(), ApiTokenResponse.class);
     }
 
-    private Crumb getCrumb(@Nonnull URL url, @Nonnull Credentials credentials, CloseableHttpClient httpClient) throws IOException {
+    private Crumb getCrumb(@NonNull URL url, @NonNull Credentials credentials, CloseableHttpClient httpClient) throws IOException {
         HttpGet get = new HttpGet(new URL(url, "crumbIssuer/api/json").toExternalForm());
         CloseableHttpResponse getResponse = httpClient.execute(get, HttpUtils.buildHttpClientContext(url, credentials));
         int statusCode = getResponse.getStatusLine().getStatusCode();

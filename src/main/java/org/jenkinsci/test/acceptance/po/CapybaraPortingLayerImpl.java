@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;

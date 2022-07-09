@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Interface for assisting porting from Capybara.
