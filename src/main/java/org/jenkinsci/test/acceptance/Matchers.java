@@ -177,7 +177,7 @@ public class Matchers {
     }
 
     public static Matcher<PageObject> pageObjectDoesNotExist() {
-        return new Matcher<PageObject>("Page object does not exists") {
+        return new Matcher<PageObject>("Page object does not exist") {
             private @CheckForNull HttpURLConnection conn; // Store for later defect localization
             @Override
             public void describeMismatchSafely(PageObject item, Description desc) {
