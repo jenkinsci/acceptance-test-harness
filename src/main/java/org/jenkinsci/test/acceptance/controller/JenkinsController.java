@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.IOException;

@@ -24,7 +24,7 @@
 
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
@@ -72,20 +72,20 @@ public class WorkflowJob extends Job {
             }
         }
 
-        private String waitFor(@Nonnull final String selector) {
+        private String waitFor(@NonNull final String selector) {
             waitForRenderOf(selector + " .ace_text-input", getJenkins());
             return selector;
         }
     };
 
-    private static void waitForRenderOf(@Nonnull final String cssSelector, @Nonnull final Jenkins jenkins) {
+    private static void waitForRenderOf(@NonNull final String cssSelector, @NonNull final Jenkins jenkins) {
         jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
                 .withTimeout(20, TimeUnit.SECONDS)
                 .until(() -> isRendered(cssSelector, jenkins))
         ;
     }
 
-    private static boolean isRendered(@Nonnull String cssSelector, @Nonnull Jenkins jenkins) {
+    private static boolean isRendered(@NonNull String cssSelector, @NonNull Jenkins jenkins) {
         return (boolean) jenkins.executeScript(
                 "var targets = document.getElementsBySelector(arguments[0]);" +
                         "if (!targets || targets.length === 0) {" +

@@ -16,7 +16,7 @@ import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.output.NullOutputStream;
@@ -100,7 +100,7 @@ public class PluginMetadata {
         return new VersionNumber(requiredCore);
     }
 
-    public PluginMetadata withVersion(@Nonnull String v) {
+    public PluginMetadata withVersion(@NonNull String v) {
         if (v == null) throw new IllegalArgumentException();
         String newGav = gav.replaceAll("\\b" + Pattern.quote(version) + "\\b", v);
         return new VersionOverride(name, newGav, v, requiredCore, dependencies);
@@ -136,12 +136,12 @@ public class PluginMetadata {
      * @author ogondza
      */
     public static final class LocalOverride extends ModifyingMetadata {
-        private @Nonnull File override;
+        private @NonNull File override;
 
         /**
          * Extract plugin metadata from a jpi/hpi file.
          */
-        public static LocalOverride create(@Nonnull File jpi) {
+        public static LocalOverride create(@NonNull File jpi) {
 
             List<Dependency> dependencies = new ArrayList<>();
             try (JarFile j = new JarFile(jpi)) {
@@ -183,7 +183,7 @@ public class PluginMetadata {
          * Snapshot builds often look like "Plugin-Version: 1.0-SNAPSHOT (private-08/21/2014 15:21-kohsuke)"
          * so trim off the build ID portion and just get "1.0-SNAPSHOT"
          */
-        private static String trimVersion(@Nonnull String version) {
+        private static String trimVersion(@NonNull String version) {
             int idx = version.indexOf(" ");
             return idx > 0
                 ? version.substring(0, idx)

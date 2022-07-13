@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.selenium.Scroller;

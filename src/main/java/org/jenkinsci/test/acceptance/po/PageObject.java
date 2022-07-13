@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -139,7 +139,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      * @param action An action that triggers the page area creation. Clicking the button, etc.
      * @return The surrounding path of the area, exception thrown when not able to find out.
      */
-    public @Nonnull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
+    public @NonNull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
         assert pathPrefix.startsWith("/"): "Path not absolute: " + pathPrefix;
         final By by = this.by.areaPath(pathPrefix);
         final List<String> existing = extractPaths(all(by));

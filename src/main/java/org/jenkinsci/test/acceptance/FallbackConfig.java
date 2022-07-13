@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.inject.Named;
 import java.io.Closeable;
 import java.io.File;
@@ -35,8 +35,6 @@ import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
-import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
-import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
@@ -395,15 +393,7 @@ public class FallbackConfig extends AbstractModule {
         if (type==null)
             type = System.getenv("TYPE");
         if (type==null) {
-            File socket = getSocket();
-            if (socket.exists() && !JenkinsControllerPoolProcess.MAIN) {
-                LOGGER.info("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
-                return new PooledJenkinsController(injector, socket);
-            }
-            else {
-                LOGGER.warning("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
-                type = "winstone";
-            }
+            type = "winstone";
         }
 
         for (JenkinsControllerFactory f : factories) {
@@ -443,22 +433,6 @@ public class FallbackConfig extends AbstractModule {
     @Provides @Named("WORKSPACE")
     public String getWorkspace() {
         return new File(System.getProperty("user.dir"), "target").getPath();
-    }
-
-    /**
-     * Name of the socket file used to communicate between jut-server and JUnit.
-     *
-     * @return the name of the socket
-     * @see JenkinsControllerPoolProcess
-     * @see <tt>docs/PRELAUNCH.md<tt/>
-     */
-    @Provides @Named("socket")
-    public File getSocket() {
-        String socket = System.getenv("JUT_SOCKET");
-        if (StringUtils.isNotBlank(socket)) {
-            return new File(socket);
-        }
-        return new File(System.getProperty("user.home"),"jenkins.sock");
     }
 
     /**
