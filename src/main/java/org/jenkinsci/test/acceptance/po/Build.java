@@ -131,8 +131,15 @@ public class Build extends ContainerPageObject {
         }
 
         JsonNode d = getJson();
-        // TODO use "inProgress" if https://github.com/jenkinsci/jenkins/pull/6829 ever reached the LTS (see also JENKINS-68981)
-        return d.get("building").booleanValue() || d.get("result") == null;
+        JsonNode inProgress = d.get("inProgress");
+        if (inProgress != null) {
+            // see https://github.com/jenkinsci/jenkins/pull/6829
+            return inProgress.booleanValue();
+        } else {
+            // TODO delete when inProgress becomes part of the LTS
+            // Please note that the test below denote a completed build, not a finished build
+            return d.get("building").booleanValue() || d.get("result") == null;
+        }
     }
 
     public int getNumber() {
