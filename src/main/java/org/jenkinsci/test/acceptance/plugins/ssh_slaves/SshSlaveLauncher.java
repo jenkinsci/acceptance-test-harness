@@ -36,14 +36,11 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
         find(by.button("Add")).click();
 
-        if (getElement(by.xpath("//span[contains(@class,'credentials-add')]")) == null) {
+        String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
+                + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
+                + "/span[contains(@class,'yuimenuitemlabel') and contains(@title, 'Jenkins Credentials Provider')]";
 
-            String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
-                    + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
-                    + "/span[contains(@class,'yuimenuitemlabel') and contains(@title, 'Jenkins Credentials Provider')]";
-
-            find(by.xpath(providerXpathExpr)).click();
-        }
+        waitFor(by.xpath(providerXpathExpr)).click();
         return new SshCredentialDialog(getPage(), "/credentials");
     }
 
