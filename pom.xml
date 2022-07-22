@@ -39,6 +39,13 @@
     <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
     <slf4j.version>1.7.36</slf4j.version>
+    <!-- TODO remove these when we can finally switch to Java 11 requirements -->
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+    <maven.compiler.testSource>8</maven.compiler.testSource>
+    <maven.compiler.testTarget>8</maven.compiler.testTarget>
+    <maven.compiler.release/>
+    <maven.compiler.testRelease/>
   </properties>
 
   <repositories>
@@ -540,6 +547,46 @@
             <goals>
               <goal>run</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- overwite parent config so we do not require java 11 prematurely -->
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>extra-enforcer-rules</artifactId>
+            <version>1.5.1</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>display-info</id>
+            <goals>
+              <goal>display-info</goal>
+              <goal>enforce</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration >
+              <rules>
+                <requireMavenVersion>
+                  <version>[3.8.1,)</version>
+                  <message>3.8.1 required to no longer download dependencies via HTTP (use HTTPS instead).</message>
+                </requireMavenVersion>
+                <!-- TODO failing during incrementals deploy: MENFORCER-281
+                <requirePluginVersions>
+                  <banSnapshots>false</banSnapshots>
+                </requirePluginVersions>
+                -->
+                <requireJavaVersion>
+                  <version>[1.8.0,]</version>
+                </requireJavaVersion>
+                <enforceBytecodeVersion>
+                  <maxJdkVersion>1.8</maxJdkVersion>
+                </enforceBytecodeVersion>
+              </rules>
+            </configuration>
           </execution>
         </executions>
       </plugin>
