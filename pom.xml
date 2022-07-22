@@ -40,12 +40,8 @@
     <mockito.version>1.10.19</mockito.version>
     <slf4j.version>1.7.36</slf4j.version>
     <!-- TODO remove these when we can finally switch to Java 11 requirements -->
-    <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
-    <maven.compiler.testSource>8</maven.compiler.testSource>
-    <maven.compiler.testTarget>8</maven.compiler.testTarget>
-    <maven.compiler.release/>
-    <maven.compiler.testRelease/>
+    <maven.compiler.release>8</maven.compiler.release>
+    <maven.compiler.testRelease>8</maven.compiler.testRelease>
   </properties>
 
   <repositories>
@@ -574,14 +570,6 @@
                   <version>[3.8.1,)</version>
                   <message>3.8.1 required to no longer download dependencies via HTTP (use HTTPS instead).</message>
                 </requireMavenVersion>
-                <!-- TODO failing during incrementals deploy: MENFORCER-281
-                <requirePluginVersions>
-                  <banSnapshots>false</banSnapshots>
-                </requirePluginVersions>
-                -->
-                <requireJavaVersion>
-                  <version>[1.8.0,]</version>
-                </requireJavaVersion>
                 <enforceBytecodeVersion>
                   <maxJdkVersion>1.8</maxJdkVersion>
                 </enforceBytecodeVersion>
