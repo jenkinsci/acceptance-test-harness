@@ -564,12 +564,8 @@
               <goal>enforce</goal>
             </goals>
             <phase>validate</phase>
-            <configuration >
+            <configuration>
               <rules>
-                <requireMavenVersion>
-                  <version>[3.8.1,)</version>
-                  <message>3.8.1 required to no longer download dependencies via HTTP (use HTTPS instead).</message>
-                </requireMavenVersion>
                 <enforceBytecodeVersion>
                   <maxJdkVersion>1.8</maxJdkVersion>
                 </enforceBytecodeVersion>
