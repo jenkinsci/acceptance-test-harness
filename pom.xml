@@ -516,7 +516,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>3.0.0-M6</version>
         <configuration>
           <!--
             tests are used to test Jenkins, not the acceptance test harness,
@@ -525,13 +525,6 @@
           <arguments>-DskipTests</arguments>
           <useReleaseProfile>false</useReleaseProfile>
         </configuration>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.maven.scm</groupId>
-                <artifactId>maven-scm-provider-gitexe</artifactId>
-                <version>1.13.0</version>
-            </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
