@@ -38,7 +38,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
         String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
                 + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
-                + "/span[contains(@class,'yuimenuitemlabel') and contains(@title, 'Jenkins Credentials Provider')]";
+                + "/span[contains(@class,'yuimenuitemlabel') and contains(@tooltip, 'Jenkins Credentials Provider')]";
 
         waitFor(by.xpath(providerXpathExpr)).click();
         return new SshCredentialDialog(getPage(), "/credentials");
