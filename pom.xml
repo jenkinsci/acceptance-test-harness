@@ -35,7 +35,7 @@
     <aether.version>1.1.0</aether.version>
     <jackson.bom.version>2.12.1</jackson.bom.version>
     <maven.version>3.3.9</maven.version>
-    <groovy.version>2.3.1</groovy.version>
+    <groovy.version>3.0.12</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
     <slf4j.version>1.7.36</slf4j.version>
