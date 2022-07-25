@@ -27,7 +27,7 @@ if (needSplittingFromWorkspace) {
 for (int i = 0; i < splits.size(); i++) {
   int index = i
   for (int j in [11]) {
-    for (String v in ['lts', 'latest']) {
+    for (String v in ['latest']) {
       int javaVersion = j
       String jenkinsUnderTest = v
       def name = "java-${javaVersion}-jenkins-${jenkinsUnderTest}-split${index}"
