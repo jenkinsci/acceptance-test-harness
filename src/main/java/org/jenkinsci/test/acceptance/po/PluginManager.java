@@ -12,9 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.jenkinsci.test.acceptance.FallbackConfig;
@@ -36,6 +39,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
+
+import static java.util.logging.Level.WARNING;
 import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -327,34 +332,40 @@ public class PluginManager extends ContainerPageObject {
      */
     @Deprecated
     public void installPlugin(File localFile) throws IOException {
+        jenkins.getPluginManager().visit("advanced");
+        // the name of the input is actually 'name'
+        final By xpath = by.xpath("//form//input[@type='file' and @name='name']");
+        final WebElement fileUpload = waitFor(xpath);
+        control(xpath).set(localFile.getAbsolutePath());
+        // click will trigger this: https://github.com/jenkinsci/jenkins/blob/c5f996a2ee5aa53e47480ebefb5f47899cf1e471/core/src/main/java/hudson/PluginManager.java#L1799
+        // at the end of the method, there is a redirection to '../updateCenter'
+        // on this page, a table will display the status of uploaded plugins
+        waitFor(by.button("Deploy")).click();
 
-        try (CloseableHttpClient httpclient = new DefaultHttpClient()) {
-            HttpGet getCrumb;
-            try {
-                getCrumb = new HttpGet(jenkins.url("crumbIssuer/api/xml?xpath=/*/crumb/text()").toURI());
-            } catch (URISyntaxException e) {
-                throw new IOException("CRUMB URI syntax error: " + e.getMessage());
-            }
-
-            HttpResponse responseCrumb = httpclient.execute(getCrumb);
-            String crumbValue = IOUtils.toString(responseCrumb.getEntity().getContent(), StandardCharsets.UTF_8);
-
-            HttpPost post = new HttpPost(jenkins.url("pluginManager/uploadPlugin").toExternalForm());
-            post.addHeader("Jenkins-Crumb",crumbValue);
-            HttpEntity e = MultipartEntityBuilder.create()
-                    .addBinaryBody("name", localFile, APPLICATION_OCTET_STREAM, "x.jpi")
-                    .addTextBody("pluginUrl", "")
-                    .build();
-            post.setEntity(e);
-
-            HttpResponse response = httpclient.execute(post);
-            if (response.getStatusLine().getStatusCode() >= 400) {
-                throw new IOException("Failed to upload plugin: " + response.getStatusLine() + "\n" +
-                        IOUtils.toString(response.getEntity().getContent()));
+        // the table may contain many plugins, the shortName is used to locate the correct table row
+        // this is stolen from: https://github.com/jenkinsci/jenkins/blob/c5f996a2ee5aa53e47480ebefb5f47899cf1e471/core/src/main/java/hudson/PluginManager.java#L1844-L1865
+        String shortName;
+        try (JarFile j = new JarFile(localFile)) {
+            String name = j.getManifest().getMainAttributes().getValue("Short-Name");
+            if (name != null) {
+                shortName = name;
             } else {
-                System.out.format("Plugin %s installed\n", localFile);
+                String baseName = FilenameUtils.getBaseName(localFile.getName());
+                shortName = baseName.substring(0, baseName.lastIndexOf('-'));
             }
         }
+
+        // First, wait for the table row to be loaded
+        // this is mandatory because it ensures that the file is uploaded and allows the use of the "wait until" below
+        WebElement pluginRow = waitFor(by.xpath("//*[@id='log']//*[descendant::*[normalize-space(text())='%1$s']]", shortName));
+        // Then wait until the plugin is loaded
+        waitFor()
+                .withMessage("All plugins should be installed")
+                .withTimeout(5, TimeUnit.MINUTES)
+                .until(() -> {
+                    List<WebElement> elements = pluginRow.findElements(by.xpath("descendant::*[contains(.,'Pending') or contains(.,'Installing')]"));
+                    return elements.isEmpty();
+                });
     }
 
     /**
