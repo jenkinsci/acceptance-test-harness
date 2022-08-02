@@ -2,22 +2,28 @@
 #
 # see docs/DOCKER.md for usage
 
-FROM centos:7
+FROM ubuntu:20.04
 MAINTAINER ogondza@gmail.com
 
-RUN yum -y install \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC \
+    apt-get install -y --no-install-recommends \
         curl \
         docker \
         git \
-        ImageMagick \
+        imagemagick \
         iptables \
         firefox \
         unzip \
-        tigervnc-server \
-        which \
-        java-1.8.0-openjdk-devel \
-        java-11-openjdk-devel && \
-    yum clean all && rm -rf /var/cache/yum
+        tigervnc-standalone-server \
+        tigervnc-xorg-extension \
+        tigervnc-viewer \
+        tigervnc-common \
+#        which \
+        openjdk-8-jdk \
+        openjdk-11-jdk && \
+    apt-get clean all && rm -rf /var/cache/apt
 
 # Selenium needs a geckodriver in order to work properly
 RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz && \
@@ -62,7 +68,6 @@ RUN touch /home/ath-user/.Xauthority
 # approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
-RUN chmod ug+s /usr/bin/docker* # In Centos, the actual binaries are hidden behind a shim so update them all
 
 ADD vnc.sh /usr/bin/
 ADD set-java.sh /usr/bin/
@@ -71,6 +76,4 @@ ADD run.sh /usr/bin/
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
 
-# Java 8 by default
 USER ath-user
-RUN set-java.sh 8
