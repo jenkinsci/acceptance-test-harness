@@ -25,8 +25,9 @@ RUN apt-get update && \
     apt-get clean all && rm -rf /var/cache/apt
 
 # Selenium needs a geckodriver in order to work properly
-RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz && \
-    tar -xvzf geckodriver-v0.26.0-linux64.tar.gz -C /usr/local/bin
+ENV GECKODRIVER_VERSION 0.31.0
+RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz && \
+    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz -C /usr/local/bin
 
 # Maven in repo is not new enough for ATH
 ENV MAVEN_VERSION 3.8.6
