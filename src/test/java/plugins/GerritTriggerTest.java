@@ -204,9 +204,8 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     }
 
     private File createGitCommit(String jobName) throws IOException, InterruptedException {
-        File dir = File.createTempFile("jenkins","git");
-        dir.delete();//result !needed
-        assertTrue(dir.mkdir());
+        File dir = Files.createTempDirectory("jenkins" + "git").toFile();//result !needed
+        assertTrue(true);
 
         ProcessBuilder pb = new ProcessBuilder("git", "clone", gtGerrituser
                 + "@" + gtHostname + ":"
