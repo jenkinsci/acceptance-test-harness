@@ -22,7 +22,6 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
      *   control.setText(someTextThatIsAlsoALocalFileName);
      * }
      * </code>
-     * @param driver
      */
     public UselessFileDetectorReplacement(WebDriver driver) {
         if (driver instanceof RemoteWebDriver) {
