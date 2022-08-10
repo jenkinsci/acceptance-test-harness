@@ -2,8 +2,18 @@
 #
 # see docs/DOCKER.md for usage
 
-FROM ubuntu:20.04
-MAINTAINER ogondza@gmail.com
+FROM ubuntu:22.04
+
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+    gpg-agent \
+    software-properties-common \
+    && \
+  apt-get clean all && rm -rf /var/cache/apt
+
+# No Snaps please https://www.omgubuntu.co.uk/2022/04/how-to-install-firefox-deb-apt-ubuntu-22-04
+RUN add-apt-repository ppa:mozillateam/ppa && \
+  echo 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001' | tee /etc/apt/preferences.d/mozilla-firefox
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
@@ -16,18 +26,25 @@ RUN apt-get update && \
         iptables \
         firefox \
         unzip \
-        tigervnc-standalone-server \
-        tigervnc-xorg-extension \
-        tigervnc-viewer \
-        tigervnc-common \
+        tightvncserver \
         openjdk-8-jdk \
-        openjdk-11-jdk && \
+        openjdk-11-jdk \
+        xfonts-base \
+        && \
     apt-get clean all && rm -rf /var/cache/apt
 
 # Selenium needs a geckodriver in order to work properly
 ENV GECKODRIVER_VERSION 0.31.0
-RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz && \
-    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz -C /usr/local/bin
+# gross due to https://github.com/mozilla/geckodriver/issues/1956
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
+  if [ "$arch" = "arm64" ] ; \
+  then \
+    curl -fsSLO https://github.com/jamesmortensen/geckodriver-arm-binaries/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz && \
+    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz -C /usr/local/bin; \
+  else \
+    curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz && \
+    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz -C /usr/local/bin ; \
+  fi
 
 # Maven in repo is not new enough for ATH
 ENV MAVEN_VERSION 3.8.6
@@ -77,3 +94,5 @@ RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
 
 USER ath-user
+
+ENV USER ath-user
