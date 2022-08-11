@@ -40,7 +40,7 @@ public class SupportBundle extends TestWatcher {
                 try {
                     spec.instance.getPlugin("support-core");
                     spec.instance.generateSupportBundle(spec.request);
-                } catch (IllegalArgumentException _) {
+                } catch (IllegalArgumentException ex) {
                     LOGGER.info("support-core plugin not installed, skipping support bundle");
                 }
             }

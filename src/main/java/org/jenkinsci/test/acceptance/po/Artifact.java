@@ -5,7 +5,7 @@ import org.jenkinsci.test.acceptance.utils.IOUtil;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,10 +17,10 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
  * @author Kohsuke Kawaguchi
  */
 public class Artifact extends PageObject {
-    public final @Nonnull Build build;
-    private final @Nonnull String path;
+    public final @NonNull Build build;
+    private final @NonNull String path;
 
-    public Artifact(@Nonnull Build build, @Nonnull String path) {
+    public Artifact(@NonNull Build build, @NonNull String path) {
         super(build.injector, build.url("artifact/%s", path));
         this.build = build;
         this.path = path;

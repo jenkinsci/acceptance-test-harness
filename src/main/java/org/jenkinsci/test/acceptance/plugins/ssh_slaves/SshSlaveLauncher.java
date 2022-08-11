@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
 import java.util.concurrent.TimeUnit;
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
@@ -36,14 +36,11 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
         find(by.button("Add")).click();
 
-        if (getElement(by.xpath("//span[contains(@class,'credentials-add')]")) == null) {
+        String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
+                + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
+                + "/span[contains(@class,'yuimenuitemlabel') and contains(@tooltip, 'Jenkins Credentials Provider')]";
 
-            String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
-                    + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
-                    + "/span[contains(@class,'yuimenuitemlabel') and contains(@title, 'Jenkins Credentials Provider')]";
-
-            find(by.xpath(providerXpathExpr)).click();
-        }
+        waitFor(by.xpath(providerXpathExpr)).click();
         return new SshCredentialDialog(getPage(), "/credentials");
     }
 

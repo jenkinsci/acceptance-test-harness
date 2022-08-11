@@ -5,42 +5,43 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.51</version>
+    <version>1.82</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.116-SNAPSHOT</version>
+  <version>1.118-SNAPSHOT</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
     <license>
       <name>MIT License</name>
-      <url>http://opensource.org/licenses/MIT</url>
+      <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
+    <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
   <properties>
-    <java.level>8</java.level>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
-    <java.level>8</java.level>
-    <findbugs.skip>true</findbugs.skip>
+    <spotbugs.skip>true</spotbugs.skip>
 
     <selenium.version>3.141.59</selenium.version>
-    <guava.version>29.0-jre</guava.version> <!-- aligned with selenium -->
-    <aether.version>0.9.0.v20140226</aether.version>
+    <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
+    <aether.version>1.1.0</aether.version>
     <jackson.bom.version>2.12.1</jackson.bom.version>
-    <maven.version>3.1.0</maven.version>
+    <maven.version>3.3.9</maven.version>
     <groovy.version>2.3.1</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
-    <slf4j.version>1.7.30</slf4j.version>
+    <slf4j.version>1.7.36</slf4j.version>
+    <!-- TODO remove these when we can finally switch to Java 11 requirements -->
+    <maven.compiler.release>8</maven.compiler.release>
+    <maven.compiler.testRelease>8</maven.compiler.testRelease>
   </properties>
 
   <repositories>
@@ -107,7 +108,13 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>4.0</version>
+      <version>5.1.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -169,7 +176,7 @@
     <dependency>
       <groupId>com.codeborne</groupId>
       <artifactId>phantomjsdriver</artifactId>
-      <version>1.4.2</version>
+      <version>1.5.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
@@ -184,7 +191,7 @@
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.11</version>
+      <version>1.15</version>
     </dependency>
 
     <!-- recorder -->
@@ -210,7 +217,7 @@
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.6</version>
+      <version>3.8.0</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -238,7 +245,7 @@
     <dependency>
       <groupId>com.cloudbees</groupId>
       <artifactId>extensibility</artifactId>
-      <version>1.4</version>
+      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -247,7 +254,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>version-number</artifactId>
-      <version>1.1</version>
+      <version>1.10</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -257,32 +264,22 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>test-annotations</artifactId>
-      <version>1.2</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
+      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-library</artifactId>
-      <version>1.3</version>
+      <version>2.2</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-core</artifactId>
-      <version>1.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
-      <version>1.3</version>
+      <version>2.2</version>
     </dependency>
     <dependency>
       <groupId>org.jvnet.hudson</groupId>
@@ -297,34 +294,34 @@
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-unixsocket</artifactId>
-      <version>0.3</version>
+      <version>0.38.17</version>
     </dependency>
     <!-- dependency use range so we want to avoid weird resolution -->
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.2.23</version>
+      <version>1.3.9</version>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.2.23</version>
+      <version>1.3.9</version>
       <classifier>native</classifier>
     </dependency>
     <dependency>
       <groupId>org.ini4j</groupId>
       <artifactId>ini4j</artifactId>
-      <version>0.5.2</version>
+      <version>0.5.4</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>crypto-util</artifactId>
-      <version>1.4</version>
+      <version>1.7</version>
     </dependency>
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
-      <version>2.0.26</version>
+      <version>2.33</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
@@ -334,12 +331,12 @@
     <dependency>
       <groupId>org.zeroturnaround</groupId>
       <artifactId>zt-zip</artifactId>
-      <version>1.7</version>
+      <version>1.15</version>
     </dependency>
     <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-      <version>1.4.4</version>
+      <groupId>com.sun.mail</groupId>
+      <artifactId>jakarta.mail</artifactId>
+      <version>2.0.1</version>
     </dependency>
     <dependency>
       <groupId>org.kohsuke</groupId>
@@ -347,9 +344,9 @@
       <version>1.5</version>
     </dependency>
     <dependency>
-      <groupId>xmlunit</groupId>
-      <artifactId>xmlunit</artifactId>
-      <version>1.5</version>
+      <groupId>org.xmlunit</groupId>
+      <artifactId>xmlunit-legacy</artifactId>
+      <version>2.9.0</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -357,9 +354,15 @@
       <version>1.3</version>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.2</version>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
@@ -369,17 +372,23 @@
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.54</version>
+      <version>0.1.55</version>
     </dependency>
     <dependency>
         <groupId>commons-configuration</groupId>
         <artifactId>commons-configuration</artifactId>
         <version>1.10</version>
+        <exclusions>
+            <exclusion>
+                <groupId>xml-apis</groupId>
+                <artifactId>xml-apis</artifactId>
+            </exclusion>
+        </exclusions>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20080701</version>
+      <version>20220320</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -400,12 +409,12 @@
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>1.11</version>
+      <version>1.12</version>
     </dependency>
     <dependency>
       <groupId>com.github.olivergondza.dumpling</groupId>
       <artifactId>dumpling</artifactId>
-      <version>2.2</version>
+      <version>2.4</version>
     </dependency>
 
     <dependency>
@@ -447,7 +456,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.8.1</version>
+        <version>3.12.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
@@ -457,12 +466,12 @@
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
-        <version>4.4.14</version>
+        <version>4.4.15</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.7</version>
+        <version>2.11.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -483,7 +492,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
+        <version>3.4.0</version>
         <configuration>
           <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
@@ -498,7 +507,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M1</version>
+        <version>3.0.0-M7</version>
         <configuration>
           <systemPropertyVariables>
             <mavenRepoPath>${settings.localRepository}</mavenRepoPath>
@@ -512,7 +521,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>appassembler-maven-plugin</artifactId>
-        <version>1.8</version>
+        <version>2.1.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -532,7 +541,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>3.0.0-M6</version>
         <configuration>
           <!--
             tests are used to test Jenkins, not the acceptance test harness,
@@ -541,17 +550,10 @@
           <arguments>-DskipTests</arguments>
           <useReleaseProfile>false</useReleaseProfile>
         </configuration>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.maven.scm</groupId>
-                <artifactId>maven-scm-provider-gitexe</artifactId>
-                <version>1.9.4</version>
-            </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <phase>generate-resources</phase>
@@ -563,6 +565,34 @@
             <goals>
               <goal>run</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <!-- overwite parent config so we do not require java 11 prematurely -->
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>extra-enforcer-rules</artifactId>
+            <version>1.6.1</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>display-info</id>
+            <goals>
+              <goal>display-info</goal>
+              <goal>enforce</goal>
+            </goals>
+            <phase>validate</phase>
+            <configuration>
+              <rules>
+                <enforceBytecodeVersion>
+                  <maxJdkVersion>1.8</maxJdkVersion>
+                </enforceBytecodeVersion>
+              </rules>
+            </configuration>
           </execution>
         </executions>
       </plugin>
