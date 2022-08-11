@@ -23,10 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
-import org.openqa.selenium.By;
+import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.SshHostKeyVerificationStrategy;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -58,6 +59,20 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     public <T extends AuthorizationStrategy> T useAuthorizationStrategy(Class<T> type) {
         maybeCheckUseSecurity();
         return selectFromDropdownOrRadioGroup(type, "authorizationStrategy");
+    }
+
+    public <T extends SshHostKeyVerificationStrategy> void useSshHostKeyVerificationStrategy(final Class<T> type) {
+        Control gitHostKeyVerificationConfiguration = control("/org-jenkinsci-plugins-gitclient-GitHostKeyVerificationConfiguration/");
+        if (gitHostKeyVerificationConfiguration.exists()) {
+            T instance;
+            try {
+                instance = type.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new IllegalArgumentException("Can't initiate a new instance of " + type.getName() + " .", e);
+            }
+            gitHostKeyVerificationConfiguration.select(instance.id());
+        }
     }
 
     private void maybeCheckUseSecurity() {
