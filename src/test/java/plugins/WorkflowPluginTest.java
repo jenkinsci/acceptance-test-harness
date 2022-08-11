@@ -45,6 +45,7 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git_client.JGitInstallation;
+import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.NoVerificationStrategy;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.GithubBranchSource;
@@ -53,10 +54,12 @@ import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSha
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -80,6 +83,14 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Inject DockerContainerHolder<SvnContainer> svn;
     @Inject DockerContainerHolder<DockerAgentContainer> agent;
     @Inject JenkinsController controller;
+
+    @Before
+    public void useNoVerificationSshHostKeyStrategy() {
+        GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
+        sc.open();
+        sc.useSshHostKeyVerificationStrategy(NoVerificationStrategy.class);
+        sc.save();
+    }
 
     @Category(DockerTest.class)
     @WithDocker
