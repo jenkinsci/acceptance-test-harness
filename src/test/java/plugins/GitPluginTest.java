@@ -29,7 +29,9 @@ import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
+import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.NoVerificationStrategy;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -70,8 +72,18 @@ public class GitPluginTest extends AbstractJUnitTest {
         repoUrl = container.getRepoUrl();
         host = container.host();
         port = container.port();
+
+        useNoVerificationSshHostKeyStrategy();
+
         job = jenkins.jobs.create();
         job.configure();
+    }
+
+    private void useNoVerificationSshHostKeyStrategy() {
+        GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
+        sc.open();
+        sc.useSshHostKeyVerificationStrategy(NoVerificationStrategy.class);
+        sc.save();
     }
 
     @Test
