@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
  * SecurityRealm for ldap plugin.
  *
  * @author Michael Prankl
- * @see org.jenkinsci.test.acceptance.po.LdapSecurityRealm_Pre1_10 if you want to test versions of the plugin < 1.10
+ * @see org.jenkinsci.test.acceptance.po.LdapSecurityRealm_Pre1_10 if you want to test versions of the plugin older than 1.10
  */
 @Describable("LDAP")
 public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends SecurityRealm {

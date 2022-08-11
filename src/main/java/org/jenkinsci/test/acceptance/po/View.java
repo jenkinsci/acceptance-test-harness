@@ -16,7 +16,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * Page object for view, which is a collection of jobs rendered in the UI.
- * <p/>
+ * <p>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi

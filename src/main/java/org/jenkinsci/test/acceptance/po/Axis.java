@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 /**
  * Page area for matrix axis.
- * <p/>
+ * <p>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi

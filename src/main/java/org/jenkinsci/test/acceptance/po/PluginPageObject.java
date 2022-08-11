@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 import org.jvnet.hudson.annotation_indexer.Indexed;
 
 /**
- * Plugin page object at <tt>$JENKINS_URL/plugin/$value/</tt>.
+ * Plugin page object at <code>$JENKINS_URL/plugin/$value/</code>.
  *
  * @author ogondza
  */

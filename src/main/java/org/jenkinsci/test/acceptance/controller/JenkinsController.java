@@ -73,8 +73,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
 
     /**
      * Starts Jenkins.
-     *
-     * @throws IOException
      */
     @Override
     public void start() throws IOException {
@@ -100,8 +98,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
 
     /**
      * Stops Jenkins
-     *
-     * @throws IOException
      */
     @Override
     public void stop() throws IOException {
@@ -147,8 +143,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
 
     /**
      * Stops and starts running Jenkins to perform a full JVM restart.
-     *
-     * @throws IOException
      */
     public void restart() throws IOException{
         stop();

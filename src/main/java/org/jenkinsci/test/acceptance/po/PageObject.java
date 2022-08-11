@@ -23,10 +23,9 @@ import org.openqa.selenium.WebElement;
 
 /**
  * Encapsulates a model in Jenkins and wraps interactions with it.
- * <p/>
- * See https://code.google.com/p/selenium/wiki/PageObjects
- * <p/>
- * <p/>
+ * <p>
+ * See <a href="https://code.google.com/p/selenium/wiki/PageObjects">...</a>
+ * <p>
  * Most non-trivial page objects should derive from {@link ContainerPageObject}.
  *
  * @author Kohsuke Kawaguchi
@@ -106,10 +105,10 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     /**
      * Create a control object that wraps access to the specific INPUT element in this page area.
-     * <p/>
+     * <p>
      * The {@link Control} object itself can be created early as the actual element resolution happens lazily. This
      * means {@link PageAreaImpl} implementations can put these in their fields.
-     * <p/>
+     * <p>
      * Several paths can be provided to find the first matching element. Useful when element path changed between
      * versions.
      */
@@ -132,8 +131,12 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      *
      * This method properly wait until the new path is known. To be used as:
      *
+     * <pre>
+     * {@code
      *  String barPath = fooArea.createPageArea("/bar", () -> control("add-button").click());
      *  new FooBarArea(fooArea, barPath);
+     *  }
+     *  </pre>
      *
      * @param pathPrefix Prefix of the expected path. The path is always absolute.
      * @param action An action that triggers the page area creation. Clicking the button, etc.

@@ -9,7 +9,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * Page area base type for credentials
- * <p/>
+ * <p>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi

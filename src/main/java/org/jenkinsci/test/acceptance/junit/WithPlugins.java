@@ -37,11 +37,11 @@ import java.io.IOException;
 /**
  * Indicates that a test requires the presence of the specified plugins.
  *
- * Example: <tt>@WithPlugin("subversion")</tt>
- * <p/>
+ * Example: <code>@WithPlugin("subversion")</code>
+ * <p>
  * One can specify a specific minimum version after the plugin name with a suffixed '@'.
- * <p/>
- * Example: <tt>@WithPlugin("subversion@1.54")</tt>
+ * <p>
+ * Example: <code>@WithPlugin("subversion@1.54")</code>
  *
  * The latter example declares that running the test with older version is pointless, typically because of missing feature.
  *

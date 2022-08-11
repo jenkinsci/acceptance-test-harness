@@ -31,9 +31,6 @@ public class MainArea extends PageAreaImpl {
 
     /**
      * Create a new Area for the configuration of title and descriptions.
-     *
-     * @param context
-     * @param path
      */
     public MainArea(PageObject context, String path) {
         super(context, path);

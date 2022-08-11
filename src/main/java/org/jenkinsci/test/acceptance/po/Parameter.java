@@ -4,7 +4,7 @@ import org.openqa.selenium.By;
 
 /**
  * Parameter for builds.
- * <p/>
+ * <p>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author Kohsuke Kawaguchi

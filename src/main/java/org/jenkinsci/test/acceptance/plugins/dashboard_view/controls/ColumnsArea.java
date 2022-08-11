@@ -23,9 +23,6 @@ public class ColumnsArea extends PageAreaImpl {
 
     /**
      * Creates a new PageArea for the config list of columns that should be shown in the default job list.
-     *
-     * @param context
-     * @param path
      */
     public ColumnsArea(PageObject context, String path) {
         super(context, path);
