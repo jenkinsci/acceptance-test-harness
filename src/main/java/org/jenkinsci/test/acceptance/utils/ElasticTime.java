@@ -45,7 +45,16 @@ public class ElasticTime {
     /**
      * Amount of threads executing concurrently. Time is slowed down proportionally multiplying the time;
      */
-    private final int concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
+    private final int concurrency;
+    {
+        int forkCount = 1;
+        try {
+            forkCount = Integer.parseInt(System.getProperty("forkCount", "1"));
+        } catch (NumberFormatException x) {
+            // may be floating point or use C suffix, fine
+        }
+        concurrency = forkCount;
+    }
 
     /**
      * Relative performance difference compared to reference environment (Upstream CI).
