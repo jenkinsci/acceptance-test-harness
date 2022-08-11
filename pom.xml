@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.119-SNAPSHOT</version>
+  <version>${changelist}</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -22,10 +22,12 @@
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
+    <url>https://github.com/jenkinsci/${project.artifactId}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
   <properties>
+    <changelist>999999-SNAPSHOT</changelist>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
