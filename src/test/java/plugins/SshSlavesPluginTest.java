@@ -215,7 +215,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         if (System.getProperty("os.arch").equals("aarch64")) {
             javaPath = "/usr/lib/jvm/java-11-openjdk-arm64/bin/java";
         }
-        launcher.javaPath.set(javaPath);
+        launcher.setJavaPath(javaPath);
         slave.save();
     
         verify();
