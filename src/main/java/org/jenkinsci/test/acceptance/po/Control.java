@@ -22,7 +22,6 @@ import org.jenkinsci.test.acceptance.junit.Resource;
  * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
  * <p>
  * {@link Control} is like a {@link WebElement}, but with the following key differences:
- * <p>
  * <ul> <li>{@link Control} is late binding, and the underlying {@link WebElement} is resolved only when an interaction
  * with control happens. This allows {@link Control}s to be instantiated earlier (typically when a {@link PageObject}
  * subtype is instantiated.) <li>{@link Control} offers richer methods to interact with a form element, making the right
@@ -243,7 +242,6 @@ public class Control extends CapybaraPortingLayerImpl {
 
     /**
      * For alternative use when the 'yui-menu-button' doesn't exist.
-     * @param type
      */
     public void selectDropdownMenuAlt(Class<?> type) {
         findCaption(type,findDropDownMenuItemBySelector);

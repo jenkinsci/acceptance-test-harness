@@ -46,17 +46,21 @@ public interface PageArea extends CapybaraPortingLayer, Control.Owner {
 
     /**
      * Capture path attribute of newly created form chunk upon invoking action.
-     *
+     * <p>
      * Consider "Add" button in page area with path "/foo" that is supposed to create new page area with path "/foo/bar"
      * or "/foo/bar[n]". There are several problems with the straightforward approach:
      *  - Created area may or may not be the first one of its kind so figuring the "path" is nontrivial.
      *  - The area may can take a while to render so waiting is needed.
      *  - Even after the markup appears, it can take a while for "path" attribute is added.
-     *
+     * <p>
      * This method properly wait until the new path is known. To be used as:
      *
+     * <pre>
+     * {@code
      *  String barPath = fooArea.createPageArea("bar", () -> control("add-button").click());
      *  new FooBarArea(fooArea, barPath);
+     *  }
+     *  </pre>
      *
      * @param name Name of the surrounding div which will the next segment in path. Given the area is "/builder" and we are
      *             about to construct /builder/shell[3], the relative prefix is "shell".

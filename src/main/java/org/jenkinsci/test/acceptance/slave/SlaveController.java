@@ -17,13 +17,11 @@ import com.google.inject.ProvidedBy;
 /**
  * Controls where/how to run slaves.
  * <p>
- * <p>
  * Jenkins supports different ways of launching slaves, and sometimes this affects behaviours of plugins. This
  * abstraction hides the details of where the slaves are running (local machine? EC2? Docker?) and how slaves are hooked
  * up to Jenkins.
  * <p>
- * <p>
- * Test authors write tests by injecting {@link SlaveController} and calling {@link install}.
+ * Test authors write tests by injecting {@link SlaveController} and calling {@link #install}.
  *
  * @author Kohsuke Kawaguchi
  * @see SlaveProvider
@@ -38,26 +36,21 @@ public abstract class SlaveController extends CapybaraPortingLayerImpl implement
     /**
      * Uses the given page object to create a new node and connect the slave to that Jenkins instance.
      * <p>
-     * <p>
      * Since the actual launch of slave can take some time and it often involves a busy loop until the slave gets fully
      * launched, this method returns {@link Future} and it can return before the slave is fully connected.
      * <p>
-     * <p>
      * However, this does not mean the setup process can run entirely in another thread, as {@link WebDriver} do not
      * support concurrent use by multiple threads.
-     * <p>
      * <p>
      * For example, SSH slaves might synchronously interact with Jenkins to create a slave, and let Jenkins begin
      * connecting to it, but this method would return without waiting for the slave to fully come online. Then later
      * when {@link Future#get()} method is invoked, it'll check back the slave status and block until the slave becomes
      * online.
      * <p>
-     * <p>
      * This design improves the speed of connecting multiple slaves.
      * <p>
      * TODO: for EC2 based providers where there's also another initial delay of allocating a new machine, this
      * abstraction doesn't hide all the latencies sufficiently.
-     * <p>
      * <p>
      * When the {@link Future#get()} method returns successfully, the slave is fully online and ready to use.
      */
