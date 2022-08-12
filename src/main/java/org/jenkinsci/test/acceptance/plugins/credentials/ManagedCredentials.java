@@ -31,7 +31,6 @@ public class ManagedCredentials extends ContainerPageObject {
 
     /**
      * Find if the given control exists on the main credentials page.
-     * @param name
      * @return Control
      */
     public Control checkSystemPage(String name) {
@@ -40,8 +39,6 @@ public class ManagedCredentials extends ContainerPageObject {
 
     /**
      * Check if the given credential is part of the domain.
-     * @param name
-     * @return
      */
     public Control checkIfCredentialsExist(String name) {
         By xpath = by.xpath("//a[@title='" + name + "']");
@@ -54,8 +51,6 @@ public class ManagedCredentials extends ContainerPageObject {
 
     /**
      * Find the href of the associted
-     * @param name
-     * @return
      */
     public String credentialById(String name) {
         By xpath = by.xpath("//a[@title='" + name + "']");

@@ -5,11 +5,11 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.82</version>
+    <version>1.85</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.118-SNAPSHOT</version>
+  <version>${changelist}</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -22,10 +22,12 @@
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
+    <url>https://github.com/jenkinsci/${project.artifactId}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
   <properties>
+    <changelist>999999-SNAPSHOT</changelist>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>

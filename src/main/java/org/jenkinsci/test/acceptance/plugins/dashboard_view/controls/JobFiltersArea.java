@@ -34,9 +34,6 @@ public class JobFiltersArea extends PageAreaImpl {
 
     /**
      * Create a new Area for the configuration regarding the job filters.
-     *
-     * @param context
-     * @param path
      */
     public JobFiltersArea(PageObject context, String path) {
         super(context, path);

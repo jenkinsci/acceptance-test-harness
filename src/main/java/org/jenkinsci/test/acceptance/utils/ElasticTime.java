@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * abort operations that takes too long and necessity not to interrupt operations taking a bit more time to complete
  * successfully.
  *
- * To reflect that, use <tt>-DElasticTime.factor</tt> and configure the factor to slow down / speed up the measured time
+ * To reflect that, use <code>-DElasticTime.factor</code> and configure the factor to slow down / speed up the measured time
  * for your executions. Floating point values are accepted too.
  *
  * This implementation takes number of concurrent threads into account.
@@ -45,7 +45,16 @@ public class ElasticTime {
     /**
      * Amount of threads executing concurrently. Time is slowed down proportionally multiplying the time;
      */
-    private final int concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
+    private final int concurrency;
+    {
+        int forkCount = 1;
+        try {
+            forkCount = Integer.parseInt(System.getProperty("forkCount", "1"));
+        } catch (NumberFormatException x) {
+            // may be floating point or use C suffix, fine
+        }
+        concurrency = forkCount;
+    }
 
     /**
      * Relative performance difference compared to reference environment (Upstream CI).
@@ -65,7 +74,7 @@ public class ElasticTime {
     
     /**
      * Get the factor by which we slow down time.
-     * Default is {@code 1.0} (no difference). Use {@code >1} in case of slower environment, {@<1} in case of faster one.
+     * Default is {@code 1.0} (no difference). Use {@code >1} in case of slower environment, {@code <1} in case of faster one.
      * @return the factor by which we slow down time.
      */
     public double getSlowDownFactor() {

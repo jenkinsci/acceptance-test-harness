@@ -11,9 +11,7 @@ public class ManagedCredentialsBinding extends ContainerPageObject {
     
     /**
      * Adds a credential binding of the type passed as parameter
-     * 
-     * @param type
-     * @return
+     *
      */
     public <T extends CredentialsBinding> T addCredentialBinding(final Class<T> type) {
         String path = createPageArea("/org-jenkinsci-plugins-credentialsbinding-impl-SecretBuildWrapper/bindings", new Runnable() {

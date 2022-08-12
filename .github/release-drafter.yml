@@ -1,2 +1,1 @@
 _extends: .github
-tag-template: acceptance-test-harness-$NEXT_MINOR_VERSION

@@ -36,9 +36,6 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
     /**
      * Constructor.
      * Should only be instantiated by addPublisher(...) of a job
-     *
-     * @param parent
-     * @param path
      */
     public LogParserPublisher(Job parent, String path) {
         super(parent, path);

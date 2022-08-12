@@ -18,8 +18,6 @@ public class CredentialsPage extends ConfigurablePageObject {
 
     /**
      * Create a new Credential
-     * @param j
-     * @param domainName
      */
     public CredentialsPage(Jenkins j, String domainName) {
         super(j, j.url("credentials/store/system/domain/" + domainName + "/newCredentials"));
@@ -27,8 +25,6 @@ public class CredentialsPage extends ConfigurablePageObject {
 
     /**
      * Create a new Credential scoped to a Folder
-     * @param f
-     * @param domainName
      */
     public CredentialsPage(Folder f, String domainName) {
         super(f, f.url("credentials/store/folder/domain/" + domainName + "/newCredentials"));
@@ -36,9 +32,6 @@ public class CredentialsPage extends ConfigurablePageObject {
 
     /**
      * Create a new personal Credential
-     * @param j
-     * @param domainName
-     * @param userName
      */
     public CredentialsPage(Jenkins j, String domainName, String userName) {
         super(j, j.url(String.format("user/%s/credentials/store/user/domain/%s/newCredentials", userName, domainName)));
