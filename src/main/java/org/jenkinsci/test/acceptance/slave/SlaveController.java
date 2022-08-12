@@ -59,7 +59,6 @@ public abstract class SlaveController extends CapybaraPortingLayerImpl implement
     /**
      * Stops the slave from the slave side, for those slave launch methods that support it.
      * <p>
-     * <p>
      * Most notably JNLP slaves can control their own lifecycles, and for those slaves this method lets you disconnect
      * this slave. A stopped slave can be later reconnected via {@link #start()}.
      */
