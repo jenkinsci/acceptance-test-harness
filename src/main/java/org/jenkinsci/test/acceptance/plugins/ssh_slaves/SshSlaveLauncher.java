@@ -83,7 +83,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
      *
      * @param username to use
      * @param password for the username
-     * @id for unique identification
+     * @param id for unique identification
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher pwdCredentials(String username, String password, String id) {

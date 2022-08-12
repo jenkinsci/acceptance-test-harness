@@ -26,12 +26,12 @@ public @interface GlobalRule {
 
     /**
      * Optional ordering among rules.
-     *
-     * Annotation with <code>priority >= 0</code> are guaranteed to be run after
+     * <p>
+     * Annotation with {@code priority >= 0} are guaranteed to be run after
      * Jenkins is up. Negative priorities are run before startup on best effort
      * basis. (It might not happen before for ExistingJenkinsController,
      * PooledJenkinsController and possibly others).
-     *
+     * <p>
      * Annotations that skips execution are encouraged to run before Jenkins is
      * booted up to save time. Note, that these implementations can not inject
      * Jenkins for obvious reasons.

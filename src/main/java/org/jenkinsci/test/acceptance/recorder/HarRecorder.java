@@ -70,7 +70,7 @@ public class HarRecorder extends TestWatcher {
 
     /**
      * Create a proxy to record the HAR listening on the specified address
-     * @param listenAddress the specific address to bind to, or {@code null} to bind on all addresses
+     * @param networkAddress the specific address to bind to, or {@code null} to bind on all addresses
      */
     public static BrowserUpProxy getProxy(InetAddress networkAddress) {
         if (proxy == null) {

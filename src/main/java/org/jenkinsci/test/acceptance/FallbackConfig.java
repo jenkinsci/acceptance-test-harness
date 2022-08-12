@@ -319,8 +319,8 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Get display number to run browser on.
-     *
-     * Custom property <code></>BROWSER_DISPLAY</code> has the preference. If not provided <code>DISPLAY</code> is used.
+     * <p>
+     * Custom property <code>BROWSER_DISPLAY</code> has the preference. If not provided <code>DISPLAY</code> is used.
      */
     public static @CheckForNull String getBrowserDisplay() {
         String d = System.getenv("BROWSER_DISPLAY");
@@ -447,10 +447,10 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Name of the socket file used to communicate between jut-server and JUnit.
+     * See <code>docs/PRELAUNCH.md</code>
      *
      * @return the name of the socket
      * @see JenkinsControllerPoolProcess
-     * @see <code>docs/PRELAUNCH.md<tt/>
      */
     @Provides @Named("socket")
     public File getSocket() {
