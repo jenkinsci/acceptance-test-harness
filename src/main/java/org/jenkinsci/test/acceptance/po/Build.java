@@ -123,23 +123,25 @@ public class Build extends ContainerPageObject {
     }
 
     public boolean isInProgress() {
-        if (result != null) {
-            return false;
-        }
-        if (!hasStarted()) {
+        JsonNode d;
+        try {
+            d = getJson();
+            JsonNode inProgress = d.get("inProgress");
+            if (inProgress != null) {
+                // see https://github.com/jenkinsci/jenkins/pull/6829
+                return inProgress.booleanValue();
+            }
+        } catch (Exception e) {
+            // Build has not started, so it is not in progress.
             return false;
         }
 
-        JsonNode d = getJson();
-        JsonNode inProgress = d.get("inProgress");
-        if (inProgress != null) {
-            // see https://github.com/jenkinsci/jenkins/pull/6829
-            return inProgress.booleanValue();
-        } else {
-            // TODO delete when inProgress becomes part of the LTS
-            // Please note that the test below denote a completed build, not a finished build
-            return d.get("building").booleanValue() || d.get("result") == null;
+        // TODO delete when inProgress becomes part of the LTS
+        if (result != null) {
+            return false;
         }
+        // Please note that the test below denote a completed build, not a finished build
+        return d.get("building").booleanValue() || d.get("result") == null;
     }
 
     public int getNumber() {
