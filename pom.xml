@@ -6,6 +6,7 @@
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
     <version>1.85</version>
+    <relativePath />
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -485,6 +486,8 @@
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
+            <phase>compile</phase>
+            <id>generate-sources</id>
             <goals>
               <goal>jar</goal>
             </goals>
@@ -495,15 +498,13 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.4.0</version>
-        <configuration>
-          <additionalparam>-Xdoclint:none</additionalparam>
-        </configuration>
         <executions>
           <execution>
-            <id>attach-javadocs</id>
-            <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
-            </configuration>
+            <phase>compile</phase>
+            <id>generate-javadocs</id>
+            <goals>
+                <goal>jar</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
