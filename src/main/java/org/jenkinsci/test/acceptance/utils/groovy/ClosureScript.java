@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.utils.groovy;
 
 import groovy.lang.Binding;
+import groovy.lang.Closure;
 import groovy.lang.MetaClass;
 import groovy.lang.MissingMethodException;
 import groovy.lang.MissingPropertyException;

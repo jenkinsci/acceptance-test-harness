@@ -12,9 +12,9 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Indicates that instances of this component are scoped to each test case.
- *
+ * <p>
  * {@link TestScope} is tied to a thread that executes a test, in anticipation of multi-threaded
- * concurrent test executions. See {@link World#testScopeObjects}
+ * concurrent test executions. See {@link World}
  *
  * @author Kohsuke Kawaguchi
  */

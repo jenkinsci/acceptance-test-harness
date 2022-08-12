@@ -20,14 +20,14 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 
 /**
  * Wraps a specific form element in {@link PageAreaImpl} to provide operations.
- * <p/>
+ * <p>
  * {@link Control} is like a {@link WebElement}, but with the following key differences:
- * <p/>
+ * <p>
  * <ul> <li>{@link Control} is late binding, and the underlying {@link WebElement} is resolved only when an interaction
  * with control happens. This allows {@link Control}s to be instantiated earlier (typically when a {@link PageObject}
  * subtype is instantiated.) <li>{@link Control} offers richer methods to interact with a form element, making the right
  * code easier to write. </ul>
- * <p/>
+ * <p>
  * See {@link PageAreaImpl} subtypes for typical usage.
  *
  * @author Kohsuke Kawaguchi

@@ -180,7 +180,7 @@ public class PluginManager extends ContainerPageObject {
      * @deprecated Please be encouraged to use {@link WithPlugins} annotations to statically declare
      * the required plugins you need. If you really do need to install plugins in the middle
      * of a test, as opposed to be in the beginning, then this is the right method.
-     * <p/>
+     * <p>
      * The deprecation marker is to call attention to {@link WithPlugins}. This method
      * is not really deprecated.
      * @return Always false.

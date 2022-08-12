@@ -320,7 +320,7 @@ public class FallbackConfig extends AbstractModule {
     /**
      * Get display number to run browser on.
      *
-     * Custom property <tt></>BROWSER_DISPLAY</tt> has the preference. If not provided <tt>DISPLAY</tt> is used.
+     * Custom property <code></>BROWSER_DISPLAY</code> has the preference. If not provided <code>DISPLAY</code> is used.
      */
     public static @CheckForNull String getBrowserDisplay() {
         String d = System.getenv("BROWSER_DISPLAY");
@@ -450,7 +450,7 @@ public class FallbackConfig extends AbstractModule {
      *
      * @return the name of the socket
      * @see JenkinsControllerPoolProcess
-     * @see <tt>docs/PRELAUNCH.md<tt/>
+     * @see <code>docs/PRELAUNCH.md<tt/>
      */
     @Provides @Named("socket")
     public File getSocket() {

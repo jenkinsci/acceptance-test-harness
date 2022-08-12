@@ -89,7 +89,6 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      *
      * @param localPath  The file to transfer
      * @param remotePath The remote path
-     * @throws IOException
      */
     public void uploadBinary(String localPath, String remotePath) throws IOException {
         FileInputStream fis = null;
@@ -112,7 +111,6 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      *
      * @param Path the Path to check
      * @return true if the Path exist, else false
-     * @throws IOException
      */
     public Boolean pathExist(String Path) throws IOException {
         if (!ftpConnect())

@@ -31,7 +31,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 
 /**
  * Convenience methods for testing the Copy Artifacts plugin.
- * @author Tomas Westling <tomas.westling@sonymobile.com>
+ * @author <a href="tomas.westling@sonymobile.com">Tomas Westling</a>
  */
 @Describable("Copy artifacts from another project")
 public class CopyArtifactBuildStep extends AbstractStep implements BuildStep {

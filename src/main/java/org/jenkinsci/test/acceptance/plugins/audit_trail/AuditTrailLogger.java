@@ -88,7 +88,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
     /**
      * Expose file through /userContent/ and wrap in Logger.
-     * <p/>
+     * <p>
      * Traditional logger in no longer created after Audit Trail 2.0
      */
     private static class ExposedFile extends AuditTrailLogger {

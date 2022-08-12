@@ -42,7 +42,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
  * Test the Copy Artifacts plugin.
- * @author Tomas Westling <tomas.westling@sonymobile.com>
+ * @author <a href="tomas.westling@sonymobile.com">Tomas Westling</a>
  */
 @WithPlugins("copyartifact")
 public class CopyArtifactPluginTest extends AbstractJUnitTest{

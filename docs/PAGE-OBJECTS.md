@@ -36,7 +36,7 @@ a specific element.
 There's a `PageObject`-like class called `PageArea`, which is a micro page object
 that maps to a section of a page that contains a series of INPUT controls.
 
-A typical usage of this is to map a single <tt>config.jelly</tt> of a builder/publisher/etc.
+A typical usage of this is to map a single <code>config.jelly</code> of a builder/publisher/etc.
 
 Page area object uses [Form element path plugin](https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin)
 to refer to input controls relative to its location in the hierarchy of controls.

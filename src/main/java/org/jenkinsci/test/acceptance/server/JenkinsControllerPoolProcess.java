@@ -39,8 +39,9 @@ import java.util.concurrent.SynchronousQueue;
  * This is intended to run in another JVM from the test harness, so that it can have independent lifecycle.
  * During development of tests, a test VM would come and go quickly. This design helps them maintain efficiency
  * in such a situation.
+ * <p>
+ * See docs/PRELAUNCH.md for more details.
  *
- * @see docs/PRELAUNCH.md
  * @author Kohsuke Kawaguchi
  */
 public class JenkinsControllerPoolProcess {

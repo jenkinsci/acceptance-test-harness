@@ -38,7 +38,7 @@ import org.apache.commons.io.FileUtils;
  *
  * Properties will be stored as follows:
  *
- * <testName>::<pluginName> = <pluginVersion>
+ * {@literal <testName>::<pluginName> = <pluginVersion>}
  *
  * @author scott.hebert@ericsson.com
  */

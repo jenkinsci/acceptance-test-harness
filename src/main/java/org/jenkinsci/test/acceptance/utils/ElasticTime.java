@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  * abort operations that takes too long and necessity not to interrupt operations taking a bit more time to complete
  * successfully.
  *
- * To reflect that, use <tt>-DElasticTime.factor</tt> and configure the factor to slow down / speed up the measured time
+ * To reflect that, use <code>-DElasticTime.factor</code> and configure the factor to slow down / speed up the measured time
  * for your executions. Floating point values are accepted too.
  *
  * This implementation takes number of concurrent threads into account.
