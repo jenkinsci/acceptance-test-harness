@@ -44,7 +44,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
  * Test the Copy Artifacts plugin.
  * @author Tomas Westling <tomas.westling@sonymobile.com>
  */
-@WithPlugins("copyartifact")
+@WithPlugins({"command-launcher", "copyartifact"})
 public class CopyArtifactPluginTest extends AbstractJUnitTest{
     @Inject
     private SlaveController slaveController;

@@ -26,7 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.BuildHistory.containsBuildOf;
 
-@WithPlugins("nodelabelparameter")
+@WithPlugins({"command-launcher", "nodelabelparameter"})
 public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
     @Inject

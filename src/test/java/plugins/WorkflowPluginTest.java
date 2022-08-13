@@ -71,6 +71,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
+@WithPlugins("command-launcher")
 public class WorkflowPluginTest extends AbstractJUnitTest {
     private static final String CREDENTIALS_ID = "pipeline";
     private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
