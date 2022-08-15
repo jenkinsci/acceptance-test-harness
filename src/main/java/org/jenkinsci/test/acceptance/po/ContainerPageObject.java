@@ -82,9 +82,9 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
 
     /**
      * Create action of this page object.
+     * See {@link Action}, {@link ActionPageObject}
      *
      * @param type Action type to create.
-     * @see {@link Action}, {@link ActionPageObject}
      */
     public <T extends Action> T action(Class<T> type) {
         final String path = type.getAnnotation(ActionPageObject.class).value();

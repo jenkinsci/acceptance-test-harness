@@ -35,6 +35,8 @@ import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
+import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
+import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
@@ -317,8 +319,8 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Get display number to run browser on.
-     *
-     * Custom property <tt></>BROWSER_DISPLAY</tt> has the preference. If not provided <tt>DISPLAY</tt> is used.
+     * <p>
+     * Custom property <code>BROWSER_DISPLAY</code> has the preference. If not provided <code>DISPLAY</code> is used.
      */
     public static @CheckForNull String getBrowserDisplay() {
         String d = System.getenv("BROWSER_DISPLAY");
@@ -393,7 +395,15 @@ public class FallbackConfig extends AbstractModule {
         if (type==null)
             type = System.getenv("TYPE");
         if (type==null) {
-            type = "winstone";
+            File socket = getSocket();
+            if (socket.exists() && !JenkinsControllerPoolProcess.MAIN) {
+                LOGGER.info("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
+                return new PooledJenkinsController(injector, socket);
+            }
+            else {
+                LOGGER.warning("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
+                type = "winstone";
+            }
         }
 
         for (JenkinsControllerFactory f : factories) {
@@ -433,6 +443,22 @@ public class FallbackConfig extends AbstractModule {
     @Provides @Named("WORKSPACE")
     public String getWorkspace() {
         return new File(System.getProperty("user.dir"), "target").getPath();
+    }
+
+    /**
+     * Name of the socket file used to communicate between jut-server and JUnit.
+     * See <code>docs/PRELAUNCH.md</code>
+     *
+     * @return the name of the socket
+     * @see JenkinsControllerPoolProcess
+     */
+    @Provides @Named("socket")
+    public File getSocket() {
+        String socket = System.getenv("JUT_SOCKET");
+        if (StringUtils.isNotBlank(socket)) {
+            return new File(socket);
+        }
+        return new File(System.getProperty("user.home"),"jenkins.sock");
     }
 
     /**

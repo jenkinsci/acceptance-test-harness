@@ -18,8 +18,7 @@ import java.util.logging.Logger;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.
- * <p/>
- * <p/>
+ * <p>
  * It provides a number of convenience methods, and sets up the correct test runner.
  *
  * @author Kohsuke Kawaguchi

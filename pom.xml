@@ -5,11 +5,11 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.82</version>
+    <version>1.85</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.117-SNAPSHOT</version>
+  <version>${changelist}</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
@@ -22,10 +22,12 @@
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
+    <url>https://github.com/jenkinsci/${project.artifactId}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
   <properties>
+    <changelist>999999-SNAPSHOT</changelist>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
@@ -35,7 +37,7 @@
     <aether.version>1.1.0</aether.version>
     <jackson.bom.version>2.12.1</jackson.bom.version>
     <maven.version>3.3.9</maven.version>
-    <groovy.version>2.3.1</groovy.version>
+    <groovy.version>3.0.12</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <mockito.version>1.10.19</mockito.version>
     <slf4j.version>1.7.36</slf4j.version>
@@ -292,6 +294,23 @@
       <version>${slf4j.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jnr-unixsocket</artifactId>
+      <version>0.38.17</version>
+    </dependency>
+    <!-- dependency use range so we want to avoid weird resolution -->
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <version>1.3.9</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.jnr</groupId>
+      <artifactId>jffi</artifactId>
+      <version>1.3.9</version>
+      <classifier>native</classifier>
+    </dependency>
+    <dependency>
       <groupId>org.ini4j</groupId>
       <artifactId>ini4j</artifactId>
       <version>0.5.4</version>
@@ -346,6 +365,11 @@
           <artifactId>jsr305</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>remoting</artifactId>
+      <version>3.2</version>
     </dependency>
     <dependency>
       <groupId>com.jcraft</groupId>
@@ -470,7 +494,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>3.4.1</version>
         <configuration>
           <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>

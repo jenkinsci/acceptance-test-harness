@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.ComputerLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
-
+import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
 import static org.junit.Assert.*;
 
 /**
@@ -24,7 +24,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public final Control suffixCmd = control("suffixStartSlaveCmd");
     public final Control timeout = control("launchTimeoutSeconds");
     public final Control retries = control("maxNumRetries");
-    public final Control javaPath = control("javaPath");
+    private final Control javaPath = control("javaPath");
     public final Control jvmOptions = control("jvmOptions");
     public final Control hostKeyVerificationStrategy = control("/");
 
@@ -44,6 +44,11 @@ public class SshSlaveLauncher extends ComputerLauncher {
         return new SshCredentialDialog(getPage(), "/credentials");
     }
 
+    public void setJavaPath(String jvmPath) {
+        try (UselessFileDetectorReplacement ufd = new UselessFileDetectorReplacement(driver)) {
+            javaPath.set(jvmPath);
+        }
+    }
     public SshSlaveLauncher port(int port) {
         ensureAdvancedOpen();
         control("port").set(port);
@@ -78,7 +83,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
      *
      * @param username to use
      * @param password for the username
-     * @id for unique identification
+     * @param id for unique identification
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher pwdCredentials(String username, String password, String id) {

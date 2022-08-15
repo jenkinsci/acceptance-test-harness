@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 /**
  * Marker Interface for {@link PageArea} that corresponds to 'Publisher' in the core.
- * <p/>
+ * <p>
  * Subtypes should have {@link Describable} annotation on it.
  *
  * @author christian.fritz

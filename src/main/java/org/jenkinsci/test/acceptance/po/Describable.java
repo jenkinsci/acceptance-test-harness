@@ -9,13 +9,13 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 
 /**
  * Annotation used to register implementations to be discovered automatically.
- * <p/>
+ * <p>
  * Note that different services creating an instances have different conventions concerning both the values of this
  * annotation as well as the class interface. In some cases, descriptions are visual labels used in UI, but it can as
  * well be an internal identifier such as Jenkins class name. Compare {@link Describable} annotations for {@link
  * MatrixProject} and {@link ShellBuildStep}. Unique constructor signature is often required for implementations of the
  * same abstraction.
- * <p/>
+ * <p>
  * The details should be documented in particular superclass, such as {@link Job} or {@link BuildStep}.
  *
  * @author Kohsuke Kawaguchi

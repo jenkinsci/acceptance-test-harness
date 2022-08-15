@@ -22,9 +22,6 @@ public class BreadCrumbs extends PageAreaImpl {
 
     /**
      * Create a new object for reading the breadcrumbs in the dashboard view.
-     *
-     * @param context
-     * @param path
      */
     public BreadCrumbs(PageObject context, String path) {
         super(context, path);

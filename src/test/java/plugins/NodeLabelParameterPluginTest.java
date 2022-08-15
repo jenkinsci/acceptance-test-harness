@@ -26,7 +26,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.po.BuildHistory.containsBuildOf;
 
-@WithPlugins("nodelabelparameter")
+@WithPlugins({"command-launcher", "nodelabelparameter"})
 public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -120,7 +120,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to check that an offline slave is not ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "All Nodes"
-     * <p/>
+     * <p>
      * It is expected that the job is pending due to the offline status of the slave.
      * But it will be reactivated as soon as the slave status becomes online.
      */
@@ -157,7 +157,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to check that an offline slave is ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "Ignore Offline Nodes"
-     * <p/>
+     * <p>
      * It is expected that the job is pending due no valid slave is available.
      */
     @Test
@@ -189,7 +189,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to check that an offline slave is not ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "All Nodes" in combination with "Allow multiple nodes" option.
-     * <p/>
+     * <p>
      * The job shall run on a mixed configuration of online and offline slaves.
      * It is expected that a number of builds is created equivalent to the number of
      * slaves selected. The build shall be pending for the offline slaves and executed
@@ -241,7 +241,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to check that an offline slave is ignored
      * when selected for a job and the job is configured with "Node eligibility" setting
      * is set to "Ignore offline Nodes" in combination with "Allow multiple nodes" option.
-     * <p/>
+     * <p>
      * The job shall run on a mixed configuration of online slaves.
      * It is expected that a number of builds is created equivalent to the number of
      * slaves selected. The build shall be pending as there is no valid online slave.
@@ -289,7 +289,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to verify that the second build is not started when the
      * build already failed on the first slave in combination with the
      * "run next build only if build succeeds" setting of the node parameter.
-     * <p/>
+     * <p>
      * As a build can fail in different stages this test simulates a FAILED result
      * during the main build action.
      */
@@ -335,12 +335,12 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to verify that the second build is not started when the
      * build already failed on the first slave in combination with the
      * "run next build only if build succeeds" setting of the node parameter.
-     * <p/>
+     * <p>
      * As a build can fail in different stages this test simulates a FAILED result
      * during the post build step. Therefore the text-finder plugin is used to
      * fail the build based on a simple pattern matching with a text file copied to
      * the slave's workspace.
-     * <p/>
+     * <p>
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
     @Test
@@ -392,10 +392,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      * This test is intended to verify that the second build is not started when the
      * build already deemed unstable on the first slave in combination with the
      * "run next build only if build succeeds" setting of the node parameter.
-     * <p/>
+     * <p>
      * The JUnit test publisher is used to create an unstable build during the post
      * build step.
-     * <p/>
+     * <p>
      * Note that in this case the main build action is still completed with status SUCCESS.
      */
     @Test
