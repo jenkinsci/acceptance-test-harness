@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 
 @Since("2.7.1")
+@WithPlugins("command-launcher")
 public class DeclarativePipelineTest extends AbstractJUnitTest {
     @Inject
     private SlaveController slaveController;

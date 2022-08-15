@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 
 import org.apache.commons.lang.SystemUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
@@ -18,6 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * Feature: Archive artifacts
  */
+@WithPlugins("command-launcher")
 public class ArtifactsTest extends AbstractJUnitTest {
 
     public static final int LARGE_FILE_GB = 3;
