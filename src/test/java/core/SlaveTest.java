@@ -25,6 +25,7 @@ package core;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
@@ -40,6 +41,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * @author Orjan Percy <orjan.percy@sonymobile.com>
  */
+@WithPlugins("command-launcher")
 public class SlaveTest extends AbstractJUnitTest {
     @Inject
     SlaveController agentController;
