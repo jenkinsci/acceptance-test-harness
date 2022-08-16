@@ -23,7 +23,7 @@ import static org.jenkinsci.test.acceptance.po.Slave.runBuildsInOrder;
 /**
  * @author Kohsuke Kawaguchi
  */
-@WithPlugins("PrioritySorter")
+@WithPlugins({"PrioritySorter", "command-launcher"})
 public class PrioritySorterPluginTest extends AbstractJUnitTest {
     private static final String LABEL = "slave";
 

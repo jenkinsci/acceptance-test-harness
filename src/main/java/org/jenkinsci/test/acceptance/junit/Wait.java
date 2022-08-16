@@ -103,7 +103,8 @@ public class Wait<Subject> extends FluentWait<Subject> {
      * Create wait with configurable timer.
      * <p>
      * This is useful for timeout waiting wall-clock time to pass.
-     * @see Wait#Wait(Subject, ElasticTime)
+     *
+     * @see Wait#Wait(Object, ElasticTime)
      */
     public Wait(Subject input) {
         super(input);
