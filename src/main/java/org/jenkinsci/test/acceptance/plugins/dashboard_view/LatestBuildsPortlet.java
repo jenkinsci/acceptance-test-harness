@@ -77,9 +77,6 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      */
     public boolean hasJob(String jobName) {
         try {
-            // Underscores in job names are prefixed with <wbr> to represent a word breaking opportunity,
-            // so we need to add these new lines to te job name when filtering
-            jobName = jobName.replace("_", "\n_");
             return !getTable().findElements(By.linkText(jobName)).isEmpty();
         } catch (NoSuchElementException e) {
             return false;
