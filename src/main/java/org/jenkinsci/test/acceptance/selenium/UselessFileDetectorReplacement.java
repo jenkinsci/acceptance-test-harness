@@ -26,7 +26,9 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
      */
     public UselessFileDetectorReplacement(WebDriver driver) {
         driver = getNonWrappedDriver(driver);
-        if (driver instanceof RemoteWebDriver) {
+        if (driver.getClass().equals(RemoteWebDriver.class)) {
+            // we test the explicit class not instanceof as the local FirefoxDriver and others 
+            // are also RemoteWebDriver but can not be configured with a FileDetector
             remoteDriver = (RemoteWebDriver) driver;
             previous = remoteDriver.getFileDetector();
             remoteDriver.setFileDetector(new UselessFileDetector());
