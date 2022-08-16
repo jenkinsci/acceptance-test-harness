@@ -14,6 +14,7 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -131,7 +132,7 @@ public class Build extends ContainerPageObject {
                 // see https://github.com/jenkinsci/jenkins/pull/6829
                 return inProgress.booleanValue();
             }
-        } catch (Exception e) {
+        } catch (NoSuchElementException e) {
             // Build has not started, so it is not in progress.
             return false;
         }
