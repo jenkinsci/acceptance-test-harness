@@ -691,7 +691,6 @@
         </property>
       </activation>
       <properties>
-        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
         <surefire.rerunFailingTestsCount>2</surefire.rerunFailingTestsCount>
       </properties>
     </profile>
