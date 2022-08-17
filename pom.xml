@@ -28,7 +28,6 @@
 
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
 
