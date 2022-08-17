@@ -27,10 +27,11 @@ public abstract class Credential extends PageAreaImpl {
      * Adds this credential and close the dialog.
      */
     public void add() {
+        WebElement dialog = find(by.id("credentialsDialog"));
         WebElement we = find(by.id("credentials-add-submit-button"));
         we.click();
         // wait for the form to be removed from the UI
-        waitFor(driver).until(ExpectedConditions.invisibilityOf(we));
+        waitFor(driver).until(ExpectedConditions.invisibilityOf(dialog));
     }
 
 }
