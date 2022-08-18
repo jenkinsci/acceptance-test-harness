@@ -18,10 +18,14 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
 
     /** 
      * Create a new instance suitable for use in a try-with-resources block.
-     * Example usage is:<code>
+     * Example usage is:
+     * <pre>
+     * {@code
      * try (UselessFileDetectorReplacement ufd = new UselessFileDetectorReplacement(driver)) {
      *   control.setText(someTextThatIsAlsoALocalFileName);
      * }
+     * }
+     * </pre>
      * </code>
      */
     public UselessFileDetectorReplacement(WebDriver driver) {

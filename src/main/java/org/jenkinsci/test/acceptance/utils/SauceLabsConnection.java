@@ -15,7 +15,7 @@ import java.util.Properties;
  * Encapsulates username and password for Sauce Labs.
  *
  * <p>
- * The credential is expected to be at <code>~/.saucelabs</code>
+ * The credential is expected to be at {@code ~/.saucelabs}
  *
  * @author Kohsuke Kawaguchi
  */
