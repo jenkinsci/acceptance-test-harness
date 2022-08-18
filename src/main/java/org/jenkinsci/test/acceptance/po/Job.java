@@ -26,7 +26,6 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.internal.AssumptionViolatedException;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
@@ -35,8 +34,9 @@ import com.google.inject.Injector;
 
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Job Page object superclass.

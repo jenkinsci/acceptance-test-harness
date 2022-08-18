@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,7 @@ public class WorkflowMultiBranchJob extends Folder {
 
     public String getBranchIndexingLog() {
         try {
-            return IOUtils.toString(url("indexing/console").openStream());
+            return IOUtils.toString(url("indexing/console").openStream(), StandardCharsets.UTF_8);
         } catch (IOException ex) {
             throw new AssertionError(ex);
         }

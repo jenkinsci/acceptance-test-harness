@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Wraps a resource found by {@link Class#getResource(String)}.
@@ -49,7 +50,7 @@ public class Resource {
 
     public String asText() {
         try {
-            return IOUtils.toString(url.openStream());
+            return IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new IOError(e);
         }

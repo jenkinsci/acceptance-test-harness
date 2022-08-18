@@ -27,6 +27,8 @@ package plugins;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -240,7 +242,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
             SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
             Process proc = new ProcessBuilder("stat", "-c", "%g", "/var/run/docker.sock").start();
-            String group = IOUtils.toString(proc.getInputStream()).trim();
+            String group = IOUtils.toString(proc.getInputStream(), StandardCharsets.UTF_8).trim();
             Assume.assumeThat("docker.sock can be statted", proc.waitFor(), is(0));
             try {
                 Integer.parseInt(group);
@@ -287,7 +289,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "package pkg\n" +
             "@Grab('commons-primitives:commons-primitives:1.0')\n" +
             "import org.apache.commons.collections.primitives.ArrayIntList\n" +
-            "static def arrayInt() {new ArrayIntList()}");
+            "static def arrayInt() {new ArrayIntList()}", StandardCharsets.UTF_8);
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set("echo(/got ${pkg.Lists.arrayInt()}/)");
         job.sandbox.check();
