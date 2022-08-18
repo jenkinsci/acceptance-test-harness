@@ -25,6 +25,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -165,7 +166,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
                 );
 
                 final File command = new File(home, "bin/" + binary);
-                FileUtils.writeStringToFile(command, code);
+                FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
             }
             else {
@@ -176,7 +177,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
                                                   homeEnvName, path
                                           );
                 final File command = new File(home, "bin/" + binary + ".cmd");
-                FileUtils.writeStringToFile(command, code);
+                FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
             }
             return home.getAbsolutePath();

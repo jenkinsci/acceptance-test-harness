@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,7 @@ public class Jenkins extends Node implements Container {
             text = urlConnection.getHeaderField("X-Jenkins");
             if (text == null) {
 
-                String pageText = IOUtils.toString(urlConnection.getInputStream());
+                String pageText = IOUtils.toString(urlConnection.getInputStream(), StandardCharsets.UTF_8);
                 throw new AssertionError(
                         "Application running on " + url + " does not seem to be Jenkins:\n" + pageText
                 );

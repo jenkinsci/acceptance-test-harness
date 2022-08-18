@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -101,7 +102,7 @@ public class GitRepo implements Closeable {
             ssh = File.createTempFile("jenkins", "ssh");
             FileUtils.writeStringToFile(ssh,
                     "#!/bin/sh\n" +
-                            "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " \"$@\"");
+                            "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " \"$@\"" , StandardCharsets.UTF_8);
             Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(OWNER_READ, OWNER_EXECUTE)));
 
             return createTempDir("git");
@@ -198,7 +199,7 @@ public class GitRepo implements Closeable {
 
     public void touch(final String fileName) {
         try {
-            FileUtils.writeStringToFile(file(fileName), "");
+            FileUtils.writeStringToFile(file(fileName), "", StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new AssertionError("Can't change file " + fileName, e);
         }

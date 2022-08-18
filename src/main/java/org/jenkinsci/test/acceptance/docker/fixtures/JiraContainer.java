@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +47,7 @@ public class JiraContainer extends DockerContainer {
                         try {
                             URLConnection connection = getURL().openConnection();
                             connection.setConnectTimeout(1000); // Prevent waiting too long for connection to timeout
-                            String s = IOUtils.toString(connection.getInputStream());
+                            String s = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
                             return s.contains("System Dashboard");
                         } catch (SocketException e) {
                             return null;

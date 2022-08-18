@@ -23,6 +23,7 @@ import org.junit.experimental.categories.Category;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -93,6 +94,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
         j.startBuild().shouldSucceed();
         sleep(20000);
         File logfile = jabber.getLogbotLogFile();
-        assertThat(FileUtils.readFileToString(logfile), CoreMatchers.containsString("SUCCESS"));
+        assertThat(FileUtils.readFileToString(logfile, StandardCharsets.UTF_8), CoreMatchers.containsString("SUCCESS"));
     }
 }
