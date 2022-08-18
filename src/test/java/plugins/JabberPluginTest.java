@@ -29,9 +29,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 /**
  * This test case is set to @Ignore because the Jabber Plugin is not able to connect to conference.localhost
  * because DNS resolution issues. These issues arise because of the used Smack API
- *      (http://www.igniterealtime.org/projects/smack/index.jsp)
+ *      (<a href="https://www.igniterealtime.org/projects/smack/index.jsp">Smack Documentation</a>)
  * that does rely on successful DNS resolution, which is totally valid in terms on conformity with the XMPP Standard.
- *
+ * <p>
  * This test is broken until a new version of the jabber plugin with a new Smack Library is provided that falls back to
  * using the hostname if the FQDN could not be resolved, *
  *
