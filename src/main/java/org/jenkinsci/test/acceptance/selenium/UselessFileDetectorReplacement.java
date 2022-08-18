@@ -26,7 +26,6 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
      * }
      * }
      * </pre>
-     * </code>
      */
     public UselessFileDetectorReplacement(WebDriver driver) {
         driver = getNonWrappedDriver(driver);
