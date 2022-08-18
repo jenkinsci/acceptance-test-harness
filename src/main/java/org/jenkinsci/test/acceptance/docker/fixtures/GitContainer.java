@@ -46,7 +46,7 @@ public class GitContainer extends DockerContainer {
     }
 
     /**
-     * Add an additional certificate to <code>~/.ssh/authorized_keys</code>
+     * Add an additional certificate to {@code ~/.ssh/authorized_keys}
      * @param pubKey the certificate public key
      */
     public void addSSHCertificate(String pubKey) throws IOException, InterruptedException {

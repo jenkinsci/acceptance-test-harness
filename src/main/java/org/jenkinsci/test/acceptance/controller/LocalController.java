@@ -391,7 +391,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * Set the flag to run the install wizard.
      * 
-     * @param runInstallWizard - <code>true</code> to run the install wizard
+     * @param runInstallWizard - {@code true} to run the install wizard
      */
     public void setRunInstallWizard(boolean runInstallWizard) {
         this.runInstallWizard = runInstallWizard;
