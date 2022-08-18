@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 
 /**
  * Databinding for Update Center metadata
