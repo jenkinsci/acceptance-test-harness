@@ -90,7 +90,7 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
     /**
      * Returns the "path" selector that finds an element by following the form-element-path plugin.
      * <p>
-     * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
+     * <a href="https://plugins.jenkins.io/form-element-path/">form-element-path-plugin</a>
      */
     @Override
     public By path(String rel) {

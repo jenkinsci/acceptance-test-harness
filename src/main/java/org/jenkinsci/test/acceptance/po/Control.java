@@ -117,7 +117,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     /**
      * like click but will block for up to 30 seconds until the underlying web element has become stale.
-     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     * see <a href="https://www.cloudbees.com/blog/get-selenium-to-wait-for-page-load/">Get Selenium to wait for page load</a>
      */
     /*package*/ void clickAndWaitToBecomeStale() {
         clickAndWaitToBecomeStale(Duration.ofSeconds(30));
@@ -125,7 +125,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     /**
      * like click but will block until the underlying web element has become stale.
-     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     * see <a href="https://www.cloudbees.com/blog/get-selenium-to-wait-for-page-load">Get Selenium to wait for page load</a>
      * @param timeout the amount of time to wait
      */
     /*package*/ void clickAndWaitToBecomeStale(Duration timeout) {
@@ -137,7 +137,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
 
     /**
-     * The existing {@link org.jenkinsci.test.acceptance.po.Control#set(String)}
+     * The existing {@link Control#set(String)}
      * method has shortcomings regarding large strings because it utilizes
      * the sendKeys mechanism to enter the string which takes a significant amount
      * of time, i.e. the browser may consider the script to be unresponsive.
@@ -146,7 +146,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * puts the whole string at once into the text field instead of char by char.
      *
      * This is a solution / workaround published for Selenium Issue 4496:
-     * https://code.google.com/p/selenium/issues/detail?id=4469
+     * <a href="https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4469">#4496</a>
      *
      * @param text the large string to be entered
      */

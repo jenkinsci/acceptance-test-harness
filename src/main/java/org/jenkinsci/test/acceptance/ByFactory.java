@@ -96,7 +96,7 @@ public class ByFactory {
     /**
      * Returns the "path" selector that finds an element by following the form-element-path plugin.
      *
-     * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
+     * <a href="https://plugins.jenkins.io/form-element-path/">form-element-path-plugin</a>
      */
     public By path(String path, Object... args) {
         return css("[path='%s']", String.format(path, args));

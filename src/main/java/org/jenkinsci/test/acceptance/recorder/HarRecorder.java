@@ -19,7 +19,7 @@ import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
 /**
  * The system property RECORD_BROWSER_TRAFFIC can be set to either off, failuresOnly or always to control when browser
  * traffic should be recorded when launching tests.
- * Traffic is recorded as a HAR (https://en.wikipedia.org/wiki/.har) file based on all network interactions between the
+ * Traffic is recorded as a HAR (<a href="https://en.wikipedia.org/wiki/HAR_(file_format)">HAR file format</a>) file based on all network interactions between the
  * browser and the Jenkins instance and then add it as JUnit attachment to the test result.
  */
 @GlobalRule
