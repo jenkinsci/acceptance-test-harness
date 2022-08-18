@@ -19,7 +19,7 @@ import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
