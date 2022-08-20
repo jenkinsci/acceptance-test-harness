@@ -105,7 +105,7 @@ public class WinstoneController extends LocalController {
         cb.addAll(JENKINS_OPTS);
 
         cb.env.putAll(commonLaunchEnv());
-        LOGGER.info("Starting Jenkins: " + cb.toString());
+        LOGGER.info("Starting Jenkins: " + cb);
         return cb.popen();
     }
 

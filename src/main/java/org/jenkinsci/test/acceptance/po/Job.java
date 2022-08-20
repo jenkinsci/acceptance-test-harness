@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -172,11 +173,8 @@ public class Job extends TopLevelItem {
     private <T extends Step> T addStep(final Class<T> type, final String section) {
         ensureConfigPage();
 
-        String path = createPageArea('/' + section, new Runnable() {
-            @Override public void run() {
-                control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
-            }
-        });
+        String path = createPageArea('/' + section,
+                () -> control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type));
         return newInstance(type, this, path);
     }
 
@@ -276,7 +274,7 @@ public class Job extends TopLevelItem {
         try {
             tmp = File.createTempFile("jenkins-acceptance-tests", "dir");
             ZipUtil.pack(file, tmp);
-            byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
+            byte[] archive = IOUtils.toByteArray(Files.newInputStream(tmp.toPath()));
 
             if (SystemUtils.IS_OS_WINDOWS) {
                 if (!(controller instanceof LocalController)) {

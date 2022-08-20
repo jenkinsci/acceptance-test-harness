@@ -182,10 +182,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
             }
             return home.getAbsolutePath();
         }
-        catch (IOException ex) {
-            throw new Error(ex);
-        }
-        catch (InterruptedException ex) {
+        catch (IOException | InterruptedException ex) {
             throw new Error(ex);
         }
     }

@@ -470,7 +470,7 @@ public class FallbackConfig extends AbstractModule {
     public File getJenkinsWar(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         try {
             return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"));
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
         }
 
         String version = System.getenv("JENKINS_VERSION");

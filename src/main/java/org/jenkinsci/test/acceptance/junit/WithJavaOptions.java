@@ -35,7 +35,7 @@ public @interface WithJavaOptions {
 
     String[] value();
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Inject
         JenkinsController controller;
 

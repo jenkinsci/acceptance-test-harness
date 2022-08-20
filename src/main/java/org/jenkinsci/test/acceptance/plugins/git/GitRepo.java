@@ -293,7 +293,7 @@ public class GitRepo implements Closeable {
             ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
             channel.connect();
             channel.cd("/home/git");
-            channel.put(new FileInputStream(zippedRepo), zippedFilename);
+            channel.put(Files.newInputStream(zippedRepo.toPath()), zippedFilename);
 
             ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
             InputStream in = channelExec.getInputStream();

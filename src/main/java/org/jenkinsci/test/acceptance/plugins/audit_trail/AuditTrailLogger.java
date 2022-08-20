@@ -51,12 +51,9 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
         final SystemLogger logger = new SystemLogger(jenkins);
 
-        logger.waitFor().until(new Callable<WebElement>() {
-            @Override
-            public WebElement call() throws Exception {
-                logger.open();
-                return logger.getElement(by.xpath("//h1[text()='%s']", logger.name));
-            }
+        logger.waitFor().until(() -> {
+            logger.open();
+            return logger.getElement(by.xpath("//h1[text()='%s']", logger.name));
         });
         return logger;
     }

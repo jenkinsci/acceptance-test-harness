@@ -41,6 +41,6 @@ public interface ExercisedPluginsReporter {
      * @param pluginName Name of Plugin that was installed
      * @param pluginVersion Version of Plugin that was installed
      */
-    public void log(String testName, String pluginName, String pluginVersion);
+    void log(String testName, String pluginName, String pluginVersion);
 
 }

@@ -27,11 +27,8 @@ public class WorkflowMultiBranchJob extends Folder {
     public <T extends BranchSource> T addBranchSource(final Class<T> type) {
         ensureConfigPage();
 
-        final String path = createPageArea("/sources", new Runnable() {
-            @Override public void run() {
-                control(by.path("/hetero-list-add[sources]")).selectDropdownMenu(type);
-            }
-        });
+        final String path = createPageArea("/sources",
+                () -> control(by.path("/hetero-list-add[sources]")).selectDropdownMenu(type));
 
         return newInstance(type, this, path + "/source");
     }
@@ -47,12 +44,7 @@ public class WorkflowMultiBranchJob extends Folder {
     public WorkflowMultiBranchJob waitForBranchIndexingFinished(final int timeout) {
         waitFor()
             .withTimeout(super.time.seconds(timeout), TimeUnit.MILLISECONDS)
-            .until(new Callable<Boolean>() {
-                @Override
-                public Boolean call() {
-                    return WorkflowMultiBranchJob.this.getBranchIndexingLog().contains("Finished: ");
-                }
-            });
+            .until(() -> WorkflowMultiBranchJob.this.getBranchIndexingLog().contains("Finished: "));
 
         return this;
     }

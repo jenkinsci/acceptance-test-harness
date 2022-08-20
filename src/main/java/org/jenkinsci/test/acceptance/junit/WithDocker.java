@@ -36,7 +36,7 @@ public @interface WithDocker {
      */
     boolean localOnly() default false;
     
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Inject
         Docker docker;
 

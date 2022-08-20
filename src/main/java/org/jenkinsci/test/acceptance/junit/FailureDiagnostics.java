@@ -65,13 +65,9 @@ public class FailureDiagnostics extends TestWatcher {
      * @param content Content to write.
      */
     public void write(String filename, String content) {
-        FileWriter writer = null;
         try {
-            try {
-                writer = new FileWriter(touch(filename));
+            try (FileWriter writer = new FileWriter(touch(filename))) {
                 writer.write(content);
-            } finally {
-                if (writer != null) writer.close();
             }
         } catch (IOException e) {
             throw new Error(e);

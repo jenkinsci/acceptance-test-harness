@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Properties;
 
 /**
@@ -29,7 +30,7 @@ public class SauceLabsConnection {
             throw new IOException("SauceLabs connection file is missing: "+conf);
 
         Properties props = new Properties();
-        try (InputStream is = new FileInputStream(conf)) {
+        try (InputStream is = Files.newInputStream(conf.toPath())) {
             props.load(is);
         }
         username = props.getProperty("username");

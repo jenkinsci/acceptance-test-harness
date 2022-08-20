@@ -51,16 +51,13 @@ public class TestLifecycle implements Scope {
 
     @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> base) {
-        return new Provider<T>() {
-            @Override
-            public T get() {
-                Map m = testScopeObjects.get();
-                if (m==null)    return null;
-                T v = (T)m.get(key);
-                if (v==null)
-                    m.put(key, v = base.get());
-                return v;
-            }
+        return () -> {
+            Map m = testScopeObjects.get();
+            if (m==null)    return null;
+            T v = (T)m.get(key);
+            if (v==null)
+                m.put(key, v = base.get());
+            return v;
         };
     }
 }
