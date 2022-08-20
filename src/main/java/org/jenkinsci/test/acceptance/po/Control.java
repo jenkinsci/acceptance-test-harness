@@ -196,7 +196,7 @@ public class Control extends CapybaraPortingLayerImpl {
         click();
         WebElement we = findCaption(type,findDropDownMenuItem);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
         waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
@@ -206,7 +206,7 @@ public class Control extends CapybaraPortingLayerImpl {
         click();
         WebElement we = findDropDownMenuItem.find(displayName);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
         waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
@@ -235,8 +235,7 @@ public class Control extends CapybaraPortingLayerImpl {
             );
             // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
             WebElement menu = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-            WebElement e = findElement(menu, by.link(caption));
-            return e;
+            return findElement(menu, by.link(caption));
         }
     };
 
@@ -271,8 +270,7 @@ public class Control extends CapybaraPortingLayerImpl {
                             "ancestor-or-self::*[contains(@class,'jenkins-select__input dropdownList')]"
             )));
             context.selectByVisibleText(caption);
-            WebElement e = context.getFirstSelectedOption();
-            return e;
+            return context.getFirstSelectedOption();
 
         }
     };

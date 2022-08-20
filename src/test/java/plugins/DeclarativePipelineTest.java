@@ -50,11 +50,9 @@ public class DeclarativePipelineTest extends AbstractJUnitTest {
 
         MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
-        slave.configure(new Callable<Void>() {
-            @Override public Void call() throws Exception {
-                slave.labels.set("remote");
-                return null;
-            }
+        slave.configure((Callable<Void>) () -> {
+            slave.labels.set("remote");
+            return null;
         });
         WorkflowJob toolsEnvAgentJob = jenkins.jobs.create(WorkflowJob.class);
         toolsEnvAgentJob.script.set(

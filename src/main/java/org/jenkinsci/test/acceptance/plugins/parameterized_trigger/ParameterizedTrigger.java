@@ -28,11 +28,7 @@ public class ParameterizedTrigger extends AbstractStep implements PostBuildStep 
      * Note that newly added trigger has one entry in there by default.
      */
     public TriggerConfig addTriggerConfig() {
-        String path = createPageArea("configs", new Runnable() {
-            @Override public void run() {
-                clickButton("Add trigger...");
-            }
-        });
+        String path = createPageArea("configs", () -> clickButton("Add trigger..."));
         return new TriggerConfig(this, path);
     }
 }

@@ -182,7 +182,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
     protected RuntimeException timeoutException(String message, Throwable lastException) {
         if (predicate != null) {
             String diagnosis = predicate.diagnose(lastException, message);
-            if (diagnosis != null && diagnosis != "") {
+            if (diagnosis != null && !diagnosis.equals("")) {
                 message += ". " + diagnosis;
             }
         }

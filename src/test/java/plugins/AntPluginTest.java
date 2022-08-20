@@ -74,15 +74,13 @@ public class AntPluginTest extends AbstractJUnitTest {
     }
 
     private Build buildHelloWorld(final String name) {
-        job.configure(new Callable<Object>() {
-            @Override public Object call() {
-                job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
-                AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
-                if (name!=null)
-                    ant.antName.select(name);
-                ant.targets.set("hello");
-                return null;
-            }
+        job.configure(() -> {
+            job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
+            AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
+            if (name!=null)
+                ant.antName.select(name);
+            ant.targets.set("hello");
+            return null;
         });
 
         return job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");

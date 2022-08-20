@@ -40,7 +40,7 @@ import com.google.inject.Inject;
 @RuleAnnotation(value = WithOS.RuleImpl.class, priority = -10)
 public @interface WithOS {
 
-    public enum OS {
+    enum OS {
         WINDOWS,
         LINUX,
         MAC
@@ -48,7 +48,7 @@ public @interface WithOS {
     
     OS[] os();
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Inject JenkinsController controller;
         
         @Override

@@ -117,11 +117,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
                         gtGerrituser + "@" + gtHostname, "gerrit",
                         "review", obj.getString("number") + ",1", "--abandon");
                 logProcessBuilderIssues(gerritAbandon, "gerrit abandon");
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.getMessage());
-            } catch (IOException e) {
-                LOGGER.warning(e.getMessage());
-            } catch (JSONException e) {
+            } catch (InterruptedException | IOException | JSONException e) {
                 LOGGER.warning(e.getMessage());
             }
         }
