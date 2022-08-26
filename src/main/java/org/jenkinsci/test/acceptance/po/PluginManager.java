@@ -313,7 +313,7 @@ public class PluginManager extends ContainerPageObject {
         }
     }
 
-    private VersionNumber getAvailableVersionForPlugin(String pluginName) {
+    public VersionNumber getAvailableVersionForPlugin(String pluginName) {
         // assuming we are on 'available' or 'updates' page
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
