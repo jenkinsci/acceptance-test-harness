@@ -318,7 +318,24 @@ public class PluginManager extends ContainerPageObject {
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(pluginName);
-        String version = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/ancestor::tr", pluginName)).getAttribute("data-plugin-version");
+        
+        // DEV MEMO: There is a {@code data-plugin-version} attribute on the {@code tr} tag holding the plugin line entry in the
+        // plugin manager. By selecting the line, we can then retrieve the version directly without having to parse the line's content.
+        final String xpathToPluginLine = "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr";
+
+        // DEV MEMO: To avoid flakiness issues, wait for the text to be entirely written in the search box, and
+        // wait for the list below to be properly refreshed and for the element we are searching for to be displayed.
+        // If not, the list might not be properly refreshed and the element would never be found.
+        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+            try {
+                check(find(by.xpath(xpathToPluginLine, pluginName)));
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return false;
+            }
+            return true;
+        });
+        
+        String version = find(by.xpath(xpathToPluginLine, pluginName)).getAttribute("data-plugin-version");
         return new VersionNumber(version);
     }
 
