@@ -96,8 +96,8 @@ public class InstallWizardTest extends AbstractJUnitTest {
         WizardCustomizeJenkins wizardCustomize = new WizardCustomizeJenkins(jenkins);
         wizardCustomize.doSelectPluginsToInstall();
         wizardCustomize.deselectAll();
-        wizardCustomize.searchPlugin("MSBuild");
-        wizardCustomize.selectPlugin("msbuild");
+        wizardCustomize.searchPlugin("JUnit");
+        wizardCustomize.selectPlugin("junit");
         wizardCustomize.startInstall();
 
         wizardCustomize.shouldFinishInstallSuccessfully();
