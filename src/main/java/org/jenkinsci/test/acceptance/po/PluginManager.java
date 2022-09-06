@@ -95,31 +95,34 @@ public class PluginManager extends ContainerPageObject {
      * Force update the plugin update center metadata.
      */
     public void checkForUpdates() {
-        mockUpdateCenter.ensureRunning(jenkins);
-        visit("index");
-        final String current = getCurrentUrl();
-        // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
-        // We use the button itself to detect when the page has changed, which happens after the refresh has been done
-        // And we check for the presence of the button again
-        WebElement checkButton = find(by.link("Check now"));
-        checkButton.click();
-        // The wait criteria is: we have left the current page and returned to the same one
-        waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
-            try {
-                // We interact with the element just to detect if it is stale
-                webElement.findElement(by.id("it does not matter"));
-            } catch(StaleElementReferenceException e) {
-                // with this exception we know we've left the original page
-                // we look for an element in the page to check for success
-                if (current.equals(getCurrentUrl())) {
-                    return true;
+        boolean isRunning = mockUpdateCenter.ensureRunning(jenkins);
+        if (isRunning) {
+            visit("index");
+            final String current = getCurrentUrl();
+            // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
+            // We use the button itself to detect when the page has changed, which happens after the refresh has been done
+            // And we check for the presence of the button again
+            WebElement checkButton = find(by.link("Check now"));
+            checkButton.click();
+            // The wait criteria is: we have left the current page and returned to the same one
+            waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
+                try {
+                    // We interact with the element just to detect if it is stale
+                    webElement.findElement(by.id("it does not matter"));
+                } catch(StaleElementReferenceException e) {
+                    // with this exception we know we've left the original page
+                    // we look for an element in the page to check for success
+                    if (current.equals(getCurrentUrl())) {
+                        return true;
+                    }
+                } catch(NoSuchElementException e) {
+                    return false;
                 }
-            } catch(NoSuchElementException e) {
                 return false;
-            }
-            return false;
-        });
-        updated = true;
+            });
+            updated = true;
+
+        }
     }
 
     public enum InstallationStatus {NOT_INSTALLED, OUTDATED, UP_TO_DATE}

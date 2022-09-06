@@ -84,20 +84,21 @@ public class MockUpdateCenter implements AutoCleaned {
 
     private HttpServer server;
 
-    public void ensureRunning(Jenkins jenkins) {
+    public boolean ensureRunning(Jenkins jenkins) {
         if (original != null) {
-            return;
+            return false;
         }
         JsonNode ucNode = new UpdateCenter(jenkins).getJson("tree=sites[url,id]");
         List<String> sites = ucNode.findValuesAsText("url");
         List<String> ids = ucNode.findValuesAsText("id");
+        LOGGER.log(Level.INFO, "update sites: {0}", sites);
         if (sites.size() != 1) {
             // TODO ideally it would rather delegate to all of them, but that implies deprecating CachedUpdateCenterMetadataLoader.url and using whatever site(s) Jenkins itself specifies
             LOGGER.log(Level.WARNING, "found an unexpected number of update sites: {0}", sites);
-            return;
+            return false;
         } else if (!"default".equals(ids.get(0))) {
             LOGGER.log(Level.WARNING, "the default update site has been replaced by a site with id: {0}. Will not setup the mock update center", ids.get(0));
-            return;
+            return false;
         }
         UpdateCenterMetadata ucm;
         try {
@@ -142,7 +143,7 @@ public class MockUpdateCenter implements AutoCleaned {
             }
         } catch (JSONException | NoSuchAlgorithmException | IOException x) {
             LOGGER.log(Level.WARNING, "cannot prepare mock update center", x);
-            return;
+            return false;
         }
         HttpProcessor proc = HttpProcessorBuilder.create().
             add(new ResponseServer("MockUpdateCenter")).
@@ -195,7 +196,7 @@ public class MockUpdateCenter implements AutoCleaned {
             server.start();
         } catch (IOException x) {
             LOGGER.log(Level.WARNING, "cannot start mock update center", x);
-            return;
+            return false;
 
         }
         original = sites.get(0);
@@ -203,6 +204,7 @@ public class MockUpdateCenter implements AutoCleaned {
         String override = "http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/update-center.json";
         LOGGER.log(Level.INFO, "replacing update site {0} with {1}", new Object[] {original, override});
         jenkins.runScript("DownloadService.signatureCheck = false; Jenkins.instance.updateCenter.sites.replaceBy([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", override);
+        return true;
     }
 
     private ExceptionLogger serverExceptionHandler() {
