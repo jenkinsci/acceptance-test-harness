@@ -2,7 +2,7 @@
 #
 # see docs/DOCKER.md for usage
 
-FROM centos:7
+FROM centos:8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ## Always install the latest version of these packages.
