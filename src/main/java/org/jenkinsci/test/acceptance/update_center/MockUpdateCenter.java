@@ -91,7 +91,6 @@ public class MockUpdateCenter implements AutoCleaned {
         JsonNode ucNode = new UpdateCenter(jenkins).getJson("tree=sites[url,id]");
         List<String> sites = ucNode.findValuesAsText("url");
         List<String> ids = ucNode.findValuesAsText("id");
-        LOGGER.log(Level.INFO, "update sites: {0}", sites);
         if (sites.size() != 1) {
             // TODO ideally it would rather delegate to all of them, but that implies deprecating CachedUpdateCenterMetadataLoader.url and using whatever site(s) Jenkins itself specifies
             LOGGER.log(Level.WARNING, "found an unexpected number of update sites: {0}", sites);
