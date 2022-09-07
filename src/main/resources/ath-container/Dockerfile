@@ -3,7 +3,6 @@
 # see docs/DOCKER.md for usage
 
 FROM centos:7
-LABEL maintainer="ogondza@gmail.com"
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ## Always install the latest version of these packages.
