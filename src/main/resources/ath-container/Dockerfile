@@ -3,8 +3,10 @@
 # see docs/DOCKER.md for usage
 
 FROM centos:7
-MAINTAINER ogondza@gmail.com
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+## Always install the latest version of these packages.
+# hadolint ignore=DL3033
 RUN yum -y install \
         curl \
         docker \
@@ -41,7 +43,7 @@ ENV gid $gid
 EXPOSE 5942
 
 RUN groupadd ath-user -g $gid && \
-    useradd ath-user -u $uid -g $gid -m -d /home/ath-user && \
+    useradd ath-user -l -u $uid -g $gid -m -d /home/ath-user && \
     # Give permission to modify the alternatives links to change the java version in use
     chown ath-user:ath-user /etc/alternatives
 
@@ -64,9 +66,9 @@ RUN touch /home/ath-user/.Xauthority
 USER root
 RUN chmod ug+s /usr/bin/docker* # In Centos, the actual binaries are hidden behind a shim so update them all
 
-ADD vnc.sh /usr/bin/
-ADD set-java.sh /usr/bin/
-ADD run.sh /usr/bin/
+COPY vnc.sh /usr/bin/
+COPY set-java.sh /usr/bin/
+COPY run.sh /usr/bin/
 
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
