@@ -1,1 +1,1 @@
-echo skipped
+echo 'skipped'
