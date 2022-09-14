@@ -38,7 +38,6 @@
     <maven.version>3.3.9</maven.version>
     <groovy.version>3.0.12</groovy.version>
     <monte.version>0.7.7.0</monte.version>
-    <mockito.version>1.10.19</mockito.version>
     <slf4j.version>2.0.0</slf4j.version>
     <!-- TODO remove these when we can finally switch to Java 11 requirements -->
     <maven.compiler.release>8</maven.compiler.release>
@@ -393,8 +392,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>${mockito.version}</version>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -406,6 +404,13 @@
           <groupId>org.hamcrest</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <!-- Keep in sync with mockito-core's version -->
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>1.12.14</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
