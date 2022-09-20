@@ -38,7 +38,7 @@
     <maven.version>3.3.9</maven.version>
     <groovy.version>3.0.12</groovy.version>
     <monte.version>0.7.7.0</monte.version>
-    <slf4j.version>2.0.0</slf4j.version>
+    <slf4j.version>2.0.2</slf4j.version>
     <!-- TODO remove these when we can finally switch to Java 11 requirements -->
     <maven.compiler.release>8</maven.compiler.release>
     <maven.compiler.testRelease>8</maven.compiler.testRelease>
