@@ -73,6 +73,6 @@ COPY run.sh /usr/bin/
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
 
-# Java 8 by default
+# Java 11 by default
 USER ath-user
-RUN set-java.sh 8
+RUN set-java.sh 11
