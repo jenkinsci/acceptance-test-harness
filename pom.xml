@@ -282,9 +282,9 @@
       <version>2.2</version>
     </dependency>
     <dependency>
-      <groupId>org.jvnet.hudson</groupId>
+      <groupId>org.jenkins-ci</groupId>
       <artifactId>trilead-ssh2</artifactId>
-      <version>build212-hudson-6</version>
+      <version>build-217-jenkins-223.v546f979619d4</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
