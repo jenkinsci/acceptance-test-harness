@@ -309,11 +309,6 @@
       <classifier>native</classifier>
     </dependency>
     <dependency>
-      <groupId>org.ini4j</groupId>
-      <artifactId>ini4j</artifactId>
-      <version>0.5.4</version>
-    </dependency>
-    <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>crypto-util</artifactId>
       <version>1.7</version>
