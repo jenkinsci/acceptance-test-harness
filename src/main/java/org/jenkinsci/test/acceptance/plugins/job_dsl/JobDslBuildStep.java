@@ -2,8 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
 
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.test.acceptance.po.*;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
-import org.openqa.selenium.By;
 
 /**
  * Encapsulates the PageArea of the Job DSL plugin.

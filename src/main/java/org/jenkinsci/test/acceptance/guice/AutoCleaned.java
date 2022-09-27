@@ -5,7 +5,7 @@ import java.io.Closeable;
 /**
  * Marks instances that want to run some shutdown action
  * at the end of their scope.
- *
+ * <p>
  * When a test scope exits, all the existing instances that implement this interface
  * gets its {@link #close()} method invoked.
  *

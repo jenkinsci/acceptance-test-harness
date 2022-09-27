@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.mailer;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
-import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;

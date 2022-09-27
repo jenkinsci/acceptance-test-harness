@@ -10,7 +10,6 @@ import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 
 import static java.util.Arrays.*;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -63,7 +62,7 @@ public class UpdateCenter extends ContainerPageObject {
 
     /**
      * Wait for the plugin installation is done.
-     *
+     * <p>
      * Wait for all UC jobs are completed. If some of them fail or require restart, Jenkins is restarted.
      * If some of the plugins is not installed after that or the version is older than expected, the waiting is considered failed.
      *

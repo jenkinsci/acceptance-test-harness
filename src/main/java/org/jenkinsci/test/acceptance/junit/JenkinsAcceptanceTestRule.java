@@ -5,7 +5,6 @@ import com.google.inject.Injector;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.junit.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestRule;
@@ -13,7 +12,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.jvnet.hudson.annotation_indexer.Index;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;

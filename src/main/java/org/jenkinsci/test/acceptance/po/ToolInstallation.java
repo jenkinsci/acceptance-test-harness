@@ -32,7 +32,6 @@ import java.util.concurrent.TimeUnit;
 import hudson.util.VersionNumber;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.openqa.selenium.NoSuchElementException;
 

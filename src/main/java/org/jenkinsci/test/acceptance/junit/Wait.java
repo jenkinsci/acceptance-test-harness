@@ -91,7 +91,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     /**
      * Create wait with configurable timer.
-     *
+     * <p>
      * This is useful for timeout waiting for tasks to complete that might be dependent on test environment.
      */
     public Wait(Subject input, ElasticTime time) {
@@ -196,7 +196,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
         /**
          * Create additional text description on the failure.
-         *
+         * <p>
          * Both lastException and message will be reported separately.
          */
         public abstract String diagnose(Throwable lastException, String message);

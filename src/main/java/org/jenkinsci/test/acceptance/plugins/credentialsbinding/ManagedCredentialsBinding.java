@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.credentialsbinding;
 
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
-import org.openqa.selenium.WebElement;
 
 public class ManagedCredentialsBinding extends ContainerPageObject {
 

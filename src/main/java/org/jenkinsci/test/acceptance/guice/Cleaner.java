@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 /**
  * Performs clean-up tasks at the end of scope.
- *
+ * <p>
  * Tests and their decorators can add stuff to this cleaner to ensure some cleanup operation
  * happens at the end of each test.
  *

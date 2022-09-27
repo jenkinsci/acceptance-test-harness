@@ -10,12 +10,11 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
  * Allow local plugins specified via environment variables to override plugin metadata from update center.
- *
+ * <p>
  * This is to support testing of locally built plugin
  *
  * @author Kohsuke Kawaguchi

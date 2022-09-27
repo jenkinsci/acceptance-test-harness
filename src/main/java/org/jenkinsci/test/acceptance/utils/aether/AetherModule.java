@@ -27,7 +27,7 @@ import java.util.Set;
 
 /**
  * Hook up Aether resolver.
- *
+ * <p>
  * To resolve components, inject {@link RepositorySystem} and {@link RepositorySystemSession}.
  *
  * @author Kohsuke Kawaguchi
