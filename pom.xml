@@ -212,11 +212,6 @@
 
     <!-- other random stuff -->
     <dependency>
-      <groupId>commons-net</groupId>
-      <artifactId>commons-net</artifactId>
-      <version>3.8.0</version>
-    </dependency>
-    <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <!--  to match upper bounds -->
