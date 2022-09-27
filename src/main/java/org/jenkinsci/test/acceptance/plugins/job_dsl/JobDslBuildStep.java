@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.job_dsl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.*;
 
 /**
