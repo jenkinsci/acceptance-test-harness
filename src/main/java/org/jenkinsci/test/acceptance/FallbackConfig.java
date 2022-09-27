@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.client.ClientUtil;
 import org.apache.commons.exec.OS;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
