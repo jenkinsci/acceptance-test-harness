@@ -39,9 +39,6 @@
     <groovy.version>3.0.13</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <slf4j.version>2.0.2</slf4j.version>
-    <!-- TODO remove these when we can finally switch to Java 11 requirements -->
-    <maven.compiler.release>8</maven.compiler.release>
-    <maven.compiler.testRelease>8</maven.compiler.testRelease>
   </properties>
 
   <repositories>
@@ -355,7 +352,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20220320</version>
+      <version>20220924</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -419,7 +416,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.9.0</version>
+        <version>5.9.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -540,34 +537,6 @@
             <goals>
               <goal>run</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <!-- overwite parent config so we do not require java 11 prematurely -->
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <dependencies>
-          <dependency>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>extra-enforcer-rules</artifactId>
-            <version>1.6.1</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <id>display-info</id>
-            <goals>
-              <goal>display-info</goal>
-              <goal>enforce</goal>
-            </goals>
-            <phase>validate</phase>
-            <configuration>
-              <rules>
-                <enforceBytecodeVersion>
-                  <maxJdkVersion>1.8</maxJdkVersion>
-                </enforceBytecodeVersion>
-              </rules>
-            </configuration>
           </execution>
         </executions>
       </plugin>
