@@ -269,7 +269,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>trilead-ssh2</artifactId>
-      <version>build-217-jenkins-223.v546f979619d4</version>
+      <version>build-217-jenkins-231.vda_87ca_d57ecf</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
