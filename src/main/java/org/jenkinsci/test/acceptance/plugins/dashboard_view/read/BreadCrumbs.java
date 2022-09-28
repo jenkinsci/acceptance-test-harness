@@ -18,13 +18,10 @@ public class BreadCrumbs extends PageAreaImpl {
     /**
      * The path to the breadcrumbs list.
      */
-    final By nameCrumb = By.xpath("//ul[@id=\"breadcrumbs\"]");
+    final By nameCrumb = By.xpath("//ol[@id=\"breadcrumbs\"] | //ul[@id=\"breadcrumbs\"]");
 
     /**
      * Create a new object for reading the breadcrumbs in the dashboard view.
-     *
-     * @param context
-     * @param path
      */
     public BreadCrumbs(PageObject context, String path) {
         super(context, path);

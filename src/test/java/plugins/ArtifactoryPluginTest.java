@@ -25,6 +25,7 @@ import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
@@ -133,7 +134,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
             @Override
             public Boolean call() throws Exception {
                 try {
-                    String s = IOUtils.toString(artifactory.getPingURL().openStream());
+                    String s = IOUtils.toString(artifactory.getPingURL().openStream(), StandardCharsets.UTF_8);
                     return s.contains("OK");
                 } catch (IOException e) {//catching IOException when server in not fully up and retuning 503
                     return null;

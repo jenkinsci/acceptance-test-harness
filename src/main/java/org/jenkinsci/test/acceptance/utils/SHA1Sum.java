@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.utils;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
@@ -54,7 +55,7 @@ public class SHA1Sum {
         byte[] buffer = new byte[8192];
 
         MessageDigest digest = MessageDigest.getInstance("SHA-1");
-        try (InputStream fis = new FileInputStream(file)) {
+        try (InputStream fis = Files.newInputStream(file.toPath())) {
             while (n != -1) {
                 n = fis.read(buffer);
                 if (n > 0) {

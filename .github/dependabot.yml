@@ -9,6 +9,8 @@ updates:
     ignore:
       # Selenium requires co-ordinated changes in consuming projects also due to the use of containers for webdriver
       - dependency-name: "org.seleniumhq.selenium:*"
+      # Kept in sync with the version mockito-core uses
+      - dependency-name: "net.bytebuddy:byte-buddy"
   - package-ecosystem: "docker"
     directory: "src/main/resources/ath-container"
     schedule:
@@ -65,4 +67,7 @@ updates:
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/Tomcat7Container"
     schedule:
       interval: "weekly"
-
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

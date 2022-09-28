@@ -44,11 +44,7 @@ public class ListView extends View {
      * @return The new dashboard column.
      */
     public <T extends ListViewColumn> T addColumn(final Class<T> type) {
-        String path = createPageArea("/columns", new Runnable() {
-            @Override public void run() {
-                control("/hetero-list-add[columns]").selectDropdownMenu(type);
-            }
-        });
+        String path = createPageArea("/columns", () -> control("/hetero-list-add[columns]").selectDropdownMenu(type));
         T col = newInstance(type, this, path);
         columns.add(col);
         return col;

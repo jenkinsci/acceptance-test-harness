@@ -27,11 +27,12 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  * Especially in the configuration page, the floating DIVs at the top and
  * the bottom of the pages can interfere with WebDriver trying to click
  * the elements underneath it.
- *
+ * <p>
  * At least on Chrome (and possibly in other browsers), trying to interact
  * with an element when it's below another element causes the following error:
  *
  * <pre>
+ * {@code
  * Tests run: 3, Failures: 0, Errors: 2, Skipped: 0, Time elapsed: 227.711 sec <<< FAILURE! - in plugins.AntPluginTest
  * autoInstallAnt(plugins.AntPluginTest)  Time elapsed: 73.932 sec  <<< ERROR!
  * org.openqa.selenium.WebDriverException: unknown error: Element is not clickable at point (506, 967). Other element would receive the click: <div class="bottom-sticker-inner">...</div>
@@ -63,11 +64,12 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  * 	at org.jenkinsci.test.acceptance.po.JenkinsConfig.addTool(JenkinsConfig.java:35)
  * 	at org.jenkinsci.test.acceptance.plugins.ant.AntInstallation.install(AntInstallation.java:37)
  * 	at plugins.AntPluginTest.autoInstallAnt(AntPluginTest.java:76)
+ * 	}
  * </pre>
  *
  * <p>
  * This work around simply tries to scroll the element into a view before we interact with this.
- * Originally developed in Ruby version of selenium-tests in <tt>lib/jenkins/capybara.rb</tt>.
+ * Originally developed in Ruby version of selenium-tests in {@code lib/jenkins/capybara.rb}.
  *
  * @author ogondza
  * @author Kohsuke Kawaguchi

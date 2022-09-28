@@ -84,11 +84,8 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     }
 
     public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {
-        final String path = createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators", new Runnable() {
-            @Override public void run() {
-                control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]")).selectDropdownMenu(type);
-            }
-        });
+        final String path = createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators",
+                () -> control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]")).selectDropdownMenu(type));
 
         return newInstance(type, this, path);
     }

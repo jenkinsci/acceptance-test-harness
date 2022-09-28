@@ -23,9 +23,6 @@ public class ColumnsArea extends PageAreaImpl {
 
     /**
      * Creates a new PageArea for the config list of columns that should be shown in the default job list.
-     *
-     * @param context
-     * @param path
      */
     public ColumnsArea(PageObject context, String path) {
         super(context, path);
@@ -76,7 +73,7 @@ public class ColumnsArea extends PageAreaImpl {
     /**
      * Provides a simple enumeration for all possible Columns.
      */
-    public static enum Column {
+    public enum Column {
         STATUS("Status"), WEATHER("Weather"), NAME("Name"), LAST_SUCCESS("Last Success"),
         LAST_FAILURE("Last Failure"), LAST_STABLE("Last Stable"), LAST_DURATION("Last Duration"),
         BUILD_BUTTON("Build Button");

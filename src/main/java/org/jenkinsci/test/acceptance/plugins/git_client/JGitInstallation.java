@@ -22,12 +22,7 @@ public class JGitInstallation extends ToolInstallation {
         final Control button = toolsPage.control(by.button("Add " + name));
 
         String pathPrefix =  button.resolve().getAttribute("path").replaceAll(Pattern.quote("hetero-list-add[tool]"), "tool");
-        return ToolInstallation.addTool(jenkins, JGitInstallation.class, pathPrefix, new Runnable() {
-            @Override
-            public void run() {
-                button.selectDropdownMenu("JGit");
-            }
-        });
+        return ToolInstallation.addTool(jenkins, JGitInstallation.class, pathPrefix, () -> button.selectDropdownMenu("JGit"));
     }
 
 }

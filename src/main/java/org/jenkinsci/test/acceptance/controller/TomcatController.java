@@ -20,7 +20,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 
 /**
- * @author: Vivek Pandey
+ * @author Vivek Pandey
  */
 public class TomcatController extends LocalController {
 

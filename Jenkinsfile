@@ -24,6 +24,16 @@ if (needSplittingFromWorkspace) {
 } else {
   splits = splitTests count(10)
 }
+
+branches['CI'] = {
+  stage('CI') {
+    node('maven-11') {
+      checkout scm 
+      sh "mvn verify --no-transfer-progress -DskipTests -P jenkins-release"
+    }
+  }
+}
+
 for (int i = 0; i < splits.size(); i++) {
   int index = i
   for (int j in [11]) {

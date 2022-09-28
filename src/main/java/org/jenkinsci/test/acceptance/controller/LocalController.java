@@ -83,9 +83,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     protected LocalController(Injector i) {
         super(i);
         try {
-            jenkinsHome = File.createTempFile("jenkins", "home", new File(WORKSPACE));
-            jenkinsHome.delete();
-            jenkinsHome.mkdirs();
+            jenkinsHome = Files.createTempDirectory(new File(WORKSPACE).toPath(), "jenkins" + "home").toFile();
         } catch (IOException e) {
             throw new RuntimeException("Failed to create a temp file",e);
         }
@@ -393,7 +391,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * Set the flag to run the install wizard.
      * 
-     * @param runInstallWizard - <code>true</code> to run the install wizard
+     * @param runInstallWizard - {@code true} to run the install wizard
      */
     public void setRunInstallWizard(boolean runInstallWizard) {
         this.runInstallWizard = runInstallWizard;

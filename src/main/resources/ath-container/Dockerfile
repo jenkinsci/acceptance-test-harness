@@ -27,7 +27,6 @@ RUN apt-get update && \
         firefox \
         unzip \
         tightvncserver \
-        openjdk-8-jdk \
         openjdk-11-jdk \
         xfonts-base \
         && \
@@ -48,8 +47,8 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
 
 # Maven in repo is not new enough for ATH
 ENV MAVEN_VERSION 3.8.6
-RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
-    tar -xvzf apache-maven-$MAVEN_VERSION-bin.tar.gz -C /opt/ && \
+RUN curl -ffSLO https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-"$MAVEN_VERSION"-bin.tar.gz && \
+    tar -xvzf apache-maven-"$MAVEN_VERSION"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
 ENV PATH="$PATH:/opt/maven/bin"
 
@@ -64,7 +63,7 @@ ENV gid $gid
 EXPOSE 5942
 
 RUN groupadd ath-user -g $gid && \
-    useradd ath-user -u $uid -g $gid -m -d /home/ath-user && \
+    useradd ath-user -l -u $uid -g $gid -m -d /home/ath-user && \
     # Give permission to modify the alternatives links to change the java version in use
     chown ath-user:ath-user /etc/alternatives
 
@@ -86,9 +85,9 @@ RUN touch /home/ath-user/.Xauthority
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
 
-ADD vnc.sh /usr/bin/
-ADD set-java.sh /usr/bin/
-ADD run.sh /usr/bin/
+COPY vnc.sh /usr/bin/
+COPY set-java.sh /usr/bin/
+COPY run.sh /usr/bin/
 
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id

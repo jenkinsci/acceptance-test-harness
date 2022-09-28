@@ -122,6 +122,8 @@ public class MockUpdateCenter implements AutoCleaned {
                 }
                 plugin.put("url", name + ".hpi");
                 updating(plugin, "version", version);
+                // "Avoid IOException: Inconsistent file length" from hudson.model.UpdateCenter
+                updating(plugin, "size", "-1");
                 updating(plugin, "gav", meta.gav);
                 updating(plugin, "requiredCore", meta.requiredCore().toString());
                 updating(plugin, "dependencies", new JSONArray(meta.getDependencies().stream().map(d -> {

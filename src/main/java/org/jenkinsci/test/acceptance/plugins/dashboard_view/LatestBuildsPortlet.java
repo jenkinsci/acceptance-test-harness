@@ -66,7 +66,7 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      * @return the number of builds of the portlet
      */
     public int getNumberOfBuilds() {
-        return Integer.valueOf(this.numberOfBuilds.resolve().getAttribute("value"));
+        return Integer.parseInt(this.numberOfBuilds.resolve().getAttribute("value"));
     }
 
     /**

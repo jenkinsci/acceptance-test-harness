@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 /**
  * Job build step.
- * <p/>
+ * <p>
  * Use {@link Describable} annotation to register an implementation.
  *
  * @author christian.fritz

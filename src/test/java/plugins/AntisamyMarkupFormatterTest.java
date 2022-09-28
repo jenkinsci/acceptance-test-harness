@@ -7,7 +7,7 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 

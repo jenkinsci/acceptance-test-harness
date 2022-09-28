@@ -180,7 +180,7 @@ public class PluginManager extends ContainerPageObject {
      * @deprecated Please be encouraged to use {@link WithPlugins} annotations to statically declare
      * the required plugins you need. If you really do need to install plugins in the middle
      * of a test, as opposed to be in the beginning, then this is the right method.
-     * <p/>
+     * <p>
      * The deprecation marker is to call attention to {@link WithPlugins}. This method
      * is not really deprecated.
      * @return Always false.
@@ -313,14 +313,30 @@ public class PluginManager extends ContainerPageObject {
         }
     }
 
-    private VersionNumber getAvailableVersionForPlugin(String pluginName) {
+    public VersionNumber getAvailableVersionForPlugin(String pluginName) {
         // assuming we are on 'available' or 'updates' page
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(pluginName);
-        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/ancestor::tr/td[2]//span[contains(@class, 'jenkins-label')] | " +
-                "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr/td[3]", pluginName, pluginName)).getText();
-        return new VersionNumber(v);
+        
+        // DEV MEMO: There is a {@code data-plugin-version} attribute on the {@code tr} tag holding the plugin line entry in the
+        // plugin manager. By selecting the line, we can then retrieve the version directly without having to parse the line's content.
+        final String xpathToPluginLine = "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr";
+
+        // DEV MEMO: To avoid flakiness issues, wait for the text to be entirely written in the search box, and
+        // wait for the list below to be properly refreshed and for the element we are searching for to be displayed.
+        // If not, the list might not be properly refreshed and the element would never be found.
+        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+            try {
+                check(find(by.xpath(xpathToPluginLine, pluginName)));
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return false;
+            }
+            return true;
+        });
+        
+        String version = find(by.xpath(xpathToPluginLine, pluginName)).getAttribute("data-plugin-version");
+        return new VersionNumber(version);
     }
 
     /**

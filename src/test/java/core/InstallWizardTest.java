@@ -23,6 +23,7 @@
  */
 package core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
 
 import java.io.IOException;
@@ -36,7 +37,6 @@ import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.WizardCreateAdminUser;
 import org.jenkinsci.test.acceptance.po.WizardCustomizeJenkins;
 import org.jenkinsci.test.acceptance.po.WizardLogin;
-import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.inject.Inject;
@@ -79,7 +79,7 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         // Check that the new user is logged in
         Login login = new Login(jenkins);
-        Assert.assertThat(login, loggedInAs("adminuser"));
+        assertThat(login, loggedInAs("adminuser"));
     }
 
     @Since("2.0")
@@ -96,8 +96,8 @@ public class InstallWizardTest extends AbstractJUnitTest {
         WizardCustomizeJenkins wizardCustomize = new WizardCustomizeJenkins(jenkins);
         wizardCustomize.doSelectPluginsToInstall();
         wizardCustomize.deselectAll();
-        wizardCustomize.searchPlugin("MSBuild");
-        wizardCustomize.selectPlugin("msbuild");
+        wizardCustomize.searchPlugin("JUnit");
+        wizardCustomize.selectPlugin("junit");
         wizardCustomize.startInstall();
 
         wizardCustomize.shouldFinishInstallSuccessfully();
@@ -114,6 +114,6 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         // Check that the new user is logged in
         Login login = new Login(jenkins);
-        Assert.assertThat(login, loggedInAs("adminuser"));
+        assertThat(login, loggedInAs("adminuser"));
     }
 }

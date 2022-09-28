@@ -109,7 +109,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
              try {
                  // With Java11 a link to the package-summary is shown, no frames
                  find(by.partialLinkText("package-summary.html")).click();
-             } catch (NoSuchElementException nse) {
+             } catch (NoSuchElementException ignored) {
              }
          }
 

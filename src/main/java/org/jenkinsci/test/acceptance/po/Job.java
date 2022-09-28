@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -20,13 +21,12 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Base64;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.junit.internal.AssumptionViolatedException;
-import org.openqa.selenium.By;
+import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
@@ -35,8 +35,9 @@ import com.google.inject.Injector;
 
 import static java.util.Objects.requireNonNull;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Job Page object superclass.
@@ -172,11 +173,8 @@ public class Job extends TopLevelItem {
     private <T extends Step> T addStep(final Class<T> type, final String section) {
         ensureConfigPage();
 
-        String path = createPageArea('/' + section, new Runnable() {
-            @Override public void run() {
-                control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type);
-            }
-        });
+        String path = createPageArea('/' + section,
+                () -> control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type));
         return newInstance(type, this, path);
     }
 
@@ -224,7 +222,7 @@ public class Job extends TopLevelItem {
 
     /**
      * Adds a shell step that copies a resource inside the test project into a file on the build machine.
-     * <p/>
+     * <p>
      * Because there's no direct file system access to Jenkins master, we do this by packing file content in
      * base64 and put it as a heredoc in the shell script.
      */
@@ -270,15 +268,13 @@ public class Job extends TopLevelItem {
      * "Copy" any file from the System into the Workspace using a zipFIle.
      *
      * Differentiates when the file is being run on Windows or Unix based machines.
-     * 
-     * @param file
      */
     public void copyFile(File file) {
         File tmp = null;
         try {
             tmp = File.createTempFile("jenkins-acceptance-tests", "dir");
             ZipUtil.pack(file, tmp);
-            byte[] archive = IOUtils.toByteArray(new FileInputStream(tmp));
+            byte[] archive = IOUtils.toByteArray(Files.newInputStream(tmp.toPath()));
 
             if (SystemUtils.IS_OS_WINDOWS) {
                 if (!(controller instanceof LocalController)) {

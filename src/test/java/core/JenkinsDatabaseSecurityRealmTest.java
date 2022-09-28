@@ -25,21 +25,17 @@ package core;
 
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-import static org.hamcrest.Matchers.any;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
+import static org.junit.Assert.assertNull;
 
 @WithPlugins("mailer")
 public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
@@ -73,7 +69,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
 
         jenkins.logout();
 
-        assertEquals(null, jenkins.getCurrentUser().id());
+        assertNull(jenkins.getCurrentUser().id());
     }
 
     @Test

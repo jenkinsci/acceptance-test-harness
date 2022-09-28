@@ -15,11 +15,8 @@ public class WorkflowSharedLibraryGlobalConfig extends PageAreaImpl {
     }
 
     public <T extends WorkflowSharedLibrary> T addSharedLibrary(final Class<T> type) {
-        final String path = createPageArea("libraries", new Runnable() {
-            @Override public void run() {
-                control(by.path(GLOBAL_LIBRARIES_PATH + "/repeatable-add")).click();
-            }
-        });
+        final String path = createPageArea("libraries",
+                () -> control(by.path(GLOBAL_LIBRARIES_PATH + "/repeatable-add")).click());
 
         return newInstance(type, this, path);
     }

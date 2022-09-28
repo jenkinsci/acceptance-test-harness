@@ -19,7 +19,7 @@ import java.util.EnumSet;
 import static java.nio.file.attribute.PosixFilePermission.*;
 
 /**
- * {@link Provider} that generates key (and once and keep it in <tt>~/.ssh/jenkins-selenium-tests4j.pub</tt>
+ * {@link Provider} that generates key (and once and keep it in {@code ~/.ssh/jenkins-selenium-tests4j.pub}
  *
  * @author Kohsuke Kawaguchi
  */

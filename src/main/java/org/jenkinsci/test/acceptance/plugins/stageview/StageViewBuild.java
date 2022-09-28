@@ -55,7 +55,6 @@ public class StageViewBuild {
     /**
      * Return the stageViewItem
      *
-     * @param buildNumber
      * @return specific item
      */
     public StageViewStage getStageViewItem(int buildNumber) {

@@ -6,7 +6,7 @@ import com.google.inject.Injector;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.MethodRule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -145,29 +145,22 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
             }
 
             private void addRule(TreeMap<Integer, Set<TestRule>> rules, int prio, Class<? extends TestRule> impl) {
-                if (rules.get(prio) == null) {
-                    rules.put(prio, new LinkedHashSet<TestRule>());
-                }
+                rules.computeIfAbsent(prio, k -> new LinkedHashSet<>());
                 rules.get(prio).add(injector.getInstance(impl));
             }
 
             private TestRule jenkinsBoot(final TreeMap<Integer, Set<TestRule>> rules) {
-                return new TestRule() {
-                    @Override
-                    public Statement apply(final Statement base, Description description) {
-                        return new Statement() {
-                            @Override public void evaluate() throws Throwable {
-                                controller.start();
-                                // Now it is safe to inject Jenkins
-                                injector.injectMembers(target);
-                                for (Set<TestRule> rg: rules.values()) {
-                                    for (TestRule rule: rg) {
-                                        injector.injectMembers(rule);
-                                    }
-                                }
-                                base.evaluate();
+                return (base1, description1) -> new Statement() {
+                    @Override public void evaluate() throws Throwable {
+                        controller.start();
+                        // Now it is safe to inject Jenkins
+                        injector.injectMembers(target);
+                        for (Set<TestRule> rg: rules.values()) {
+                            for (TestRule rule: rg) {
+                                injector.injectMembers(rule);
                             }
-                        };
+                        }
+                        base1.evaluate();
                     }
                 };
             }

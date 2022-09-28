@@ -29,6 +29,7 @@ import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.openqa.selenium.WebElement;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -50,12 +51,9 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
         final SystemLogger logger = new SystemLogger(jenkins);
 
-        logger.waitFor().until(new Callable<WebElement>() {
-            @Override
-            public WebElement call() throws Exception {
-                logger.open();
-                return logger.getElement(by.xpath("//h1[text()='%s']", logger.name));
-            }
+        logger.waitFor().until(() -> {
+            logger.open();
+            return logger.getElement(by.xpath("//h1[text()='%s']", logger.name));
         });
         return logger;
     }
@@ -88,7 +86,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
     /**
      * Expose file through /userContent/ and wrap in Logger.
-     * <p/>
+     * <p>
      * Traditional logger in no longer created after Audit Trail 2.0
      */
     private static class ExposedFile extends AuditTrailLogger {
@@ -126,7 +124,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         public List<String> getEvents() {
             try {
                 List<String> events = new ArrayList<>();
-                for (String line : (List<String>) IOUtils.readLines(url.openStream())) {
+                for (String line : (List<String>) IOUtils.readLines(url.openStream(), StandardCharsets.UTF_8)) {
                     Matcher m = LOG_PATTERN.matcher(line);
                     m.find();
                     events.add(m.group(1));
@@ -141,7 +139,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
 
         private String getContent() {
             try {
-                return IOUtils.toString(url.openStream());
+                return IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
             }
             catch (IOException ex) {
                 throw new AssertionError("Audit trail log not exposed", ex);
