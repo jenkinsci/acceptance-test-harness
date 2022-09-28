@@ -34,7 +34,6 @@
     <selenium.version>3.141.59</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
-    <jackson.bom.version>2.12.1</jackson.bom.version>
     <maven.version>3.3.9</maven.version>
     <groovy.version>3.0.13</groovy.version>
     <monte.version>0.7.7.0</monte.version>
@@ -168,7 +167,7 @@
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>htmlunit-driver</artifactId>
-      <version>2.33.0</version>
+      <version>2.64.0</version>
     </dependency>
     <dependency>
       <groupId>com.codeborne</groupId>
