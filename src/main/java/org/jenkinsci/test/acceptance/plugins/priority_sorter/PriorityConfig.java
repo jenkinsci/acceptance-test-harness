@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.priority_sorter;
 
 import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.NoSuchElementException;
 
 @ActionPageObject("advanced-build-queue")
 public class PriorityConfig extends Action {

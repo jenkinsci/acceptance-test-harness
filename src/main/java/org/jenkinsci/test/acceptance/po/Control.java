@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import edu.umd.cs.findbugs.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
@@ -141,10 +140,10 @@ public class Control extends CapybaraPortingLayerImpl {
      * method has shortcomings regarding large strings because it utilizes
      * the sendKeys mechanism to enter the string which takes a significant amount
      * of time, i.e. the browser may consider the script to be unresponsive.
-     *
+     * <p>
      * This method method shall provide a high throughput mechanism which
      * puts the whole string at once into the text field instead of char by char.
-     *
+     * <p>
      * This is a solution / workaround published for Selenium Issue 4496:
      * <a href="https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4469">#4496</a>
      *
@@ -168,7 +167,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     /**
      * Sets the value of the input field to the specified text.
-     *
+     * <p>
      * Any existing value gets cleared.
      */
     public void set(@Nullable String text) {

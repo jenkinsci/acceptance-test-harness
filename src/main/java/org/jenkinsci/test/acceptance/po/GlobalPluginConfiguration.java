@@ -8,7 +8,7 @@ import org.openqa.selenium.WebElement;
  *
  * <p>
  * These page areas do not get fixed path name, so we need to figure that out from the hidden "name" field.
- *
+ * <p>
  * TODO: improve core to make this more robust
  *
  * @author Kohsuke Kawaguchi

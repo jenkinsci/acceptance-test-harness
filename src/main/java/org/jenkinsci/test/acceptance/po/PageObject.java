@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -122,13 +121,13 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     /**
      * Capture path attribute of newly created form chunk upon invoking action.
-     *
+     * <p>
      * Consider "Add" button in page area with path "/foo" that is supposed to create new page area with path "/foo/bar"
      * or "/foo/bar[n]". There are several problems with the straightforward approach:
      *  - Created area may or may not be the first one of its kind so figuring the "path" is nontrivial.
      *  - The area may can take a while to render so waiting is needed.
      *  - Even after the markup appears, it can take a while for "path" attribute is added.
-     *
+     * <p>
      * This method properly wait until the new path is known. To be used as:
      *
      * <pre>

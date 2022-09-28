@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hudson.util.VersionNumber;
-import org.jenkinsci.test.acceptance.junit.Since;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Injector;

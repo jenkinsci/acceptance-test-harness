@@ -11,7 +11,7 @@ import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Built-in standard slave type.
- *
+ * <p>
  * To create a new slave into a test, use {@link SlaveController}.
  *
  * @author Kohsuke Kawaguchi

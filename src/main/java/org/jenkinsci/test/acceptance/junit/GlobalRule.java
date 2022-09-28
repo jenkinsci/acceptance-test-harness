@@ -12,7 +12,7 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 
 /**
  * {@link TestRule} to be applied on all tests globally.
- *
+ * <p>
  * Annotate {@link TestRule} to have it run for every test.
  * See {@link RuleAnnotation} optional rule registration.
  *

@@ -20,7 +20,7 @@ import java.security.Security;
 
 /**
  * Configuration injected from outside that holds the SSH key pair that can be used for tests.
- *
+ * <p>
  * This is used for example for test harness to remotely logging in to EC2 instances, or for
  * masters to login to slaves.
  *

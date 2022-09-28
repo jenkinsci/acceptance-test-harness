@@ -16,7 +16,7 @@ import java.util.Map;
 public class TestLifecycle implements Scope {
     /**
      * Records components that are scoped to tests.
-     *
+     * <p>
      * Inherited, so that threads created from within a test can correctly identify its scope.
      */
     private final ThreadLocal<Map> testScopeObjects = new InheritableThreadLocal<>();

@@ -31,7 +31,7 @@ public class LogWatcher implements LogListener {
 
     /**
      * Starts watching an expression in the output.
-     *
+     * <p>
      * Returned future will signal when the expression is found.
      */
     public Future<Matcher> watch(Pattern regexp) {
