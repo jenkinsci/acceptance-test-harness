@@ -4,6 +4,7 @@
 
 FROM ubuntu:22.04
 
+# hadolint ignore=DL3008
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
     gpg-agent \
@@ -12,9 +13,11 @@ RUN apt-get update && \
   apt-get clean all && rm -rf /var/cache/apt
 
 # No Snaps please https://www.omgubuntu.co.uk/2022/04/how-to-install-firefox-deb-apt-ubuntu-22-04
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN add-apt-repository ppa:mozillateam/ppa && \
-  echo 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001' | tee /etc/apt/preferences.d/mozilla-firefox
+  printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001' | tee /etc/apt/preferences.d/mozilla-firefox
 
+# hadolint ignore=DL3008
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     TZ=Etc/UTC \
