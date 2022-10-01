@@ -17,7 +17,7 @@ import com.google.inject.Injector;
 
 /**
  * Runs jenkins.war inside docker so that it gets a different IP address even though it's run on the same host.
- *
+ * <p>
  * For efficiency, the docker container gets the entire host file system bind-mounted on it,
  * and we ssh into that box and start jenkins.
  *

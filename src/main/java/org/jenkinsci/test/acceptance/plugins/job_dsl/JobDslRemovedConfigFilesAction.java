@@ -7,5 +7,5 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
  */
 public enum JobDslRemovedConfigFilesAction {
 
-    IGNORE, DELETE;
+    IGNORE, DELETE
 }

@@ -27,9 +27,8 @@ public class JUnitScreenRecorder extends ScreenRecorder {
     }
 
     @Override
-    protected File createMovieFile(Format fileFormat) throws IOException {
-        final File f = generateOutput(fileFormat);
-        return f;
+    protected File createMovieFile(Format fileFormat) {
+        return generateOutput(fileFormat);
     }
 
     public void removeMovieFile() {

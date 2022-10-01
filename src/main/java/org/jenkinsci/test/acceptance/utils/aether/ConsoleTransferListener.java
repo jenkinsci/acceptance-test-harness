@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
  *    Sonatype, Inc. - initial API and implementation
  *******************************************************************************/
@@ -57,14 +57,14 @@ public class ConsoleTransferListener
     public void transferProgressed( TransferEvent event )
     {
         TransferResource resource = event.getResource();
-        downloads.put( resource, Long.valueOf( event.getTransferredBytes() ) );
+        downloads.put( resource, event.getTransferredBytes());
 
         StringBuilder buffer = new StringBuilder( 64 );
 
         for ( Map.Entry<TransferResource, Long> entry : downloads.entrySet() )
         {
             long total = entry.getKey().getContentLength();
-            long complete = entry.getValue().longValue();
+            long complete = entry.getValue();
 
             buffer.append( getStatus( complete, total ) ).append( "  " );
         }
