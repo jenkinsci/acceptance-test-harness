@@ -53,17 +53,14 @@ public class JobsMixIn extends MixIn {
         // I'm seeing occasional 404 when trying to access the page right after a job is created.
         // so I'm giving it a bit of time before the job properly appears.
         waitFor().withTimeout(3, TimeUnit.SECONDS)
-                .until(new Callable<Object>() {
-                    @Override
-                    public Object call() throws Exception {
-                        try {
-                            j.getJson();
-                            return true;
-                        } catch (Exception e) {
-                            return false;
-                        }
+                .until((Callable<Object>) () -> {
+                    try {
+                        j.getJson();
+                        return true;
+                    } catch (Exception e) {
+                        return false;
                     }
-        });
+                });
 
         return j;
     }

@@ -132,7 +132,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
             @Override
             public String toString() {
-              return isTrue.toString();
+                return isTrue.toString();
             }
         });
     }

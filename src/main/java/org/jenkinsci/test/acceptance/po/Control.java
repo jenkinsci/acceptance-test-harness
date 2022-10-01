@@ -46,24 +46,14 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public Control(PageObject parent, String... paths) {
         super(parent.injector);
-        this.parent = new Owner() {
-            @Override
-            public By path(String rel) {
-                return by.path(rel);
-            }
-        };
+        this.parent = by::path;
         this.relativePaths = paths;
     }
 
     public Control(Injector injector, final By selector) {
         super(injector);
         this.relativePaths = new String[1];
-        this.parent = new Owner() {
-            @Override
-            public By path(String rel) {
-                return selector;
-            }
-        };
+        this.parent = rel -> selector;
     }
 
     public WebElement resolve() {

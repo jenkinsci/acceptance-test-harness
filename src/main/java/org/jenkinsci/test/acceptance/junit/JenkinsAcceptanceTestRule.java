@@ -78,21 +78,16 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
              */
             private Statement decorateWithRules(Statement body) {
 
-                TreeMap<Integer, Set<TestRule>> rules = new TreeMap<Integer, Set<TestRule>>(new Comparator<Integer>() {
-                    @Override
-                    public int compare(Integer o1, Integer o2) {
-                        // Reversed since we apply the TestRule inside out:
-                        return Integer.compare(o2, o1);
-                    }
+                TreeMap<Integer, Set<TestRule>> rules = new TreeMap<>((o1, o2) -> {
+                    // Reversed since we apply the TestRule inside out:
+                    return Integer.compare(o2, o1);
                 });
 
                 collectRuleAnnotations(method, target, rules);
                 collectGlobalRules(rules);
 
                 // Make sure Jenkins is started between -1 and 0
-                if (rules.get(0) == null) {
-                    rules.put(0, new LinkedHashSet<TestRule>());
-                }
+                rules.computeIfAbsent(0, k -> new LinkedHashSet<TestRule>());
                 rules.get(0).add(jenkinsBoot(rules));
 
                 for (Set<TestRule> rulesGroup: rules.values()) {

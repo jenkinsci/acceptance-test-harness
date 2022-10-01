@@ -79,11 +79,6 @@ public class JabberGlobalConfig extends PageAreaImpl {
         public final Control nickname = control("nickname");
         public final Control jenkinsLogin = control("jenkinsLogin");
         public final Control useProxy = control("useProxy");
-
-
-
-
-
     }
 
 

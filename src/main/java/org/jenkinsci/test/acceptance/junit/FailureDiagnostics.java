@@ -108,7 +108,7 @@ public class FailureDiagnostics extends TestWatcher {
                 Files.walk(dir.toPath()).forEach(p -> {
                     if (Files.isRegularFile(p)) {
                         //https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
-                        System.out.println(String.format(JUNIT_ATTACHMENT, p.toAbsolutePath()));
+                        System.out.printf((JUNIT_ATTACHMENT) + "%n", p.toAbsolutePath());
                     }
                 });
             } catch (IOException x) {
