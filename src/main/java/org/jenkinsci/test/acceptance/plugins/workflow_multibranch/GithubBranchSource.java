@@ -45,12 +45,9 @@ public class GithubBranchSource extends BranchSource {
 
     public GithubBranchSource selectRepository(final String repoName) {
         waitFor().withTimeout(10, TimeUnit.SECONDS)
-                .until(new Callable<Object>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        final Select select = new Select(repository.resolve());
-                        return select.getOptions().size() > 0;
-                    }
+                .until((Callable<Object>) () -> {
+                    final Select select = new Select(repository.resolve());
+                    return select.getOptions().size() > 0;
                 });
 
         this.repository.select(repoName);

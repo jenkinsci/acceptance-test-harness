@@ -166,14 +166,14 @@ public class FormValidation {
     public static Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
         StringDescription sd = new StringDescription();
         message.describeTo(sd);
-        return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd.toString()) {
+        return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd) {
             @Override public boolean matchesSafely(FormValidation item) {
                 return item.getKind() == kind && message.matches(item.getMessage());
             }
 
             @Override public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
                 if (item.getKind() != kind) {
-                    mismatchDescription.appendText("It is " + item.toString());
+                    mismatchDescription.appendText("It is " + item);
                 } else {
                     message.describeMismatch(item.getMessage(), mismatchDescription);
                 }

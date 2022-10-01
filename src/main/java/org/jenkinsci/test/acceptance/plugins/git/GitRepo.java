@@ -261,8 +261,7 @@ public class GitRepo implements Closeable {
     }
 
     private File createTempDir(String name) throws IOException {
-        File tmp = Files.createTempDirectory("jenkins" + name).toFile();
-        return tmp;
+        return Files.createTempDirectory("jenkins" + name).toFile();
     }
 
     /**

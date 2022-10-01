@@ -70,12 +70,7 @@ public class Build extends ContainerPageObject {
     public Build waitUntilStarted(int timeout) {
         waitFor().withMessage("Next build of %s is started", job)
                 .withTimeout(timeout, TimeUnit.SECONDS)
-                .until(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() {
-                        return hasStarted();
-                    }
-        });
+                .until(this::hasStarted);
         return this;
     }
 

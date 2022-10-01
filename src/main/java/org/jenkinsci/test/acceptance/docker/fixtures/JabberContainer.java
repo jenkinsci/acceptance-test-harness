@@ -35,8 +35,7 @@ public class JabberContainer extends DockerContainer {
 
     private String getTimestampForLogfile() {
         Date today = new Date();
-        String timestamp = new SimpleDateFormat("yyyyMMdd").format(today);
-        return timestamp;
+        return new SimpleDateFormat("yyyyMMdd").format(today);
     }
 
 }
