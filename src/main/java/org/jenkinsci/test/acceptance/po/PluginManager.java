@@ -3,23 +3,19 @@ package org.jenkinsci.test.acceptance.po;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.temporal.ChronoUnit;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpGet;
 import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
@@ -35,16 +31,7 @@ import org.openqa.selenium.WebElement;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
 
-import static java.util.logging.Level.WARNING;
-import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 

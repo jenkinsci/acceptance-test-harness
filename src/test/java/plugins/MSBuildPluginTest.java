@@ -15,7 +15,7 @@ import org.junit.Test;
 
 /**
  * This test is designed to be run on a Windows machine with MSBuild installed and in the PATH
- * 
+ * <p>
  * Tests will be skipped if:
  *      - MSBUild.exe is not in the path. This implies that machine running Jenkins is windows.
  *      - The test and Jenkins are being run on different machines

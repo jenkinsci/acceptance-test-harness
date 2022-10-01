@@ -53,7 +53,7 @@ public class IOUtil {
             }
         }
 
-        throw new IOException("None of the paths exist: " + Arrays.asList(candidatePaths).toString());
+        throw new IOException("None of the paths exist: " + Arrays.asList(candidatePaths));
     }
 
     /**

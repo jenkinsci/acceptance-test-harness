@@ -37,9 +37,9 @@ import org.apache.commons.io.FileUtils;
 /**
  * Exercised Plugin Reporter that logs to text file
  * The contents are java properties.
- *
+ * <p>
  * Properties will be stored as follows:
- *
+ * <p>
  * {@literal <testName>::<pluginName> = <pluginVersion>}
  *
  * @author scott.hebert@ericsson.com

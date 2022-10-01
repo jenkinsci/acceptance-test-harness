@@ -22,7 +22,7 @@ import static org.junit.Assert.assertFalse;
 public class MatrixAuthPluginTest extends AbstractJUnitTest {
     /**
      * Test scenario:
-     *
+     * <p>
      * - we create admin user "alice" and regular limited user "bob"
      * - alice creates a new project
      * - bob shouldn't be able to see it

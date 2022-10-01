@@ -27,7 +27,7 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 public @interface Describable {
     /**
      * Descriptions.
-     *
+     * <p>
      * The annotation accepts several values as possible alternatives. First that exists will be used.
      */
     String[] value();

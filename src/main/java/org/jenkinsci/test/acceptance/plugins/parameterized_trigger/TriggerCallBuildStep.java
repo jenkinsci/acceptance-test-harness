@@ -22,7 +22,7 @@ public class TriggerCallBuildStep extends AbstractStep implements BuildStep {
 
     /**
      * Adds a new trigger setting.
-     *
+     * <p>
      * Note that newly added trigger has one entry in there by default.
      */
     public BuildTriggerConfig addTriggerConfig() {

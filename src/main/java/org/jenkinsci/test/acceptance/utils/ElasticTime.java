@@ -58,7 +58,7 @@ public class ElasticTime {
 
     /**
      * Relative performance difference compared to reference environment (Upstream CI).
-     *
+     * <p>
      * Default is 1.0 (no difference). Use >1 in case of slower environment, <1 in case of faster one.
      */
     private final double factor = Double.parseDouble(System.getProperty("ElasticTime.factor", "1.0"));

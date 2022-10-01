@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.plugins.git;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -262,8 +261,7 @@ public class GitRepo implements Closeable {
     }
 
     private File createTempDir(String name) throws IOException {
-        File tmp = Files.createTempDirectory("jenkins" + name).toFile();
-        return tmp;
+        return Files.createTempDirectory("jenkins" + name).toFile();
     }
 
     /**

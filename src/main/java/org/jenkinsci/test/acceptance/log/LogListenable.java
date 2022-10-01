@@ -4,7 +4,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 
 /**
  * Produces line-by-line log.
- *
+ * <p>
  * Among other things, optionally implemented by {@link JenkinsController} that provides access
  * to the console output.
  *

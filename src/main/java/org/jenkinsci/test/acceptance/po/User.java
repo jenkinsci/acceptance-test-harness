@@ -26,8 +26,6 @@ package org.jenkinsci.test.acceptance.po;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.openqa.selenium.NoSuchElementException;
 
-import java.util.Objects;
-
 public class User extends ContainerPageObject {
 
     private String id;

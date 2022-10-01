@@ -34,7 +34,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 public @interface Native {
     String[] value();
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
