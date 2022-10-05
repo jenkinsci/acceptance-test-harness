@@ -368,7 +368,7 @@
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>163.v12f007a_0d63f</version>
+      <version>166.v912b_95083ffe</version>
     </dependency>
     <dependency>
       <groupId>com.github.olivergondza.dumpling</groupId>
