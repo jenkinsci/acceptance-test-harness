@@ -37,7 +37,7 @@
     <maven.version>3.3.9</maven.version>
     <groovy.version>3.0.13</groovy.version>
     <monte.version>0.7.7.0</monte.version>
-    <slf4j.version>2.0.2</slf4j.version>
+    <slf4j.version>2.0.3</slf4j.version>
   </properties>
 
   <repositories>
@@ -295,7 +295,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>1.71.1</version>
+      <version>1.72</version>
     </dependency>
     <dependency>
       <groupId>org.zeroturnaround</groupId>
@@ -368,7 +368,7 @@
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>163.v12f007a_0d63f</version>
+      <version>166.v912b_95083ffe</version>
     </dependency>
     <dependency>
       <groupId>com.github.olivergondza.dumpling</groupId>

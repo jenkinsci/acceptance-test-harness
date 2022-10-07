@@ -3,6 +3,13 @@
 
 properties([disableConcurrentBuilds(abortPrevious: true)])
 
+if (env.BRANCH_IS_PRIMARY) {
+  properties([
+          buildDiscarder(logRotator(numToKeepStr: '50')),
+          pipelineTriggers([cron('0 18 * * 2')]),
+  ])
+}
+
 def branches = [:]
 def splits
 def needSplittingFromWorkspace = true
