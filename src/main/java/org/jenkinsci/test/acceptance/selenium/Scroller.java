@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
@@ -16,8 +15,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.WrapsDriver;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
 
 /**
@@ -134,10 +131,6 @@ public class Scroller extends AbstractWebDriverEventListener {
      * or tests, there is likely a framework problem to be fixed.
      */
     public void scrollIntoView(WebElement e, WebDriver driver) {
-        if (driver instanceof HtmlUnitDriver || (driver instanceof WrapsDriver && ((WrapsDriver) driver).getWrappedDriver() instanceof HtmlUnitDriver)) {
-            return;
-        }
-
         WebElement element = e;
         if (Objects.equals(element.getTagName(), "option")) {
             element = e.findElement(By.xpath("..")); // scroll select into view not option

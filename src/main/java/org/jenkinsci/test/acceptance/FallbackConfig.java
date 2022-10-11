@@ -1,7 +1,14 @@
 package org.jenkinsci.test.acceptance;
 
+import static org.jenkinsci.test.acceptance.recorder.HarRecorder.isCaptureHarEnabled;
+
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.client.ClientUtil;
+import com.cloudbees.sdk.extensibility.ExtensionList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import javax.inject.Named;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +24,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.client.ClientUtil;
+import javax.inject.Named;
 import org.apache.commons.exec.OS;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.RepositorySystem;
@@ -41,7 +46,6 @@ import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
-import org.jenkinsci.test.acceptance.utils.SauceLabsConnection;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ConsoleExercisedPluginReporter;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
@@ -62,23 +66,12 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
-
-import com.cloudbees.sdk.extensibility.ExtensionList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import static org.jenkinsci.test.acceptance.recorder.HarRecorder.isCaptureHarEnabled;
 
 /**
  * The default configuration for running tests.
@@ -124,16 +117,12 @@ public class FallbackConfig extends AbstractModule {
             }
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, buildFirefoxOptions(testName));
-        case "firefox-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox-debug:3.141.59", buildFirefoxOptions(testName));
-        case "chrome-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-chrome-debug:3.141.59", new ChromeOptions());
         case "ie":
         case "iexplore":
         case "iexplorer":
             return new InternetExplorerDriver();
         case "chrome":
-            Map<String, String> prefs = new HashMap<String, String>();
+            Map<String, String> prefs = new HashMap<>();
             prefs.put(LANGUAGE_SELECTOR, "en");
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
@@ -146,29 +135,6 @@ public class FallbackConfig extends AbstractModule {
             return new ChromeDriver(options);
         case "safari":
             return new SafariDriver();
-        case "htmlunit":
-            return new HtmlUnitDriver(true);
-        case "saucelabs":
-        case "saucelabs-firefox":
-            DesiredCapabilities caps = DesiredCapabilities.firefox();
-            caps.setCapability("version", "29");
-            caps.setCapability("platform", "Windows 7");
-            caps.setCapability("name", testName.get());
-            if (isCaptureHarEnabled()) {
-                caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
-            }
-
-            // if running inside Jenkins, expose build ID
-            String tag = System.getenv("BUILD_TAG");
-            if (tag!=null)
-                caps.setCapability("build", tag);
-
-            return new SauceLabsConnection().createWebDriver(caps);
-        case "phantomjs":
-            DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
-            capabilities.setCapability(LANGUAGE_SELECTOR, "en");
-            capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
-            return new PhantomJSDriver(capabilities);
         case "remote-webdriver-firefox":
             return buildRemoteWebDriver(buildFirefoxOptions(testName));
         case "remote-webdriver-chrome":

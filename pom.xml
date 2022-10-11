@@ -31,7 +31,7 @@
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
 
-    <selenium.version>3.141.59</selenium.version>
+    <selenium.version>4.5.0</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <maven.version>3.3.9</maven.version>
@@ -126,48 +126,8 @@
     <!-- Selenium -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-api</artifactId>
-      <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-support</artifactId>
-      <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
       <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-firefox-driver</artifactId>
-      <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-chrome-driver</artifactId>
-      <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-ie-driver</artifactId>
-      <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-safari-driver</artifactId>
-      <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>lift</artifactId>
-      <version>${selenium.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>htmlunit-driver</artifactId>
-      <version>2.64.0</version>
     </dependency>
     <dependency>
       <groupId>com.codeborne</groupId>
@@ -210,6 +170,11 @@
       <artifactId>commons-logging</artifactId>
       <!--  to match upper bounds -->
       <version>1.2</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-net</groupId>
+      <artifactId>commons-net</artifactId>
+      <version>3.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -433,6 +398,11 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.11.0</version>
+      </dependency>
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty-codec</artifactId>
+        <version>4.1.79.Final</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

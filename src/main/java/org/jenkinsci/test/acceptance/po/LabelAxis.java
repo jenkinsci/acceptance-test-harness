@@ -1,7 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.lift.Matchers;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -19,7 +19,13 @@ public class LabelAxis extends Axis {
             find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel1']//a")).click();
             find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel2']//a")).click();
 
-            waitFor(checkBox, Matchers.displayed(), 3);
+
+            waitFor(checkBox, new Matcher<>("Checkbox should be displayed") {
+                @Override
+                public boolean matchesSafely(WebElement item) {
+                    return item.isDisplayed();
+                }
+            }, 3);
         }
         check(checkBox, true);
     }
