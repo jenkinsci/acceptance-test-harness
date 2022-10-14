@@ -31,7 +31,7 @@
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
 
-    <selenium.version>3.141.59</selenium.version>
+    <selenium.version>4.5.0</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <maven.version>3.3.9</maven.version>
@@ -167,26 +167,11 @@
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>htmlunit-driver</artifactId>
-      <version>2.64.0</version>
+      <version>4.5.0</version>
       <exclusions>
         <exclusion>
           <groupId>xml-apis</groupId>
           <artifactId>xml-apis</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.codeborne</groupId>
-      <artifactId>phantomjsdriver</artifactId>
-      <version>1.5.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk15on</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcpkix-jdk15on</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -415,6 +400,14 @@
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
         <version>5.9.1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <!-- upper bounds conflict -->
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>4.1.84.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
