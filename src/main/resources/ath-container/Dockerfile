@@ -22,8 +22,8 @@ RUN yum -y install \
     yum clean all && rm -rf /var/cache/yum
 
 # Selenium needs a geckodriver in order to work properly
-RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz && \
-    tar -xvzf geckodriver-v0.26.0-linux64.tar.gz -C /usr/local/bin
+RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux-aarch64.tar.gz && \
+    tar -xvzf geckodriver-v0.32.0-linux-aarch64.tar.gz -C /usr/local/bin
 
 # Maven in repo is not new enough for ATH
 ENV MAVEN_VERSION 3.8.6
