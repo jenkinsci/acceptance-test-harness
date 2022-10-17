@@ -7,8 +7,6 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 20
     ignore:
-      # Selenium requires co-ordinated changes in consuming projects also due to the use of containers for webdriver
-      - dependency-name: "org.seleniumhq.selenium:*"
       # Kept in sync with the version mockito-core uses
       - dependency-name: "net.bytebuddy:byte-buddy"
   - package-ecosystem: "docker"
