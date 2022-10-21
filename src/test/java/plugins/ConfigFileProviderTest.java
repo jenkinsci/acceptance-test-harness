@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import org.apache.commons.lang3.SystemUtils;
 
 /**
  * Tests config-file-provider plugin inside a Pipeline.
@@ -84,7 +85,8 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
                 "    configFileProvider(\n" +
                 "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS')]) {\n" +
                 "            \n" +
-                "        sh 'cat $MAVEN_SETTINGS '\n" +
+                (SystemUtils.IS_OS_WINDOWS ? "        bat 'type %%MAVEN_SETTINGS%% '\n"
+                                           : "        sh 'cat $MAVEN_SETTINGS '\n") +
                 "    }\n" +
                 "}", mvnConfig.id()));
 
@@ -117,7 +119,8 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
                 "    configFileProvider(\n" +
                 "        [configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n" +
                 "            \n" +
-                "        sh 'cat $CUSTOM_SETTINGS '\n" +
+                (SystemUtils.IS_OS_WINDOWS ? "        bat 'type %%CUSTOM_SETTINGS%% '\n"
+                                          :  "        sh 'cat $CUSTOM_SETTINGS '\n") +
                 "    }\n" +
                 "}", customConfig.id()));
 
