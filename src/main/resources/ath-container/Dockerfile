@@ -3,8 +3,10 @@
 # see docs/DOCKER.md for usage
 
 FROM centos:7
-MAINTAINER ogondza@gmail.com
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+## Always install the latest version of these packages.
+# hadolint ignore=DL3033
 RUN yum -y install \
         curl \
         docker \
@@ -24,9 +26,9 @@ RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.26.0
     tar -xvzf geckodriver-v0.26.0-linux64.tar.gz -C /usr/local/bin
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION 3.8.3
-RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
-    tar -xvzf apache-maven-$MAVEN_VERSION-bin.tar.gz -C /opt/ && \
+ENV MAVEN_VERSION 3.8.6
+RUN curl -ffSLO https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-"$MAVEN_VERSION"-bin.tar.gz && \
+    tar -xvzf apache-maven-"$MAVEN_VERSION"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
 ENV PATH="$PATH:/opt/maven/bin"
 
@@ -41,7 +43,7 @@ ENV gid $gid
 EXPOSE 5942
 
 RUN groupadd ath-user -g $gid && \
-    useradd ath-user -u $uid -g $gid -m -d /home/ath-user && \
+    useradd ath-user -l -u $uid -g $gid -m -d /home/ath-user && \
     # Give permission to modify the alternatives links to change the java version in use
     chown ath-user:ath-user /etc/alternatives
 
@@ -64,13 +66,13 @@ RUN touch /home/ath-user/.Xauthority
 USER root
 RUN chmod ug+s /usr/bin/docker* # In Centos, the actual binaries are hidden behind a shim so update them all
 
-ADD vnc.sh /usr/bin/
-ADD set-java.sh /usr/bin/
-ADD run.sh /usr/bin/
+COPY vnc.sh /usr/bin/
+COPY set-java.sh /usr/bin/
+COPY run.sh /usr/bin/
 
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
 
-# Java 8 by default
+# Java 11 by default
 USER ath-user
-RUN set-java.sh 8
+RUN set-java.sh 11

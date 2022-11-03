@@ -7,9 +7,9 @@ import org.openqa.selenium.WebElement;
 /**
  * This class provides the ability to add a Jenkins Text Finder post build step
  * to the job.
- *
+ * <p>
  * It provides access to the particular web elements to configure the post build step.
- *
+ * <p>
  * This post build step requires installation of the text-finder plugin.
  *
  * @author Martin Ende

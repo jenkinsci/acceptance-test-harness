@@ -13,8 +13,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.mail.MessagingException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -75,7 +75,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     private void assertExistAndRun(final WorkflowJob job, final boolean withSuccess) {
         try {
-            IOUtils.toString(job.url("").openStream());
+            IOUtils.toString(job.url("").openStream(), StandardCharsets.UTF_8);
         } catch (final IOException ex) {
             Assert.fail("Job has not been created");
         }

@@ -27,6 +27,8 @@ package plugins;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +47,7 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git_client.JGitInstallation;
+import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.NoVerificationStrategy;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.GithubBranchSource;
@@ -53,10 +56,12 @@ import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSha
 import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -68,6 +73,7 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.*;
 
+@WithPlugins("command-launcher")
 public class WorkflowPluginTest extends AbstractJUnitTest {
     private static final String CREDENTIALS_ID = "pipeline";
     private static final String KEY_FILENAME = "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe";
@@ -80,6 +86,14 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Inject DockerContainerHolder<SvnContainer> svn;
     @Inject DockerContainerHolder<DockerAgentContainer> agent;
     @Inject JenkinsController controller;
+
+    @Before
+    public void useNoVerificationSshHostKeyStrategy() {
+        GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
+        sc.open();
+        sc.useSshHostKeyVerificationStrategy(NoVerificationStrategy.class);
+        sc.save();
+    }
 
     @Category(DockerTest.class)
     @WithDocker
@@ -228,7 +242,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
             SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
             Process proc = new ProcessBuilder("stat", "-c", "%g", "/var/run/docker.sock").start();
-            String group = IOUtils.toString(proc.getInputStream()).trim();
+            String group = IOUtils.toString(proc.getInputStream(), StandardCharsets.UTF_8).trim();
             Assume.assumeThat("docker.sock can be statted", proc.waitFor(), is(0));
             try {
                 Integer.parseInt(group);
@@ -275,7 +289,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             "package pkg\n" +
             "@Grab('commons-primitives:commons-primitives:1.0')\n" +
             "import org.apache.commons.collections.primitives.ArrayIntList\n" +
-            "static def arrayInt() {new ArrayIntList()}");
+            "static def arrayInt() {new ArrayIntList()}", StandardCharsets.UTF_8);
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set("echo(/got ${pkg.Lists.arrayInt()}/)");
         job.sandbox.check();

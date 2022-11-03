@@ -26,7 +26,7 @@ import org.openqa.selenium.WebDriver;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 
-@WithPlugins({"ownership", "cloudbees-folder"})
+@WithPlugins({"command-launcher", "ownership", "cloudbees-folder"})
 public class OwnershipPluginTest extends AbstractJUnitTest {
 
     @Inject

@@ -28,7 +28,7 @@ import java.net.URL;
 
 /**
  * Global tools configuration UI.
- *
+ * <p>
  * Introduced in Jenkins 2.0.
  */
 public class GlobalToolConfig extends ContainerPageObject {
@@ -45,11 +45,7 @@ public class GlobalToolConfig extends ContainerPageObject {
     public <T extends ToolInstallation> T addTool(final Class<T> type) {
         final String name = type.getAnnotation(ToolInstallationPageObject.class).name();
 
-        String path = createPageArea("configs", new Runnable() {
-            @Override public void run() {
-                clickButton("Add " + name);
-            }
-        });
+        String path = createPageArea("configs", () -> clickButton("Add " + name));
 
         return newInstance(type, this, path);
     }

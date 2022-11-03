@@ -31,18 +31,18 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
  * Declare there is a property that needs to be provided to run the test.
- *
+ * <p>
  * This is often used when credentials than can not be in git are needed
  * to run the test. Another use-case is test interacting with pre-deployed
  * service.
- *
+ * <p>
  * Failing the activation criteria will skip the test but unlike JUnit assumptions
  * it will happen before Jenkins boots up.
  *

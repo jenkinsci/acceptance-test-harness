@@ -25,7 +25,7 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
 
     /**
      * Creates another injector and bind them using the given closure.
-     *
+     * <p>
      * The newly created injector will be returned.
      */
     public SubWorld subworld(final Closure config) {

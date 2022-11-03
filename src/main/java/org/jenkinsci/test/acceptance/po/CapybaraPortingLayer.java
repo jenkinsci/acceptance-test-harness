@@ -7,8 +7,6 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import javax.annotation.Nonnull;
-
 /**
  * Interface for assisting porting from Capybara.
  *
@@ -40,7 +38,7 @@ public interface CapybaraPortingLayer {
 
     /**
      * Repeated evaluate the given predicate until it returns true.
-     * <p/>
+     * <p>
      * If it times out, an exception will be thrown.
      *
      * @param timeoutSec 0 if left to the default value
@@ -95,21 +93,17 @@ public interface CapybaraPortingLayer {
 
     /**
      * Finds all the elements that match the selector.
-     * <p/>
-     * <p/>
+     * <p>
      * Note that this method inherits the same restriction of the {@link org.openqa.selenium.WebDriver#findElements(org.openqa.selenium.By)},
      * in that its execution is not synchronized with the JavaScript execution of the browser.
-     * <p/>
-     * <p/>
+     * <p>
      * For example, if you click something that's expected to populate additional DOM elements,
      * and then call {@code all()} to find them, then all() can execute before those additional DOM elements
      * are populated, thereby failing to find the elements you are looking for.
-     * <p/>
-     * <p/>
+     * <p>
      * In contrast, {@link #find(org.openqa.selenium.By)} do not have this problem, because it waits until the element
      * that matches the criteria appears.
-     * <p/>
-     * <p/>
+     * <p>
      * So if you are using this method, think carefully. Perhaps you can use {@link #find(org.openqa.selenium.By)} to
      * achieve what you are looking for (by making the query more specific), or perhaps you can combine
      * this with {@link #waitForCond(java.util.concurrent.Callable)} so that if you don't find the elements you are looking for

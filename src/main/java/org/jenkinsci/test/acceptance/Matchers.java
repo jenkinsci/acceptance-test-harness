@@ -6,7 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.CoreMatchers;
@@ -280,9 +280,7 @@ public class Matchers {
             @Override
             public boolean matchesSafely(final User user) {
                 if (user.fullName() != null) {
-                    if (user.fullName().equals(fullName)) {
-                        return true;
-                    }
+                    return user.fullName().equals(fullName);
                 }
                 return false;
             }
@@ -299,9 +297,7 @@ public class Matchers {
             @Override
             public boolean matchesSafely(final User user) {
                 if (user.mail() != null) {
-                    if (user.mail().equals(mail)) {
-                        return true;
-                    }
+                    return user.mail().equals(mail);
                 }
                 return false;
             }

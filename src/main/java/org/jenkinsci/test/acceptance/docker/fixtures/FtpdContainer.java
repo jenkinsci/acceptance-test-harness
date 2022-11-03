@@ -45,7 +45,7 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
         if (ftpClient.isConnected()) {
             try {
                 ftpClient.disconnect();
-            } catch (IOException f) {
+            } catch (IOException ignored) {
 
             }
         }
@@ -89,7 +89,6 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      *
      * @param localPath  The file to transfer
      * @param remotePath The remote path
-     * @throws IOException
      */
     public void uploadBinary(String localPath, String remotePath) throws IOException {
         FileInputStream fis = null;
@@ -112,17 +111,13 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      *
      * @param Path the Path to check
      * @return true if the Path exist, else false
-     * @throws IOException
      */
     public Boolean pathExist(String Path) throws IOException {
         if (!ftpConnect())
             throw new IOException("Connection to ftp Failed!");
         FTPFile[] files = ftpClient.listFiles(Path);
         ftpDisconnect();
-        if (files.length > 0)
-            return true;
-        else
-            return false;
+        return files.length > 0;
     }
 
 }

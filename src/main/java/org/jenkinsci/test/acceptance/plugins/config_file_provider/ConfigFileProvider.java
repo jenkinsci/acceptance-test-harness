@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.WebElement;
 
 public class ConfigFileProvider extends PageObject {
@@ -55,6 +56,9 @@ public class ConfigFileProvider extends PageObject {
 
         clickButton("Next");
         String id = getElement(by.name("config.id")).getAttribute("value");
+        // clicking the button leads to the load of a new page but it is not a navigation event from the listeners PoV
+        // so we need to disable the sticky elmements again
+        new Scroller().disableStickyElements(driver);
         return newInstance(type, this, id);
     }
 }

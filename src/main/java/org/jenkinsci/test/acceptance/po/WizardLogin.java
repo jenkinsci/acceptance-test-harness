@@ -24,21 +24,19 @@
 
 package org.jenkinsci.test.acceptance.po;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
-import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.internal.AssumptionViolatedException;
-
-import com.google.inject.Inject;
 
 /**
  * Page object for Wizard Login page.
@@ -77,7 +75,7 @@ public class WizardLogin extends PageObject {
 
     public WizardLogin doSuccessfulLogin(String password) {
         this.doLoginDespiteNoPaths(password);
-        Assert.assertThat(driver, not(hasContent("The password entered is incorrect")));
+        assertThat(driver, not(hasContent("The password entered is incorrect")));
         return this;
     }
 
@@ -90,7 +88,6 @@ public class WizardLogin extends PageObject {
     public String getPassword(JenkinsController controller) throws IOException {
         Assume.assumeThat("Testing the setup wizard is only supported if a LocalController is in use. Test will be skipped.", controller, instanceOf(LocalController.class));
         File passwordFile = new File(((LocalController) controller).getJenkinsHome(), "secrets/initialAdminPassword");
-        String pass = FileUtils.readFileToString(passwordFile).trim();
-        return pass;
+        return FileUtils.readFileToString(passwordFile, StandardCharsets.UTF_8).trim();
     }
 }

@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.CheckReturnValue;
+import edu.umd.cs.findbugs.annotations.CheckReturnValue;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import hudson.util.VersionNumber;
-import org.jenkinsci.test.acceptance.junit.Since;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Injector;

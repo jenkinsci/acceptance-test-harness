@@ -19,7 +19,7 @@ import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReporter;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -36,21 +36,21 @@ import java.io.IOException;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
- *
- * Example: <tt>@WithPlugin("subversion")</tt>
- * <p/>
+ * <p>
+ * Example: {@code @WithPlugin("subversion")}
+ * <p>
  * One can specify a specific minimum version after the plugin name with a suffixed '@'.
- * <p/>
- * Example: <tt>@WithPlugin("subversion@1.54")</tt>
- *
+ * <p>
+ * Example: {@code @WithPlugin("subversion@1.54")}
+ * <p>
  * The latter example declares that running the test with older version is pointless, typically because of missing feature.
- *
+ * <p>
  * In normal mode the annotation guarantees that the plugin is installed in required or later version.
- *
+ * <p>
  * There is also a pre configured plugins mode, running in this mode means that the ATH is using a war file that (somehow)
  * has already preconfigured all the plugins that are to be tested, in that case the ATH only validates that the
  * pre configured plugin universe is enough to run the tests and don't try to modify the existing plugins in any way.
- *
+ * <p>
  * If the existing plugin configuration is not enough to run the test the end result depends on the configured value
  * for the configuration property pluginEvaluationOutcome
  * <ul>

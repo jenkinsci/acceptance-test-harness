@@ -27,15 +27,15 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Scale time measurement to support individual execution schemes.
- *
+ * <p>
  * Due to the nature of the harness, the framework is full of timeouts waiting for things to happen. Given the number of
  * modes of execution, environments and configurations there is, there are no right timeouts to balance the desire to
  * abort operations that takes too long and necessity not to interrupt operations taking a bit more time to complete
  * successfully.
- *
- * To reflect that, use <tt>-DElasticTime.factor</tt> and configure the factor to slow down / speed up the measured time
+ * <p>
+ * To reflect that, use {@code -DElasticTime.factor} and configure the factor to slow down / speed up the measured time
  * for your executions. Floating point values are accepted too.
- *
+ * <p>
  * This implementation takes number of concurrent threads into account.
  *
  * @author ogondza
@@ -45,11 +45,20 @@ public class ElasticTime {
     /**
      * Amount of threads executing concurrently. Time is slowed down proportionally multiplying the time;
      */
-    private final int concurrency = Integer.parseInt(System.getProperty("forkCount", "1"));
+    private final int concurrency;
+    {
+        int forkCount = 1;
+        try {
+            forkCount = Integer.parseInt(System.getProperty("forkCount", "1"));
+        } catch (NumberFormatException x) {
+            // may be floating point or use C suffix, fine
+        }
+        concurrency = forkCount;
+    }
 
     /**
      * Relative performance difference compared to reference environment (Upstream CI).
-     *
+     * <p>
      * Default is 1.0 (no difference). Use >1 in case of slower environment, <1 in case of faster one.
      */
     private final double factor = Double.parseDouble(System.getProperty("ElasticTime.factor", "1.0"));
@@ -65,7 +74,7 @@ public class ElasticTime {
     
     /**
      * Get the factor by which we slow down time.
-     * Default is {@code 1.0} (no difference). Use {@code >1} in case of slower environment, {@<1} in case of faster one.
+     * Default is {@code 1.0} (no difference). Use {@code >1} in case of slower environment, {@code <1} in case of faster one.
      * @return the factor by which we slow down time.
      */
     public double getSlowDownFactor() {

@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapGroupMembershipStrategy;
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -13,7 +12,7 @@ import static java.util.Objects.requireNonNull;
  * SecurityRealm for ldap plugin.
  *
  * @author Michael Prankl
- * @see org.jenkinsci.test.acceptance.po.LdapSecurityRealm_Pre1_10 if you want to test versions of the plugin < 1.10
+ * @see org.jenkinsci.test.acceptance.po.LdapSecurityRealm_Pre1_10 if you want to test versions of the plugin older than 1.10
  */
 @Describable("LDAP")
 public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends SecurityRealm {

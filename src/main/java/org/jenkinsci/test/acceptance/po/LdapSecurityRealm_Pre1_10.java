@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
  * Ldap security realm for ldap plugin prior to version 1.10.
  *
  * @author Michael Prankl
- * @deprecated only use this if you are really testing against a ldap plugin version < 1.10
+ * @deprecated only use this if you are really testing against a ldap plugin version older than 1.10
  */
 @Deprecated
 @Describable("LDAP")

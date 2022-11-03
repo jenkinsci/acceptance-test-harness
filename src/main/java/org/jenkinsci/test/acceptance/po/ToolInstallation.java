@@ -25,13 +25,13 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import hudson.util.VersionNumber;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.SystemUtils;
-import org.jenkinsci.test.acceptance.Matchers;
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.openqa.selenium.NoSuchElementException;
 
@@ -165,7 +165,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
                 );
 
                 final File command = new File(home, "bin/" + binary);
-                FileUtils.writeStringToFile(command, code);
+                FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
             }
             else {
@@ -176,15 +176,12 @@ public abstract class ToolInstallation extends PageAreaImpl {
                                                   homeEnvName, path
                                           );
                 final File command = new File(home, "bin/" + binary + ".cmd");
-                FileUtils.writeStringToFile(command, code);
+                FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
             }
             return home.getAbsolutePath();
         }
-        catch (IOException ex) {
-            throw new Error(ex);
-        }
-        catch (InterruptedException ex) {
+        catch (IOException | InterruptedException ex) {
             throw new Error(ex);
         }
     }

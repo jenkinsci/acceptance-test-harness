@@ -4,12 +4,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * Special kind of page object that maps to a portion of a page with multiple INPUT controls.
- * <p/>
- * <p/>
+ * <p>
  * Typically we use this to map a set of controls in the configuration page, which is generated
  * by composing various config.jelly files from different extension points.
  *
@@ -90,8 +89,8 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
 
     /**
      * Returns the "path" selector that finds an element by following the form-element-path plugin.
-     * <p/>
-     * https://wiki.jenkins-ci.org/display/JENKINS/Form+Element+Path+Plugin
+     * <p>
+     * <a href="https://plugins.jenkins.io/form-element-path/">form-element-path-plugin</a>
      */
     @Override
     public By path(String rel) {
@@ -100,10 +99,10 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
 
     /**
      * Create a control object that wraps access to the specific INPUT element in this page area.
-     * <p/>
+     * <p>
      * The {@link Control} object itself can be created early as the actual element resolution happens
      * lazily. This means {@link PageArea} implementations can put these in their fields.
-     * <p/>
+     * <p>
      * Several paths can be provided to find the first matching element. Useful
      * when element path changed between versions.
      */
@@ -117,7 +116,7 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
         return new Control(injector, selector);
     }
 
-    public @Nonnull String createPageArea(String name, Runnable action) throws TimeoutException {
+    public @NonNull String createPageArea(String name, Runnable action) throws TimeoutException {
         String pathPrefix = getPath() + '/' + name;
         return getPage().createPageArea(pathPrefix, action);
     }

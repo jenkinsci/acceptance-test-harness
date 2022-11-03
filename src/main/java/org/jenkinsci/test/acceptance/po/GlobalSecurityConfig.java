@@ -23,10 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
-import org.openqa.selenium.By;
+import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.SshHostKeyVerificationStrategy;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -60,6 +61,20 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         return selectFromDropdownOrRadioGroup(type, "authorizationStrategy");
     }
 
+    public <T extends SshHostKeyVerificationStrategy> void useSshHostKeyVerificationStrategy(final Class<T> type) {
+        Control gitHostKeyVerificationConfiguration = control("/org-jenkinsci-plugins-gitclient-GitHostKeyVerificationConfiguration/");
+        if (gitHostKeyVerificationConfiguration.exists()) {
+            T instance;
+            try {
+                instance = type.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
+                throw new IllegalArgumentException("Can't initiate a new instance of " + type.getName() + " .", e);
+            }
+            gitHostKeyVerificationConfiguration.select(instance.id());
+        }
+    }
+
     private void maybeCheckUseSecurity() {
         try {
             control("/useSecurity").check();
@@ -69,11 +84,8 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     }
 
     public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {
-        final String path = createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators", new Runnable() {
-            @Override public void run() {
-                control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]")).selectDropdownMenu(type);
-            }
-        });
+        final String path = createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators",
+                () -> control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]")).selectDropdownMenu(type));
 
         return newInstance(type, this, path);
     }

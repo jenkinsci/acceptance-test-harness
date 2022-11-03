@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.priority_sorter;
 
 import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.NoSuchElementException;
 
 @ActionPageObject("advanced-build-queue")
 public class PriorityConfig extends Action {
@@ -39,11 +38,7 @@ public class PriorityConfig extends Action {
     }
 
     public Group addGroup() {
-        String path = createPageArea("/jobGroup", new Runnable() {
-            @Override public void run() {
-                control("/repeatable-add").click();
-            }
-        });
+        String path = createPageArea("/jobGroup", () -> control("/repeatable-add").click());
         return new Group(this, path);
     }
 

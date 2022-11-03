@@ -30,7 +30,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
@@ -57,8 +57,8 @@ public class FormValidation {
         }
     }
 
-    private final @Nonnull Kind kind;
-    private final @Nonnull String message;
+    private final @NonNull Kind kind;
+    private final @NonNull String message;
 
     public static FormValidation await(Control control) {
         return await(control, false);
@@ -120,7 +120,7 @@ public class FormValidation {
         this.message = outcome.getText();
     }
 
-    private @Nonnull Kind extractKind(WebElement element) {
+    private @NonNull Kind extractKind(WebElement element) {
         String kindClass = element.getAttribute("class");
         try {
             return Kind.get(kindClass);
@@ -132,11 +132,11 @@ public class FormValidation {
         }
     }
 
-    public @Nonnull Kind getKind() {
+    public @NonNull Kind getKind() {
         return kind;
     }
 
-    public @Nonnull String getMessage() {
+    public @NonNull String getMessage() {
         return message;
     }
 
@@ -166,14 +166,14 @@ public class FormValidation {
     public static Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
         StringDescription sd = new StringDescription();
         message.describeTo(sd);
-        return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd.toString()) {
+        return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd) {
             @Override public boolean matchesSafely(FormValidation item) {
                 return item.getKind() == kind && message.matches(item.getMessage());
             }
 
             @Override public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
                 if (item.getKind() != kind) {
-                    mismatchDescription.appendText("It is " + item.toString());
+                    mismatchDescription.appendText("It is " + item);
                 } else {
                     message.describeMismatch(item.getMessage(), mismatchDescription);
                 }

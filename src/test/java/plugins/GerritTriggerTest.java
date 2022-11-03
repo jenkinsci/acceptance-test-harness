@@ -39,7 +39,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,6 +49,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -116,11 +116,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
                         gtGerrituser + "@" + gtHostname, "gerrit",
                         "review", obj.getString("number") + ",1", "--abandon");
                 logProcessBuilderIssues(gerritAbandon, "gerrit abandon");
-            } catch (InterruptedException e) {
-                LOGGER.warning(e.getMessage());
-            } catch (IOException e) {
-                LOGGER.warning(e.getMessage());
-            } catch (JSONException e) {
+            } catch (InterruptedException | IOException | JSONException e) {
                 LOGGER.warning(e.getMessage());
             }
         }
@@ -133,7 +129,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
 
         FileUtils.writeStringToFile(ssh,
                 "#!/bin/sh\n" +
-                        "exec ssh -o StrictHostKeyChecking=no -i " + gtPrivateKey + " \"$@\"");
+                        "exec ssh -o StrictHostKeyChecking=no -i " + gtPrivateKey + " \"$@\"", StandardCharsets.UTF_8);
         Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(OWNER_READ, OWNER_EXECUTE)));
 
         changes = new ArrayList<String>();
@@ -204,9 +200,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     }
 
     private File createGitCommit(String jobName) throws IOException, InterruptedException {
-        File dir = File.createTempFile("jenkins","git");
-        dir.delete();//result !needed
-        assertTrue(dir.mkdir());
+        File dir = Files.createTempDirectory("jenkins" + "git").toFile();
 
         ProcessBuilder pb = new ProcessBuilder("git", "clone", gtGerrituser
                 + "@" + gtHostname + ":"
@@ -258,7 +252,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     private static String stringFrom(Process p) throws InterruptedException, IOException {
         assertThat(p.waitFor(), is(equalTo(0)));
         StringWriter writer = new StringWriter();
-        IOUtils.copy(p.getInputStream(), writer);
+        IOUtils.copy(p.getInputStream(), writer, StandardCharsets.UTF_8);
         String string = writer.toString().replaceAll(System.getProperty("line.separator"),
                 "").replaceAll(" ", "");
         writer.close();
@@ -288,8 +282,8 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         int result = processToRun.waitFor();
         if (result != 0) {
             StringWriter writer = new StringWriter();
-            IOUtils.copy(processToRun.getErrorStream(), writer);
-            LOGGER.severe("Issue occurred during command \"" + commandName + "\":\n" + writer.toString());
+            IOUtils.copy(processToRun.getErrorStream(), writer, StandardCharsets.UTF_8);
+            LOGGER.severe("Issue occurred during command \"" + commandName + "\":\n" + writer);
             writer.close();
         }
         return processToRun;

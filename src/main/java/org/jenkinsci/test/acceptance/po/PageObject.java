@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -23,10 +22,9 @@ import org.openqa.selenium.WebElement;
 
 /**
  * Encapsulates a model in Jenkins and wraps interactions with it.
- * <p/>
- * See https://code.google.com/p/selenium/wiki/PageObjects
- * <p/>
- * <p/>
+ * <p>
+ * See <a href="https://code.google.com/p/selenium/wiki/PageObjects">...</a>
+ * <p>
  * Most non-trivial page objects should derive from {@link ContainerPageObject}.
  *
  * @author Kohsuke Kawaguchi
@@ -106,10 +104,10 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     /**
      * Create a control object that wraps access to the specific INPUT element in this page area.
-     * <p/>
+     * <p>
      * The {@link Control} object itself can be created early as the actual element resolution happens lazily. This
      * means {@link PageAreaImpl} implementations can put these in their fields.
-     * <p/>
+     * <p>
      * Several paths can be provided to find the first matching element. Useful when element path changed between
      * versions.
      */
@@ -123,23 +121,27 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     /**
      * Capture path attribute of newly created form chunk upon invoking action.
-     *
+     * <p>
      * Consider "Add" button in page area with path "/foo" that is supposed to create new page area with path "/foo/bar"
      * or "/foo/bar[n]". There are several problems with the straightforward approach:
      *  - Created area may or may not be the first one of its kind so figuring the "path" is nontrivial.
      *  - The area may can take a while to render so waiting is needed.
      *  - Even after the markup appears, it can take a while for "path" attribute is added.
-     *
+     * <p>
      * This method properly wait until the new path is known. To be used as:
      *
+     * <pre>
+     * {@code
      *  String barPath = fooArea.createPageArea("/bar", () -> control("add-button").click());
      *  new FooBarArea(fooArea, barPath);
+     *  }
+     *  </pre>
      *
      * @param pathPrefix Prefix of the expected path. The path is always absolute.
      * @param action An action that triggers the page area creation. Clicking the button, etc.
      * @return The surrounding path of the area, exception thrown when not able to find out.
      */
-    public @Nonnull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
+    public @NonNull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
         assert pathPrefix.startsWith("/"): "Path not absolute: " + pathPrefix;
         final By by = this.by.areaPath(pathPrefix);
         final List<String> existing = extractPaths(all(by));

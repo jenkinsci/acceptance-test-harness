@@ -31,7 +31,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class IOUtil {
 
@@ -44,7 +44,7 @@ public class IOUtil {
      * @return File representing the file or directory.
      * @throws IOException If nothing found.
      */
-    public static @Nonnull File firstExisting(boolean directory, String... candidatePaths) throws IOException {
+    public static @NonNull File firstExisting(boolean directory, String... candidatePaths) throws IOException {
         for (String path: candidatePaths) {
             if (path == null) continue;
             File f = new File(path);
@@ -53,13 +53,13 @@ public class IOUtil {
             }
         }
 
-        throw new IOException("None of the paths exist: " + Arrays.asList(candidatePaths).toString());
+        throw new IOException("None of the paths exist: " + Arrays.asList(candidatePaths));
     }
 
     /**
      * Open URL connection with sanity timeout.
      */
-    public static HttpURLConnection openConnection(@Nonnull URL url) throws IOException {
+    public static HttpURLConnection openConnection(@NonNull URL url) throws IOException {
         int timeout = (int) time.milliseconds(10000);
 
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -80,8 +80,8 @@ public class IOUtil {
     /**
      * Gives random available TCP port in the given range.
      *
-     * @param from if <=0 then default value 49152 is used
-     * @param to   if <=0 then default value 65535 is used
+     * @param from if {@code <=0} then default value 49152 is used
+     * @param to   if {@code <=0} then default value 65535 is used
      */
     public static int randomTcpPort(int from, int to){
         from = (from <=0) ? 49152 : from;

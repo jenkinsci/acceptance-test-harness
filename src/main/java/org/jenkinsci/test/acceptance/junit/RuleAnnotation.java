@@ -23,19 +23,19 @@ import static java.lang.annotation.RetentionPolicy.*;
 public @interface RuleAnnotation {
     /**
      * The rule class that defines the setup/shutdown behaviour.
-     *
+     * <p>
      * The instance is obtained through Guice.
      */
     Class<? extends TestRule> value();
 
     /**
      * Optional ordering among rules.
-     *
-     * Annotation with <tt>priority >= 0</tt> are guaranteed to be run after
+     * <p>
+     * Annotation with {@code priority >= 0} are guaranteed to be run after
      * Jenkins is up. Negative priorities are run before startup on best effort
      * basis. (It might not happen before for ExistingJenkinsController,
      * PooledJenkinsController and possibly others).
-     *
+     * <p>
      * Annotations that skips execution are encouraged to run before Jenkins is
      * booted up to save time. Note, that these implementations can not inject
      * Jenkins for obvious reasons.

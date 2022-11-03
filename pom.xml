@@ -5,42 +5,39 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.51</version>
+    <version>1.90</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
-  <version>1.116-SNAPSHOT</version>
+  <version>${changelist}</version>
 
   <name>Acceptance Test Harness</name>
   <licenses>
     <license>
       <name>MIT License</name>
-      <url>http://opensource.org/licenses/MIT</url>
+      <url>https://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}.git</connection>
+    <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
-    <tag>HEAD</tag>
+    <url>https://github.com/jenkinsci/${project.artifactId}</url>
+    <tag>${scmTag}</tag>
   </scm>
 
   <properties>
-    <java.level>8</java.level>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <changelist>999999-SNAPSHOT</changelist>
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
-    <java.level>8</java.level>
-    <findbugs.skip>true</findbugs.skip>
+    <spotbugs.skip>true</spotbugs.skip>
 
     <selenium.version>3.141.59</selenium.version>
-    <guava.version>29.0-jre</guava.version> <!-- aligned with selenium -->
-    <aether.version>0.9.0.v20140226</aether.version>
-    <jackson.bom.version>2.12.1</jackson.bom.version>
-    <maven.version>3.1.0</maven.version>
-    <groovy.version>2.3.1</groovy.version>
+    <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
+    <aether.version>1.1.0</aether.version>
+    <maven.version>3.3.9</maven.version>
+    <groovy.version>3.0.13</groovy.version>
     <monte.version>0.7.7.0</monte.version>
-    <mockito.version>1.10.19</mockito.version>
-    <slf4j.version>1.7.30</slf4j.version>
+    <slf4j.version>2.0.3</slf4j.version>
   </properties>
 
   <repositories>
@@ -107,7 +104,13 @@
     <dependency>
       <groupId>com.google.inject</groupId>
       <artifactId>guice</artifactId>
-      <version>4.0</version>
+      <version>5.1.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -164,12 +167,18 @@
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>htmlunit-driver</artifactId>
-      <version>2.33.0</version>
+      <version>2.64.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xml-apis</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.codeborne</groupId>
       <artifactId>phantomjsdriver</artifactId>
-      <version>1.4.2</version>
+      <version>1.5.0</version>
       <exclusions>
         <exclusion>
           <groupId>org.bouncycastle</groupId>
@@ -180,11 +189,6 @@
           <artifactId>bcpkix-jdk15on</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.11</version>
     </dependency>
 
     <!-- recorder -->
@@ -208,37 +212,21 @@
 
     <!-- other random stuff -->
     <dependency>
-      <groupId>commons-net</groupId>
-      <artifactId>commons-net</artifactId>
-      <version>3.6</version>
-    </dependency>
-    <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <!--  to match upper bounds -->
       <version>1.2</version>
     </dependency>
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <!--  same version as commons-configuration -->
-      <version>2.6</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci</groupId>
-      <artifactId>process-utils</artifactId>
-      <version>1.3</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
     </dependency>
 
     <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>1</version>
-    </dependency>
-    <dependency>
       <groupId>com.cloudbees</groupId>
       <artifactId>extensibility</artifactId>
-      <version>1.4</version>
+      <version>1.5</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -247,7 +235,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>version-number</artifactId>
-      <version>1.1</version>
+      <version>1.10</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -257,98 +245,71 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>test-annotations</artifactId>
-      <version>1.2</version>
     </dependency>
     <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-library</artifactId>
-      <version>1.3</version>
+      <version>2.2</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest-core</artifactId>
-      <version>1.3</version>
+      <version>2.2</version>
     </dependency>
     <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-all</artifactId>
-      <version>1.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jvnet.hudson</groupId>
+      <groupId>org.jenkins-ci</groupId>
       <artifactId>trilead-ssh2</artifactId>
-      <version>build212-hudson-6</version>
+      <version>build-217-jenkins-231.vda_87ca_d57ecf</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
+      <artifactId>slf4j-jdk14</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-unixsocket</artifactId>
-      <version>0.3</version>
+      <version>0.38.17</version>
     </dependency>
     <!-- dependency use range so we want to avoid weird resolution -->
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.2.23</version>
+      <version>1.3.9</version>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.2.23</version>
+      <version>1.3.9</version>
       <classifier>native</classifier>
-    </dependency>
-    <dependency>
-      <groupId>org.ini4j</groupId>
-      <artifactId>ini4j</artifactId>
-      <version>0.5.2</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>crypto-util</artifactId>
-      <version>1.4</version>
+      <version>1.7</version>
     </dependency>
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
-      <version>2.0.26</version>
+      <version>2.33</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.54</version>
+      <artifactId>bcpkix-jdk18on</artifactId>
+      <version>1.72</version>
     </dependency>
     <dependency>
       <groupId>org.zeroturnaround</groupId>
       <artifactId>zt-zip</artifactId>
-      <version>1.7</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-      <version>1.4.4</version>
+      <version>1.15</version>
     </dependency>
     <dependency>
       <groupId>org.kohsuke</groupId>
       <artifactId>wordnet-random-name</artifactId>
-      <version>1.5</version>
-    </dependency>
-    <dependency>
-      <groupId>xmlunit</groupId>
-      <artifactId>xmlunit</artifactId>
       <version>1.5</version>
     </dependency>
     <dependency>
@@ -357,34 +318,39 @@
       <version>1.3</version>
     </dependency>
     <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>3.0.2</version>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <optional>true</optional>
+      <exclusions>
+        <exclusion>
+          <groupId>com.google.code.findbugs</groupId>
+          <artifactId>jsr305</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3.2</version>
+      <version>4.13.3</version>
     </dependency>
     <dependency>
       <groupId>com.jcraft</groupId>
       <artifactId>jsch</artifactId>
-      <version>0.1.54</version>
+      <version>0.1.55</version>
     </dependency>
     <dependency>
-        <groupId>commons-configuration</groupId>
-        <artifactId>commons-configuration</artifactId>
-        <version>1.10</version>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>2.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20080701</version>
+      <version>20220924</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>${mockito.version}</version>
+      <artifactId>mockito-core</artifactId>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -397,15 +363,22 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- Keep in sync with mockito-core's version -->
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>1.12.14</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>1.12</version>
+      <version>166.v912b_95083ffe</version>
     </dependency>
     <dependency>
       <groupId>com.github.olivergondza.dumpling</groupId>
       <artifactId>dumpling</artifactId>
-      <version>2.2</version>
+      <version>2.4</version>
     </dependency>
 
     <dependency>
@@ -421,6 +394,10 @@
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcpkix-jdk15on</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
   </dependencies>
@@ -430,7 +407,14 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.13.3</version>
+        <version>2.13.4.20221013</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>5.9.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -445,11 +429,6 @@
         <version>${slf4j.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.8.1</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>4.5.13</version>
@@ -457,7 +436,7 @@
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
-        <version>4.4.14</version>
+        <version>4.4.15</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
@@ -483,7 +462,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
         <configuration>
           <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
@@ -498,7 +476,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M7</version>
         <configuration>
           <systemPropertyVariables>
             <mavenRepoPath>${settings.localRepository}</mavenRepoPath>
@@ -512,7 +489,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>appassembler-maven-plugin</artifactId>
-        <version>1.8</version>
+        <version>2.1.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -532,7 +509,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.3</version>
         <configuration>
           <!--
             tests are used to test Jenkins, not the acceptance test harness,
@@ -541,17 +517,9 @@
           <arguments>-DskipTests</arguments>
           <useReleaseProfile>false</useReleaseProfile>
         </configuration>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.maven.scm</groupId>
-                <artifactId>maven-scm-provider-gitexe</artifactId>
-                <version>1.9.4</version>
-            </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
         <executions>
           <execution>
             <phase>generate-resources</phase>
@@ -659,7 +627,6 @@
         </property>
       </activation>
       <properties>
-        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
         <surefire.rerunFailingTestsCount>2</surefire.rerunFailingTestsCount>
       </properties>
     </profile>

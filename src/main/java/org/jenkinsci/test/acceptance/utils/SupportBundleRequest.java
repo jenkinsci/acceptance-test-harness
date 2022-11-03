@@ -4,6 +4,7 @@ import org.openqa.selenium.json.Json;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,16 +72,12 @@ public class SupportBundleRequest {
         }
 
         public Builder includeComponents(String... components) {
-            for (String c : components) {
-                includedComponents.add(c);
-            }
+            Collections.addAll(includedComponents, components);
             return this;
         }
 
         public Builder excludeComponents(String... components) {
-            for (String c : components) {
-                excludedComponents.add(c);
-            }
+            Collections.addAll(excludedComponents, components);
             return this;
         }
 

@@ -41,7 +41,7 @@ public @interface ToolInstallationPageObject {
 
     /**
      * Pattern to be logged once updates arrive.
-     *
+     * <p>
      * Clients should not interact with this ToolInstalltion before updates was loaded.
      */
     String installer();

@@ -16,7 +16,7 @@ import java.util.Map;
 public class TestLifecycle implements Scope {
     /**
      * Records components that are scoped to tests.
-     *
+     * <p>
      * Inherited, so that threads created from within a test can correctly identify its scope.
      */
     private final ThreadLocal<Map> testScopeObjects = new InheritableThreadLocal<>();
@@ -51,16 +51,13 @@ public class TestLifecycle implements Scope {
 
     @Override
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> base) {
-        return new Provider<T>() {
-            @Override
-            public T get() {
-                Map m = testScopeObjects.get();
-                if (m==null)    return null;
-                T v = (T)m.get(key);
-                if (v==null)
-                    m.put(key, v = base.get());
-                return v;
-            }
+        return () -> {
+            Map m = testScopeObjects.get();
+            if (m==null)    return null;
+            T v = (T)m.get(key);
+            if (v==null)
+                m.put(key, v = base.get());
+            return v;
         };
     }
 }

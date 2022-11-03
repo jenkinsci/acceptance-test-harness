@@ -1,6 +1,5 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
@@ -14,7 +13,7 @@ import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins ({"plain-credentials", "credentials-binding", "credentials@2.0"})
 public class CredentialsBindingTest extends AbstractJUnitTest {

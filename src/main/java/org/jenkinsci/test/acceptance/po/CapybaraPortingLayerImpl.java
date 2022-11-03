@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.annotation.CheckForNull;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
@@ -16,7 +16,6 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -57,7 +56,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     /**
      * Some subtypes are constructed via Guice, in which case injection is done by outside this class.
      * The injector parameter should be null for that case.
-     * <p/>
+     * <p>
      * Some subtypes are constructed programmatically. In that case, non-null injector must be supplied.
      */
     public CapybaraPortingLayerImpl(Injector injector) {
@@ -149,7 +148,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     /**
      * Repeated evaluate the given predicate until it returns true.
-     * <p/>
+     * <p>
      * If it times out, an exception will be thrown.
      */
     @Override @Deprecated
@@ -308,21 +307,17 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     /**
      * Finds all the elements that match the selector.
-     * <p/>
-     * <p/>
+     * <p>
      * Note that this method inherits the same restriction of the {@link org.openqa.selenium.WebDriver#findElements(org.openqa.selenium.By)},
      * in that its execution is not synchronized with the JavaScript execution of the browser.
-     * <p/>
-     * <p/>
+     * <p>
      * For example, if you click something that's expected to populate additional DOM elements,
      * and then call {@code all()} to find them, then all() can execute before those additional DOM elements
      * are populated, thereby failing to find the elements you are looking for.
-     * <p/>
-     * <p/>
+     * <p>
      * In contrast, {@link #find(org.openqa.selenium.By)} do not have this problem, because it waits until the element
      * that matches the criteria appears.
-     * <p/>
-     * <p/>
+     * <p>
      * So if you are using this method, think carefully. Perhaps you can use {@link #find(org.openqa.selenium.By)} to
      * achieve what you are looking for (by making the query more specific), or perhaps you can combine
      * this with {@link #waitForCond(java.util.concurrent.Callable)} so that if you don't find the elements you are looking for
@@ -359,7 +354,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     /**
      * Returns {@code true} if the webElement is stale (that is accessing it would cause a
-     * @{link StaleElementReferenceException} to be thrown
+     * {@link StaleElementReferenceException} to be thrown
      * @param element the element to check.
      * @return {@code true} iff the element is stale.
      */
@@ -453,7 +448,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     /**
      * Finds matching constructor and invoke it.
-     * <p/>
+     * <p>
      * This is often useful for binding {@link org.jenkinsci.test.acceptance.po.PageArea} by taking the concrete type as a parameter.
      */
     protected <T> T newInstance(Class<T> type, Object... args) {

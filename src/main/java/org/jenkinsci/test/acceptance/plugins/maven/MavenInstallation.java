@@ -40,7 +40,6 @@ public class MavenInstallation extends ToolInstallation {
 
     /**
      * Ensures that maven is installed. Installs maven if it is not yet installed.
-     * @param jenkins
      */
     public static void ensureThatMavenIsInstalled(Jenkins jenkins) {
         new GlobalToolConfig(jenkins).configure();

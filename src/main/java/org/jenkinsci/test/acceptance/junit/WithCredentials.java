@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -27,17 +27,17 @@ import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials
 /**
  * Indicates that a test requires credentials.
  * Adds required credentials in the credential plugin
- * <p/>
+ * <p>
  * Supports:
- * <p/>
+ * <p>
  * -Username/password:
- * <p/>
+ * <p>
  * Example: @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {"username", "password"})
- * <p/>
+ * <p>
  * -Username/sshKey:
- * <p/>
+ * <p>
  * Example: @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"username", "/ssh_keys/unsafe"})
- * <p/>
+ * <p>
  *
  * @author Karl Matthias
  */

@@ -26,15 +26,15 @@ package org.jenkinsci.test.acceptance.update_center;
 import com.google.common.base.Splitter;
 import hudson.util.VersionNumber;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+
 import java.util.Iterator;
 import java.util.Objects;
 
 /**
  * Reference to a plugin, optionally with the version.
- *
+ * <p>
  * The string syntax of this is shortName[@version].
  */
 public class PluginSpec {
@@ -42,14 +42,14 @@ public class PluginSpec {
     /**
      * Short name of the plugin.
      */
-    private final @Nonnull String name;
+    private final @NonNull String name;
 
     /**
      * Optional version.
      */
     private final @CheckForNull VersionNumber version;
 
-    public PluginSpec(@Nonnull String name, String version) {
+    public PluginSpec(@NonNull String name, String version) {
         this.name = name;
         this.version = version == null
                 ? null
@@ -57,7 +57,7 @@ public class PluginSpec {
         ;
     }
 
-    public PluginSpec(@Nonnull String coordinates) {
+    public PluginSpec(@NonNull String coordinates) {
         Iterator<String> spliter = Splitter.on("@").split(coordinates).iterator();
         name = spliter.next();
         if (spliter.hasNext()) {
@@ -67,7 +67,7 @@ public class PluginSpec {
         }
     }
 
-    public @Nonnull String getName() {
+    public @NonNull String getName() {
         return name;
     }
 

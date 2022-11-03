@@ -13,13 +13,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.Security;
 
 /**
  * Configuration injected from outside that holds the SSH key pair that can be used for tests.
- *
+ * <p>
  * This is used for example for test harness to remotely logging in to EC2 instances, or for
  * masters to login to slaves.
  *
@@ -42,11 +43,11 @@ public class SshKeyPair {
     }
 
     public String readPublicKey() throws IOException {
-        return FileUtils.readFileToString(publicKey);
+        return FileUtils.readFileToString(publicKey, StandardCharsets.UTF_8);
     }
 
     public String readPrivateKey() throws IOException {
-        return FileUtils.readFileToString(privateKey);
+        return FileUtils.readFileToString(privateKey, StandardCharsets.UTF_8);
     }
 
     /**
@@ -54,7 +55,7 @@ public class SshKeyPair {
      */
     public String getFingerprint() throws IOException, GeneralSecurityException {
         Security.addProvider(new BouncyCastleProvider());
-        try (Reader r = new BufferedReader(new StringReader(FileUtils.readFileToString(privateKey)));
+        try (Reader r = new BufferedReader(new StringReader(FileUtils.readFileToString(privateKey, StandardCharsets.UTF_8)));
                 PEMParser pem = new PEMParser(r)) {
 
             KeyPair pair = (KeyPair) pem.readObject();

@@ -76,15 +76,15 @@ public class Folder extends TopLevelItem implements Container {
     }
 
     public void setEnvironmentalVariables(final Map<String, String> envVbles) {
-        String envVblesAsString = "";
+        StringBuilder envVblesAsString = new StringBuilder();
 
         if (envVbles != null) {
             for (Map.Entry<String, String> envVble : envVbles.entrySet()) {
-                envVblesAsString += String.format("%s=%s\n", envVble.getKey(), envVble.getValue());
+                envVblesAsString.append(String.format("%s=%s\n", envVble.getKey(), envVble.getValue()));
             }
         }
 
-        this.properties.set(envVblesAsString);
+        this.properties.set(envVblesAsString.toString());
     }
 
     public List<String> getViewsNames() {

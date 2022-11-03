@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 
 /**
  * Databinding for Update Center metadata
@@ -70,9 +70,9 @@ public class UpdateCenterMetadata {
 
     /**
      * Find all the transitive dependency plugins of the given plugins, in the order of installation.
-     * 
+     * <p>
      * Resolved plugins set should satisfy required versions including Jenkins version.
-     * 
+     * <p>
      * Transitive dependencies will not be included if there is an already valid version of the plugin installed.
      *
      * @throws UnableToResolveDependencies When there requested plugin version can not be installed.
