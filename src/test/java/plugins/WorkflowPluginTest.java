@@ -25,15 +25,12 @@
 package plugins;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
@@ -71,7 +68,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.*;
-import static org.junit.Assume.*;
 
 @WithPlugins("command-launcher")
 public class WorkflowPluginTest extends AbstractJUnitTest {
@@ -279,24 +275,6 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         }
     }
 
-    @WithPlugins({"workflow-cps-global-lib@2.3", "workflow-basic-steps@2.1", "workflow-job@2.5"})
-    @Issue("JENKINS-26192")
-    @Test public void grapeLibrary() throws Exception {
-        assumeThat("TODO otherwise we would need to set up SSH access to push via Git, which seems an awful hassle", controller, instanceOf(LocalController.class));
-        File workflowLibs = /* WorkflowLibRepository.workspace() */ new File(((LocalController) controller).getJenkinsHome(), "workflow-libs");
-        // Cf. GrapeTest.useBinary using JenkinsRule:
-        FileUtils.write(new File(workflowLibs, "src/pkg/Lists.groovy"),
-            "package pkg\n" +
-            "@Grab('commons-primitives:commons-primitives:1.0')\n" +
-            "import org.apache.commons.collections.primitives.ArrayIntList\n" +
-            "static def arrayInt() {new ArrayIntList()}", StandardCharsets.UTF_8);
-        WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("echo(/got ${pkg.Lists.arrayInt()}/)");
-        job.sandbox.check();
-        job.save();
-        assertThat(job.startBuild().shouldSucceed().getConsole(), containsString("got []"));
-    }
-
     /** Pipeline analogue of {@link SubversionPluginTest#build_has_changes}. */
     @Category(DockerTest.class)
     @WithDocker
@@ -314,7 +292,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertTrue(b2.getChanges().hasChanges());
     }
 
-    @WithPlugins({"git@3.0.1", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source@2.5.5", "workflow-cps-global-lib"})
+    @WithPlugins({"git@3.0.1", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source@2.5.5", "pipeline-groovy-lib"})
     @Test
     public void testSharedLibraryFromGithub() {
         this.configureSharedLibrary();
