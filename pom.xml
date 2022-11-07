@@ -436,7 +436,7 @@
         <artifactId>commons-text</artifactId>
         <version>1.10.0</version>
         <!-- 
-        commons confif is only used by org/jenkinsci/test/acceptance/utils/pluginreporter/TextFileExercisedPluginReporter
+        commons config is only used by org/jenkinsci/test/acceptance/utils/pluginreporter/TextFileExercisedPluginReporter
         should be possible to rewrite without the need for commons-config but for later
 Require upper bound dependencies error for org.apache.commons:commons-text:1.9 paths to dependency are:
 +-org.jenkins-ci:acceptance-test-harness:999999-SNAPSHOT
