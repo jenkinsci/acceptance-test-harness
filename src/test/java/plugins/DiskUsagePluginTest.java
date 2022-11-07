@@ -37,7 +37,6 @@ import java.util.regex.Pattern;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.Matchers.hasElement;
-import static org.jenkinsci.test.acceptance.plugins.disk_usage.DiskUsage.reloaded;
 
 @WithPlugins("disk-usage")
 public class DiskUsagePluginTest extends AbstractJUnitTest {
@@ -52,7 +51,6 @@ public class DiskUsagePluginTest extends AbstractJUnitTest {
     @Test
     public void update_disk_usage() {
         du.reload();
-        assertThat(du, reloaded());
     }
 
     @Test

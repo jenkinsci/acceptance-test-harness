@@ -62,21 +62,19 @@ public class WizardCustomizeJenkins extends PageObject {
         return this;
     }
 
-    @SuppressWarnings("deprecation") // FIXME: change the detection method when we have id or name in the frame.
     public void shouldFinishInstallSuccessfully() {
         waitFor()
                 .withTimeout(400, TimeUnit.SECONDS)
                 .ignoring(NoSuchElementException.class, NoSuchFrameException.class)
                 .until(() -> {
                     try {
-                        WebElement element = driver.switchTo().defaultContent().switchTo().frame(1).findElement(by.name("username"));
+                        WebElement element = driver.switchTo().defaultContent().switchTo().frame("setup-first-user").findElement(by.name("username"));
                         return element != null;
                     } finally {
                         driver.switchTo().defaultContent();
                         assertThat(driver, not(hasContent("Installation Failures")));
                     }
-                })
-        ;
+                });
     }
 
     public void searchPlugin(String searchSring) {

@@ -1,1 +1,1 @@
-FROM docker.bintray.io/jfrog/artifactory-oss:7.41.13
+FROM docker.bintray.io/jfrog/artifactory-oss:7.46.11
