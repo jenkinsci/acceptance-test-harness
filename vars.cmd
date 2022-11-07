@@ -23,4 +23,5 @@ set SELENIUM_PROXY_HOSTNAME=%IP%
 set JENKINS_LOCAL_HOSTNAME=%IP%
 @echo.
 @echo To start the remote firefox container run the following command:
-@echo docker run --shm-size=256m -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e no_proxy=localhost -e SCREEN_WIDTH=1680 -e SCREEN_HEIGHT=1090 selenium/standalone-firefox:4.5.0
+@echo docker run --shm-size=256m -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e no_proxy=localhost -e SCREEN_WIDTH=1680 -e SCREEN_HEIGHT=1090 selenium/standalone-firefox:4.6.0
+
