@@ -51,7 +51,7 @@ public class WizardCreateAdminUser extends PageObject {
     }
 
     public WizardCreateAdminUser createAdminUser(String userName, String password, String fullName, String email) {
-        driver.switchTo().defaultContent().switchTo().frame(1);
+        driver.switchTo().defaultContent().switchTo().frame("setup-first-user");
 
         cUsername.set(userName);
         cPassword1.set(password);
