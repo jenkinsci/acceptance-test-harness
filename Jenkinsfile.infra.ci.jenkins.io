@@ -1,5 +1,3 @@
-@Library('pipeline-library@pull/459/head') _
-
 // This pipeline runs on infra.ci.jenkins.io (private) to build, test and deploy the Docker image
 buildDockerAndPublishImage('ath', [
   automaticSemanticVersioning: false,
