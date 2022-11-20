@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Minimal Jenkins version required to run the test.
- *
+ * <p>
  * Declares that running the test with older version is pointless, typically because of missing feature.
  *
  * @author Oliver Gondza

@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import javax.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -266,7 +265,7 @@ public class Job extends TopLevelItem {
 
     /**
      * "Copy" any file from the System into the Workspace using a zipFIle.
-     *
+     * <p>
      * Differentiates when the file is being run on Windows or Unix based machines.
      */
     public void copyFile(File file) {

@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapGroupMembershipStrategy;
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 

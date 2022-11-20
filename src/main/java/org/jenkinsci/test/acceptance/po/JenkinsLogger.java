@@ -65,10 +65,6 @@ public class JenkinsLogger extends PageObject {
     public void waitForLogged(final Pattern pattern, final int timeout) {
         waitFor().withMessage("%s to be logged", pattern)
                 .withTimeout(timeout, TimeUnit.SECONDS)
-                .until(new Callable<Boolean>() {
-                    @Override public Boolean call() throws Exception {
-                        return hasLogged(pattern);
-                    }
-        });
+                .until(() -> hasLogged(pattern));
     }
 }

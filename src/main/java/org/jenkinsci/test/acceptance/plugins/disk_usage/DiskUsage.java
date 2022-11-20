@@ -23,18 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.disk_usage;
 
+import com.google.inject.Injector;
 import java.net.URL;
-import java.util.regex.Pattern;
-
-import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.Matcher;
-import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PluginPageObject;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
-
-import com.google.inject.Injector;
 
 @PluginPageObject("disk-usage")
 public class DiskUsage extends PageObject {
@@ -45,42 +37,8 @@ public class DiskUsage extends PageObject {
 
     public void reload() {
         open();
-        try {
-            clickButton("Record Disk Usage");
-        } catch (NoSuchElementException ex) { // v0.22
-            clickButton("Record Builds Disk Usage");
-            clickButton("Record Jobs Disk Usage");
-            clickButton("Record Workspaces Disk Usage");
-        }
-    }
-
-    public static Matcher<DiskUsage> reloaded() {
-        return new Matcher<DiskUsage>("disk usage reloaded") {
-            private Exception cause;
-            @Override public boolean matchesSafely(DiskUsage item) {
-                JenkinsLogger logger = item.getJenkins().getLogger("all");
-                try {
-                    logger.waitForLogged(Pattern.compile("Finished Project disk usage. \\d+ ms"));
-                    return true;
-                } catch (TimeoutException ex) {
-                    // v0.22 and newer
-                    cause = ex;
-                }
-
-                try {
-                    logger.waitForLogged(Pattern.compile("Finished Calculation of builds disk usage.*"));
-                    logger.waitForLogged(Pattern.compile("Finished Calculation of job directories.*"));
-                    logger.waitForLogged(Pattern.compile("Finished Calculation of workspace usage.*"));
-                    return true;
-                } catch (TimeoutException ex) {
-                    cause = ex;
-                    return false;
-                }
-            }
-
-            @Override public void describeMismatchSafely(DiskUsage item, Description dsc) {
-                dsc.appendText(cause.getMessage());
-            }
-        };
+        clickButton("Record Builds Disk Usage");
+        clickButton("Record Jobs Disk Usage");
+        clickButton("Record Workspaces Disk Usage");
     }
 }

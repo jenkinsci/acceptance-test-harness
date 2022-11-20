@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * The logparser plugin uses two frames.
- *
+ * <p>
  * To check the content of the frames the selenium driver must be switched to the frames.
  *
  * @author Michael Engel.

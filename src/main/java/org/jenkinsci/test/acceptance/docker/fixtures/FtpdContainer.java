@@ -45,7 +45,7 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
         if (ftpClient.isConnected()) {
             try {
                 ftpClient.disconnect();
-            } catch (IOException f) {
+            } catch (IOException ignored) {
 
             }
         }
@@ -117,10 +117,7 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
             throw new IOException("Connection to ftp Failed!");
         FTPFile[] files = ftpClient.listFiles(Path);
         ftpDisconnect();
-        if (files.length > 0)
-            return true;
-        else
-            return false;
+        return files.length > 0;
     }
 
 }

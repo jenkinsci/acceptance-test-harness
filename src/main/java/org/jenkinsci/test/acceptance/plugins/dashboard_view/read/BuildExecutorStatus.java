@@ -47,7 +47,7 @@ public class BuildExecutorStatus extends PageAreaImpl {
 
     /**
      * Get the Headers (names of all nodes) in the table.
-     *
+     * <p>
      * If only one node header would be shown, it is not. And therefore also not in this list.
      *
      * @return the names of all displayed nodes/agents.

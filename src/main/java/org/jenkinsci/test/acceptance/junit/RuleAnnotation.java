@@ -23,7 +23,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 public @interface RuleAnnotation {
     /**
      * The rule class that defines the setup/shutdown behaviour.
-     *
+     * <p>
      * The instance is obtained through Guice.
      */
     Class<? extends TestRule> value();

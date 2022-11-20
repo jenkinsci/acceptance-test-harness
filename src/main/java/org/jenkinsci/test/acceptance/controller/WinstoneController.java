@@ -99,7 +99,6 @@ public class WinstoneController extends LocalController {
             cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
         }
         cb.add("-jar", war,
-                "--ajp13Port=-1",
                 "--httpPort=" + httpPort
         );
         cb.addAll(JENKINS_OPTS);

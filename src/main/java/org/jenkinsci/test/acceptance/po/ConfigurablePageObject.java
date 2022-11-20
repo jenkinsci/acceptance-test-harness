@@ -111,7 +111,7 @@ public abstract class ConfigurablePageObject extends PageObject {
             visit(getConfigUrl());
         }
         waitFor(By.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
-        waitFor(By.xpath("//span[contains(@class, 'submit-button')]//button[contains(text(), '" + getSubmitButtonText() + "')]"), 5);
+        waitFor(By.xpath("//div[contains(@class, 'bottom-sticker-inner')]//input[@type='submit'] | //div[contains(@class, 'bottom-sticker-inner')]//button[contains(text(), '" + getSubmitButtonText() + "')]"), 5);
     }
 
     public String getFormName(){

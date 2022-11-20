@@ -28,7 +28,7 @@ import java.net.URL;
 
 /**
  * Global tools configuration UI.
- *
+ * <p>
  * Introduced in Jenkins 2.0.
  */
 public class GlobalToolConfig extends ContainerPageObject {

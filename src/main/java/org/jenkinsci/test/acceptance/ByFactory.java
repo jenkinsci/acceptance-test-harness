@@ -1,22 +1,15 @@
 package org.jenkinsci.test.acceptance;
 
-import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import javax.xml.xpath.XPathVariableResolver;
 
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.By.ByPartialLinkText;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * More factories for {@link By} objects.
@@ -95,7 +88,7 @@ public class ByFactory {
 
     /**
      * Returns the "path" selector that finds an element by following the form-element-path plugin.
-     *
+     * <p>
      * <a href="https://plugins.jenkins.io/form-element-path/">form-element-path-plugin</a>
      */
     public By path(String path, Object... args) {

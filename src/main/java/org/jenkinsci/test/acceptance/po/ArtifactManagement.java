@@ -28,7 +28,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 
 /**
  * Global page area to configure Artifact management.
- *
+ * <p>
  * Note this feature is available since 1.532.
  *
  * @author ogondza

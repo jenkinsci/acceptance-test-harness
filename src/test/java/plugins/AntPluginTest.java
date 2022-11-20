@@ -11,7 +11,6 @@ import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("CdiInjectionPointsInspection")

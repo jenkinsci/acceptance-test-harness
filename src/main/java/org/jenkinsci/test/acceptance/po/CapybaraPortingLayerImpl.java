@@ -16,7 +16,6 @@ import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;

@@ -28,13 +28,13 @@ import hudson.util.VersionNumber;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import edu.umd.cs.findbugs.annotations.Nullable;
+
 import java.util.Iterator;
 import java.util.Objects;
 
 /**
  * Reference to a plugin, optionally with the version.
- *
+ * <p>
  * The string syntax of this is shortName[@version].
  */
 public class PluginSpec {

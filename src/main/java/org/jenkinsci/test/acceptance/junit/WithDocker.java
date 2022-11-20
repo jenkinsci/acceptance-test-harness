@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Indicates the docker is necessary to run the test.
- *
+ * <p>
  * Otherwise the test is skipped.
  */
 @Retention(RUNTIME)

@@ -463,7 +463,7 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Get the file with Jenkins to run.
-     *
+     * <p>
      * The file will exist on machine where tests run.
      */
     @Provides @Named("jenkins.war")

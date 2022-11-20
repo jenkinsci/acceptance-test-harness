@@ -368,7 +368,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     /**
      * Hostname to use when accessing Jenkins.
-     *
+     * <p>
      * Useful to override with public hostname/IP when external clients needs to talk back to Jenkins.
      *
      * @return "127.0.0.1" unless overridden via JENKINS_LOCAL_HOSTNAME env var.
