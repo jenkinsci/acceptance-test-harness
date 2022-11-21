@@ -82,7 +82,7 @@ public class JBossController extends LocalController {
         try {
             int status = cb.system();
             if(status != 0){
-                System.out.println("Cannot stop JBoss: "+cb.toString());
+                System.out.println("Cannot stop JBoss: "+ cb);
             }
         } catch (InterruptedException e) {
             throw new IOException(e);

@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.jenkinsci.test.acceptance.Matcher;
-import org.openqa.selenium.Alert;
 
 public class Workspace extends PageObject {
 

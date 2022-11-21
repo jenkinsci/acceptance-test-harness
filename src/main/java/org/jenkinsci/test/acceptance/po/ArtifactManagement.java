@@ -28,7 +28,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 
 /**
  * Global page area to configure Artifact management.
- *
+ * <p>
  * Note this feature is available since 1.532.
  *
  * @author ogondza
@@ -40,11 +40,8 @@ public class ArtifactManagement extends PageAreaImpl {
     }
 
     public <T extends Factory> T add(final Class<T> impl) {
-        String path = createPageArea("artifactManagerFactories", new Runnable() {
-            @Override public void run() {
-                control("hetero-list-add[artifactManagerFactories]").selectDropdownMenu(impl);
-            }
-        });
+        String path = createPageArea("artifactManagerFactories",
+                () -> control("hetero-list-add[artifactManagerFactories]").selectDropdownMenu(impl));
         return newInstance(impl, this, path);
     }
 

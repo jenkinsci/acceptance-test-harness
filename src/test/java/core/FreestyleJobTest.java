@@ -28,12 +28,12 @@ import org.openqa.selenium.WebElement;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -352,7 +352,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     private String getConfigXml(FreeStyleJob j) {
         try {
             HttpURLConnection con = IOUtil.openConnection(new URL(j.url, "config.xml"));
-            return IOUtils.toString(con.getInputStream());
+            return IOUtils.toString(con.getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new Error(e);
         }

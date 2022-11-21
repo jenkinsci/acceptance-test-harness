@@ -12,7 +12,6 @@ import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import com.fasterxml.jackson.databind.JsonNode;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -72,12 +71,7 @@ public class Build extends ContainerPageObject {
     public Build waitUntilStarted(int timeout) {
         waitFor().withMessage("Next build of %s is started", job)
                 .withTimeout(timeout, TimeUnit.SECONDS)
-                .until(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() {
-                        return hasStarted();
-                    }
-        });
+                .until(this::hasStarted);
         return this;
     }
 
@@ -326,7 +320,7 @@ public class Build extends ContainerPageObject {
 
         if (isInProgress()) {
             WebElement stopButton = find(by.href("stop"));
-            runThenConfirmAlert(() -> stopButton.click());
+            runThenConfirmAlert(stopButton::click);
         }
     }
 

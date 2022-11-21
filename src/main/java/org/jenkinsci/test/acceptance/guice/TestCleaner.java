@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 
 /**
  * {@link Cleaner} at the end of each {@link TestScope}.
- *
+ * <p>
  * Oftentimes marking your class with {@link AutoCleaned} gets the job done.
  *
  * @author Kohsuke Kawaguchi

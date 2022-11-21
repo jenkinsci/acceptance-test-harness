@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,7 @@ import java.util.logging.Level;
 
 /**
  * Top-level object that acts as an entry point to various systems.
- *
+ * <p>
  * This is also the only page object that can be injected since there's always one that points to THE Jenkins instance
  * under test.
  *
@@ -93,7 +94,7 @@ public class Jenkins extends Node implements Container {
             text = urlConnection.getHeaderField("X-Jenkins");
             if (text == null) {
 
-                String pageText = IOUtils.toString(urlConnection.getInputStream());
+                String pageText = IOUtils.toString(urlConnection.getInputStream(), StandardCharsets.UTF_8);
                 throw new AssertionError(
                         "Application running on " + url + " does not seem to be Jenkins:\n" + pageText
                 );

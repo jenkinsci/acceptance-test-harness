@@ -56,7 +56,7 @@ public class GlobalConfig extends PageAreaImpl {
     private void ensureAdvanced() {
         try {
             control("advanced-button").click();
-        } catch(NoSuchElementException ex) {
+        } catch(NoSuchElementException ignored) {
         }
     }
 }

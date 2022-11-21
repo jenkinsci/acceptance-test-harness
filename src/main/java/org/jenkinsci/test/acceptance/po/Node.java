@@ -27,7 +27,6 @@ import com.google.inject.Injector;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Common base for Jenkins and Slave.

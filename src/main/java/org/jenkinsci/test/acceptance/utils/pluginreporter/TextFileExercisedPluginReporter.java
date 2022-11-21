@@ -28,16 +28,18 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.FileUtils;
 
 /**
  * Exercised Plugin Reporter that logs to text file
  * The contents are java properties.
- *
+ * <p>
  * Properties will be stored as follows:
- *
+ * <p>
  * {@literal <testName>::<pluginName> = <pluginVersion>}
  *
  * @author scott.hebert@ericsson.com
@@ -72,7 +74,10 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
 
         PropertiesConfiguration config;
         try {
-           config = new PropertiesConfiguration(file);
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                    new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
+                            .configure(new Parameters().properties().setFile(file));
+            config = builder.getConfiguration();
         } catch (ConfigurationException e) {
             LOGGER.severe(e.getMessage());
             return;
@@ -80,7 +85,10 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
 
         config.setProperty(testName + "$" + pluginName, pluginVersion);
         try {
-            config.save();
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+                    new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
+                            .configure(new Parameters().properties().setFile(file));
+            builder.save();
         } catch (ConfigurationException e) {
             LOGGER.severe(e.getMessage());
         }

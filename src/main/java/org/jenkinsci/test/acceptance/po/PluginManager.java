@@ -3,23 +3,19 @@ package org.jenkinsci.test.acceptance.po;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.time.temporal.ChronoUnit;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpGet;
 import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
@@ -35,16 +31,7 @@ import org.openqa.selenium.WebElement;
 import com.google.inject.Inject;
 
 import hudson.util.VersionNumber;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
 
-import static java.util.logging.Level.WARNING;
-import static org.apache.http.entity.ContentType.APPLICATION_OCTET_STREAM;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 
@@ -313,14 +300,30 @@ public class PluginManager extends ContainerPageObject {
         }
     }
 
-    private VersionNumber getAvailableVersionForPlugin(String pluginName) {
+    public VersionNumber getAvailableVersionForPlugin(String pluginName) {
         // assuming we are on 'available' or 'updates' page
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(pluginName);
-        String v = find(by.xpath("//input[starts-with(@name,'plugin.%s.')]/ancestor::tr/td[2]//span[contains(@class, 'jenkins-label')] | " +
-                "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr/td[3]", pluginName, pluginName)).getText();
-        return new VersionNumber(v);
+        
+        // DEV MEMO: There is a {@code data-plugin-version} attribute on the {@code tr} tag holding the plugin line entry in the
+        // plugin manager. By selecting the line, we can then retrieve the version directly without having to parse the line's content.
+        final String xpathToPluginLine = "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr";
+
+        // DEV MEMO: To avoid flakiness issues, wait for the text to be entirely written in the search box, and
+        // wait for the list below to be properly refreshed and for the element we are searching for to be displayed.
+        // If not, the list might not be properly refreshed and the element would never be found.
+        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+            try {
+                check(find(by.xpath(xpathToPluginLine, pluginName)));
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return false;
+            }
+            return true;
+        });
+        
+        String version = find(by.xpath(xpathToPluginLine, pluginName)).getAttribute("data-plugin-version");
+        return new VersionNumber(version);
     }
 
     /**

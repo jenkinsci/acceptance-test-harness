@@ -15,11 +15,7 @@ public class TriggerConfig extends PageAreaImpl {
     }
 
     public <Ret extends BuildParameters> Ret addParameter(final Class<Ret> type) {
-        String path = createPageArea("configs", new Runnable() {
-            @Override public void run() {
-                control("hetero-list-add[configs]").selectDropdownMenu(type);
-            }
-        });
+        String path = createPageArea("configs", () -> control("hetero-list-add[configs]").selectDropdownMenu(type));
         return newInstance(type, this, path);
     }
 }

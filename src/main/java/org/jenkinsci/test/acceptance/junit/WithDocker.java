@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.junit;
 
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerImage;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -21,7 +21,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Indicates the docker is necessary to run the test.
- *
+ * <p>
  * Otherwise the test is skipped.
  */
 @Retention(RUNTIME)
@@ -36,7 +36,7 @@ public @interface WithDocker {
      */
     boolean localOnly() default false;
     
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Inject
         Docker docker;
 

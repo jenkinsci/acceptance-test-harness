@@ -14,8 +14,9 @@ import java.net.URL;
 /**
  * Integrates user-configuration (such as which {@link WebDriver} and {@link JenkinsController}
  * to use) into Guice.
- *
- * We expect the configuration script to be specified in Groovy (see https://github.com/jenkinsci/lib-groovy-guice-binder)
+ * <p>
+ * We expect the configuration script to be specified in Groovy
+ * (see <a href="https://github.com/jenkinsci/lib-groovy-guice-binder">lib-groovy-guice-binder</a>)
  * and its location be given via "CONFIG" system property or environment variable.
  *
  * @author Kohsuke Kawaguchi

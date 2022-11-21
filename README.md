@@ -1,6 +1,7 @@
 # Acceptance tests for Jenkins
 
 [![Jenkins](https://ci.jenkins.io/job/Core/job/acceptance-test-harness/job/master/badge/icon)](https://ci.jenkins.io/job/Core/job/acceptance-test-harness/job/master/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jenkins/ath.svg)](https://hub.docker.com/r/jenkins/ath/)
 
 End to end test suite for Jenkins automation server and its plugins.
 
@@ -57,7 +58,7 @@ without author's notice for the sake of suite reliability.
 * [EC2 provider configuration](docs/EC2-CONFIG.md)
 * [Investigation](docs/INVESTIGATION.md)
 
-Areas where acceptance-tests-harness is more suitable then jenkins-test-harness are:
+Areas where acceptance-tests-harness is more suitable than jenkins-test-harness are:
 
 - Installing plugins for cross-plugin integration
 - Running tests in a realistic classloader environment

@@ -27,15 +27,15 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Scale time measurement to support individual execution schemes.
- *
+ * <p>
  * Due to the nature of the harness, the framework is full of timeouts waiting for things to happen. Given the number of
  * modes of execution, environments and configurations there is, there are no right timeouts to balance the desire to
  * abort operations that takes too long and necessity not to interrupt operations taking a bit more time to complete
  * successfully.
- *
- * To reflect that, use <code>-DElasticTime.factor</code> and configure the factor to slow down / speed up the measured time
+ * <p>
+ * To reflect that, use {@code -DElasticTime.factor} and configure the factor to slow down / speed up the measured time
  * for your executions. Floating point values are accepted too.
- *
+ * <p>
  * This implementation takes number of concurrent threads into account.
  *
  * @author ogondza
@@ -58,7 +58,7 @@ public class ElasticTime {
 
     /**
      * Relative performance difference compared to reference environment (Upstream CI).
-     *
+     * <p>
      * Default is 1.0 (no difference). Use >1 in case of slower environment, <1 in case of faster one.
      */
     private final double factor = Double.parseDouble(System.getProperty("ElasticTime.factor", "1.0"));

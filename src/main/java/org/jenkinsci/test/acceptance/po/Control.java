@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import edu.umd.cs.findbugs.annotations.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
@@ -47,24 +46,14 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public Control(PageObject parent, String... paths) {
         super(parent.injector);
-        this.parent = new Owner() {
-            @Override
-            public By path(String rel) {
-                return by.path(rel);
-            }
-        };
+        this.parent = by::path;
         this.relativePaths = paths;
     }
 
     public Control(Injector injector, final By selector) {
         super(injector);
         this.relativePaths = new String[1];
-        this.parent = new Owner() {
-            @Override
-            public By path(String rel) {
-                return selector;
-            }
-        };
+        this.parent = rel -> selector;
     }
 
     public WebElement resolve() {
@@ -117,7 +106,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     /**
      * like click but will block for up to 30 seconds until the underlying web element has become stale.
-     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     * see <a href="https://www.cloudbees.com/blog/get-selenium-to-wait-for-page-load/">Get Selenium to wait for page load</a>
      */
     /*package*/ void clickAndWaitToBecomeStale() {
         clickAndWaitToBecomeStale(Duration.ofSeconds(30));
@@ -125,7 +114,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     /**
      * like click but will block until the underlying web element has become stale.
-     * see https://blog.codeship.com/get-selenium-to-wait-for-page-load/
+     * see <a href="https://www.cloudbees.com/blog/get-selenium-to-wait-for-page-load">Get Selenium to wait for page load</a>
      * @param timeout the amount of time to wait
      */
     /*package*/ void clickAndWaitToBecomeStale(Duration timeout) {
@@ -137,16 +126,16 @@ public class Control extends CapybaraPortingLayerImpl {
 
 
     /**
-     * The existing {@link org.jenkinsci.test.acceptance.po.Control#set(String)}
+     * The existing {@link Control#set(String)}
      * method has shortcomings regarding large strings because it utilizes
      * the sendKeys mechanism to enter the string which takes a significant amount
      * of time, i.e. the browser may consider the script to be unresponsive.
-     *
+     * <p>
      * This method method shall provide a high throughput mechanism which
      * puts the whole string at once into the text field instead of char by char.
-     *
+     * <p>
      * This is a solution / workaround published for Selenium Issue 4496:
-     * https://code.google.com/p/selenium/issues/detail?id=4469
+     * <a href="https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/4469">#4496</a>
      *
      * @param text the large string to be entered
      */
@@ -168,7 +157,7 @@ public class Control extends CapybaraPortingLayerImpl {
 
     /**
      * Sets the value of the input field to the specified text.
-     *
+     * <p>
      * Any existing value gets cleared.
      */
     public void set(@Nullable String text) {
@@ -196,7 +185,7 @@ public class Control extends CapybaraPortingLayerImpl {
         click();
         WebElement we = findCaption(type,findDropDownMenuItem);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
         waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
@@ -206,7 +195,7 @@ public class Control extends CapybaraPortingLayerImpl {
         click();
         WebElement we = findDropDownMenuItem.find(displayName);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
         waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
@@ -235,8 +224,7 @@ public class Control extends CapybaraPortingLayerImpl {
             );
             // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
             WebElement menu = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-            WebElement e = findElement(menu, by.link(caption));
-            return e;
+            return findElement(menu, by.link(caption));
         }
     };
 
@@ -271,8 +259,7 @@ public class Control extends CapybaraPortingLayerImpl {
                             "ancestor-or-self::*[contains(@class,'jenkins-select__input dropdownList')]"
             )));
             context.selectByVisibleText(caption);
-            WebElement e = context.getFirstSelectedOption();
-            return e;
+            return context.getFirstSelectedOption();
 
         }
     };

@@ -1,7 +1,7 @@
 package plugins;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
 import org.jenkinsci.test.acceptance.junit.*;
@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -77,6 +78,6 @@ public class DeployPluginTest extends AbstractJUnitTest {
 
     private String readText(Tomcat7Container f) throws IOException {
         URL url = new URL(f.getUrl(), "/test/");
-        return IOUtils.toString(url.openStream());
+        return IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
     }
 }

@@ -8,10 +8,10 @@ import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRea
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
@@ -47,16 +47,16 @@ public class AuthorizeProjectTest extends AbstractJUnitTest {
         Build b = job.startBuild().shouldSucceed();
 
         String consoleOutput = b.getConsole();
-        Assert.assertThat(consoleOutput, containsString(STARTED_BY_USER2));
-        Assert.assertThat(consoleOutput, not(containsString(RUNNING_ANONYMOUS)));
+        assertThat(consoleOutput, containsString(STARTED_BY_USER2));
+        assertThat(consoleOutput, not(containsString(RUNNING_ANONYMOUS)));
 
         this.authorizeUserToLaunchProject(USER1);
 
         b = job.startBuild().shouldSucceed();
         consoleOutput = b.getConsole();
-        Assert.assertThat(consoleOutput, containsString(STARTED_BY_USER2));
+        assertThat(consoleOutput, containsString(STARTED_BY_USER2));
         // Running as anonymous is displayed due to permissions but the plugin performs its job
-        Assert.assertThat(consoleOutput, containsString(RUNNING_ANONYMOUS));
+        assertThat(consoleOutput, containsString(RUNNING_ANONYMOUS));
     }
 
     private void setupUsers(final GlobalSecurityConfig security, final String... users) {

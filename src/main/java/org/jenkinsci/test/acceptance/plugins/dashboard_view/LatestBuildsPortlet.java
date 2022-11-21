@@ -66,7 +66,7 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      * @return the number of builds of the portlet
      */
     public int getNumberOfBuilds() {
-        return Integer.valueOf(this.numberOfBuilds.resolve().getAttribute("value"));
+        return Integer.parseInt(this.numberOfBuilds.resolve().getAttribute("value"));
     }
 
     /**
@@ -91,7 +91,7 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      */
     public boolean hasBuild(int buildNr) {
         try {
-            return !getTable().findElements(By.linkText("#" + String.valueOf(buildNr))).isEmpty();
+            return !getTable().findElements(By.linkText("#" + buildNr)).isEmpty();
         } catch (NoSuchElementException e) {
             return false;
         }

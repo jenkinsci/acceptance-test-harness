@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -11,7 +11,7 @@ import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Built-in standard slave type.
- *
+ * <p>
  * To create a new slave into a test, use {@link SlaveController}.
  *
  * @author Kohsuke Kawaguchi

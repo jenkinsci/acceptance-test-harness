@@ -28,10 +28,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.Select;
 
-import javax.swing.text.html.HTMLDocument;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-
 @Describable("Git")
 public class GitScm extends Scm {
 

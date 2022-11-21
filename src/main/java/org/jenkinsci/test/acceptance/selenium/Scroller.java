@@ -69,7 +69,7 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  *
  * <p>
  * This work around simply tries to scroll the element into a view before we interact with this.
- * Originally developed in Ruby version of selenium-tests in <code>lib/jenkins/capybara.rb</code>.
+ * Originally developed in Ruby version of selenium-tests in {@code lib/jenkins/capybara.rb}.
  *
  * @author ogondza
  * @author Kohsuke Kawaguchi

@@ -7,5 +7,5 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
  */
 public enum JobDslLookupStrategy {
 
-    JENKINS_ROOT, SEED_JOB;
+    JENKINS_ROOT, SEED_JOB
 }

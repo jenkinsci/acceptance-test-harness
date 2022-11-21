@@ -69,7 +69,7 @@ public class TomcatController extends LocalController {
             cb.env.putAll(commonLaunchEnv());
             int status = cb.system();
             if(status != 0){
-                throw new RuntimeException("Failed during Tomcat startup: "+cb.toString());
+                throw new RuntimeException("Failed during Tomcat startup: "+ cb);
             }
             CommandBuilder tail = new CommandBuilder("tail").add("-f", tomcatLog);
             return tail.popen();

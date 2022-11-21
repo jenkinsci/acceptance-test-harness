@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.selenium;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.remote.FileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.UselessFileDetector;
@@ -17,14 +18,20 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
 
     /** 
      * Create a new instance suitable for use in a try-with-resources block.
-     * Example usage is:<code>
+     * Example usage is:
+     * <pre>
+     * {@code
      * try (UselessFileDetectorReplacement ufd = new UselessFileDetectorReplacement(driver)) {
      *   control.setText(someTextThatIsAlsoALocalFileName);
      * }
-     * </code>
+     * }
+     * </pre>
      */
     public UselessFileDetectorReplacement(WebDriver driver) {
-        if (driver instanceof RemoteWebDriver) {
+        driver = getNonWrappedDriver(driver);
+        if (driver.getClass().equals(RemoteWebDriver.class)) {
+            // we test the explicit class not instanceof as the local FirefoxDriver and others 
+            // are also RemoteWebDriver but can not be configured with a FileDetector
             remoteDriver = (RemoteWebDriver) driver;
             previous = remoteDriver.getFileDetector();
             remoteDriver.setFileDetector(new UselessFileDetector());
@@ -32,6 +39,18 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
             remoteDriver = null;
             previous = null;
         }
+    }
+
+    /**
+     * Obtain the underlying driver if the driver is {@link WrapsDriver wrapped} otherwise returns {@code driver}. 
+     * @param driver the {@link WebDriver} to unwrap or return if it is not wrapped. 
+     */
+    private WebDriver getNonWrappedDriver(WebDriver driver) {
+        WebDriver d = driver;
+        while (d instanceof WrapsDriver) {
+            d = ((WrapsDriver)d).getWrappedDriver();
+        }
+        return d;
     }
 
     @Override

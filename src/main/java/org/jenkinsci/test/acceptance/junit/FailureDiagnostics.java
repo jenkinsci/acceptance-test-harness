@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 /**
  * Attach diagnostic file related to a test failure.
- *
+ * <p>
  * The harness can attach any number of diagnostic files to be stored in /target/diagnostics/$TEST_NAME/.
  * The same 'kind' of diagnostic information is expected to use the same file/subdir name.
  *
@@ -65,13 +65,9 @@ public class FailureDiagnostics extends TestWatcher {
      * @param content Content to write.
      */
     public void write(String filename, String content) {
-        FileWriter writer = null;
         try {
-            try {
-                writer = new FileWriter(touch(filename));
+            try (FileWriter writer = new FileWriter(touch(filename))) {
                 writer.write(content);
-            } finally {
-                if (writer != null) writer.close();
             }
         } catch (IOException e) {
             throw new Error(e);
@@ -112,7 +108,7 @@ public class FailureDiagnostics extends TestWatcher {
                 Files.walk(dir.toPath()).forEach(p -> {
                     if (Files.isRegularFile(p)) {
                         //https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
-                        System.out.println(String.format(JUNIT_ATTACHMENT, p.toAbsolutePath()));
+                        System.out.printf((JUNIT_ATTACHMENT) + "%n", p.toAbsolutePath());
                     }
                 });
             } catch (IOException x) {

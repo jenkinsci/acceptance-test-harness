@@ -4,9 +4,6 @@ import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.openqa.selenium.WebElement;
-
-import java.util.List;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -24,15 +21,11 @@ public class ParameterizedTrigger extends AbstractStep implements PostBuildStep 
 
     /**
      * Adds a new trigger setting.
-     *
+     * <p>
      * Note that newly added trigger has one entry in there by default.
      */
     public TriggerConfig addTriggerConfig() {
-        String path = createPageArea("configs", new Runnable() {
-            @Override public void run() {
-                clickButton("Add trigger...");
-            }
-        });
+        String path = createPageArea("configs", () -> clickButton("Add trigger..."));
         return new TriggerConfig(this, path);
     }
 }

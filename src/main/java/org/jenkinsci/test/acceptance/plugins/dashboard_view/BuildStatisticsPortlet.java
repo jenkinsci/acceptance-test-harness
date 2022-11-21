@@ -60,7 +60,7 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
      * @return number of builds
      */
     public int getNumberOfBuilds(JobType type) {
-        return Integer.valueOf(getTable().findElement(By.xpath(".//tbody/tr[" + type.row + "]/td[3]")).getText().trim());
+        return Integer.parseInt(getTable().findElement(By.xpath(".//tbody/tr[" + type.row + "]/td[3]")).getText().trim());
     }
 
     /**

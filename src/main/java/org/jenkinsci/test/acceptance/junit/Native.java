@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -34,7 +34,7 @@ import static java.lang.annotation.RetentionPolicy.*;
 public @interface Native {
     String[] value();
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Override
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {

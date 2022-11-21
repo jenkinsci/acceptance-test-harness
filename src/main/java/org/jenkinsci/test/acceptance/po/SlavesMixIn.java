@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.io.File;
@@ -41,6 +42,10 @@ public class SlavesMixIn extends MixIn {
         // This form submission will drop us on the configure page
 
         S s = newInstance(type, jenkins, name);
+        // Automatic disabling of sticky elements doesn't occur after a redirect
+        // so force it after the configuration page has loaded
+        new Scroller().disableStickyElements(driver);
+
 
         // reasonable starting point values
         s.setExecutors(1);

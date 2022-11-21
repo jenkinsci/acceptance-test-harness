@@ -10,10 +10,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -40,7 +40,7 @@ import com.google.inject.Inject;
 @RuleAnnotation(value = WithOS.RuleImpl.class, priority = -10)
 public @interface WithOS {
 
-    public enum OS {
+    enum OS {
         WINDOWS,
         LINUX,
         MAC
@@ -48,7 +48,7 @@ public @interface WithOS {
     
     OS[] os();
 
-    public class RuleImpl implements TestRule {
+    class RuleImpl implements TestRule {
         @Inject JenkinsController controller;
         
         @Override

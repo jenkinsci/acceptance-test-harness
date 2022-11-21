@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance;
 
-import org.apache.xerces.impl.dv.util.Base64;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.jvnet.hudson.crypto.RSAPublicKeyUtil;
 
@@ -14,12 +13,13 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.EnumSet;
 
 import static java.nio.file.attribute.PosixFilePermission.*;
 
 /**
- * {@link Provider} that generates key (and once and keep it in <code>~/.ssh/jenkins-selenium-tests4j.pub</code>
+ * {@link Provider} that generates key (and once and keep it in {@code ~/.ssh/jenkins-selenium-tests4j.pub}
  *
  * @author Kohsuke Kawaguchi
  */
@@ -56,7 +56,7 @@ public class SshKeyPairGenerator implements Provider<SshKeyPair>, com.google.inj
 
         // and public key
         try (FileWriter w = new FileWriter(publicKey)) {
-            w.write("ssh-rsa "+ Base64.encode(RSAPublicKeyUtil.encode(kp.getPublic()))+" generated-used-by-jenkins");
+            w.write("ssh-rsa "+ Base64.getEncoder().encode(RSAPublicKeyUtil.encode(kp.getPublic()))+" generated-used-by-jenkins");
         }
     }
 }

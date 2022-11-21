@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.client.ClientUtil;
 import org.apache.commons.exec.OS;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
@@ -320,7 +320,7 @@ public class FallbackConfig extends AbstractModule {
     /**
      * Get display number to run browser on.
      * <p>
-     * Custom property <code>BROWSER_DISPLAY</code> has the preference. If not provided <code>DISPLAY</code> is used.
+     * Custom property {@code BROWSER_DISPLAY} has the preference. If not provided {@code DISPLAY} is used.
      */
     public static @CheckForNull String getBrowserDisplay() {
         String d = System.getenv("BROWSER_DISPLAY");
@@ -447,7 +447,7 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Name of the socket file used to communicate between jut-server and JUnit.
-     * See <code>docs/PRELAUNCH.md</code>
+     * See {@code docs/PRELAUNCH.md}
      *
      * @return the name of the socket
      * @see JenkinsControllerPoolProcess
@@ -463,14 +463,14 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Get the file with Jenkins to run.
-     *
+     * <p>
      * The file will exist on machine where tests run.
      */
     @Provides @Named("jenkins.war")
     public File getJenkinsWar(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         try {
             return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"));
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
         }
 
         String version = System.getenv("JENKINS_VERSION");

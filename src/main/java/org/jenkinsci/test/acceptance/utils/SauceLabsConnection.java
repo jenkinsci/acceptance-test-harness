@@ -5,17 +5,17 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Properties;
 
 /**
  * Encapsulates username and password for Sauce Labs.
  *
  * <p>
- * The credential is expected to be at <code>~/.saucelabs</code>
+ * The credential is expected to be at {@code ~/.saucelabs}
  *
  * @author Kohsuke Kawaguchi
  */
@@ -29,7 +29,7 @@ public class SauceLabsConnection {
             throw new IOException("SauceLabs connection file is missing: "+conf);
 
         Properties props = new Properties();
-        try (InputStream is = new FileInputStream(conf)) {
+        try (InputStream is = Files.newInputStream(conf.toPath())) {
             props.load(is);
         }
         username = props.getProperty("username");

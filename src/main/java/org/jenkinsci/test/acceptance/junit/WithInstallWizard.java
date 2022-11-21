@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 /**
  * Enables the install wizard to run the test. This is only possible for LocalControllers. Otherwise the test is
  * skipped.
- *
+ * <p>
  * Note the Jenkins will not have form-element-path installed automatically preventing {@link org.jenkinsci.test.acceptance.po.Control}
  * and {@link org.jenkinsci.test.acceptance.po.PageArea} to use "path" based navigation.
  */
