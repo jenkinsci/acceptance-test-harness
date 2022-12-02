@@ -41,8 +41,9 @@ public class GradleStep extends AbstractStep implements BuildStep {
     }
 
     private void ensureAdvancedOptionsOpen() {
-        Control advancedButton = control("advanced-button");
-        if(advancedButton.exists()) {
+        Control advancedButton = control(by.css(".advanced-button:not([data-expanded='true'])"));
+
+        if (advancedButton.exists()) {
             advancedButton.click();
 
             // Sticky footer obscures this, trying another click seems to work better
