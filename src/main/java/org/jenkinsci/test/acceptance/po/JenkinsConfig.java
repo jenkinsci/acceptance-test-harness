@@ -1,9 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.WebElement;
-
 import java.net.URL;
-import java.util.List;
 
 /**
  * Page object for the system configuration page.
@@ -14,8 +11,6 @@ public class JenkinsConfig extends ConfigurablePageObject {
     public final Jenkins jenkins;
 
     public final Control numExecutors = control("/jenkins-model-MasterBuildConfiguration/numExecutors");
-
-    public final Control addCloudButton = control("/jenkins-model-GlobalCloudConfiguration/hetero-list-add[cloud]");
 
     public final Control labels = control("/jenkins-model-MasterBuildConfiguration/labelString");
 
@@ -38,17 +33,6 @@ public class JenkinsConfig extends ConfigurablePageObject {
     public void clearArtifactManagers() {
         jenkins.ensureConfigPage();
         new ArtifactManagement(this).clear();
-    }
-
-    public <T extends Cloud> T addCloud(Class<T> type) {
-        jenkins.ensureConfigPage();
-
-        addCloudButton.selectDropdownMenu(type);
-
-        List<WebElement> all = all(by.name("cloud"));
-        WebElement last = all.get(all.size()-1);
-
-        return newInstance(type, this, last.getAttribute("path"));
     }
 
     public void setJenkinsUrl(String url) {
