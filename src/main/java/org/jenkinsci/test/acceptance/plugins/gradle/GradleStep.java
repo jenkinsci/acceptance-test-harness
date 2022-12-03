@@ -48,7 +48,9 @@ public class GradleStep extends AbstractStep implements BuildStep {
                 .findElements(by.css(".advanced-button:not([data-expanded='true'])"));
 
         advancedButtons.forEach(advancedButton -> {
-            advancedButton.click();
+            if (advancedButton.isDisplayed()) {
+                advancedButton.click();
+            }
         });
     }
 
