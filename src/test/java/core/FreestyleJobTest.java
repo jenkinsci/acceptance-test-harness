@@ -197,10 +197,6 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         b2.keepForever(false);
 
         j.scheduleBuild().waitUntilFinished();
-        // TODO remove as soon as 'waitUntilFinished' effectively waiting for the build to be finished (including hudson.model.Job#logRotate)
-        waitFor(b2).withMessage("waiting for build #2 to be deleted")
-                .withTimeout(30, TimeUnit.SECONDS).until(pageObjectDoesNotExist());
-
         assertThat(b2, pageObjectDoesNotExist());
     }
 
