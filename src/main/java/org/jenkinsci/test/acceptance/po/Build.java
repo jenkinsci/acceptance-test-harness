@@ -117,6 +117,7 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
+    /** Checks if the build is in progress,  that is the build has started and not yet completed. */
     public boolean isInProgress() {
         JsonNode d;
         try {
