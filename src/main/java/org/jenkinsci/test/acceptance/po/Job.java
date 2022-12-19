@@ -408,9 +408,9 @@ public class Job extends TopLevelItem {
     public void useCustomWorkspace(String ws) {
         ensureConfigPage();
 
-        // There may be multiple "Advanced..." buttons visible on the job config page, and there's no easy way to identify
+        // There may be multiple "Advanced" buttons visible on the job config page, and there's no easy way to identify
         // which one is the Advanced Project Options one, so let's just hit all of them.
-        for (WebElement advancedButton : all(by.button("Advanced..."))) {
+        for (WebElement advancedButton : all(by.button("Advanced"))) {
             if (advancedButton.isDisplayed()) {
                 advancedButton.click();
             }

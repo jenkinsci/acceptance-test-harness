@@ -78,7 +78,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
         final ConfigurablePageObject page = ensureConfigPage(jenkins);
 
         final String name = type.getAnnotation(ToolInstallationPageObject.class).name();
-        final Control expandButton = page.control(by.button(name + " installations..."));
+        final Control expandButton = page.control(by.button(name + " installations"));
         try {
             expandButton.click();
         } catch (NoSuchElementException e) {
