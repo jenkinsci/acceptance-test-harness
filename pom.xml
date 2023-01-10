@@ -486,7 +486,7 @@ and
         <configuration>
           <systemPropertyVariables>
             <!-- allow large xpaths https://www.oracle.com/java/technologies/javase/11-0-15-relnotes.html#JDK-8270504 -->
-            <jdk.xml.xpathTotalOpLimit>200</jdk.xml.xpathTotalOpLimit>
+            <jdk.xml.xpathExprOpLimit>200</jdk.xml.xpathExprOpLimit>
             <mavenRepoPath>${settings.localRepository}</mavenRepoPath>
             <listener>org.jenkinsci.test.acceptance.junit.JUnitProgressReporter</listener>
           </systemPropertyVariables>
