@@ -2,28 +2,51 @@
 #
 # see docs/DOCKER.md for usage
 
-FROM centos:7
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+FROM ubuntu:22.04
 
-## Always install the latest version of these packages.
-# hadolint ignore=DL3033
-RUN yum -y install \
+# hadolint ignore=DL3008
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+    gpg-agent \
+    software-properties-common \
+    && \
+  apt-get clean all && rm -rf /var/cache/apt
+
+# No Snaps please https://www.omgubuntu.co.uk/2022/04/how-to-install-firefox-deb-apt-ubuntu-22-04
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN add-apt-repository ppa:mozillateam/ppa && \
+  printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001' | tee /etc/apt/preferences.d/mozilla-firefox
+
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC \
+    apt-get install -y --no-install-recommends \
         curl \
         docker \
         git \
-        ImageMagick \
+        imagemagick \
         iptables \
         firefox \
         unzip \
-        tigervnc-server \
-        which \
-        java-1.8.0-openjdk-devel \
-        java-11-openjdk-devel && \
-    yum clean all && rm -rf /var/cache/yum
+        tightvncserver \
+        openjdk-11-jdk \
+        xfonts-base \
+        && \
+    apt-get clean all && rm -rf /var/cache/apt
 
 # Selenium needs a geckodriver in order to work properly
-RUN curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v0.32.0/geckodriver-v0.32.0-linux64.tar.gz && \
-    tar -xvzf geckodriver-v0.32.0-linux64.tar.gz -C /usr/local/bin
+ENV GECKODRIVER_VERSION 0.32.0
+# gross due to https://github.com/mozilla/geckodriver/issues/1956
+RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
+  if [ "$arch" = "arm64" ] ; \
+  then \
+    curl -fsSLO https://github.com/jamesmortensen/geckodriver-arm-binaries/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz && \
+    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz -C /usr/local/bin; \
+  else \
+    curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz && \
+    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz -C /usr/local/bin ; \
+  fi
 
 # Maven in repo is not new enough for ATH
 ENV MAVEN_VERSION 3.8.7
@@ -64,7 +87,6 @@ RUN touch /home/ath-user/.Xauthority
 # approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
-RUN chmod ug+s /usr/bin/docker* # In Centos, the actual binaries are hidden behind a shim so update them all
 
 COPY vnc.sh /usr/bin/
 COPY set-java.sh /usr/bin/
@@ -73,6 +95,6 @@ COPY run.sh /usr/bin/
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
 
-# Java 11 by default
 USER ath-user
-RUN set-java.sh 11
+
+ENV USER ath-user

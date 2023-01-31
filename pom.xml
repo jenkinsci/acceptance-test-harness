@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.92</version>
+    <version>1.94</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -358,7 +358,7 @@
     <dependency>
       <groupId>com.github.olivergondza.dumpling</groupId>
       <artifactId>dumpling</artifactId>
-      <version>2.4</version>
+      <version>2.6</version>
     </dependency>
 
     <dependency>
@@ -387,14 +387,14 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.14.1</version>
+        <version>2.14.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.9.1</version>
+        <version>5.9.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
