@@ -24,6 +24,9 @@
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
 import org.jenkinsci.test.acceptance.po.*;
+import org.openqa.selenium.WebElement;
+
+import java.util.List;
 
 @Describable("Invoke Gradle script")
 public class GradleStep extends AbstractStep implements BuildStep {
@@ -41,15 +44,14 @@ public class GradleStep extends AbstractStep implements BuildStep {
     }
 
     private void ensureAdvancedOptionsOpen() {
-        Control advancedButton = control("advanced-button");
-        if(advancedButton.exists()) {
-            advancedButton.click();
+        List<WebElement> advancedButtons = control("").resolve()
+                .findElements(by.css(".advanced-button:not([data-expanded='true'])"));
 
-            // Sticky footer obscures this, trying another click seems to work better
-            if (advancedButton.exists()) {
+        advancedButtons.forEach(advancedButton -> {
+            if (advancedButton.isDisplayed()) {
                 advancedButton.click();
             }
-        }
+        });
     }
 
     public void setVersion(String version) {

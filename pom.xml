@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.88</version>
+    <version>1.92</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -35,9 +35,9 @@
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <maven.version>3.3.9</maven.version>
-    <groovy.version>3.0.13</groovy.version>
+    <groovy.version>3.0.14</groovy.version>
     <monte.version>0.7.7.0</monte.version>
-    <slf4j.version>2.0.2</slf4j.version>
+    <slf4j.version>2.0.6</slf4j.version>
   </properties>
 
   <repositories>
@@ -168,6 +168,12 @@
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>htmlunit-driver</artifactId>
       <version>2.64.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xml-apis</groupId>
+          <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.codeborne</groupId>
@@ -229,7 +235,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>version-number</artifactId>
-      <version>1.10</version>
+      <version>1.11</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -239,7 +245,6 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>test-annotations</artifactId>
-      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -268,24 +273,24 @@
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jnr-unixsocket</artifactId>
-      <version>0.38.17</version>
+      <version>0.38.19</version>
     </dependency>
     <!-- dependency use range so we want to avoid weird resolution -->
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.3.9</version>
+      <version>1.3.10</version>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.3.9</version>
+      <version>1.3.10</version>
       <classifier>native</classifier>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>crypto-util</artifactId>
-      <version>1.7</version>
+      <version>1.8</version>
     </dependency>
     <dependency>
       <groupId>args4j</groupId>
@@ -295,7 +300,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>1.71.1</version>
+      <version>1.72</version>
     </dependency>
     <dependency>
       <groupId>org.zeroturnaround</groupId>
@@ -368,7 +373,7 @@
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>163.v12f007a_0d63f</version>
+      <version>166.v912b_95083ffe</version>
     </dependency>
     <dependency>
       <groupId>com.github.olivergondza.dumpling</groupId>
@@ -389,6 +394,10 @@
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcpkix-jdk15on</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>javax.xml.bind</groupId>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
   </dependencies>
@@ -398,7 +407,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.13.4</version>
+        <version>2.14.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -422,12 +431,12 @@
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
-        <version>4.5.13</version>
+        <version>4.5.14</version>
       </dependency>
       <dependency>
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpcore</artifactId>
-        <version>4.4.15</version>
+        <version>4.4.16</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
@@ -453,7 +462,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.4.1</version>
         <configuration>
           <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
@@ -468,7 +476,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M7</version>
         <configuration>
           <systemPropertyVariables>
             <mavenRepoPath>${settings.localRepository}</mavenRepoPath>
@@ -502,7 +509,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>3.0.0-M6</version>
         <configuration>
           <!--
             tests are used to test Jenkins, not the acceptance test harness,
@@ -514,7 +520,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.1.0</version>
         <executions>
           <execution>
             <phase>generate-resources</phase>
@@ -622,7 +627,7 @@
         </property>
       </activation>
       <properties>
-        <surefire.rerunFailingTestsCount>2</surefire.rerunFailingTestsCount>
+        <surefire.rerunFailingTestsCount>1</surefire.rerunFailingTestsCount>
       </properties>
     </profile>
     <profile>
