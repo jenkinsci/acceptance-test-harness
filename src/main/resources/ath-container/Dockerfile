@@ -36,7 +36,7 @@ RUN apt-get update && \
     apt-get clean all && rm -rf /var/cache/apt
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION 0.31.0
+ENV GECKODRIVER_VERSION 0.32.0
 # gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
