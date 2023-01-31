@@ -15,9 +15,9 @@ updates:
     directory: "src/main/resources/ath-container"
     schedule:
       interval: "weekly"
-      ignore:
-        - dependency-name: "ubuntu"
-          versions: [">=22.04"]
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/ArtifactoryContainer"
     schedule:
