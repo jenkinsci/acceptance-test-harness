@@ -8,7 +8,17 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 uid=$(id -u)
 gid=$(id -g)
 tag="jenkins/ath"
-java_version="${java_version:-8}"
+java_version="${java_version:-11}"
+
+# high chance of uid / group already existing in the container
+# known to happen on macOS
+if (( uid < 1000 )); then
+    uid=1001
+fi
+
+if (( gid < 1000 )); then
+    gid=1001
+fi
 
 docker build --build-arg=uid="$uid" --build-arg=gid="$gid" "$DIR/src/main/resources/ath-container" -t "$tag"
 
