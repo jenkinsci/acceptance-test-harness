@@ -15,6 +15,9 @@ updates:
     directory: "src/main/resources/ath-container"
     schedule:
       interval: "weekly"
+      ignore:
+        - dependency-name: "ubuntu"
+          versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/ArtifactoryContainer"
     schedule:
@@ -27,22 +30,37 @@ updates:
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/FtpdContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JabberContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JavaGitContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JiraContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/LdapContainer"
     schedule:
@@ -55,6 +73,9 @@ updates:
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/SMBContainer"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/SshAgentContainer"
     schedule:
@@ -67,6 +88,9 @@ updates:
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/Tomcat7Container"
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "ubuntu"
+        versions: [">=22.04"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
