@@ -1,5 +1,5 @@
 # Sets up
-FROM debian:buster
+FROM debian:bullseye
 
 RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion viewvc && apt-get clean
 
