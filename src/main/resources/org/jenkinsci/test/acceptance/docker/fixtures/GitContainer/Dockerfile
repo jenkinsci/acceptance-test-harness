@@ -3,7 +3,7 @@
 # and prepares for execution of gitplugin tests.
 #
 
-FROM ubuntu:xenial
+FROM ubuntu:22.04
 
 RUN mkdir -p /var/run/sshd
 

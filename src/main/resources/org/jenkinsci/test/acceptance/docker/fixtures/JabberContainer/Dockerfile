@@ -2,7 +2,7 @@
 # Setup Prosody IM XMPP Server with two users
 #
 
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 # Needed for supervisord
 RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe" > /etc/apt/sources.list
