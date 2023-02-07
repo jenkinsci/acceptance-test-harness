@@ -26,7 +26,7 @@ fi
 
 function download() {
     echo "Fetching $1 to $2"
-    status=$(curl -sSL --write-out "%{http_code}" --retry 3 --retry-delay 0 --retry-max-time 60 -o $2 $1)
+    status=$(curl --http1.1 -sSL --write-out "%{http_code}" --retry 3 --retry-delay 0 --retry-max-time 60 -o $2 $1)
     if [ "$status" -ne 200 ]; then
         echo >&2 "Failed to fetch the $1 ($status) to $2"
         return 1
