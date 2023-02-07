@@ -74,7 +74,7 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  * @author ogondza
  * @author Kohsuke Kawaguchi
  */
-public class Scroller extends  AbstractWebDriverEventListener {
+public class Scroller extends AbstractWebDriverEventListener {
 
     private final Logger LOGGER = Logger.getLogger(Scroller.class.getName());
 
