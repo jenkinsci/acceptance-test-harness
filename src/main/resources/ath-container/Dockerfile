@@ -64,7 +64,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /
 
 RUN echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+      $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 # Ensure that version is fixed
 RUN echo " \
     Package: docker-ce* \
