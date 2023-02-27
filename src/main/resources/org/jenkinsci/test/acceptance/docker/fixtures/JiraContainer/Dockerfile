@@ -3,7 +3,7 @@
 #
 #    The initial password is 'admin:admin'
 #
-FROM ubuntu:22.04
+FROM ubuntu:xenial
 
 # Pin JIRA version to make the tests more predictable and less fragile
 # In particular, pinned to 6.X because from 7.X the SOAP API is gone, and it's
