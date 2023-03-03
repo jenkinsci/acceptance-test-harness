@@ -15,7 +15,7 @@ RUN apt-get update && \
 # No Snaps please https://www.omgubuntu.co.uk/2022/04/how-to-install-firefox-deb-apt-ubuntu-22-04
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN add-apt-repository ppa:mozillateam/ppa && \
-  printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001' | tee /etc/apt/preferences.d/mozilla-firefox
+  printf 'Package: firefox*\nPin: version 102.8.0*\nPin-Priority: 1001' | tee /etc/apt/preferences.d/mozilla-firefox
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
@@ -27,7 +27,7 @@ RUN apt-get update && \
         git \
         imagemagick \
         iptables \
-        firefox \
+        firefox-esr \
         unzip \
         tightvncserver \
         openjdk-11-jdk \
@@ -36,7 +36,7 @@ RUN apt-get update && \
     apt-get clean all && rm -rf /var/cache/apt
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION 0.32.0
+ENV GECKODRIVER_VERSION 0.32.2
 # gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
@@ -94,6 +94,7 @@ COPY run.sh /usr/bin/
 
 RUN chmod u+s "$(which update-alternatives)"
 RUN dbus-uuidgen > /etc/machine-id
+RUN ln -s /lib/firefox-esr/firefox.sh /usr/bin/firefox
 
 USER ath-user
 
