@@ -13,6 +13,7 @@ import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.junit.Ignore;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -80,6 +81,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
 
     @Test
     @Since("1.509") @Issue("JENKINS-24370")
+    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1044")
     public void correct_redirect_after_save() throws Exception {
         JenkinsConfig cp = jenkins.getConfigPage();
         cp.configure();
