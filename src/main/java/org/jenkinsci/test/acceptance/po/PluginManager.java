@@ -95,14 +95,12 @@ public class PluginManager extends ContainerPageObject {
             try {
                 // We interact with the element just to detect if it is stale
                 webElement.findElement(by.id("it does not matter"));
-            } catch(StaleElementReferenceException e) {
+            } catch(StaleElementReferenceException | NoSuchElementException e) {
                 // with this exception we know we've left the original page
                 // we look for an element in the page to check for success
                 if (current.equals(getCurrentUrl())) {
                     return true;
                 }
-            } catch(NoSuchElementException e) {
-                return false;
             }
             return false;
         });

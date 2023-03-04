@@ -363,7 +363,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             // Calling any method forces a staleness check
             element.isEnabled();
             return false;
-        } catch (StaleElementReferenceException expected) {
+        } catch (StaleElementReferenceException | NoSuchElementException expected) {
             return true;
         }
     }
