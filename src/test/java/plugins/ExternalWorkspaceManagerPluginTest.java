@@ -12,7 +12,6 @@ import org.jenkinsci.test.acceptance.slave.LocalSlaveController;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.openqa.selenium.By;
@@ -41,7 +40,6 @@ import static org.hamcrest.core.StringContains.containsString;
         "workflow-job",
         "ws-cleanup",
 })
-@Ignore("TODO https://github.com/jenkinsci/external-workspace-manager-plugin/pull/77")
 public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @ClassRule
