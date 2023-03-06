@@ -12,10 +12,7 @@ RUN apt-get update && \
     && \
   apt-get clean all && rm -rf /var/cache/apt
 
-# No Snaps please https://www.omgubuntu.co.uk/2022/04/how-to-install-firefox-deb-apt-ubuntu-22-04
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN add-apt-repository ppa:mozillateam/ppa && \
-  printf 'Package: *\nPin: release o=LP-PPA-mozillateam\nPin-Priority: 1001' | tee /etc/apt/preferences.d/mozilla-firefox
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
@@ -30,7 +27,6 @@ RUN apt-get update && \
         git \
         imagemagick \
         iptables \
-        firefox \
         unzip \
         tightvncserver \
         openjdk-11-jdk \
@@ -38,8 +34,19 @@ RUN apt-get update && \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
+# Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
+ARG FIREFOX_VERSION=108.0.2
+RUN apt-get -y install libgtk-3-0 libasound2 libdbus-glib-1-2 libx11-xcb-dev libpci-dev libgl1-mesa-glx wget bzip2 \
+  && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
+  && wget --no-verbose -O /tmp/firefox.tar.bz2 https://download-installer.cdn.mozilla.net/pub/firefox/releases/$FIREFOX_VERSION/linux-x86_64/en-US/firefox-$FIREFOX_VERSION.tar.bz2 \
+  && rm -rf /opt/firefox \
+  && tar -C /opt -xjf /tmp/firefox.tar.bz2 \
+  && rm /tmp/firefox.tar.bz2 \
+  && mv /opt/firefox /opt/firefox-$FIREFOX_VERSION \
+  && ln -fs /opt/firefox-$FIREFOX_VERSION/firefox /usr/bin/firefox
+
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION 0.32.0
+ENV GECKODRIVER_VERSION 0.32.2
 # gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
