@@ -4,10 +4,13 @@
 # The admin user has username 'admin' and password 'tomcat'
 #
 
-FROM ubuntu:xenial
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y gnupg
 
 # Tomcat7 is from Universe
 RUN echo "deb http://archive.ubuntu.com/ubuntu xenial universe" >> /etc/apt/sources.list
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 40976EAF437D05B5
 RUN apt-get update && apt-get install -y tomcat7 tomcat7-admin
 
 # configure the admin user
