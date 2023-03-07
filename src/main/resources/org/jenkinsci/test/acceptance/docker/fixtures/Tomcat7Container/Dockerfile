@@ -4,7 +4,7 @@
 # The admin user has username 'admin' and password 'tomcat'
 #
 
-FROM ubuntu:22.04
+FROM ubuntu:xenial
 
 # Tomcat7 is from Universe
 RUN echo "deb http://archive.ubuntu.com/ubuntu xenial universe" >> /etc/apt/sources.list
