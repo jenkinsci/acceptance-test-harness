@@ -36,7 +36,7 @@ ENV FIREFOX_VERSION 108.0.2
 # hadolint ignore=DL3008, DL3015
 RUN apt-get -y install libgtk-3-0 libasound2 libdbus-glib-1-2 libx11-xcb-dev libpci-dev libgl1-mesa-glx wget bzip2 \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
-  && curl -sO https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 /tmp/firefox.tar.bz2 \
+  && curl --silent https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 --output /tmp/firefox.tar.bz2 \
   && rm -rf /opt/firefox \
   && tar -C /opt -xjf /tmp/firefox.tar.bz2 \
   && rm /tmp/firefox.tar.bz2 \
