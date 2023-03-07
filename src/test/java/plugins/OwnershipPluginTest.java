@@ -81,7 +81,6 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
 
     @Test
     @Since("1.509") @Issue("JENKINS-24370")
-    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1044")
     public void correct_redirect_after_save() throws Exception {
         JenkinsConfig cp = jenkins.getConfigPage();
         cp.configure();
