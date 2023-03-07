@@ -31,6 +31,7 @@ RUN apt-get update && \
         tightvncserver \
         openjdk-11-jdk \
         xfonts-base \
+        openssh-client \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
