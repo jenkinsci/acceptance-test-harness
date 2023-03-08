@@ -12,8 +12,11 @@ FROM ubuntu:22.04
 ENV JIRA_VERSION 6.3
 
 # base package installation
-RUN apt-get update -y && apt-get install -y apt-transport-https && echo "deb https://packages.atlassian.com/atlassian-sdk-deb stable contrib" >> /etc/apt/sources.list && apt-get update
-RUN apt-get install -y --allow-unauthenticated openjdk-8-jdk atlassian-plugin-sdk netcat
+RUN apt-get update && apt-get install -y apt-transport-https wget gnupg2 && echo "deb https://packages.atlassian.com/debian/atlassian-sdk-deb/ stable contrib" >> /etc/apt/sources.list
+RUN wget https://packages.atlassian.com/api/gpg/key/public
+RUN apt-key add public
+
+RUN apt-get update && apt-get install -y openjdk-8-jdk atlassian-plugin-sdk netcat
 
 # this will install the whole thing, launches Tomcat,
 # asks the user to do Ctrl+C to quit, then it shuts down presumably because it
