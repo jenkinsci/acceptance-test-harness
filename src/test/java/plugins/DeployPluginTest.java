@@ -3,7 +3,7 @@ package plugins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
-import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat7Container;
+import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat10Container;
 import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.deploy.DeployPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -29,12 +29,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class DeployPluginTest extends AbstractJUnitTest {
 
     @Inject
-    DockerContainerHolder<Tomcat7Container> docker;
+    DockerContainerHolder<Tomcat10Container> docker;
 
     @Test
     @Native("bash")
     @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {"admin", "tomcat"}, id = "tomcat")
-    public void deploy_sample_webapp_to_tomcat7() throws IOException, InterruptedException {
+    public void deploy_sample_webapp_to_tomcat10() throws IOException, InterruptedException {
         if (SystemUtils.IS_OS_WINDOWS) {
             // TODO move somewhere else...
             String path = new CommandBuilder("where.exe", "bash.exe").popen().asText().trim();
@@ -46,7 +46,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
             cp.setShell(path);
             cp.save();
         }
-        Tomcat7Container f = docker.get();
+        Tomcat10Container f = docker.get();
 
         FreeStyleJob j = jenkins.jobs.create();
         j.configure();
@@ -76,7 +76,7 @@ public class DeployPluginTest extends AbstractJUnitTest {
         assertThat(readText(f), containsString("Hello Jenkins"));
     }
 
-    private String readText(Tomcat7Container f) throws IOException {
+    private String readText(Tomcat10Container f) throws IOException {
         URL url = new URL(f.getUrl(), "/test/");
         return IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
     }
