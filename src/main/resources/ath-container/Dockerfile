@@ -75,19 +75,17 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /
 RUN echo \
       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
       $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-# Ensure that version is fixed
-RUN echo " \
-    Package: docker-ce* \
-    Pin: version 5:23.0.1-1* \
-    Pin-Priority: 1001 \
-    " | tee /etc/apt/preferences.d/docker-ce
 
-# Install pinned version
-# hadolint: Do not pin packages as they are requirements only for docker installation (and not of the rest of the ATH) and the effort required to track each version would be too huge
-# hadolint ignore=DL3008
-RUN apt-get update --quiet && apt-get install --yes --no-install-recommends docker-ce docker-ce-cli docker-buildx-plugin \
-    && apt-get clean \
-    && rm -rf /var/cache/apt
+# Ensure that version is fixed
+ARG DOCKER_VERSION=23.0.1
+ARG DOCKER_BUILDX_VERSION=0.10.2
+RUN apt-get update --quiet \
+  && apt-get install --yes --no-install-recommends \
+    docker-ce="5:${DOCKER_VERSION}*" \
+    docker-ce-cli="5:${DOCKER_VERSION}*" \
+    docker-buildx-plugin="${DOCKER_BUILDX_VERSION}*" \
+  && apt-get clean \
+  && rm -rf /var/cache/apt
 
 ENV SHARED_DOCKER_SERVICE true
 
