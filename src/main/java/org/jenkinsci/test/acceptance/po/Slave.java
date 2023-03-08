@@ -21,7 +21,7 @@ public class Slave extends Node {
     private final String name;
 
     public Slave(Jenkins j, String name) {
-        super(j, j.getVersion().isNewerThan(new VersionNumber("2.363")) ? j.url("manage/computer/%s/", name) : j.url("computer/%s/", name));
+        super(j, j.url("computer/%s/", name));
         this.name = name;
     }
 
