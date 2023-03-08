@@ -69,7 +69,7 @@ RUN curl -ffSLO https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/a
 ENV PATH="$PATH:/opt/maven/bin"
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
-RUN mkdir -m 0755 -p /etc/apt/keyrings
+RUN mkdir -p /etc/apt/keyrings && chmod 0755 /etc/apt/keyrings /etc/apt/ /etc
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
 RUN echo \
@@ -83,7 +83,11 @@ RUN echo " \
     " | tee /etc/apt/preferences.d/docker-ce
 
 # Install pinned version
-RUN  apt-get update --quiet && apt-get install --yes --no-install-recommends docker-ce docker-ce-cli docker-buildx-plugin
+# hadolint: Do not pin packages as they are requirements only for docker installation (and not of the rest of the ATH) and the effort required to track each version would be too huge
+# hadolint ignore=DL3008
+RUN apt-get update --quiet && apt-get install --yes --no-install-recommends docker-ce docker-ce-cli docker-buildx-plugin \
+    && apt-get clean \
+    && rm -rf /var/cache/apt
 
 ENV SHARED_DOCKER_SERVICE true
 
