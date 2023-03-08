@@ -35,7 +35,7 @@
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <maven.version>3.3.9</maven.version>
-    <groovy.version>3.0.14</groovy.version>
+    <groovy.version>3.0.15</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <slf4j.version>2.0.6</slf4j.version>
   </properties>
