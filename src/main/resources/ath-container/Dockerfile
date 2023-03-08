@@ -19,8 +19,11 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     TZ=Etc/UTC \
     apt-get install -y --no-install-recommends \
+        # docker dep
+        ca-certificates \
+        gnupg \
+        lsb-release \
         curl \
-        docker \
         git \
         imagemagick \
         iptables \
@@ -28,6 +31,7 @@ RUN apt-get update && \
         tightvncserver \
         openjdk-11-jdk \
         xfonts-base \
+        openssh-client \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
@@ -62,6 +66,23 @@ RUN curl -ffSLO https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/a
     mv /opt/apache-maven-* /opt/maven
 ENV PATH="$PATH:/opt/maven/bin"
 
+# Docker installation according to https://docs.docker.com/engine/install/ubuntu/
+RUN mkdir -m 0755 -p /etc/apt/keyrings
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+RUN echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+      $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+# Ensure that version is fixed
+RUN echo " \
+    Package: docker-ce* \
+    Pin: version 5:23.0.1-1* \
+    Pin-Priority: 1001 \
+    " | tee /etc/apt/preferences.d/docker-ce
+
+# Install pinned version
+RUN  apt-get update --quiet && apt-get install --yes --no-install-recommends docker-ce docker-ce-cli docker-buildx-plugin
+
 ENV SHARED_DOCKER_SERVICE true
 
 # Allow injecting uid and git to match directory ownership
@@ -94,6 +115,7 @@ RUN touch /home/ath-user/.Xauthority
 # approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
 # have in ENTRYPOINT as the container is started as ath-user.
 USER root
+RUN chmod ug+s /usr/bin/docker*
 
 COPY vnc.sh /usr/bin/
 COPY set-java.sh /usr/bin/
