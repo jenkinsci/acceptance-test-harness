@@ -84,7 +84,7 @@ public class WizardCreateAdminUser extends PageObject {
             control.clickAndWaitToBecomeStale(Duration.ofSeconds(time.seconds(30)));
         } catch (TimeoutException ex) {
             System.err.println("The button to accept the url settings in the setup wizard is not becoming stale, trying to click again");
-            control.clickAndWaitToBecomeStale();
+            //control.clickAndWaitToBecomeStale();
         }
     }
 

@@ -484,6 +484,10 @@ and
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <!-- For debugging reasons, DO NOT MERGE INTO MASTER -->
+          <includes>
+            <include>**/InstallWizardTest*.java</include>
+          </includes>
           <systemPropertyVariables>
             <!-- allow large xpaths https://www.oracle.com/java/technologies/javase/11-0-15-relnotes.html#JDK-8270504 -->
             <jdk.xml.xpathExprOpLimit>200</jdk.xml.xpathExprOpLimit>

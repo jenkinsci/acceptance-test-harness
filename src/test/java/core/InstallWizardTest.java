@@ -74,6 +74,8 @@ public class InstallWizardTest extends AbstractJUnitTest {
         createAdmin.shouldCreateTheUserSuccessfully();
         if(jenkins.getVersion().isNewerThan(new VersionNumber("2.118"))) {
             createAdmin.confirmURLSettings();
+        } else {
+            System.err.println("The check of the jenkins version on the setup wizard failed!!!");
         }
         createAdmin.wizardShouldFinishSuccessfully();
 
@@ -109,6 +111,8 @@ public class InstallWizardTest extends AbstractJUnitTest {
         createAdmin.shouldCreateTheUserSuccessfully();
         if(jenkins.getVersion().isNewerThan(new VersionNumber("2.118"))) {
             createAdmin.confirmURLSettings();
+        } else {
+            System.err.println("The check of the jenkins version on the setup wizard failed!!!");
         }
         createAdmin.wizardShouldFinishSuccessfully();
 
