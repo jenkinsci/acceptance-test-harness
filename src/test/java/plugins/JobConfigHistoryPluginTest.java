@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.junit.Ignore;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.job_config_history.JobConfigHistory;
@@ -42,6 +43,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 
 @WithPlugins("jobConfigHistory")
+@Ignore("Flaky see issue 1052") //https://github.com/jenkinsci/acceptance-test-harness/issues/1052
 public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
 
     private static final String LS_COMMAND = "ls";

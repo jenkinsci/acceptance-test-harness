@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.92</version>
+    <version>1.94</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -35,9 +35,9 @@
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <maven.version>3.3.9</maven.version>
-    <groovy.version>3.0.13</groovy.version>
+    <groovy.version>3.0.15</groovy.version>
     <monte.version>0.7.7.0</monte.version>
-    <slf4j.version>2.0.5</slf4j.version>
+    <slf4j.version>2.0.6</slf4j.version>
   </properties>
 
   <repositories>
@@ -346,7 +346,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20220924</version>
+      <version>20230227</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -378,7 +378,7 @@
     <dependency>
       <groupId>com.github.olivergondza.dumpling</groupId>
       <artifactId>dumpling</artifactId>
-      <version>2.4</version>
+      <version>2.6</version>
     </dependency>
 
     <dependency>
@@ -407,14 +407,14 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.14.1</version>
+        <version>2.14.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>5.9.1</version>
+        <version>5.9.2</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

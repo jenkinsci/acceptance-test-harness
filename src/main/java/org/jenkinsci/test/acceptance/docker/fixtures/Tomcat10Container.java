@@ -11,8 +11,8 @@ import java.net.URL;
  *
  * @author Kohsuke Kawaguchi
  */
-@DockerFixture(id="tomcat7",ports=8080)
-public class Tomcat7Container extends DockerContainer {
+@DockerFixture(id="tomcat10",ports=8080)
+public class Tomcat10Container extends DockerContainer {
     /**
      * URL of Tomcat.
      */

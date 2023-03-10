@@ -12,7 +12,7 @@ fi
 # and then killed normally.
 
 vncserver -kill $display > /dev/null
-setsid vncserver $display -geometry 1750x1250 -localhost=no 1>&2
+setsid vncserver $display -geometry 1750x1250 1>&2
 if command -v vncviewer >/dev/null 2>&1; then
   setsid vncviewer localhost$display > /dev/null &
 fi
