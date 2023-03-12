@@ -31,7 +31,7 @@
     <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
 
-    <selenium.version>4.6.0</selenium.version>
+    <selenium.version>4.8.0</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <maven.version>3.3.9</maven.version>
