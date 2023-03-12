@@ -402,7 +402,7 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.84.Final</version>
+        <version>4.1.89.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
