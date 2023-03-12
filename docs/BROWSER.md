@@ -6,11 +6,9 @@ The following values are available:
 
  * `firefox` (default)
         _(if set the binary at `FIREFOX_BIN` will be used to launch firefox)_
- * `ie`
  * `chrome`
  * `safari`
  * `htmlunit`
- * `phantomjs`
  * `saucelabs`
  * `remote-webdriver-firefox`
         _(Requires `REMOTE_WEBDRIVER_URL` to be set to the url of the remote,
