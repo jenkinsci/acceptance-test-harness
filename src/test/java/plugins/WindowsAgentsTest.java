@@ -131,7 +131,7 @@ public class WindowsAgentsTest extends AbstractJUnitTest {
     private String getWindowsProperty(String property) {
         String p = System.getProperty(property);
         if (p == null || p.isEmpty()) {
-            throw new AssumptionViolatedException(String.format("No windows property (%s) found, ignoring windows slaves test", property));
+            throw new AssumptionViolatedException(String.format("No windows property (%s) found, ignoring windows test", property));
         }
         return p;
     }
