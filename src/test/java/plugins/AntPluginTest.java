@@ -124,7 +124,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         assertThat(console, containsString(expectedVersion));
     }
 
-    @Test @Native("ant")
+    @Test
     public void testAdvancedConfiguration() {
         setUpAnt();
 
@@ -183,7 +183,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         job = jenkins.jobs.create(FreeStyleJob.class);
 
         job.configure();
-        job.copyResource(resource(BUILD_FILE), BUILD_FILE);
+        job.copyResource(resource("ant/"+BUILD_FILE), BUILD_FILE);
         step = job.addBuildStep(AntBuildStep.class);
         step.antName.select(NATIVE_ANT_NAME);
         step.targets.set("");
