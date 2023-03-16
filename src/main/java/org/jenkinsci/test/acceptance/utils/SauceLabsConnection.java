@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.utils;
 
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -39,7 +40,7 @@ public class SauceLabsConnection {
             throw new IOException("Missing username/key entries in "+conf);
     }
 
-    public WebDriver createWebDriver(DesiredCapabilities caps) throws IOException {
+    public WebDriver createWebDriver(Capabilities caps) throws IOException {
         return new RemoteWebDriver(new URL(
                 String.format("http://%s:%s@ondemand.saucelabs.com/wd/hub",username,password)),caps);
     }

@@ -24,6 +24,7 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.concurrent.Callable;
@@ -204,9 +205,17 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     // Return subclass
 
-    @Override
+    /**
+     * @deprecated Use withTimeout(Duration) instead.
+     */
+    @Deprecated
     public Wait<Subject> withTimeout(long duration, TimeUnit unit) {
-        return (Wait<Subject>) super.withTimeout(duration, unit);
+        return (Wait<Subject>) super.withTimeout(Duration.of(duration, unit.toChronoUnit()));
+    }
+
+    @Override
+    public Wait<Subject> withTimeout(Duration timeout) {
+        return (Wait<Subject>) super.withTimeout(timeout);
     }
 
     @Override
@@ -214,9 +223,12 @@ public class Wait<Subject> extends FluentWait<Subject> {
         return (Wait<Subject>) super.withMessage(message);
     }
 
-    @Override
+    /**
+     * @deprecated Use pollingEvery(Duration) instead.
+     */
+    @Deprecated
     public Wait<Subject> pollingEvery(long duration, TimeUnit unit) {
-        return (Wait<Subject>) super.pollingEvery(duration, unit);
+        return (Wait<Subject>) super.pollingEvery(Duration.of(duration, unit.toChronoUnit()));
     }
 
     @Override
