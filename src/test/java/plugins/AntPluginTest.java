@@ -124,7 +124,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         assertThat(console, containsString(expectedVersion));
     }
 
-    @Test
+    @Test @Native("ant")
     public void testAdvancedConfiguration() {
         setUpAnt();
 
