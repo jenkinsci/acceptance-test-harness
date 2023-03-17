@@ -1,10 +1,12 @@
 package plugins;
 
+import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.Matchers;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
 import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
@@ -52,12 +54,17 @@ public class AntPluginTest extends AbstractJUnitTest {
     FreeStyleJob job;
     private AntBuildStep step;
 
+    @Inject private DockerContainerHolder<SshAgentContainer> docker;
+
+    private SshAgentContainer sshd;
+
     @Before
     public void setUp() {
+        sshd = docker.get();
         job = jenkins.jobs.create(FreeStyleJob.class);
     }
 
-    @Test @Native("ant")
+    @Test
     public void use_default_ant_installation() {
         buildHelloWorld(null);
     }
@@ -81,7 +88,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         );
     }
 
-    @Test @Native("ant")
+    @Test
     public void locallyInstalledAnt() {
         AntInstallation ant = ToolInstallation.addTool(jenkins, AntInstallation.class);
         ant.name.set("native_ant");
@@ -99,7 +106,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
 
-    @Test @Native("ant")
+    @Test
     @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
     public void testAntWrapper() {
         String antHome = setUpAntInstallation();
@@ -124,7 +131,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         assertThat(console, containsString(expectedVersion));
     }
 
-    @Test @Native("ant")
+    @Test
     public void testAdvancedConfiguration() {
         setUpAnt();
 
@@ -146,7 +153,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         assertThat(console, not(Matchers.containsRegexp("[echoproperties] " + NOK_PROP2, Pattern.MULTILINE)));
     }
 
-    @Test @Native("ant")
+    @Test
     public void testCustomBuildFailDoesNotExist() {
         setUpAnt();
 
