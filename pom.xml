@@ -12,6 +12,7 @@
   <version>${changelist}</version>
 
   <name>Acceptance Test Harness</name>
+  <url>https://github.com/jenkinsci/acceptance-test-harness</url>
   <licenses>
     <license>
       <name>MIT License</name>
