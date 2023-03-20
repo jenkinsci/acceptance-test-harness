@@ -38,7 +38,7 @@
     <maven.version>3.3.9</maven.version>
     <groovy.version>3.0.16</groovy.version>
     <monte.version>0.7.7.0</monte.version>
-    <slf4j.version>2.0.6</slf4j.version>
+    <slf4j.version>2.0.7</slf4j.version>
   </properties>
 
   <repositories>
