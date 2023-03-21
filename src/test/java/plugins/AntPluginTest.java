@@ -147,12 +147,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         useSlave();
         String antHome = setUpAntInstallation();
 
-        String expectedVersion;
-        if(SystemUtils.IS_OS_WINDOWS) {
-            expectedVersion = jenkins.runScript(String.format("'%s\\bin\\ant -version'.execute().text", antHome));
-        } else {
-            expectedVersion = jenkins.runScript(String.format("'%s/bin/ant -version'.execute().text", antHome));
-        }
+        String expectedVersion = "1.10.5"; // this is the version installed in the java container by the ubuntu bionic;
 
         WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
         workflowJob.script.set(SCRIPT_PIPELINE_ANT);
