@@ -10,20 +10,20 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
 import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.ToolInstallation;
-import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
+import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
 import org.junit.Test;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertTrue;
+
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 
 @SuppressWarnings("CdiInjectionPointsInspection")
-@WithPlugins("ant")
+@WithPlugins({"ant", "ssh-slaves"})
 public class AntPluginTest extends AbstractJUnitTest {
 
     private static final String INSTALL_VERSION_1_8 = "1.8.4";
@@ -54,18 +54,52 @@ public class AntPluginTest extends AbstractJUnitTest {
     FreeStyleJob job;
     private AntBuildStep step;
 
+    public static final String REMOTE_FS = "/tmp";
+
     @Inject private DockerContainerHolder<SshAgentContainer> docker;
 
     private SshAgentContainer sshd;
+    private DumbSlave slave;
 
     @Before
     public void setUp() {
-        sshd = docker.get();
         job = jenkins.jobs.create(FreeStyleJob.class);
+        sshd = docker.get();
+
+    }
+
+    private SshSlaveLauncher configureDefaultSSHSlaveLauncher() {
+        return configureSSHSlaveLauncher(sshd.ipBound(22), sshd.port(22));
+    }
+
+    private SshSlaveLauncher configureSSHSlaveLauncher(String host, int port) {
+        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
+        launcher.host.set(host);
+        launcher.port(port);
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        return launcher;
+    }
+
+    private void useSlave() {
+        slave = jenkins.slaves.create(DumbSlave.class);
+        slave.setExecutors(1);
+        slave.remoteFS.set(REMOTE_FS);
+
+        configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
+        slave.save();
+
+        slave.waitUntilOnline();
+        assertTrue(slave.isOnline());
+
+        job.configure();
+        job.setLabelExpression(slave.getName());
+
+        job.save();
     }
 
     @Test
     public void use_default_ant_installation() {
+        useSlave();
         buildHelloWorld(null);
     }
 
@@ -90,6 +124,7 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     @Test
     public void locallyInstalledAnt() {
+        useSlave();
         AntInstallation ant = ToolInstallation.addTool(jenkins, AntInstallation.class);
         ant.name.set("native_ant");
         String antHome = ant.useNative();
@@ -102,13 +137,14 @@ public class AntPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        String expectedVersion = localAntVersion(antHome);
+        String expectedVersion = "1.10.5"; // this is the version installed in the java container by the ubuntu bionic
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
 
     @Test
     @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
     public void testAntWrapper() {
+        useSlave();
         String antHome = setUpAntInstallation();
 
         String expectedVersion;
@@ -133,6 +169,7 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     @Test
     public void testAdvancedConfiguration() {
+        useSlave();
         setUpAnt();
 
         antBuildStepAdvancedConfiguration(step, BUILD_FILE, PROPERTIES, OPTS);
@@ -155,6 +192,7 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     @Test
     public void testCustomBuildFailDoesNotExist() {
+        useSlave();
         setUpAnt();
 
         antBuildStepAdvancedConfiguration(step, FAKE_BUILD_FILE, null, null);
@@ -180,14 +218,8 @@ public class AntPluginTest extends AbstractJUnitTest {
         return job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");
     }
 
-    private String localAntVersion(String antHome) {
-        return jenkins.runScript(String.format("'%s/bin/ant -version'.execute().text", antHome));
-    }
-
     private void setUpAnt() {
         setUpAntInstallation();
-
-        job = jenkins.jobs.create(FreeStyleJob.class);
 
         job.configure();
         job.copyResource(resource("ant/"+BUILD_FILE), BUILD_FILE);
