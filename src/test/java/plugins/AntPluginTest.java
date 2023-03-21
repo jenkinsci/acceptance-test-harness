@@ -42,15 +42,7 @@ public class AntPluginTest extends AbstractJUnitTest {
     private static final String OPTS = "-showversion";
     private static final String BUILD_FILE = "custom-build-file.xml";
     private static final String FAKE_BUILD_FILE = "fake.xml";
-    private static final String SCRIPT_PIPELINE_ANT = "node {\n" +
-            "    withAnt(installation: '" + NATIVE_ANT_NAME + "') {\n" +
-            "        if (isUnix()) {\n" +
-            "            sh \"ant -version\"\n" +
-            "        } else {\n" +
-            "            bat \"ant -version\"\n" +
-            "        }\n" +
-            "    }\n" +
-            "}";
+
     FreeStyleJob job;
     private AntBuildStep step;
 
@@ -145,6 +137,15 @@ public class AntPluginTest extends AbstractJUnitTest {
     @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
     public void testAntWrapper() {
         useSlave();
+        String SCRIPT_PIPELINE_ANT = "node (\"" + slave.getName() + "\") {\n" +
+                "    withAnt(installation: '" + NATIVE_ANT_NAME + "') {\n" +
+                "        if (isUnix()) {\n" +
+                "            sh \"ant -version\"\n" +
+                "        } else {\n" +
+                "            bat \"ant -version\"\n" +
+                "        }\n" +
+                "    }\n" +
+                "}";
         String antHome = setUpAntInstallation();
 
         String expectedVersion = "1.10.5"; // this is the version installed in the java container by the ubuntu bionic;
