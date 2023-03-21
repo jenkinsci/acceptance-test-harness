@@ -194,14 +194,8 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         job.addUserAxis(AXIS_X, AXIS_X_VALUES);
         job.addUserAxis(AXIS_Y, AXIS_Y_VALUES);
 
-        // Table to Divs: https://www.jenkins.io/doc/developer/views/table-to-div-migration/
-        if (jenkins.getVersion().isOlderThan(new VersionNumber("2.264"))) {
-            job.control(by.xpath("//td[text()=\"Execution Strategy\"]/..//select")).select(STRATEGY);
-            job.control(by.xpath("//td[text()=\"Groovy Script\"]/..//textarea")).set(GROOVY_SELECTOR_SCRIPT);
-        } else {
-            job.control(by.xpath("//div[normalize-space(text())='%s']/..//select", "Execution Strategy")).select(STRATEGY);
-            job.control(by.xpath("//div[normalize-space(text())='%s']/..//textarea", "Groovy Script")).set(GROOVY_SELECTOR_SCRIPT);
-        }
+        job.control(by.xpath("//div[normalize-space(text())='%s']/..//select", "Execution Strategy")).select(STRATEGY);
+        job.control(by.xpath("//div[normalize-space(text())='%s']/..//textarea", "Groovy Script")).set(GROOVY_SELECTOR_SCRIPT);
 
         job.save();
         job.startBuild();
