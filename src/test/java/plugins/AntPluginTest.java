@@ -34,24 +34,15 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     private static final String NATIVE_ANT_NAME = "native_ant";
 
-    private static final String OK_PROP1 = "okPROP1=foo_bar_ok_1";
-    private static final String OK_PROP2 = "okPROP2=foo_bar_ok_2";
-    private static final String NOK_PROP1 = "nokPROP1=foo_bar_nok_1";
-    private static final String NOK_PROP2 = "nokPROP2=foo_bar_nok_2";
-    private static final String PROPERTIES = OK_PROP1+"\n"+OK_PROP2+"\n"+NOK_PROP1+"\n"+NOK_PROP2;
-    private static final String OPTS = "-showversion";
     private static final String BUILD_FILE = "custom-build-file.xml";
-    private static final String FAKE_BUILD_FILE = "fake.xml";
 
     FreeStyleJob job;
     private AntBuildStep step;
 
-    public static final String REMOTE_FS = "/tmp";
-
     @Inject private DockerContainerHolder<SshAgentContainer> docker;
 
     private SshAgentContainer sshd;
-    private DumbSlave slave;
+    private DumbSlave agent;
 
     @Before
     public void setUp() {
@@ -60,38 +51,27 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     }
 
-    private SshSlaveLauncher configureDefaultSSHSlaveLauncher() {
-        return configureSSHSlaveLauncher(sshd.ipBound(22), sshd.port(22));
-    }
+    private void useCustomAgent() {
+        String remote_fs = "/tmp";
+        agent = jenkins.slaves.create(DumbSlave.class);
+        agent.setExecutors(1);
+        agent.remoteFS.set(remote_fs);
 
-    private SshSlaveLauncher configureSSHSlaveLauncher(String host, int port) {
-        SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
-        launcher.host.set(host);
-        launcher.port(port);
-        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
-        return launcher;
-    }
+        sshd.configureSSHSlaveLauncher(agent, sshd.ipBound(22), sshd.port(22)).pwdCredentials("test", "test");
+        agent.save();
 
-    private void useSlave() {
-        slave = jenkins.slaves.create(DumbSlave.class);
-        slave.setExecutors(1);
-        slave.remoteFS.set(REMOTE_FS);
-
-        configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
-        slave.save();
-
-        slave.waitUntilOnline();
-        assertTrue(slave.isOnline());
+        agent.waitUntilOnline();
+        assertTrue(agent.isOnline());
 
         job.configure();
-        job.setLabelExpression(slave.getName());
+        job.setLabelExpression(agent.getName());
 
         job.save();
     }
 
     @Test
     public void use_default_ant_installation() {
-        useSlave();
+        useCustomAgent();
         buildHelloWorld(null);
     }
 
@@ -116,16 +96,16 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     @Test
     public void locallyInstalledAnt() {
-        useSlave();
+        useCustomAgent();
         AntInstallation ant = ToolInstallation.addTool(jenkins, AntInstallation.class);
-        ant.name.set("native_ant");
+        ant.name.set(NATIVE_ANT_NAME);
         String antHome = ant.useNative();
         ant.getPage().save();
 
         job.configure();
         job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
         AntBuildStep step = job.addBuildStep(AntBuildStep.class);
-        step.antName.select("native_ant");
+        step.antName.select(NATIVE_ANT_NAME);
         step.targets.set("-version");
         job.save();
 
@@ -135,15 +115,11 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     @Test
     @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
-    public void testAntWrapper() {
-        useSlave();
-        String SCRIPT_PIPELINE_ANT = "node (\"" + slave.getName() + "\") {\n" +
+    public void testWithAntPipelineBlock() {
+        useCustomAgent();
+        String script_pipeline_ant = "node (\"" + agent.getName() + "\") {\n" +
                 "    withAnt(installation: '" + NATIVE_ANT_NAME + "') {\n" +
-                "        if (isUnix()) {\n" +
-                "            sh \"ant -version\"\n" +
-                "        } else {\n" +
-                "            bat \"ant -version\"\n" +
-                "        }\n" +
+                "       sh \"ant -version\"\n" +
                 "    }\n" +
                 "}";
         String antHome = setUpAntInstallation();
@@ -151,7 +127,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         String expectedVersion = "1.10.5"; // this is the version installed in the java container by the ubuntu bionic;
 
         WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
-        workflowJob.script.set(SCRIPT_PIPELINE_ANT);
+        workflowJob.script.set(script_pipeline_ant);
 
         workflowJob.save();
 
@@ -165,10 +141,16 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     @Test
     public void testAdvancedConfiguration() {
-        useSlave();
+        String ok_prop1 = "okPROP1=foo_bar_ok_1";
+        String ok_prop2 = "okPROP2=foo_bar_ok_2";
+        String nok_prop1 = "nokPROP1=foo_bar_nok_1";
+        String nok_prop2 = "nokPROP2=foo_bar_nok_2";
+        String properties = ok_prop1+"\n"+ok_prop2+"\n"+nok_prop1+"\n"+nok_prop2;
+        String OPTS = "-showversion";
+        useCustomAgent();
         setUpAnt();
 
-        antBuildStepAdvancedConfiguration(step, BUILD_FILE, PROPERTIES, OPTS);
+        antBuildStepAdvancedConfiguration(step, BUILD_FILE, properties, OPTS);
 
         job.save();
 
@@ -176,29 +158,30 @@ public class AntPluginTest extends AbstractJUnitTest {
 
         String console = job.getLastBuild().getConsole();
         assertThat(console, containsString(System.getProperty("java.version")));
-        assertThat(console, containsString("-D" + OK_PROP1));
-        assertThat(console, containsString("-D" + OK_PROP2));
-        assertThat(console, containsString("-D" + NOK_PROP1));
-        assertThat(console, containsString("-D" + NOK_PROP2));
-        assertThat(console, containsString("[echoproperties] " + OK_PROP1));
-        assertThat(console, containsString("[echoproperties] " + OK_PROP2));
-        assertThat(console, not(Matchers.containsRegexp("[echoproperties] " + NOK_PROP1, Pattern.MULTILINE)));
-        assertThat(console, not(Matchers.containsRegexp("[echoproperties] " + NOK_PROP2, Pattern.MULTILINE)));
+        assertThat(console, containsString("-D" + ok_prop1));
+        assertThat(console, containsString("-D" + ok_prop2));
+        assertThat(console, containsString("-D" + nok_prop1));
+        assertThat(console, containsString("-D" + nok_prop2));
+        assertThat(console, containsString("[echoproperties] " + ok_prop1));
+        assertThat(console, containsString("[echoproperties] " + ok_prop2));
+        assertThat(console, not(Matchers.containsRegexp("[echoproperties] " + nok_prop1, Pattern.MULTILINE)));
+        assertThat(console, not(Matchers.containsRegexp("[echoproperties] " + nok_prop2, Pattern.MULTILINE)));
     }
 
     @Test
     public void testCustomBuildFailDoesNotExist() {
-        useSlave();
+        String fake_build_file = "fake.xml";
+        useCustomAgent();
         setUpAnt();
 
-        antBuildStepAdvancedConfiguration(step, FAKE_BUILD_FILE, null, null);
+        antBuildStepAdvancedConfiguration(step, fake_build_file, null, null);
 
         job.save();
 
         job.startBuild().shouldFail();
 
         String console = job.getLastBuild().getConsole();
-        assertThat(console, Matchers.containsRegexp("ERROR: Unable to find build script at .*/" + FAKE_BUILD_FILE, Pattern.MULTILINE));
+        assertThat(console, Matchers.containsRegexp("ERROR: Unable to find build script at .*/" + fake_build_file, Pattern.MULTILINE));
     }
 
     private Build buildHelloWorld(final String name) {

@@ -25,6 +25,8 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
 
 /**
  * Jenkins agent with various login methods.
@@ -40,4 +42,11 @@ public class SshAgentContainer extends JavaContainer {
         return resource("ed25519.pass").asText();
     }
 
+    public static SshSlaveLauncher configureSSHSlaveLauncher(DumbSlave agent, String host, int port) {
+        SshSlaveLauncher launcher = agent.setLauncher(SshSlaveLauncher.class);
+        launcher.host.set(host);
+        launcher.port(port);
+        launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
+        return launcher;
+    }
 }
