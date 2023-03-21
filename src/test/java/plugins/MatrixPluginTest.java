@@ -20,7 +20,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 
-@WithPlugins({"matrix-project", "matrix-reloaded", "matrix-groovy-execution-strategy"})
+@WithPlugins({"matrix-project"})
 public class MatrixPluginTest extends AbstractJUnitTest {
 
     /* Groovy script to select which builds of the matrix will be generated.
@@ -187,6 +187,7 @@ public class MatrixPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @WithPlugins({"matrix-reloaded", "matrix-groovy-execution-strategy"})
     public void run_extended_test() {
         job.configure();
         // Create a [3,3] matrix
