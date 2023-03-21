@@ -188,7 +188,7 @@ public class MatrixPluginTest extends AbstractJUnitTest {
 
     @Test
     public void run_extended_test() {
-        MatrixProject job = jenkins.jobs.create(MatrixProject.class);
+        job.configure();
         // Create a [3,3] matrix
         job.addUserAxis(AXIS_X, AXIS_X_VALUES);
         job.addUserAxis(AXIS_Y, AXIS_Y_VALUES);
