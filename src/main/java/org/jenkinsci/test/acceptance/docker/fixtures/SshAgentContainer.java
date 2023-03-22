@@ -42,10 +42,10 @@ public class SshAgentContainer extends JavaContainer {
         return resource("ed25519.pass").asText();
     }
 
-    public static SshSlaveLauncher configureSSHSlaveLauncher(DumbSlave agent, String host, int port) {
+    public SshSlaveLauncher configureSSHSlaveLauncher(DumbSlave agent) {
         SshSlaveLauncher launcher = agent.setLauncher(SshSlaveLauncher.class);
-        launcher.host.set(host);
-        launcher.port(port);
+        launcher.host.set(ipBound(22));
+        launcher.port(port(22));
         launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
         return launcher;
     }

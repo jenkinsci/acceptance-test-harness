@@ -2,7 +2,6 @@ package plugins;
 
 import com.google.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
@@ -10,7 +9,6 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
 import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
-import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +41,6 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     private SshAgentContainer sshd;
     private DumbSlave agent;
-
     @Before
     public void setUp() {
         job = jenkins.jobs.create(FreeStyleJob.class);
@@ -57,7 +54,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         agent.setExecutors(1);
         agent.remoteFS.set(remote_fs);
 
-        sshd.configureSSHSlaveLauncher(agent, sshd.ipBound(22), sshd.port(22)).pwdCredentials("test", "test");
+        sshd.configureSSHSlaveLauncher(agent).pwdCredentials("test", "test");
         agent.save();
 
         agent.waitUntilOnline();
@@ -97,10 +94,7 @@ public class AntPluginTest extends AbstractJUnitTest {
     @Test
     public void locallyInstalledAnt() {
         useCustomAgent();
-        AntInstallation ant = ToolInstallation.addTool(jenkins, AntInstallation.class);
-        ant.name.set(NATIVE_ANT_NAME);
-        String antHome = ant.useNative();
-        ant.getPage().save();
+        setUpAntInstallation();
 
         job.configure();
         job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
@@ -147,6 +141,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         String nok_prop2 = "nokPROP2=foo_bar_nok_2";
         String properties = ok_prop1+"\n"+ok_prop2+"\n"+nok_prop1+"\n"+nok_prop2;
         String OPTS = "-showversion";
+
         useCustomAgent();
         setUpAnt();
 
@@ -171,6 +166,7 @@ public class AntPluginTest extends AbstractJUnitTest {
     @Test
     public void testCustomBuildFailDoesNotExist() {
         String fake_build_file = "fake.xml";
+
         useCustomAgent();
         setUpAnt();
 
