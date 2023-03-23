@@ -38,6 +38,7 @@
     <groovy.version>3.0.16</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <slf4j.version>2.0.6</slf4j.version>
+    <jffi.version>1.3.11</jffi.version>
   </properties>
 
   <repositories>
@@ -259,12 +260,12 @@
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.3.11</version>
+      <version>${jffi.version}</version>
     </dependency>
     <dependency>
       <groupId>com.github.jnr</groupId>
       <artifactId>jffi</artifactId>
-      <version>1.3.11</version>
+      <version>${jffi.version}</version>
       <classifier>native</classifier>
     </dependency>
     <dependency>
