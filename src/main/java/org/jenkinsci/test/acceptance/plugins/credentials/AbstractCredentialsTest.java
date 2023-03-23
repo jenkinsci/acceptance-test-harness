@@ -97,41 +97,39 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
         return createCredentials(credClazz,cp, scope, SECRET_FILE);
     }
 
-    protected  <T extends BaseStandardCredentials> T createCredentials(Class<T> credClazz, CredentialsPage cp, String scope, String file) {
-        try (UselessFileDetectorReplacement ufdr = new UselessFileDetectorReplacement(driver)) {
-            final T cred = cp.add(credClazz);
+    protected <T extends BaseStandardCredentials> T createCredentials(Class<T> credClazz, CredentialsPage cp, String scope, String file) {
+        final T cred = cp.add(credClazz);
 
-            if (UserPwdCredential.class.equals(credClazz)) {
-                final UserPwdCredential castedCred = (UserPwdCredential) cred;
-                castedCred.username.set(CRED_USER);
-                castedCred.password.set(CRED_PWD);
-                castedCred.description.set(CRED_DSCR);
-            } else if (StringCredentials.class.equals(credClazz)) {
-                final StringCredentials castedCred = (StringCredentials) cred;
-                castedCred.secret.set(SECRET_TEXT);
-                castedCred.description.set(CRED_DSCR);
-            } else if (FileCredentials.class.equals(credClazz)) {
-                final FileCredentials castedCred = (FileCredentials) cred;
-                castedCred.description.set(CRED_DSCR);
-                final WebElement we = castedCred.file.resolve();
-                Class<? extends AbstractCredentialsTest> kl = getClass();
-                String dir = kl.getSimpleName().toLowerCase(Locale.ENGLISH).replace("test", "");
-                final File fileToUpload = new File(kl.getResource("/" + dir + "/" + file).getFile());
-                we.sendKeys(fileToUpload.getAbsolutePath());
-            } else if (SshPrivateKeyCredential.class.equals(credClazz)) {
-                SshPrivateKeyCredential castedCred = (SshPrivateKeyCredential) cred;
-                castedCred.description.set(CRED_DSCR);
-                if (scope != null) {
-                    castedCred.scope.select(scope);
-                }
-                castedCred.username.set(CRED_USER);
-                castedCred.selectEnterDirectly().privateKey.set(CRED_PWD);
+        if (UserPwdCredential.class.equals(credClazz)) {
+            final UserPwdCredential castedCred = (UserPwdCredential) cred;
+            castedCred.username.set(CRED_USER);
+            castedCred.password.set(CRED_PWD);
+            castedCred.description.set(CRED_DSCR);
+        } else if (StringCredentials.class.equals(credClazz)) {
+            final StringCredentials castedCred = (StringCredentials) cred;
+            castedCred.secret.set(SECRET_TEXT);
+            castedCred.description.set(CRED_DSCR);
+        } else if (FileCredentials.class.equals(credClazz)) {
+            final FileCredentials castedCred = (FileCredentials) cred;
+            castedCred.description.set(CRED_DSCR);
+            final WebElement we = castedCred.file.resolve();
+            Class<? extends AbstractCredentialsTest> kl = getClass();
+            String dir = kl.getSimpleName().toLowerCase(Locale.ENGLISH).replace("test", "");
+            final File fileToUpload = new File(kl.getResource("/" + dir + "/" + file).getFile());
+            we.sendKeys(fileToUpload.getAbsolutePath());
+        } else if (SshPrivateKeyCredential.class.equals(credClazz)) {
+            SshPrivateKeyCredential castedCred = (SshPrivateKeyCredential) cred;
+            castedCred.description.set(CRED_DSCR);
+            if (scope != null) {
+                castedCred.scope.select(scope);
             }
-
-            cred.setId(CRED_ID);
-            cp.create();
-            return cred;
+            castedCred.username.set(CRED_USER);
+            castedCred.selectEnterDirectly().privateKey.set(CRED_PWD);
         }
+
+        cred.setId(CRED_ID);
+        cp.create();
+        return cred;
     }
 
     private void navigateToCreateCredentials() {
