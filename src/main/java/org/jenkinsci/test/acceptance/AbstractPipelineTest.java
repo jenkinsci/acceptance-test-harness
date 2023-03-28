@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package org.jenkinsci.test.acceptance;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -29,6 +30,9 @@ import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
+
+import org.jvnet.hudson.test.Issue;
+
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchFrameException;
 
@@ -68,6 +72,7 @@ public class AbstractPipelineTest extends AbstractJUnitTest {
         return String.format(script, scriptParameters);
     }
 
+    @Issue("FNDJEN-979")
     protected void assertJavadoc(final Job job) {
         assertThat(job, hasAction(JAVADOC_ACTION));
 
