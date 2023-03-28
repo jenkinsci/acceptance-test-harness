@@ -44,7 +44,7 @@ branches['CI'] = {
 for (int i = 0; i < splits.size(); i++) {
   int index = i
   for (int j in [11]) {
-    for (String v in ['latest']) {
+    for (String v in ['lts', 'latest']) {
       int javaVersion = j
       String jenkinsUnderTest = v
       def name = "java-${javaVersion}-jenkins-${jenkinsUnderTest}-split${index}"
