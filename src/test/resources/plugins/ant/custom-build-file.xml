@@ -1,0 +1,5 @@
+<project name="foo" default="foo">
+  <target name="foo">
+    <echoproperties prefix="ok"/>
+  </target>
+</project>

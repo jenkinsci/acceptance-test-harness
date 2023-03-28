@@ -39,11 +39,7 @@ public class AntInstallation extends ToolInstallation {
     }
 
     public String useNative() {
-        String antHome = System.getenv("ANT_HOME");
-        if (antHome == null || antHome.trim().isEmpty()) {
-            antHome =  fakeHome("ant", "ANT_HOME");
-        }
-        installedIn(antHome);
-        return antHome;
+        installedIn("/usr/share/ant/");
+        return "/usr/share/ant/";
     }
 }
