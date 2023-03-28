@@ -64,14 +64,13 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
-
+import org.openqa.selenium.support.events.WebDriverListener;
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -150,7 +149,7 @@ public class FallbackConfig extends AbstractModule {
             return new HtmlUnitDriver(true);
         case "saucelabs":
         case "saucelabs-firefox":
-            DesiredCapabilities caps = DesiredCapabilities.firefox();
+            FirefoxOptions caps = new FirefoxOptions();
             caps.setCapability("version", "29");
             caps.setCapability("platform", "Windows 7");
             caps.setCapability("name", testName.get());
@@ -164,11 +163,6 @@ public class FallbackConfig extends AbstractModule {
                 caps.setCapability("build", tag);
 
             return new SauceLabsConnection().createWebDriver(caps);
-        case "phantomjs":
-            DesiredCapabilities capabilities = DesiredCapabilities.phantomjs();
-            capabilities.setCapability(LANGUAGE_SELECTOR, "en");
-            capabilities.setCapability(LANGUAGE_SELECTOR_PHANTOMJS, "en");
-            return new PhantomJSDriver(capabilities);
         case "remote-webdriver-firefox":
             return buildRemoteWebDriver(buildFirefoxOptions(testName));
         case "remote-webdriver-chrome":

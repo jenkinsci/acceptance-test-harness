@@ -1,5 +1,6 @@
 package plugins;
 
+import hudson.util.VersionNumber;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,6 +14,8 @@ import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.junit.Assume;
+import org.junit.Ignore;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -25,6 +28,7 @@ import org.openqa.selenium.WebDriver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assume.assumeFalse;
 
 @WithPlugins({"command-launcher", "ownership", "cloudbees-folder"})
 public class OwnershipPluginTest extends AbstractJUnitTest {
@@ -81,6 +85,7 @@ public class OwnershipPluginTest extends AbstractJUnitTest {
     @Test
     @Since("1.509") @Issue("JENKINS-24370")
     public void correct_redirect_after_save() throws Exception {
+        assumeFalse("Agent uses a different url between 2.363 and 2.391", jenkins.getVersion().isNewerThan(new VersionNumber("2.363")) && jenkins.getVersion().isOlderThan(new VersionNumber("2.391")));
         JenkinsConfig cp = jenkins.getConfigPage();
         cp.configure();
         cp.setJenkinsUrl("http://www.google.com");

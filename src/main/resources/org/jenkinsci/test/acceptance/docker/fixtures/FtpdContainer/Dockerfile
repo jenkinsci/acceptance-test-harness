@@ -2,7 +2,7 @@
 # Runs sshd and allow the 'test' user to login
 #
 
-FROM ubuntu:trusty
+FROM ubuntu:22.04
 
 # install FTP
 RUN apt-get update && apt-get install -y vsftpd
