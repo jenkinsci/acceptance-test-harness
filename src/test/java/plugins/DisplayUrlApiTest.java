@@ -19,7 +19,7 @@ import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 
 import jakarta.mail.MessagingException;
 import java.io.IOException;

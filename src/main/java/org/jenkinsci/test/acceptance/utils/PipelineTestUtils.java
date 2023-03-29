@@ -27,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.po.JobsMixIn;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -35,6 +34,8 @@ import java.util.Locale;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import java.nio.charset.StandardCharsets;
 
 public class PipelineTestUtils {
 
@@ -49,7 +50,7 @@ public class PipelineTestUtils {
 
     public static String scriptForPipelineFromResource(final Class resourceOwner, final String resourceName) throws IOException {
         String resourceDirName = resourceOwner.getSimpleName().toLowerCase(Locale.ENGLISH).replace("test", "");
-        return IOUtils.toString(resourceOwner.getResourceAsStream( "/" + resourceDirName + "/" + resourceName));
+        return IOUtils.toString(resourceOwner.getResourceAsStream( "/" + resourceDirName + "/" + resourceName), StandardCharsets.UTF_8);
     }
 
     public static String scriptForPipelineFromResourceWithParameters(final Class resourceOwner, final String resourceName, final String... scriptParameters) throws IOException {
@@ -60,7 +61,7 @@ public class PipelineTestUtils {
     }
 
     public static void checkScript(final String script) {
-        Assert.assertThat(script, is(not(nullValue())));
+        assertThat(script, is(not(nullValue())));
     }
 
     public static String resolveScriptName(final String scriptName) {
