@@ -101,7 +101,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     @WithPlugins("credentials-binding@1.10")
     public void pipelineWithCredentialsTest() throws IOException {
         final HttpResponse resp = new CredentialsRESTClient(jenkins.url).createCredential(CRED_ID, CRED_USER, CRED_PWD, GLOBAL_SCOPE);
-        Assert.assertThat(resp.getStatusLine().getStatusCode(), is(200));
+       assertThat(resp.getStatusLine().getStatusCode(), is(200));
 
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("usernameSplitPasswordScript"), CRED_ID, CRED_USER, USERNAME_CORRECT_MESSAGE, CRED_PWD, PASSWORD_CORRECT_MESSAGE);
         final Build b = PipelineTestUtils.createPipelineJobWithScript(jenkins.jobs, script).startBuild();
@@ -172,7 +172,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
 
         final String consoleOutput = b.getConsole();
         for (final String message : messagesToCheck) {
-            Assert.assertThat(consoleOutput, Matchers.containsString(message));
+           assertThat(consoleOutput, Matchers.containsString(message));
         }
     }
 

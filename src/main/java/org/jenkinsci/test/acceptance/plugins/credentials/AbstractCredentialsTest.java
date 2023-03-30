@@ -36,7 +36,7 @@ import org.openqa.selenium.WebElement;
 import java.io.File;
 import java.util.Locale;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AbstractCredentialsTest extends AbstractJUnitTest {
 
