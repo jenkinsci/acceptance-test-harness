@@ -27,7 +27,6 @@ import org.apache.http.HttpResponse;
 import org.hamcrest.Description;
 import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.Matcher;
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.authorize_project.ProjectDefaultBuildAccessControl;
 import org.jenkinsci.test.acceptance.plugins.credentials.AbstractCredentialsTest;
