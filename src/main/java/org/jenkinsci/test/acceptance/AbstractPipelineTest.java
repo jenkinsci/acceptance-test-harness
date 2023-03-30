@@ -67,7 +67,7 @@ public class AbstractPipelineTest extends AbstractJUnitTest {
 
         return String.format(script, scriptParameters);
     }
-    
+
     protected void assertJavadoc(final Job job) {
         assertThat(job, hasAction(JAVADOC_ACTION));
 
