@@ -27,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.po.JobsMixIn;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
