@@ -16,16 +16,14 @@ import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.internal.AssumptionViolatedException;
+import org.junit.AssumptionViolatedException;
 
 import jakarta.mail.MessagingException;
 import java.io.IOException;
 import java.util.regex.Pattern;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Tests the display-url-api plugin.
@@ -130,7 +128,7 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
         try {
             response = (CloseableHttpResponse) client.execute(get);
             int responseCode = response.getStatusLine().getStatusCode();
-            assertTrue(String.format("URL %s is not reachable", s.trim()), responseCode == 200);
+            assertEquals(String.format("URL %s is not reachable", s.trim()), 200, responseCode);
         } finally {
             response.close();
         }
