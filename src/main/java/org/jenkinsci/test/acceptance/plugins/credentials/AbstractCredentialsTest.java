@@ -71,7 +71,7 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
     private void assertLogin(Matcher<Login> matcher) {
         Login login = jenkins.login();
         login.doLogin(CRED_USER);
-        //Give some time to login to do backgroun proccesses (found some times when the user page shows you are not logged even if the link is present)
+        //Give some time to login to do background processes (found some times when the user page shows you are not logged even if the link is present)
         elasticSleep(2000);
         assertThat(login, matcher);
     }
