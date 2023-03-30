@@ -83,7 +83,7 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
-    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/Tomcat7Container"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/Tomcat10Container"
     schedule:
       interval: "weekly"
     ignore:
