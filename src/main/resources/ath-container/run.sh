@@ -1,25 +1,25 @@
 #!/bin/bash
 
 if [[ $# -lt 2 ]]; then
-	cat <<USAGE
-Usage: $0 BROWSER JENKINS [ARGS]
+	cat <<-USAGE
+		Usage: $0 BROWSER JENKINS [ARGS]
 
-It can use jenkins.war from local maven repository or download it when missing.
+		It can use jenkins.war from local maven repository or download it when missing.
 
-BROWSER: Value for BROWSER variable
-JENKINS: Path to the jenkins.war, Jenkins version of one of "latest", "latest-rc", "lts" and "lts-rc"
+		BROWSER: Value for BROWSER variable
+		JENKINS: Path to the jenkins.war, Jenkins version of one of "latest", "latest-rc", "lts" and "lts-rc"
 
-Examples:
+		Examples:
 
-# Run full suite in FF against ./jenkins.war.
-$ ./run firefox ./jenkins.war
+		# Run full suite in FF against ./jenkins.war.
+		$ ./run firefox ./jenkins.war
 
-# Run Ant plugin test in chrome against Jenkins 1.512.
-$ ./run chrome 1.512 -Dtest=AntPluginTest
+		# Run Ant plugin test in chrome against Jenkins 1.512.
+		$ ./run chrome 1.512 -Dtest=AntPluginTest
 
-# Run full suite in FF against LTS release candidate
-$ ./run firefox lts-rc
-USAGE
+		# Run full suite in FF against LTS release candidate
+		$ ./run firefox lts-rc
+	USAGE
 	exit 2
 fi
 
