@@ -1,7 +1,6 @@
 #!/bin/bash
 
-
-if [ $# -lt 2 ]; then
+if [[ $# -lt 2 ]]; then
 	cat <<USAGE
 Usage: $0 BROWSER JENKINS [ARGS]
 
@@ -21,68 +20,65 @@ $ ./run chrome 1.512 -Dtest=AntPluginTest
 # Run full suite in FF against LTS release candidate
 $ ./run firefox lts-rc
 USAGE
-  exit 2
+	exit 2
 fi
 
 function download() {
-    echo "Fetching $1 to $2"
-    status=$(curl --http1.1 -sSL --write-out "%{http_code}" --retry 3 --retry-delay 0 --retry-max-time 60 -o $2 $1)
-    if [ "$status" -ne 200 ]; then
-        echo >&2 "Failed to fetch the $1 ($status) to $2"
-        return 1
-    fi
+	echo "Fetching $1 to $2"
+	status=$(curl --http1.1 -sSL --write-out '%{http_code}' --retry 3 --retry-delay 0 --retry-max-time 60 -o "$2" "$1")
+	if [[ $status -ne 200 ]]; then
+		echo >&2 "Failed to fetch the $1 ($status) to $2"
+		return 1
+	fi
 }
 
-if [ -z "$DISPLAY" ] && [ -z "$BROWSER_DISPLAY" ]; then
-    echo >&2 "Neither DISPLAY nor BROWSER_DISPLAY defined. Is the VNC server running?"
-    exit 1
+if [[ -z $DISPLAY ]] && [[ -z $BROWSER_DISPLAY ]]; then
+	echo >&2 'Neither DISPLAY nor BROWSER_DISPLAY defined. Is the VNC server running?'
+	exit 1
 fi
 
 browser=$1
 war=$2
-if [ ! -f $war ]; then
-    case "$war" in
-        "latest")
-            war=jenkins-latest.war
-            url=https://updates.jenkins.io/latest/jenkins.war
-        ;;
-        "lts")
-            war=jenkins-lts.war
-            url=https://updates.jenkins.io/stable/latest/jenkins.war
-        ;;
-    esac
+if [[ ! -f $war ]]; then
+	case "$war" in
+	latest)
+		war=jenkins-latest.war
+		url=https://updates.jenkins.io/latest/jenkins.war
+		;;
+	lts)
+		war=jenkins-lts.war
+		url=https://updates.jenkins.io/stable/latest/jenkins.war
+		;;
+	esac
 
-    if [ -n "$url" ]; then
-        find $war -maxdepth 0 -mtime +1 -delete 2> /dev/null
-        if [ ! -f $war ]; then
-            download "$url" "$war" || exit 1
-        fi
-    fi
+	if [[ -n $url ]]; then
+		find $war -maxdepth 0 -mtime +1 -delete 2>/dev/null
+		if [[ ! -f $war ]]; then
+			download "$url" "$war" || exit 1
+		fi
+	fi
 fi
 
-if [ ! -f $war ] && [[ $war == *.war ]]; then
-    download "$war" "jenkins.war" || exit 1
-    war=jenkins.war
+if [[ ! -f $war ]] && [[ $war == *.war ]]; then
+	download "$war" "jenkins.war" || exit 1
+	war=jenkins.war
 fi
 
-if [ ! -f $war ]; then
-
+if [[ ! -f $war ]]; then
 	wardir=~/.m2/repository/org/jenkins-ci/main/jenkins-war
 
-    war=$wardir/$2/jenkins-war-$2.war
-    if [ ! -f $war ]; then
+	war=$wardir/$2/jenkins-war-$2.war
+	if [[ ! -f $war ]]; then
+		mvn -B org.apache.maven.plugins:maven-dependency-plugin:2.7:get \
+			-DremoteRepositories=repo.jenkins-ci.org::::https://repo.jenkins-ci.org/public/ \
+			"-Dartifact=org.jenkins-ci.main:jenkins-war:$2:war"
+	fi
 
-        mvn -B org.apache.maven.plugins:maven-dependency-plugin:2.7:get\
-            -DremoteRepositories=repo.jenkins-ci.org::::https://repo.jenkins-ci.org/public/\
-            -Dartifact=org.jenkins-ci.main:jenkins-war:$2:war
-    fi
-
-    if [ ! -f $war ]; then
-
-        echo "No such jenkins.war. Available local versions:"
-        ls $wardir/*/jenkins-war-*.war | sed -r -e 's/.*jenkins-war-(.+)\.war/\1/'
-        exit 1
-    fi
+	if [[ ! -f $war ]]; then
+		echo 'No such jenkins.war. Available local versions:'
+		ls $wardir/*/jenkins-war-*.war | sed -r -e 's/.*jenkins-war-(.+)\.war/\1/'
+		exit 1
+	fi
 fi
 
 shift 2

@@ -4,11 +4,11 @@ set -uo pipefail
 trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 # The selection used by update-alternatives for each java version
-if [ "$1" == "11" ]; then
-    selection="11-openjdk"
+if [[ $1 == '11' ]]; then
+	selection='11-openjdk'
 else
-    echo >&2 "Unsupported java version '${1}'"
-    exit 1
+	echo >&2 "Unsupported java version '${1}'"
+	exit 1
 fi
 
 # For some reason, all tools from JDK are split to 2 groups named java and javac
