@@ -62,7 +62,7 @@ public class Script extends CapybaraPortingLayerImpl {
         return runOn(params, null);
     }
 
-    public ScriptResult runOnAllSlaves() {
+    public ScriptResult runOnAllAgents() {
         return runOn(null, "(all slaves)");
     }
 
@@ -70,17 +70,17 @@ public class Script extends CapybaraPortingLayerImpl {
         return runOn(null, "(all)");
     }
 
-    public ScriptResult runOn(Map<String, String> params, String slave) {
+    public ScriptResult runOn(Map<String, String> params, String agent) {
         visitAction("runScript");
 
-        if (slave != null) {
+        if (agent != null) {
             try {
-                control("/node").select(slave);
+                control("/node").select(agent);
             }
             catch (NoSuchElementException ex) {
                 elasticSleep(1000);
                 visitAction("runScript");
-                control("/node").select(slave);
+                control("/node").select(agent);
             }
         }
 
