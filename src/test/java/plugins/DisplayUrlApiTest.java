@@ -66,7 +66,6 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
         final MailhogContainer mailhog = mailhogProvider.get();
         final WorkflowJob job = createPipelineJobWithScript(scriptForMailerPipeline(true));
         job.startBuild().shouldFail();
-
         String expectedUrlGeneratedByDisplayUrlApiPlugin = getURLS(job.name)[0];
 
         mailhog.assertMail(
@@ -104,7 +103,7 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
         String status = makeFail ? "FAILURE" : "SUCCESS";
         return String.format("node {\n" +
                 "    try {\n" +
-                "        sh 'exit 1'\n" +
+                "      error \" Failure\"" +
                 "    } catch (any) {\n" +
                 "        currentBuild.result = '%s'\n" +
                 "        if (currentBuild.result == 'FAILURE')\n" +
