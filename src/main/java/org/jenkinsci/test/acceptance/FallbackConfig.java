@@ -232,7 +232,7 @@ public class FallbackConfig extends AbstractModule {
             // out of container so using host networking is the most straightforward way to go.
             String[] args = {
                     "run", "-d", "--shm-size=2g", "--network=host",
-                    "-e", "SE_OPTS=-port " + controlPort,
+                    "-e", "SE_OPTS=--port " + controlPort,
                     "-e", "DISPLAY=:" + displayNumber,
                     image
             };
