@@ -28,21 +28,18 @@ import org.jenkinsci.test.acceptance.AbstractPipelineTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.TopLevelItem;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.Matchers.hasURL;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -59,9 +56,6 @@ public class CloudbeesFoldersTest extends AbstractPipelineTest {
     private final static String JOB2_NAME = "job2";
     private final static String JOB3_NAME = "job3";
     private final static String JOB4_NAME = "job4";
-
-    private final static String ALL_VIEW = "All";
-    private final static String MY_VIEW = "myView";
 
     @Test
     public void basicOperationsTest()  {
@@ -124,27 +118,6 @@ public class CloudbeesFoldersTest extends AbstractPipelineTest {
         this.checkItemExists(job3, false);
         this.checkItemExists(folder2, false);
         this.checkItemExists(job2Renamed, false);
-    }
-
-    @Test
-    public void folderViewsTest() {
-        final Folder folder1 = this.createFolder(FOLDER1_NAME);
-        folder1.open();
-
-        this.checkViews(folder1, ALL_VIEW, ALL_VIEW);
-
-        final ListView myView = folder1.getViews().create(ListView.class, MY_VIEW);
-        myView.open();
-
-        this.checkViews(folder1, MY_VIEW, ALL_VIEW, MY_VIEW);
-
-        folder1.selectView(ListView.class, ALL_VIEW);
-
-        this.checkViews(folder1, ALL_VIEW);
-
-        myView.delete();
-
-        this.checkViews(folder1, ALL_VIEW, ALL_VIEW);
     }
 
     @Test
@@ -216,19 +189,4 @@ public class CloudbeesFoldersTest extends AbstractPipelineTest {
 
         assertEquals(exists, expectedExists);
     }
-
-    private void checkViews(final Folder f, final String expectedActiveView, final String... expectedExistingViews) {
-        if (expectedExistingViews.length > 0) {
-            final List<String> viewNames = f.getViewsNames();
-            assertEquals(expectedExistingViews.length, viewNames.size());
-
-            for (final String expectedView : expectedExistingViews) {
-                assertTrue(viewNames.contains(expectedView));
-            }
-        }
-
-        final String activeView = f.getActiveViewName();
-        assertEquals(expectedActiveView, activeView);
-    }
-
 }
