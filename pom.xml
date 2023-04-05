@@ -355,13 +355,6 @@
       <artifactId>zt-zip</artifactId>
       <version>1.15</version>
     </dependency>
-    <!-- Keep in sync with mockito-core's version -->
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-      <version>1.12.14</version>
-      <scope>test</scope>
-    </dependency>
     <!--
       This is just for dependency updates.
 
