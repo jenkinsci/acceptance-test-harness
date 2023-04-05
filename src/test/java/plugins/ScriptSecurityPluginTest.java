@@ -24,16 +24,24 @@
 
 package plugins;
 
+import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.groovy_postbuild.GroovyPostBuildStep;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
+
+import java.util.regex.Pattern;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins({"script-security", "mock-security-realm", "matrix-auth@2.3", "groovy-postbuild"})
 public class ScriptSecurityPluginTest extends AbstractJUnitTest {
@@ -41,6 +49,13 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
     private static final String ADMIN = "admin";
     /** Normal user. */
     private static final String USER = "user";
+    /** Scripts */
+    private static final String SCRIPT_VARARGS = "def printDebugMethodStart(methodName, ... parameters = null) {\n" +
+                                                 "  println \"myMethod\"\n" +
+                                                 "}\n" +
+                                                 "\n" +
+                                                 "printDebugMethodStart(\"myMethod\", \"param1\", \"param2\", \"paramn\")\n" +
+                                                 "printDebugMethodStart(\"myMethod\", null, \"param2\", \"paramn\")";
 
     private void login(String user) {
         jenkins.login().doLogin(user);
@@ -100,6 +115,26 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
             sa.findSignature("getProperties").approve();
         }
         shouldSucceed(job); // Script approved
+    }
+
+    @Test
+    @WithPlugins({"script-security@1.39","workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
+    @Issue("JENKINS-48364")
+    public void varargs() throws Exception {
+        final WorkflowJob job;
+        final Build b;
+        login(USER);
+        {
+            job  = jenkins.jobs.create(WorkflowJob.class);
+            job.script.set(SCRIPT_VARARGS);
+            job.save();
+            b = job.startBuild().shouldSucceed();
+
+            assertThat(
+                    b.getConsole(),
+                    Matchers.containsRegexp("myMethod", Pattern.MULTILINE)
+            );
+        }
     }
 
 }
