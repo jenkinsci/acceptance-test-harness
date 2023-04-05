@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.94</version>
+    <version>1.97</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -29,7 +29,6 @@
 
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
-    <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
 
     <selenium.version>4.8.1</selenium.version>
@@ -355,13 +354,6 @@
       <artifactId>zt-zip</artifactId>
       <version>1.15</version>
     </dependency>
-    <!-- Keep in sync with mockito-core's version -->
-    <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-      <version>1.12.14</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
@@ -413,6 +405,12 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.11.0</version>
+      </dependency>
+      <!-- RequireUpperBoundDeps between Mockito and Selenium -->
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>1.14.3</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -500,7 +498,6 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-          <trimStackTrace>false</trimStackTrace> <!-- SUREFIRE-1798 -->
         </configuration>
       </plugin>
       <plugin>
