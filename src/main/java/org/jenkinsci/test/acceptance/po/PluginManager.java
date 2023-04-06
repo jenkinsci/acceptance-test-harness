@@ -88,7 +88,7 @@ public class PluginManager extends ContainerPageObject {
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
         // And we check for the presence of the button again
-        WebElement checkButton = find(by.css("#button-refresh, .jenkins-button[href='checkUpdatesServer']"));
+        WebElement checkButton = find(by.link("Check now"));
         checkButton.click();
         // The wait criteria is: we have left the current page and returned to the same one
         waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
