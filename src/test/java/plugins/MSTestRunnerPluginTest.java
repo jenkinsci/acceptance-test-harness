@@ -44,7 +44,7 @@ import org.junit.Test;
 @WithPlugins({"mstestrunner","msbuild"})
 @Native({"MSTest"})
 @WithOS(os = {WithOS.OS.WINDOWS})
-public class MSTestPluginTest extends AbstractJUnitTest{
+public class MSTestRunnerPluginTest extends AbstractJUnitTest{
 
     private static final String FAILING_TESTS_PROJECT = "/mstestrunner_plugin/BankIncorrect/";
     private static final String SUCCESSFUL_TESTS_PROJECT = "/mstestrunner_plugin/BankCorrect/";
