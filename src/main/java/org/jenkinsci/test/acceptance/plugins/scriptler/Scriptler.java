@@ -41,7 +41,7 @@ public class Scriptler extends Action {
     }
 
     public Script upload(Resource script) {
-        visit(url("scriptsettings"));
+        visit(url("scriptSettings"));
         new Control(injector, by.name("file")).upload(script);
         clickButton("Upload");
 
@@ -49,7 +49,7 @@ public class Scriptler extends Action {
     }
 
     public Script create(String name, String text, Map<String, String> params) {
-        visit(url("scriptsettings"));
+        visit(url("scriptSettings"));
         name += ".groovy";
         control("/id").set(name);
         control("/name").set(name);
