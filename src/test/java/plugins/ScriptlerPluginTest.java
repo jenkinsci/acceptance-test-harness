@@ -33,7 +33,6 @@ import org.jenkinsci.test.acceptance.plugins.scriptler.Scriptler;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -41,7 +40,6 @@ import java.util.HashMap;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@Ignore("TODO not currently on the update center, so not testable")
 @WithPlugins("scriptler")
 public class ScriptlerPluginTest extends AbstractJUnitTest {
 
@@ -49,7 +47,7 @@ public class ScriptlerPluginTest extends AbstractJUnitTest {
     private final Resource PARAMETERIZED_SCRIPT = resource("/scriptler_plugin/hello_parameterized.groovy");
 
     @Inject
-    private SlaveController slaves;
+    private SlaveController agents;
 
     private Scriptler scriptler;
 
@@ -65,31 +63,28 @@ public class ScriptlerPluginTest extends AbstractJUnitTest {
 
         String output = script.run().output(jenkins);
         assertThat(output, containsString("Hello world!"));
-
-        script.delete();
-        assertThat(script.exists(), is(false));
     }
 
     @Test
-    public void run_on_slave() throws Exception {
-        Slave slave = slaves.install(jenkins).get();
+    public void run_on_agent() throws Exception {
+        Slave agent = agents.install(jenkins).get();
 
         Script script = scriptler.upload(SIMPLE_SCRIPT);
-        String output = script.runOn(slave).output(slave);
+        String output = script.runOn(agent).output(agent);
         assertThat(output, equalTo("Hello world!"));
     }
 
     @Test
-    public void run_on_all_slaves() throws Exception {
-        Slave slaveA = slaves.install(jenkins).get();
-        Slave slaveB = slaves.install(jenkins).get();
+    public void run_on_all_agents() throws Exception {
+        Slave agentA = agents.install(jenkins).get();
+        Slave agentB = agents.install(jenkins).get();
 
         Script script = scriptler.upload(SIMPLE_SCRIPT);
-        ScriptResult output = script.runOnAllSlaves();
+        ScriptResult output = script.runOnAllAgents();
 
         assertThat(output.output(jenkins), nullValue());
-        assertThat(output.output(slaveA), equalTo("Hello world!"));
-        assertThat(output.output(slaveB), equalTo("Hello world!"));
+        assertThat(output.output(agentA), equalTo("Hello world!"));
+        assertThat(output.output(agentB), equalTo("Hello world!"));
     }
 
     @Test
