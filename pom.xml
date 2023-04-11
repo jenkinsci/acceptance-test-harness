@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.94</version>
+    <version>1.97</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -29,9 +29,9 @@
 
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
-    <trimStackTrace>false</trimStackTrace> <!-- surefire -->
     <spotbugs.skip>true</spotbugs.skip>
 
+    <jenkins.version>2.399</jenkins.version>
     <selenium.version>4.8.1</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
@@ -355,12 +355,23 @@
       <artifactId>zt-zip</artifactId>
       <version>1.15</version>
     </dependency>
-    <!-- Keep in sync with mockito-core's version -->
+    <!--
+      This is just for dependency updates.
+
+      TODO: Delete this dependency and figure out how to automatically update
+      this dependency some other way.
+    -->
     <dependency>
-      <groupId>net.bytebuddy</groupId>
-      <artifactId>byte-buddy</artifactId>
-      <version>1.12.14</version>
+      <groupId>org.jenkins-ci.main</groupId>
+      <artifactId>jenkins-core</artifactId>
+      <version>${jenkins.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -413,6 +424,12 @@
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
         <version>2.11.0</version>
+      </dependency>
+      <!-- RequireUpperBoundDeps between Mockito and Selenium -->
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>1.14.3</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -500,7 +517,6 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-          <trimStackTrace>false</trimStackTrace> <!-- SUREFIRE-1798 -->
         </configuration>
       </plugin>
       <plugin>
@@ -787,6 +803,49 @@ and
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>download-war</id>
+      <activation>
+        <file>
+          <missing>${env.JENKINS_WAR}</missing>
+        </file>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>jenkins-war</id>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <phase>process-test-resources</phase>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.main</groupId>
+                      <artifactId>jenkins-war</artifactId>
+                      <version>${jenkins.version}</version>
+                      <type>war</type>
+                    </artifactItem>
+                  </artifactItems>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <stripVersion>true</stripVersion>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>lts</id>
+      <properties>
+        <jenkins.version>2.387.1</jenkins.version>
+      </properties>
     </profile>
   </profiles>
 </project>

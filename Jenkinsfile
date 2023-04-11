@@ -34,9 +34,19 @@ if (needSplittingFromWorkspace) {
 
 branches['CI'] = {
   stage('CI') {
-    node('maven-11') {
-      checkout scm 
-      sh "mvn verify --no-transfer-progress -DskipTests -P jenkins-release"
+    retry(count: 2, conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()]) {
+      node('maven-11') {
+        checkout scm
+        def mavenOptions = [
+          '-Dset.changelist',
+          '-DskipTests',
+          '-U',
+          'clean',
+          'install',
+        ]
+        infra.runMaven(mavenOptions, 11)
+        infra.prepareToPublishIncrementals()
+      }
     }
   }
 }
@@ -71,7 +81,7 @@ for (int i = 0; i < splits.size(); i++) {
                     set-java.sh $javaVersion
                     eval \$(vnc.sh)
                     java -version
-                    run.sh firefox ${jenkinsUnderTest} -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                    run.sh firefox ${jenkinsUnderTest} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
                 """
               }
             }
@@ -83,3 +93,4 @@ for (int i = 0; i < splits.size(); i++) {
   }
 }
 parallel branches
+infra.maybePublishIncrementals()
