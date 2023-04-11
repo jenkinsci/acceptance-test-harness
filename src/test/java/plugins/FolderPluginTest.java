@@ -32,11 +32,11 @@ import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.po.*;
-import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -274,8 +274,8 @@ public class FolderPluginTest extends AbstractJUnitTest {
             job3.startBuild();
             fail("Copied job should not be able to build until saved");
         } catch (final NoSuchElementException ex) {
-            Assert.assertThat(ex.getMessage(), containsRegexp("Build Now"));
-            Assert.assertThat(ex.getMessage(), containsRegexp("Unable to locate"));
+            assertThat(ex.getMessage(), containsRegexp("Build Now"));
+            assertThat(ex.getMessage(), containsRegexp("Unable to locate"));
         }
 
         job3.configure();
@@ -284,12 +284,12 @@ public class FolderPluginTest extends AbstractJUnitTest {
 
         f3f2.getJobs().copy("/" + folder1.name + "/" + job1.name, job1.name);
 
-        Assert.assertThat(driver, hasContent("A job already exists with the name ‘" +  job1.name + "’"));
+        assertThat(driver, hasContent("A job already exists with the name ‘" +  job1.name + "’"));
     }
 
     private void checkItemNameAndUrl(final TopLevelItem item, final String itemName, final TopLevelItem... parentItems) {
         item.open();
-        Assert.assertThat("Item name is not displayed", driver, hasContent(itemName));
+        assertThat("Item name is not displayed", driver, hasContent(itemName));
 
         if (parentItems.length > 0) {
             String itemPath = "";
@@ -300,7 +300,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
 
             itemPath += item.name;
 
-            Assert.assertThat("Complete path for item is not displayed", driver, hasContent(itemPath));
+            assertThat("Complete path for item is not displayed", driver, hasContent(itemPath));
         }
     }
 
@@ -308,7 +308,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
         boolean exists = true;
 
         try {
-            IOUtils.toString(f.url("").openStream());
+            IOUtils.toString(f.url("").openStream(), StandardCharsets.UTF_8);
         } catch (final IOException ex) {
             exists = false;
         }
