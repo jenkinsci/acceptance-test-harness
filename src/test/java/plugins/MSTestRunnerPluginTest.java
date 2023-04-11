@@ -120,7 +120,7 @@ public class MSTestRunnerPluginTest extends AbstractJUnitTest{
      * @param categories the test categories to run
      * @param cmdLineArgs the command line options to use
      * @param ignoreFailingTests whether to ignore failing tests or not
-     * @return
+     * @return the FreeStyle job created
      */
     private FreeStyleJob msBuildJobWithTests(String workspacePath, String testFiles, String categories, String cmdLineArgs, boolean ignoreFailingTests) {
         if (workspacePath != null && testFiles != null) {
