@@ -26,7 +26,6 @@ package plugins;
 import org.jenkinsci.test.acceptance.AbstractPipelineTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.Test;
 import org.openqa.selenium.TimeoutException;
 
@@ -37,7 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 public class MetricsTest extends AbstractPipelineTest {
@@ -49,14 +48,11 @@ public class MetricsTest extends AbstractPipelineTest {
 
 
     @Test
-    @WithPlugins("metrics")
+    @WithPlugins({"metrics", "parameter-separator"})
     public void testMetrics() throws IOException {
         this.checkHealthcheck();
         this.checkPing();
         this.checkMetrics(0);
-
-        // install a new plugin and create a job which will be queued forever
-        jenkins.getPluginManager().installPlugins(new PluginSpec("parameter-separator", null));
 
         final Build b = this.createPipelineJobWithScript(scriptForPipeline()).startBuild();
         try {
