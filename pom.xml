@@ -31,7 +31,7 @@
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
 
-    <jenkins.version>2.399</jenkins.version>
+    <jenkins.version>2.400</jenkins.version>
     <selenium.version>4.8.1</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
