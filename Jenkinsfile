@@ -63,8 +63,11 @@ for (int i = 0; i < splits.size(); i++) {
          retry(count: 2, conditions: [agent(), nonresumable()]) {
           node('docker-highmem') {
             checkout scm
+            def browser = 'firefox'
             def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
-            image.inside('-v /var/run/docker.sock:/var/run/docker.sock --shm-size 2g') {
+            sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
+            def cwd = pwd()
+            image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
               def exclusions = splits.get(index).join('\n')
               writeFile file: 'excludes.txt', text: exclusions
               realtimeJUnit(
@@ -81,9 +84,22 @@ for (int i = 0; i < splits.size(); i++) {
                     set-java.sh $javaVersion
                     eval \$(vnc.sh)
                     java -version
-                    run.sh firefox ${jenkinsUnderTest} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                    run.sh ${browser} ${jenkinsUnderTest} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                    cp --verbose target/surefire-reports/TEST-*.xml /reports
                 """
               }
+            }
+            launchable.install()
+            withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+              launchable('verify')
+              /*
+               * TODO Create a Launchable build and session earlier, and replace "--no-build" with
+               * "--session" to associate these test results with a particular build. The commits
+               * associated with the Launchable build should be the commits of the transitive closure of
+               * the Jenkins WAR under test in this build as well as the commits of the transitive closure
+               * of the ATH JAR.
+               */
+              launchable("record tests --no-build --flavor platform=linux --flavor jdk=${javaVersion} --flavor browser=${browser} maven './target/ath-reports'")
             }
           }
          }
