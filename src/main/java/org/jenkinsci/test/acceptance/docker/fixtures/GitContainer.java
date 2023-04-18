@@ -32,6 +32,11 @@ public class GitContainer extends DockerContainer {
         return "ssh://git@" + host() + ":" + port() + REPO_DIR;
     }
 
+    /** Fake URL for browser. */
+    public String getUrlRepositoryBrowser() {
+        return "http://" + host() + "/" + REPO_NAME + "/commits/";
+    }
+
     @Deprecated
     public String getRepoUrlInsideDocker() throws IOException {
         return "ssh://git@" + getIpAddress() + REPO_DIR;

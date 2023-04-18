@@ -27,10 +27,13 @@ import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.plugins.git.GitLabScm;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.NoVerificationStrategy;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
+import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Before;
@@ -38,8 +41,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -657,10 +663,69 @@ public class GitPluginTest extends AbstractJUnitTest {
         );
     }
 
+    @Test
+    public void gitlab_repository_browser_test() throws IOException {
+        try (GitRepo gitRepo = buildGitRepo()) {
+            final String testBranch = "testingTesting";
+            gitRepo.createBranch(testBranch);
+            gitRepo.changeAndCommitFoo("Second Commit");
+            gitRepo.transferToDockerContainer(host, port);
+            GitLabScm scm = (GitLabScm) job.useScm(GitLabScm.class)
+                    .url(repoUrl)
+                    .credentials(USERNAME)
+                    .repositoryBrowser("gitlab")
+                    .urlRepositoryBrowser(container.getUrlRepositoryBrowser());
+            scm = (GitLabScm) newCalculateCangelog(scm, "origin", testBranch).gitlabVersion("2.0");
+
+            job.save();
+
+            Build b = job.startBuild();
+            b.shouldSucceed();
+
+            URL changesUrl = b.url("changes");
+            String revision = getRevisionFromConsole(b.getConsole());
+            String revisionUrl = container.getUrlRepositoryBrowser() + revision;
+
+            assertThat(
+                    visit(changesUrl).getPageSource(),
+                    Matchers.containsRegexp(revisionUrl, Pattern.MULTILINE)
+            );
+        }
+    }
+
 
     ////////////////////
     // HELPER METHODS //
     ////////////////////
+
+    private <T extends GitScm> T newCalculateCangelog(T scm, String remote, String branch) {
+        Control behaviourButton = scm.control("hetero-list-add[extensions]");
+        waitFor(behaviourButton);
+        javascriptLoadClick(behaviourButton.resolve(), 30);
+        FinderDropDownMenuItem findDropDownMenuItem = new FinderDropDownMenuItem(behaviourButton);
+        WebElement caption = findDropDownMenuItem.find("Calculate changelog against a specific branch");
+        scm.waitFor(caption);
+        javascriptLoadClick(caption, 30);
+
+        scm.control("/extensions/options/compareRemote").set(remote);
+        scm.control("/extensions/options/compareTarget").set(branch);
+
+        return scm;
+    }
+
+    // polling while yui javascript library is loaded
+    private void javascriptLoadClick(WebElement element, int tries) {
+        try {
+            element.click();
+            elasticSleep(1000);
+        } catch (WebDriverException e) {
+            if (tries == 1 || !e.getMessage().contains("Element is not clickable")) {
+                throw e;
+            } else {
+                javascriptLoadClick(element, tries--);
+            }
+        }
+    }
 
     private String getRevisionFromConsole(String console) {
         Pattern p = Pattern.compile("(?<=\\bRevision\\s)(\\w+)");
@@ -710,5 +775,31 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed();
     }
+    private class FinderDropDownMenuItem extends CapybaraPortingLayerImpl.Finder<WebElement> {
+        private Control button;
+
+        protected FinderDropDownMenuItem(Control button) {
+            this.button = button;
+        }
+
+        @Override
+        protected WebElement find(String caption) {
+            // With enough implementations registered the one we are looking for might
+            // require scrolling in menu to become visible. This dirty hack stretch
+            // yui menu so that all the items are visible.
+            executeScript("" +
+                    "YAHOO.util.Dom.batch(" +
+                    "    document.querySelector('.yui-menu-body-scrolled')," +
+                    "    function (el) {" +
+                    "        el.style.height = 'auto';" +
+                    "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
+                    "    }" +
+                    ");"
+            );
+
+            return button.find(by.link(caption));
+        }
+    };
+
 
 }
