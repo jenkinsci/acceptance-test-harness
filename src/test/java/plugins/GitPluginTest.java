@@ -674,8 +674,9 @@ public class GitPluginTest extends AbstractJUnitTest {
                     .url(repoUrl)
                     .credentials(USERNAME)
                     .repositoryBrowser("gitlab")
-                    .urlRepositoryBrowser(container.getUrlRepositoryBrowser());
-            scm = (GitLabScm) newCalculateCangelog(scm, "origin", testBranch).gitlabVersion("2.0");
+                    .urlRepositoryBrowser(container.getUrlRepositoryBrowser())
+                    .calculateChangelog("origin", testBranch);
+            scm.gitlabVersion("2.0");
 
             job.save();
 
@@ -684,7 +685,7 @@ public class GitPluginTest extends AbstractJUnitTest {
 
             URL changesUrl = b.url("changes");
             String revision = getRevisionFromConsole(b.getConsole());
-            String revisionUrl = container.getUrlRepositoryBrowser() + revision;
+            String revisionUrl = container.getUrlRepositoryBrowser() + "/commits/" + revision;
 
             assertThat(
                     visit(changesUrl).getPageSource(),
@@ -697,35 +698,6 @@ public class GitPluginTest extends AbstractJUnitTest {
     ////////////////////
     // HELPER METHODS //
     ////////////////////
-
-    private <T extends GitScm> T newCalculateCangelog(T scm, String remote, String branch) {
-        Control behaviourButton = scm.control("hetero-list-add[extensions]");
-        waitFor(behaviourButton);
-        javascriptLoadClick(behaviourButton.resolve(), 30);
-        FinderDropDownMenuItem findDropDownMenuItem = new FinderDropDownMenuItem(behaviourButton);
-        WebElement caption = findDropDownMenuItem.find("Calculate changelog against a specific branch");
-        scm.waitFor(caption);
-        javascriptLoadClick(caption, 30);
-
-        scm.control("/extensions/options/compareRemote").set(remote);
-        scm.control("/extensions/options/compareTarget").set(branch);
-
-        return scm;
-    }
-
-    // polling while yui javascript library is loaded
-    private void javascriptLoadClick(WebElement element, int tries) {
-        try {
-            element.click();
-            elasticSleep(1000);
-        } catch (WebDriverException e) {
-            if (tries == 1 || !e.getMessage().contains("Element is not clickable")) {
-                throw e;
-            } else {
-                javascriptLoadClick(element, tries--);
-            }
-        }
-    }
 
     private String getRevisionFromConsole(String console) {
         Pattern p = Pattern.compile("(?<=\\bRevision\\s)(\\w+)");

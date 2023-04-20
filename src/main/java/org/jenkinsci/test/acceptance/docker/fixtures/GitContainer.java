@@ -34,7 +34,7 @@ public class GitContainer extends DockerContainer {
 
     /** Fake URL for browser. */
     public String getUrlRepositoryBrowser() {
-        return "http://" + host() + "/" + REPO_NAME + "/commits/";
+        return "http://" + host() + "/" + REPO_NAME ;
     }
 
     @Deprecated
