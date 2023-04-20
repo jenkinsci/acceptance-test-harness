@@ -233,7 +233,9 @@ public class FallbackConfig extends AbstractModule {
             String[] args = {
                     "run", "-d", "--shm-size=2g", "--network=host",
                     "-e", "SE_OPTS=--port " + controlPort,
-                    "-e", "DISPLAY=:" + displayNumber,
+                    "-e", "DISPLAY=:" + displayNumber + ".0",
+                    "-e", "DISPLAY_NUM=" + displayNumber,
+                    "-e", "SE_VNC_PORT=" + vncPort,
                     image
             };
             ProcessInputStream popen = Docker.cmd(args).popen();
