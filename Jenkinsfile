@@ -84,12 +84,12 @@ for (int i = 0; i < splits.size(); i++) {
                   allowEmptyResults: true
                   ) {
                     sh """
-                    set-java.sh ${jdk}
-                    eval \$(vnc.sh)
-                    java -version
-                    run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                    cp --verbose target/surefire-reports/TEST-*.xml /reports
-                """
+                        set-java.sh ${jdk}
+                        eval \$(vnc.sh)
+                        java -version
+                        run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                        cp --verbose target/surefire-reports/TEST-*.xml /reports
+                        """
                   }
             }
             launchable.install()
