@@ -53,54 +53,56 @@ branches['CI'] = {
 
 for (int i = 0; i < splits.size(); i++) {
   int index = i
-  for (int j in [11]) {
-    for (String v in ['lts', 'latest']) {
-      int javaVersion = j
-      String jenkinsUnderTest = v
-      def name = "java-${javaVersion}-jenkins-${jenkinsUnderTest}-split${index}"
-      branches[name] = {
-        stage(name) {
-          retry(count: 2, conditions: [agent(), nonresumable()]) {
-            node('docker-highmem') {
-              checkout scm
-              def browser = 'firefox'
-              def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
-              sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
-              def cwd = pwd()
-              image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
-                def exclusions = splits.get(index).join('\n')
-                writeFile file: 'excludes.txt', text: exclusions
-                realtimeJUnit(
-                    testResults: 'target/surefire-reports/TEST-*.xml',
-                    testDataPublishers: [[$class: 'AttachmentPublisher']],
-                    // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
-                    // The build failure prevents parallel tests executor to realize the tests are gone so same
-                    // split is run to execute and report zero tests - which fails the build. Permit the test
-                    // results to be empty to break the circle: build after removal executes one empty split
-                    // but not letting the build to fail will cause next build not to try those tests again.
-                    allowEmptyResults: true
-                    ) {
-                      sh """
-                          set-java.sh $javaVersion
-                          eval \$(vnc.sh)
-                          java -version
-                          run.sh ${browser} ${jenkinsUnderTest} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                          cp --verbose target/surefire-reports/TEST-*.xml /reports
-                          """
-                    }
-              }
-              launchable.install()
-              withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-                launchable('verify')
-                /*
-                 * TODO Create a Launchable build and session earlier, and replace "--no-build" with
-                 * "--session" to associate these test results with a particular build. The commits
-                 * associated with the Launchable build should be the commits of the transitive closure of
-                 * the Jenkins WAR under test in this build as well as the commits of the transitive closure
-                 * of the ATH JAR.
-                 */
-                launchable("record tests --no-build --flavor platform=linux --flavor jdk=${javaVersion} --flavor browser=${browser} maven './target/ath-reports'")
-              }
+  def axes = [
+    jenkinsVersions: ['lts', 'latest'],
+    platforms: ['linux'],
+    jdks: [11],
+    browsers: ['firefox'],
+  ]
+  axes.values().combinations {
+    def (jenkinsVersion, platform, jdk, browser) = it
+    def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
+    branches[name] = {
+      stage(name) {
+        retry(count: 2, conditions: [agent(), nonresumable()]) {
+          node('docker-highmem') {
+            checkout scm
+            def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
+            sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
+            def cwd = pwd()
+            image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
+              def exclusions = splits.get(index).join('\n')
+              writeFile file: 'excludes.txt', text: exclusions
+              realtimeJUnit(
+                  testResults: 'target/surefire-reports/TEST-*.xml',
+                  testDataPublishers: [[$class: 'AttachmentPublisher']],
+                  // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
+                  // The build failure prevents parallel tests executor to realize the tests are gone so same
+                  // split is run to execute and report zero tests - which fails the build. Permit the test
+                  // results to be empty to break the circle: build after removal executes one empty split
+                  // but not letting the build to fail will cause next build not to try those tests again.
+                  allowEmptyResults: true
+                  ) {
+                    sh """
+                        set-java.sh ${jdk}
+                        eval \$(vnc.sh)
+                        java -version
+                        run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                        cp --verbose target/surefire-reports/TEST-*.xml /reports
+                        """
+                  }
+            }
+            launchable.install()
+            withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+              launchable('verify')
+              /*
+               * TODO Create a Launchable build and session earlier, and replace "--no-build" with
+               * "--session" to associate these test results with a particular build. The commits
+               * associated with the Launchable build should be the commits of the transitive closure of
+               * the Jenkins WAR under test in this build as well as the commits of the transitive closure
+               * of the ATH JAR.
+               */
+              launchable("record tests --no-build --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} maven './target/ath-reports'")
             }
           }
         }
