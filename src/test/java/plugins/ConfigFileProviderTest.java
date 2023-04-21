@@ -27,7 +27,7 @@ import org.openqa.selenium.Alert;
 /**
  * Tests config-file-provider plugin inside a Pipeline.
  */
-@WithPlugins({"config-file-provider", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
+@WithPlugins({"config-file-provider", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "cloudbees-folder"})
 public class ConfigFileProviderTest extends AbstractJUnitTest {
 
     private static final String CRED_ID = "credId";
