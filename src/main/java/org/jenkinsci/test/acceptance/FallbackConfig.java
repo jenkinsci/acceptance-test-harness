@@ -232,8 +232,10 @@ public class FallbackConfig extends AbstractModule {
             // out of container so using host networking is the most straightforward way to go.
             String[] args = {
                     "run", "-d", "--shm-size=2g", "--network=host",
-                    "-e", "SE_OPTS=-port " + controlPort,
-                    "-e", "DISPLAY=:" + displayNumber,
+                    "-e", "SE_OPTS=--port " + controlPort,
+                    "-e", "DISPLAY=:" + displayNumber + ".0",
+                    "-e", "DISPLAY_NUM=" + displayNumber,
+                    "-e", "SE_VNC_PORT=" + vncPort,
                     image
             };
             ProcessInputStream popen = Docker.cmd(args).popen();
