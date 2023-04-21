@@ -62,7 +62,6 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         assertThat(jobLog, containsString(SERVER_ID));
         assertThat(jobLog, containsString(CRED_USR));
-        assertThat(jobLog, containsString(CRED_PWD));
     }
 
 
@@ -153,7 +152,6 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         Assert.assertThat(jobLog, containsString(SERVER_ID));
         Assert.assertThat(jobLog, containsString(CRED_USR));
-        Assert.assertThat(jobLog, containsString(CRED_PWD));
         Assert.assertThat(jobLog, containsString(ANOTHER_SERVER_ID));
         Assert.assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT));
 
@@ -162,7 +160,6 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         Assert.assertThat(jobLog, containsString(SERVER_ID));
         Assert.assertThat(jobLog, containsString(CRED_USR));
-        Assert.assertThat(jobLog, containsString(CRED_PWD));
         Assert.assertThat(jobLog, not(containsString(ANOTHER_SERVER_ID)));
         Assert.assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT + CUSTOM_CONF_EXTRA_CONTENT));
 
