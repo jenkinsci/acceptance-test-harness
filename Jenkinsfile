@@ -14,6 +14,8 @@ def branches = [:]
 def splits
 def needSplittingFromWorkspace = true
 
+// TODO could use launchable split-subset to split this into bins
+
 for (build = currentBuild.previousCompletedBuild; build != null; build = build.previousCompletedBuild) {
   if (build.resultIsBetterOrEqualTo('UNSTABLE')) {
     // we have a reference build
@@ -30,6 +32,53 @@ if (needSplittingFromWorkspace) {
   }
 } else {
   splits = splitTests count(10)
+}
+
+def axes = [
+  jenkinsVersions: ['lts', 'latest'],
+  platforms: ['linux'],
+  jdks: [11],
+  browsers: ['firefox'],
+]
+
+stage('Record builds and sessions') {
+  retry(conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()], count: 2) {
+    node('maven-11') {
+      infra.checkoutSCM()
+      def athCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+      launchable.install()
+      withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+        launchable('verify')
+        launchable('record commit')
+      }
+      axes['jenkinsVersions'].each { jenkinsVersion ->
+        if (jenkinsVersion == 'lts') {
+          // TODO Launchable not yet supported on LTS line
+          return
+        }
+        /*
+         * TODO Add the commits of the transitive closure of the Jenkins WAR under test and the ATH
+         * JAR to this build.
+         */
+        withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+          launchable('verify')
+          launchable("record build --name ${env.BUILD_TAG}-${jenkinsVersion} --no-commit-collection --commit jenkinsci/acceptance-test-harness=${athCommit} --link \"View build in CI\"=${env.BUILD_URL}")
+        }
+      }
+      withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+        axes.values().combinations {
+          def (jenkinsVersion, platform, jdk, browser) = it
+          if (jenkinsVersion == 'lts') {
+            // TODO Launchable not yet supported on LTS line
+            return
+          }
+          def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
+          launchable("record session --build ${env.BUILD_TAG}-${jenkinsVersion} --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} --link \"View session in CI\"=${env.BUILD_URL} >${sessionFile}")
+          stash name: sessionFile, includes: sessionFile
+        }
+      }
+    }
+  }
 }
 
 branches['CI'] = {
@@ -53,12 +102,6 @@ branches['CI'] = {
 
 for (int i = 0; i < splits.size(); i++) {
   int index = i
-  def axes = [
-    jenkinsVersions: ['lts', 'latest'],
-    platforms: ['linux'],
-    jdks: [11],
-    browsers: ['firefox'],
-  ]
   axes.values().combinations {
     def (jenkinsVersion, platform, jdk, browser) = it
     def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
@@ -92,17 +135,16 @@ for (int i = 0; i < splits.size(); i++) {
                         """
                   }
             }
-            launchable.install()
-            withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-              launchable('verify')
-              /*
-               * TODO Create a Launchable build and session earlier, and replace "--no-build" with
-               * "--session" to associate these test results with a particular build. The commits
-               * associated with the Launchable build should be the commits of the transitive closure of
-               * the Jenkins WAR under test in this build as well as the commits of the transitive closure
-               * of the ATH JAR.
-               */
-              launchable("record tests --no-build --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} maven './target/ath-reports'")
+            if (jenkinsVersion != 'lts') {
+              // TODO Launchable not yet supported on LTS line
+              launchable.install()
+              withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+                launchable('verify')
+                def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
+                unstash sessionFile
+                def session = readFile(sessionFile).trim()
+                launchable("record tests --session ${session} maven './target/ath-reports'")
+              }
             }
           }
         }
