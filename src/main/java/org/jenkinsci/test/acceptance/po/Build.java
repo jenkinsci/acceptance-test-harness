@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
+import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -70,7 +71,7 @@ public class Build extends ContainerPageObject {
 
     public Build waitUntilStarted(int timeout) {
         waitFor().withMessage("Next build of %s is started", job)
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(this::hasStarted);
         return this;
     }
@@ -123,7 +124,11 @@ public class Build extends ContainerPageObject {
         try {
             d = getJson();
             // see https://github.com/jenkinsci/jenkins/pull/6829
-            return d.get("inProgress").booleanValue();
+
+            // for a pipeline you can often see when it has just started "building:true" but "inProgress: false"
+            // the former however is set to false whilst post build steps are still firing.
+            // so we check both
+            return d.get("inProgress").booleanValue() || d.get("building").booleanValue();
         } catch (NoSuchElementException e) {
             // Build has not started, so it is not in progress.
             return false;
