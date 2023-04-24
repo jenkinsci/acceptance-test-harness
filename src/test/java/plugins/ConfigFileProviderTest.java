@@ -13,7 +13,6 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -150,18 +149,18 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         String jobLog = this.buildJobAndGetConsole(job, true);
 
-        Assert.assertThat(jobLog, containsString(SERVER_ID));
-        Assert.assertThat(jobLog, containsString(CRED_USR));
-        Assert.assertThat(jobLog, containsString(ANOTHER_SERVER_ID));
-        Assert.assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT));
+        assertThat(jobLog, containsString(SERVER_ID));
+        assertThat(jobLog, containsString(CRED_USR));
+        assertThat(jobLog, containsString(ANOTHER_SERVER_ID));
+        assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT));
 
         this.makeChangesInConfigurations(mvnConfig, customConf);
         jobLog = this.buildJobAndGetConsole(job, true);
 
-        Assert.assertThat(jobLog, containsString(SERVER_ID));
-        Assert.assertThat(jobLog, containsString(CRED_USR));
-        Assert.assertThat(jobLog, not(containsString(ANOTHER_SERVER_ID)));
-        Assert.assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT + CUSTOM_CONF_EXTRA_CONTENT));
+        assertThat(jobLog, containsString(SERVER_ID));
+        assertThat(jobLog, containsString(CRED_USR));
+        assertThat(jobLog, not(containsString(ANOTHER_SERVER_ID)));
+        assertThat(jobLog, containsString(CUSTOM_CONF_CONTENT + CUSTOM_CONF_EXTRA_CONTENT));
 
         // We want to delete the config file and re-run the job to see it fail
         jenkins.visit("configfiles");
@@ -172,7 +171,7 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         jobLog = this.buildJobAndGetConsole(job, false);
 
-        Assert.assertThat(jobLog, containsString(String.format(MANAGED_FILE_NOT_FOUND_ERROR, mvnConfig.id())));
+        assertThat(jobLog, containsString(String.format(MANAGED_FILE_NOT_FOUND_ERROR, mvnConfig.id())));
     }
 
     private MavenSettingsConfig createMavenSettingsConfig(final String serverWithCreds, final String serverWithoutCreds, final String credId) {
