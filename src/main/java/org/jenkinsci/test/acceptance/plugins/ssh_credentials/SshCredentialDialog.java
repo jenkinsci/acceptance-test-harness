@@ -11,7 +11,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /**
  * Modal dialog to enter a credential.
@@ -48,7 +48,7 @@ public class SshCredentialDialog extends PageAreaImpl {
 
         this.findAndPerformClick(addSubmitButton);
 
-        waitFor().withTimeout(5, TimeUnit.SECONDS).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(5)).until(() -> {
             try {
                 return !find(addSubmitButton).isDisplayed();
             } catch (final NoSuchElementException | StaleElementReferenceException ex) {

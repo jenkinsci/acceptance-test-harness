@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.containsString;
@@ -256,7 +256,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
         Build first = j.build(1);
         new Wait<>(first)
-                .withTimeout(70, TimeUnit.SECONDS) // Wall-clock time
+                .withTimeout(Duration.ofSeconds(70)) // Wall-clock time
                 .until(pageObjectExists())
         ;
         assertThat(first.getConsole(), containsString("Started by timer"));

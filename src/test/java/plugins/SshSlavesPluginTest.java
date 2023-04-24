@@ -51,8 +51,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.fail;
 
+import java.time.Duration;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 
@@ -262,7 +262,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
     
     private void waitForLogMessage(final String message) {
-        waitFor().withTimeout(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+        waitFor().withTimeout(Duration.ofSeconds(5)).until(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 return slave.getLog().contains(message);

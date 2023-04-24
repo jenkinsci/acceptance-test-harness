@@ -31,10 +31,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 /**
@@ -114,7 +114,7 @@ public class Jenkins extends Node implements Container {
      * Wait for Jenkins to become up and running
      */
     public void waitForStarted() {
-        waitFor().withTimeout(1, TimeUnit.MINUTES)
+        waitFor().withTimeout(Duration.ofMinutes(1))
                  .ignoring(AssertionError.class)
                  .until(() -> getVersionNumber() != null);
     }
@@ -192,7 +192,7 @@ public class Jenkins extends Node implements Container {
         ignoring.add(WebDriverException.class);
         //Ignore WebDriverException during restart.
         // Poll until we have the real page
-        waitFor(driver).withTimeout(seconds, TimeUnit.SECONDS)
+        waitFor(driver).withTimeout(Duration.ofSeconds(seconds))
                 .ignoreAll(ignoring)
                 .until((Function<WebDriver, Boolean>) driver -> {
                     visit(driver.getCurrentUrl()); // the page sometimes does not reload (fast enough)

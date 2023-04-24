@@ -29,7 +29,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchFrameException;
 import org.openqa.selenium.WebElement;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
@@ -64,7 +64,7 @@ public class WizardCustomizeJenkins extends PageObject {
 
     public void shouldFinishInstallSuccessfully() {
         waitFor()
-                .withTimeout(400, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(400))
                 .ignoring(NoSuchElementException.class, NoSuchFrameException.class)
                 .until(() -> {
                     try {
