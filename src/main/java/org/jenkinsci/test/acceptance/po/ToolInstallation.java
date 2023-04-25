@@ -26,8 +26,8 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import hudson.util.VersionNumber;
 import org.apache.commons.io.FileUtils;
@@ -51,7 +51,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
 
         jenkins.waitFor()
                 .withMessage("tool installer metadata for %s has arrived", type.getAnnotation(ToolInstallationPageObject.class).installer())
-                .withTimeout(60, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(60))
                 .until(new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {

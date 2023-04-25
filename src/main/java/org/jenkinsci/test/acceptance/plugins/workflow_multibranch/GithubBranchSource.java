@@ -7,8 +7,8 @@ import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSharedLibrary;
 import org.openqa.selenium.support.ui.Select;
 
+import java.time.Duration;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Base type for {@link PageAreaImpl} for Github Branch Source.
@@ -44,7 +44,7 @@ public class GithubBranchSource extends BranchSource {
     }
 
     public GithubBranchSource selectRepository(final String repoName) {
-        waitFor().withTimeout(10, TimeUnit.SECONDS)
+        waitFor().withTimeout(Duration.ofSeconds(10))
                 .until((Callable<Object>) () -> {
                     final Select select = new Select(repository.resolve());
                     return select.getOptions().size() > 0;

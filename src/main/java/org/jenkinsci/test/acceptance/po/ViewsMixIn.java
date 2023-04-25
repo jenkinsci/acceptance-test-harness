@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 /**
  * Mix-in for {@link PageObject}s that own a group of views, like
@@ -29,7 +29,7 @@ public class ViewsMixIn extends MixIn {
         };
 
         // Views contributed by plugins might need some extra time to appear
-        WebElement typeRadio = waitFor().withTimeout(5, TimeUnit.SECONDS)
+        WebElement typeRadio = waitFor().withTimeout(Duration.ofSeconds(5))
                 .until(() -> {
                     visit("newView");
                     return findCaption(type, finder);

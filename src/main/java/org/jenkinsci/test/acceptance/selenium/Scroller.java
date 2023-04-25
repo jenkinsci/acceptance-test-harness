@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -150,7 +150,7 @@ public class Scroller extends AbstractWebDriverEventListener {
         // Wait until web element is successfully scrolled.
         try {
             new Wait<>(Boolean.TRUE)
-                    .withTimeout(5, TimeUnit.SECONDS) // Wall-clock time
+                    .withTimeout(Duration.ofSeconds(5)) // Wall-clock time
                     .until(() -> (Boolean) executor.executeScript(scrollJs, eYCoord, eXCoord, id))
             ;
         } catch (TimeoutException ex) {

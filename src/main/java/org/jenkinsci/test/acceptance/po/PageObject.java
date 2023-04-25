@@ -5,10 +5,10 @@ import edu.umd.cs.findbugs.annotations.Nullable;
 import javax.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.base.Function;
 import org.kohsuke.randname.RandomNameGenerator;
@@ -35,7 +35,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     protected ObjectMapper jsonParser;
 
     /**
-     * Full URL of the object that this page object represents. Ends with '/', like "http://localhsot:8080/job/foo/"
+     * Full URL of the object that this page object represents. Ends with '/', like "http://localhost:8080/job/foo/"
      *
      * @see ContainerPageObject#url(String) Method that lets you resolve relative paths easily.
      */
@@ -148,7 +148,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
         final int existingSize = existing.size();
         action.run();
 
-        return waitFor().withTimeout(10, TimeUnit.SECONDS).until(new Function<CapybaraPortingLayer, String>() {
+        return waitFor().withTimeout(Duration.ofSeconds(10)).until(new Function<CapybaraPortingLayer, String>() {
             @Nullable @Override public String apply(@Nullable CapybaraPortingLayer input) {
                 List<String> current = extractPaths(all(by));
                 int size = current.size();

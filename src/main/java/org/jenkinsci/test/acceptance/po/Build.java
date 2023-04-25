@@ -4,8 +4,6 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.hamcrest.Description;
@@ -103,7 +101,7 @@ public class Build extends ContainerPageObject {
         visit("console");
 
         waitFor().withMessage("Build %s is finished", this)
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(new Wait.Predicate<Boolean>() {
                     @Override
                     public Boolean apply() throws Exception {

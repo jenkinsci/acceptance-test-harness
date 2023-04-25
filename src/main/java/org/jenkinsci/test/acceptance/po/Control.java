@@ -97,7 +97,7 @@ public class Control extends CapybaraPortingLayerImpl {
         // button may be obscured by say the "Save Apply" screen so we wait as Selenium will do a scroll but the CSS 
         // can take a while to update the layout \o/
         waitFor(we).
-               withTimeout(1, TimeUnit.SECONDS).
+               withTimeout(Duration.ofSeconds(1)).
                pollingEvery(100, TimeUnit.MILLISECONDS).
                ignoring(ElementClickInterceptedException.class).
                until(() -> {we.click(); return true;});
@@ -185,20 +185,20 @@ public class Control extends CapybaraPortingLayerImpl {
         click();
         WebElement we = findCaption(type,findDropDownMenuItem);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(we::isDisplayed);
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(Duration.ofSeconds(1)).until(() -> !we.isDisplayed());
     }
 
     public void selectDropdownMenu(String displayName) {
         click();
         WebElement we = findDropDownMenuItem.find(displayName);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(we::isDisplayed);
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(1, TimeUnit.SECONDS).until(() -> !we.isDisplayed());
+        waitFor(we).pollingEvery(100L, TimeUnit.MILLISECONDS).withTimeout(Duration.ofSeconds(1)).until(() -> !we.isDisplayed());
     }
 
     /**
