@@ -205,14 +205,6 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     // Return subclass
 
-    /**
-     * @deprecated Use withTimeout(Duration) instead.
-     */
-    @Deprecated
-    public Wait<Subject> withTimeout(long duration, TimeUnit unit) {
-        return (Wait<Subject>) super.withTimeout(Duration.of(duration, unit.toChronoUnit()));
-    }
-
     @Override
     public Wait<Subject> withTimeout(Duration timeout) {
         return (Wait<Subject>) super.withTimeout(timeout);

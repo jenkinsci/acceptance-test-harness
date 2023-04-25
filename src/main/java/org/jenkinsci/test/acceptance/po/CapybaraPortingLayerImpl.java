@@ -154,7 +154,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override @Deprecated
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
-        return waitFor(this).withTimeout(timeoutSec, TimeUnit.SECONDS).until(block);
+        return waitFor(this).withTimeout(Duration.ofSeconds(timeoutSec)).until(block);
     }
 
     @Override @Deprecated
@@ -181,7 +181,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement find(final By selector) {
         try {
-            return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
+            return waitFor().withTimeout(Duration.ofSeconds(time.seconds(1))).until(new Callable<WebElement>() {
                 @Override public WebElement call() {
                     for (WebElement element : driver.findElements(selector)) {
                         if (isDisplayed(element)) return element;
