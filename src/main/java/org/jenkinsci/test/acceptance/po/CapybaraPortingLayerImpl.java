@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -119,7 +120,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public <T> Wait<T> waitFor(T subject) {
         return new Wait<>(subject, time)
                 .pollingEvery(500, TimeUnit.MILLISECONDS)
-                .withTimeout(120, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(120))
         ;
     }
 
@@ -134,7 +135,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement waitFor(final By selector, final int timeoutSec) {
         return waitFor(this).withMessage("Element matching %s is present", selector)
-                .withTimeout(timeoutSec, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeoutSec))
                 .ignoring(NoSuchElementException.class)
                 .until(() -> find(selector));
     }
@@ -166,7 +167,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         StringDescription desc = new StringDescription();
         matcher.describeTo(desc);
         waitFor(item).withMessage(desc.toString())
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(matcher)
         ;
     }
@@ -407,7 +408,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
         Wait<WebDriver> wait = new Wait<>(driver, time)
                 .pollingEvery(500, TimeUnit.MILLISECONDS)
-                .withTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeoutSeconds))
         ;
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         try {

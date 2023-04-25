@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.97</version>
+    <version>1.98</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -31,8 +31,8 @@
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
 
-    <jenkins.version>2.399</jenkins.version>
-    <selenium.version>4.8.1</selenium.version>
+    <jenkins.version>2.401</jenkins.version>
+    <selenium.version>4.8.3</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <aether.version>1.1.0</aether.version>
     <maven.version>3.3.9</maven.version>
@@ -83,13 +83,7 @@
     <dependency>
       <groupId>com.cloudbees</groupId>
       <artifactId>extensibility</artifactId>
-      <version>1.5</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.sonatype.sisu</groupId>
-          <artifactId>sisu-inject-plexus</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>1.6</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -401,7 +395,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.14.2</version>
+        <version>2.15.0</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>

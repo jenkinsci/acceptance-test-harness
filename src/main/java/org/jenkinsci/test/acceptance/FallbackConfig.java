@@ -65,12 +65,10 @@ import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringWebDriver;
-import org.openqa.selenium.support.events.WebDriverListener;
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -233,7 +231,9 @@ public class FallbackConfig extends AbstractModule {
             String[] args = {
                     "run", "-d", "--shm-size=2g", "--network=host",
                     "-e", "SE_OPTS=--port " + controlPort,
-                    "-e", "DISPLAY=:" + displayNumber,
+                    "-e", "DISPLAY=:" + displayNumber + ".0",
+                    "-e", "DISPLAY_NUM=" + displayNumber,
+                    "-e", "SE_VNC_PORT=" + vncPort,
                     image
             };
             ProcessInputStream popen = Docker.cmd(args).popen();

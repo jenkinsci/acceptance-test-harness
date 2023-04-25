@@ -3,10 +3,9 @@ package org.jenkinsci.test.acceptance.po;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -64,7 +63,7 @@ public class JenkinsLogger extends PageObject {
 
     public void waitForLogged(final Pattern pattern, final int timeout) {
         waitFor().withMessage("%s to be logged", pattern)
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(() -> hasLogged(pattern));
     }
 }
