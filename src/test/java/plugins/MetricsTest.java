@@ -30,8 +30,8 @@ import org.junit.Test;
 import org.openqa.selenium.TimeoutException;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -56,7 +56,7 @@ public class MetricsTest extends AbstractPipelineTest {
 
         final Build b = this.createPipelineJobWithScript(scriptForPipeline()).startBuild();
         try {
-            waitFor().withTimeout(30, TimeUnit.SECONDS).until(new Callable<Boolean>() {
+            waitFor().withTimeout(Duration.ofSeconds(30)).until(new Callable<Boolean>() {
                 @Override
                 public Boolean call() {
                     Pattern pattern = Pattern.compile(".*Jenkins.* doesn.*t have label .*" + NOT_EXISTENT_NODE + ".*");

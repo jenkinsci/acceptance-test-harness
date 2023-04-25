@@ -3,8 +3,8 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
@@ -42,7 +42,7 @@ public class WorkflowMultiBranchJob extends Folder {
 
     public WorkflowMultiBranchJob waitForBranchIndexingFinished(final int timeout) {
         waitFor()
-            .withTimeout(super.time.seconds(timeout), TimeUnit.MILLISECONDS)
+            .withTimeout(Duration.ofMillis(super.time.seconds(timeout)))
             .until(() -> WorkflowMultiBranchJob.this.getBranchIndexingLog().contains("Finished: "));
 
         return this;

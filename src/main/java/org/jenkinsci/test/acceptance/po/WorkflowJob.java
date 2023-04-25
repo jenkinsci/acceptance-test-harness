@@ -26,7 +26,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
@@ -80,7 +80,7 @@ public class WorkflowJob extends Job {
 
     private static void waitForRenderOf(@NonNull final String cssSelector, @NonNull final Jenkins jenkins) {
         jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
-                .withTimeout(20, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(20))
                 .until(() -> isRendered(cssSelector, jenkins))
         ;
     }
