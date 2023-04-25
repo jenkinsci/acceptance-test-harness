@@ -223,12 +223,9 @@ public class Wait<Subject> extends FluentWait<Subject> {
         return (Wait<Subject>) super.withMessage(message);
     }
 
-    /**
-     * @deprecated Use pollingEvery(Duration) instead.
-     */
-    @Deprecated
-    public Wait<Subject> pollingEvery(long duration, TimeUnit unit) {
-        return (Wait<Subject>) super.pollingEvery(Duration.of(duration, unit.toChronoUnit()));
+    @Override
+    public Wait<Subject> pollingEvery(Duration timeout) {
+        return (Wait<Subject>) super.pollingEvery(timeout);
     }
 
     @Override
