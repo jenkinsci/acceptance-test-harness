@@ -11,6 +11,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
@@ -344,8 +345,8 @@ public class FallbackConfig extends AbstractModule {
         d.register(new Scroller());
 
         try {
-            d.manage().timeouts().pageLoadTimeout(time.seconds(PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
-            d.manage().timeouts().implicitlyWait(time.seconds(IMPLICIT_WAIT_TIMEOUT), TimeUnit.MILLISECONDS);
+            d.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(PAGE_LOAD_TIMEOUT)));
+            d.manage().timeouts().implicitlyWait(Duration.ofMillis(time.seconds(IMPLICIT_WAIT_TIMEOUT)));
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
             LOGGER.info(base + " doesn't support page load timeout");
