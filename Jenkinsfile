@@ -56,13 +56,17 @@ stage('Record builds and sessions') {
           // TODO Launchable not yet supported on LTS line
           return
         }
+        infra.withArtifactCachingProxy {
+          sh "DISPLAY=:0 ./run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
+        }
+        def coreCommit = sh(script: './core-commit.sh', returnStdout: true).trim()
         /*
          * TODO Add the commits of the transitive closure of the Jenkins WAR under test and the ATH
          * JAR to this build.
          */
         withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
           launchable('verify')
-          launchable("record build --name ${env.BUILD_TAG}-${jenkinsVersion} --no-commit-collection --commit jenkinsci/acceptance-test-harness=${athCommit} --link \"View build in CI\"=${env.BUILD_URL}")
+          launchable("record build --name ${env.BUILD_TAG}-${jenkinsVersion} --no-commit-collection --commit jenkinsci/acceptance-test-harness=${athCommit} --commit jenkinsci/jenkins=${coreCommit} --link \"View build in CI\"=${env.BUILD_URL}")
         }
       }
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {

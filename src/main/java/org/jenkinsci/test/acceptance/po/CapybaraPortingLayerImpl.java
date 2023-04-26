@@ -119,7 +119,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public <T> Wait<T> waitFor(T subject) {
         return new Wait<>(subject, time)
-                .pollingEvery(500, TimeUnit.MILLISECONDS)
+                .pollingEvery(Duration.ofMillis(500))
                 .withTimeout(Duration.ofSeconds(120))
         ;
     }
@@ -407,7 +407,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             runnable.run();
         }
         Wait<WebDriver> wait = new Wait<>(driver, time)
-                .pollingEvery(500, TimeUnit.MILLISECONDS)
+                .pollingEvery(Duration.ofMillis(500))
                 .withTimeout(Duration.ofSeconds(timeoutSeconds))
         ;
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
