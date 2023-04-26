@@ -7,6 +7,7 @@ if (env.BRANCH_IS_PRIMARY) {
   properties([
           buildDiscarder(logRotator(numToKeepStr: '50')),
           pipelineTriggers([cron('0 18 * * 2')]),
+          disableConcurrentBuilds(abortPrevious: true),
   ])
 }
 
