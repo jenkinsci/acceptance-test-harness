@@ -30,6 +30,7 @@ RUN apt-get update && \
         unzip \
         tightvncserver \
         openjdk-11-jdk \
+        openjdk-17-jdk \
         xfonts-base \
         openssh-client \
         && \
