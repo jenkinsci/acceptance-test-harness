@@ -7,7 +7,6 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -181,7 +180,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement find(final By selector) {
         try {
-            return waitFor().withTimeout(Duration.ofSeconds(time.seconds(1))).until(new Callable<WebElement>() {
+            return waitFor().withTimeout(Duration.ofMillis(time.seconds(1))).until(new Callable<WebElement>() {
                 @Override public WebElement call() {
                     for (WebElement element : driver.findElements(selector)) {
                         if (isDisplayed(element)) return element;
