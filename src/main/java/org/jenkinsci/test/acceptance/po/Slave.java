@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import hudson.util.VersionNumber;
 import java.util.regex.Pattern;
 
 import org.jenkinsci.test.acceptance.Matcher;
