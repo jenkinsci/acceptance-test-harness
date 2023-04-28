@@ -28,7 +28,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
