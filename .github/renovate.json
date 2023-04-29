@@ -12,7 +12,7 @@
     {
       "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
       "matchStrings": ["ENV GECKODRIVER_VERSION=(?<currentValue>.*?)\n"],
-      "depNameTemplate": "geckodriver/releases",
+      "depNameTemplate": "mozilla/geckodriver",
       "datasourceTemplate": "github-releases"
     },
     {
