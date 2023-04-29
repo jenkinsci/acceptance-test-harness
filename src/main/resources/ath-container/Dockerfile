@@ -50,7 +50,7 @@ RUN apt-get -y --no-install-recommends install libgtk-3-0 libasound2 libdbus-gli
   && ln -fs /opt/firefox-${FIREFOX_VERSION}/firefox /usr/bin/firefox
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION 0.32.2
+ENV GECKODRIVER_VERSION 0.33.0
 # gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
