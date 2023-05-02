@@ -47,7 +47,6 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
@@ -56,7 +55,6 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.utils.PipelineTestUtils.resolveScriptName;
 
 @WithPlugins ({"credentials@2.0.7", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
@@ -100,8 +98,8 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     @Test
     @WithPlugins("credentials-binding@1.10")
     public void pipelineWithCredentialsTest() throws IOException {
-        final HttpResponse resp = new CredentialsRESTClient(jenkins.url).createCredential(CRED_ID, CRED_USER, CRED_PWD, GLOBAL_SCOPE);
-       assertThat(resp.getStatusLine().getStatusCode(), is(200));
+        CredentialsPage cp = createCredentialsPage(false);
+        createCredentials(UserPwdCredential.class, cp, GLOBAL_SCOPE, null);
 
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("usernameSplitPasswordScript"), CRED_ID, CRED_USER, USERNAME_CORRECT_MESSAGE, CRED_PWD, PASSWORD_CORRECT_MESSAGE);
         final Build b = PipelineTestUtils.createPipelineJobWithScript(jenkins.jobs, script).startBuild();
