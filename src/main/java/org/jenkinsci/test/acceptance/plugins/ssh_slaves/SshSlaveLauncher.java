@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
@@ -123,7 +123,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * to check whether it has already been rendered in the dropdown.
      */
     private void waitForCredentialVisible(final String credUsername) {
-        assertTrue(waitFor().withTimeout(5, TimeUnit.SECONDS).until(() ->
+        assertTrue(waitFor().withTimeout(Duration.ofSeconds(5)).until(() ->
                 credentialsId.resolve().getText().contains(credUsername))
         );
         // Select the new credentials. Control.selectDropdownMenu seems to be YUI-only.

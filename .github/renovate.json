@@ -1,0 +1,32 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":semanticCommitsDisabled",
+    "schedule:earlyMondays"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
+      "matchStrings": ["ENV GECKODRIVER_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "mozilla/geckodriver",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
+      "matchStrings": ["ENV MAVEN_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "org.apache.maven:maven-core",
+      "datasourceTemplate": "maven"
+    },
+    {
+      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
+      "matchStrings": ["DOCKER_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "docker",
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "rebaseWhen": "conflicted"
+}

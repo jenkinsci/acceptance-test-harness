@@ -18,9 +18,9 @@ import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
@@ -42,7 +42,7 @@ public class JiraContainer extends DockerContainer {
      */
     public void waitForReady(CapybaraPortingLayer p) {
         p.waitFor().withMessage("Waiting for jira to come up")
-                .withTimeout(2000, TimeUnit.SECONDS) // [INFO] jira started successfully in 1064s
+                .withTimeout(Duration.ofSeconds(2000)) // [INFO] jira started successfully in 1064s
                 .until( () ->  {
                         try {
                             URLConnection connection = getURL().openConnection();

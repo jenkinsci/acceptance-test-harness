@@ -14,8 +14,6 @@ import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.junit.Assume;
-import org.junit.Ignore;
 import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;

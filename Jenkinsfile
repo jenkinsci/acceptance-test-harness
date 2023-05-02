@@ -7,12 +7,15 @@ if (env.BRANCH_IS_PRIMARY) {
   properties([
           buildDiscarder(logRotator(numToKeepStr: '50')),
           pipelineTriggers([cron('0 18 * * 2')]),
+          disableConcurrentBuilds(abortPrevious: true),
   ])
 }
 
 def branches = [:]
 def splits
 def needSplittingFromWorkspace = true
+
+// TODO could use launchable split-subset to split this into bins
 
 for (build = currentBuild.previousCompletedBuild; build != null; build = build.previousCompletedBuild) {
   if (build.resultIsBetterOrEqualTo('UNSTABLE')) {
@@ -30,6 +33,57 @@ if (needSplittingFromWorkspace) {
   }
 } else {
   splits = splitTests count(10)
+}
+
+def axes = [
+  jenkinsVersions: ['lts', 'latest'],
+  platforms: ['linux'],
+  jdks: [11],
+  browsers: ['firefox'],
+]
+
+stage('Record builds and sessions') {
+  retry(conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()], count: 2) {
+    node('maven-11') {
+      infra.checkoutSCM()
+      def athCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+      launchable.install()
+      withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+        launchable('verify')
+        launchable('record commit')
+      }
+      axes['jenkinsVersions'].each { jenkinsVersion ->
+        if (jenkinsVersion == 'lts') {
+          // TODO Launchable not yet supported on LTS line
+          return
+        }
+        infra.withArtifactCachingProxy {
+          sh "DISPLAY=:0 ./run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
+        }
+        def coreCommit = sh(script: './core-commit.sh', returnStdout: true).trim()
+        /*
+         * TODO Add the commits of the transitive closure of the Jenkins WAR under test and the ATH
+         * JAR to this build.
+         */
+        withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+          launchable('verify')
+          launchable("record build --name ${env.BUILD_TAG}-${jenkinsVersion} --no-commit-collection --commit jenkinsci/acceptance-test-harness=${athCommit} --commit jenkinsci/jenkins=${coreCommit} --link \"View build in CI\"=${env.BUILD_URL}")
+        }
+      }
+      withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+        axes.values().combinations {
+          def (jenkinsVersion, platform, jdk, browser) = it
+          if (jenkinsVersion == 'lts') {
+            // TODO Launchable not yet supported on LTS line
+            return
+          }
+          def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
+          launchable("record session --build ${env.BUILD_TAG}-${jenkinsVersion} --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} --link \"View session in CI\"=${env.BUILD_URL} >${sessionFile}")
+          stash name: sessionFile, includes: sessionFile
+        }
+      }
+    }
+  }
 }
 
 branches['CI'] = {
@@ -53,40 +107,51 @@ branches['CI'] = {
 
 for (int i = 0; i < splits.size(); i++) {
   int index = i
-  for (int j in [11]) {
-    for (String v in ['lts', 'latest']) {
-      int javaVersion = j
-      String jenkinsUnderTest = v
-      def name = "java-${javaVersion}-jenkins-${jenkinsUnderTest}-split${index}"
-      branches[name] = {
-        stage(name) {
-         retry(count: 2, conditions: [agent(), nonresumable()]) {
+  axes.values().combinations {
+    def (jenkinsVersion, platform, jdk, browser) = it
+    def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
+    branches[name] = {
+      stage(name) {
+        retry(count: 2, conditions: [agent(), nonresumable()]) {
           node('docker-highmem') {
             checkout scm
             def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
-            image.inside('-v /var/run/docker.sock:/var/run/docker.sock --shm-size 2g') {
+            sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
+            def cwd = pwd()
+            image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
               def exclusions = splits.get(index).join('\n')
               writeFile file: 'excludes.txt', text: exclusions
               realtimeJUnit(
-                testResults: 'target/surefire-reports/TEST-*.xml',
-                testDataPublishers: [[$class: 'AttachmentPublisher']],
-                // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
-                // The build failure prevents parallel tests executor to realize the tests are gone so same
-                // split is run to execute and report zero tests - which fails the build. Permit the test
-                // results to be empty to break the circle: build after removal executes one empty split
-                // but not letting the build to fail will cause next build not to try those tests again.
-                allowEmptyResults: true
-              ) {
-                sh """
-                    set-java.sh $javaVersion
-                    eval \$(vnc.sh)
-                    java -version
-                    run.sh firefox ${jenkinsUnderTest} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                """
+                  testResults: 'target/surefire-reports/TEST-*.xml',
+                  testDataPublishers: [[$class: 'AttachmentPublisher']],
+                  // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
+                  // The build failure prevents parallel tests executor to realize the tests are gone so same
+                  // split is run to execute and report zero tests - which fails the build. Permit the test
+                  // results to be empty to break the circle: build after removal executes one empty split
+                  // but not letting the build to fail will cause next build not to try those tests again.
+                  allowEmptyResults: true
+                  ) {
+                    sh """
+                        set-java.sh ${jdk}
+                        eval \$(vnc.sh)
+                        java -version
+                        run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                        cp --verbose target/surefire-reports/TEST-*.xml /reports
+                        """
+                  }
+            }
+            if (jenkinsVersion != 'lts') {
+              // TODO Launchable not yet supported on LTS line
+              launchable.install()
+              withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+                launchable('verify')
+                def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
+                unstash sessionFile
+                def session = readFile(sessionFile).trim()
+                launchable("record tests --session ${session} maven './target/ath-reports'")
               }
             }
           }
-         }
         }
       }
     }

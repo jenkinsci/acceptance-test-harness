@@ -30,6 +30,7 @@ RUN apt-get update && \
         unzip \
         tightvncserver \
         openjdk-11-jdk \
+        openjdk-17-jdk \
         xfonts-base \
         openssh-client \
         && \
@@ -49,7 +50,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 liba
   && ln -fs /opt/firefox-${FIREFOX_VERSION}/firefox /usr/bin/firefox
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION 0.32.2
+ENV GECKODRIVER_VERSION=0.33.0
 # gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
@@ -62,7 +63,7 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   fi
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION 3.9.1
+ENV MAVEN_VERSION=3.9.1
 RUN curl -ffSLO https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-"$MAVEN_VERSION"-bin.tar.gz && \
     tar -xvzf apache-maven-"$MAVEN_VERSION"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven

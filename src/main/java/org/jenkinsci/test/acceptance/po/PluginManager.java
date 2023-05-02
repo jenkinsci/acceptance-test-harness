@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +89,7 @@ public class PluginManager extends ContainerPageObject {
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
         // And we check for the presence of the button again
-        WebElement checkButton = find(by.link("Check now"));
+        WebElement checkButton = find(by.css("#button-refresh, .jenkins-button[href='checkUpdatesServer']"));
         checkButton.click();
         // The wait criteria is: we have left the current page and returned to the same one
         waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
@@ -279,7 +280,7 @@ public class PluginManager extends ContainerPageObject {
         // the target plugin web element becomes stale due to the dynamic behaviour of the plugin
         // manager UI which ends up with StaleElementReferenceException.
         // This is re-trying until the element can be properly checked.
-        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
             try {
                 check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
             } catch (NoSuchElementException | StaleElementReferenceException e) {
@@ -313,7 +314,7 @@ public class PluginManager extends ContainerPageObject {
         // DEV MEMO: To avoid flakiness issues, wait for the text to be entirely written in the search box, and
         // wait for the list below to be properly refreshed and for the element we are searching for to be displayed.
         // If not, the list might not be properly refreshed and the element would never be found.
-        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
             try {
                 check(find(by.xpath(xpathToPluginLine, pluginName)));
             } catch (NoSuchElementException | StaleElementReferenceException e) {
@@ -364,7 +365,7 @@ public class PluginManager extends ContainerPageObject {
         // Then wait until the plugin is loaded
         waitFor()
                 .withMessage("All plugins should be installed")
-                .withTimeout(5, TimeUnit.MINUTES)
+                .withTimeout(Duration.ofMinutes(5))
                 .until(() -> {
                     List<WebElement> elements = pluginRow.findElements(by.xpath("descendant::*[contains(.,'Pending') or contains(.,'Installing')]"));
                     return elements.isEmpty();

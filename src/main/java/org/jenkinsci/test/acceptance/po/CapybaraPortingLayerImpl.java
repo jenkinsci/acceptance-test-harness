@@ -4,9 +4,9 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import javax.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -118,8 +118,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public <T> Wait<T> waitFor(T subject) {
         return new Wait<>(subject, time)
-                .pollingEvery(500, TimeUnit.MILLISECONDS)
-                .withTimeout(120, TimeUnit.SECONDS)
+                .pollingEvery(Duration.ofMillis(500))
+                .withTimeout(Duration.ofSeconds(120))
         ;
     }
 
@@ -134,7 +134,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement waitFor(final By selector, final int timeoutSec) {
         return waitFor(this).withMessage("Element matching %s is present", selector)
-                .withTimeout(timeoutSec, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeoutSec))
                 .ignoring(NoSuchElementException.class)
                 .until(() -> find(selector));
     }
@@ -153,7 +153,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override @Deprecated
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
-        return waitFor(this).withTimeout(timeoutSec, TimeUnit.SECONDS).until(block);
+        return waitFor(this).withTimeout(Duration.ofSeconds(timeoutSec)).until(block);
     }
 
     @Override @Deprecated
@@ -166,7 +166,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         StringDescription desc = new StringDescription();
         matcher.describeTo(desc);
         waitFor(item).withMessage(desc.toString())
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(matcher)
         ;
     }
@@ -180,7 +180,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement find(final By selector) {
         try {
-            return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
+            return waitFor().withTimeout(Duration.ofMillis(time.seconds(1))).until(new Callable<WebElement>() {
                 @Override public WebElement call() {
                     for (WebElement element : driver.findElements(selector)) {
                         if (isDisplayed(element)) return element;
@@ -406,8 +406,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             runnable.run();
         }
         Wait<WebDriver> wait = new Wait<>(driver, time)
-                .pollingEvery(500, TimeUnit.MILLISECONDS)
-                .withTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .pollingEvery(Duration.ofMillis(500))
+                .withTimeout(Duration.ofSeconds(timeoutSeconds))
         ;
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         try {

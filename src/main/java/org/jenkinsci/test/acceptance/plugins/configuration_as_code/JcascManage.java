@@ -28,7 +28,7 @@ import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -45,7 +45,7 @@ public class JcascManage extends PageObject {
     public void configure(String path) {
         Control control = control("/newSource");
         control.set(path);
-        waitFor().withTimeout(5, TimeUnit.SECONDS).ignoring(AssertionError.class).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(5)).ignoring(AssertionError.class).until(() -> {
             assertThat(control.getFormValidation(), FormValidation.reports(FormValidation.Kind.OK, "The configuration can be applied"));
             return true;
         });
