@@ -23,7 +23,6 @@
  */
 package plugins;
 
-import org.apache.http.HttpResponse;
 import org.hamcrest.Description;
 import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -32,7 +31,6 @@ import org.jenkinsci.test.acceptance.plugins.authorize_project.ProjectDefaultBui
 import org.jenkinsci.test.acceptance.plugins.credentials.AbstractCredentialsTest;
 import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
-import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsRESTClient;
 import org.jenkinsci.test.acceptance.plugins.credentials.FileCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.StringCredentials;
