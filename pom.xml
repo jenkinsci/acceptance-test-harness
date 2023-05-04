@@ -34,7 +34,7 @@
     <jenkins.version>2.402</jenkins.version>
     <selenium.version>4.9.0</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
-    <maven.version>3.8.1</maven.version>
+    <maven.version>3.9.1</maven.version>
     <maven-resolver.version>1.6.2</maven-resolver.version>
     <groovy.version>3.0.17</groovy.version>
     <monte.version>0.7.7.0</monte.version>
