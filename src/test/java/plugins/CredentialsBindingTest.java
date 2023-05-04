@@ -122,7 +122,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     @Test
     @WithPlugins({"credentials-binding@1.17", "mock-security-realm", "authorize-project"})
     public void pipelineSecretTextPersonalCredentials() throws URISyntaxException, IOException {
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("secretTextScript"), CRED_ID, SECRET_TEXT, SECRET_TEXT_CORRECT_MESSAGE);
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("secretTextScript"), CRED_ID, AbstractCredentialsTest.SECRET_TEXT, SECRET_TEXT_CORRECT_MESSAGE);
         this.testPersonalCredentials(StringCredentials.class, null, script, SECRET_TEXT_CORRECT_MESSAGE);
     }
 
