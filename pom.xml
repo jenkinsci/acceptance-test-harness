@@ -272,7 +272,7 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>4.13.3</version>
+      <version>3107.v665000b_51092</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
@@ -833,7 +833,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.387.1</jenkins.version>
+        <jenkins.version>2.387.3</jenkins.version>
       </properties>
     </profile>
   </profiles>
