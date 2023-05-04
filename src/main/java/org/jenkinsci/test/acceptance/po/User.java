@@ -91,8 +91,12 @@ public class User extends ContainerPageObject {
     }
 
     public void delete() {
-        visit("delete");
-        clickButton("Yes");
+        try {
+            visit("delete");
+            clickButton("Yes");
+        } catch (NoSuchElementException nse) {
+            runThenConfirmAlert(() -> clickLink("Delete"),2);
+        }
     }
 
     @Override

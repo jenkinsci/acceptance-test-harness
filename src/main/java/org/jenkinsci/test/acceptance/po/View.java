@@ -5,6 +5,7 @@ import java.net.URL;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,9 +57,13 @@ public abstract class View extends ContainerPageObject {
      */
     public void delete() {
         configure();
-        clickLink("Delete View");
-        waitFor(by.button("Yes"));
-        clickButton("Yes");
+        try {
+            visit("delete");
+            waitFor(by.button("Yes"));
+            clickButton("Yes");
+        } catch (UnhandledAlertException uae) {
+            runThenConfirmAlert(() -> clickLink("Delete View"), 2);
+        }
     }
 
     @Override
