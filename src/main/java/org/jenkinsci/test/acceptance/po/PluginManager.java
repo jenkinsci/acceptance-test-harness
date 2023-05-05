@@ -93,21 +93,25 @@ public class PluginManager extends ContainerPageObject {
         WebElement checkButton = find(by.css("#button-refresh, .jenkins-button[href='checkUpdatesServer']"));
         checkButton.click();
         // The wait criteria is: we have left the current page and returned to the same one
-        waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
-            try {
-                // We interact with the element just to detect if it is stale
-                webElement.findElement(by.id("it does not matter"));
-            } catch(StaleElementReferenceException e) {
-                // with this exception we know we've left the original page
-                // we look for an element in the page to check for success
-                if (current.equals(getCurrentUrl())) {
-                    return true;
+        try {
+            waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
+                try {
+                    // We interact with the element just to detect if it is stale
+                    webElement.findElement(by.id("it does not matter"));
+                } catch(StaleElementReferenceException e) {
+                    // with this exception we know we've left the original page
+                    // we look for an element in the page to check for success
+                    if (current.equals(getCurrentUrl())) {
+                        return true;
+                    }
+                } catch(NoSuchElementException e) {
+                    return false;
                 }
-            } catch(NoSuchElementException e) {
                 return false;
-            }
-            return false;
-        });
+            });
+        } catch (TimeoutException x) {
+            throw new AssumptionViolatedException("Timed out checking for updates; perhaps update center is unresponsive", x);
+        }
         updated = true;
     }
 
@@ -281,18 +285,14 @@ public class PluginManager extends ContainerPageObject {
         // the target plugin web element becomes stale due to the dynamic behaviour of the plugin
         // manager UI which ends up with StaleElementReferenceException.
         // This is re-trying until the element can be properly checked.
-        try {
-            waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
-                try {
-                    check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
-                } catch (NoSuchElementException | StaleElementReferenceException e) {
-                    return false;
-                }
-                return true;
-            });
-        } catch (TimeoutException x) {
-            throw new AssumptionViolatedException("Timed out waiting for plugin to be available; perhaps update center is unresponsive", x);
-        }
+        waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
+            try {
+                check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+            } catch (NoSuchElementException | StaleElementReferenceException e) {
+                return false;
+            }
+            return true;
+        });
 
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
