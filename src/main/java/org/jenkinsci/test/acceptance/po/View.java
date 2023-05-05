@@ -5,6 +5,7 @@ import java.net.URL;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebElement;
 
@@ -58,11 +59,11 @@ public abstract class View extends ContainerPageObject {
     public void delete() {
         configure();
         try {
+            runThenConfirmAlert(() -> clickLink("Delete View"), 2);
+        } catch (TimeoutException te) {
             visit("delete");
             waitFor(by.button("Yes"));
             clickButton("Yes");
-        } catch (UnhandledAlertException uae) {
-            runThenConfirmAlert(() -> clickLink("Delete View"), 2);
         }
     }
 
