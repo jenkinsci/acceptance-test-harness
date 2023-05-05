@@ -27,6 +27,7 @@ import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import com.google.inject.Inject;
@@ -280,14 +281,18 @@ public class PluginManager extends ContainerPageObject {
         // the target plugin web element becomes stale due to the dynamic behaviour of the plugin
         // manager UI which ends up with StaleElementReferenceException.
         // This is re-trying until the element can be properly checked.
-        waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
-            try {
-                check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
-            } catch (NoSuchElementException | StaleElementReferenceException e) {
-                return false;
-            }
-            return true;
-        });
+        try {
+            waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
+                try {
+                    check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
+                } catch (NoSuchElementException | StaleElementReferenceException e) {
+                    return false;
+                }
+                return true;
+            });
+        } catch (TimeoutException x) {
+            throw new AssumptionViolatedException("Timed out waiting for plugin to be available; perhaps update center is unresponsive", x);
+        }
 
         final VersionNumber requiredVersion = spec.getVersionNumber();
         if (requiredVersion != null) {
