@@ -1,0 +1,9 @@
+node {
+    withCredentials([sshUserPrivateKey(keyFileVariable: 'THEKEY', passphraseVariable: 'THEPASS', usernameVariable: 'THEUSER', credentialsId: '%s')]) {
+        bat '@if \"%%THEUSER%%\"==\"%s\" echo \"%s\"'
+        bat '@if \"%%THEPASS%%\"==\"%s\" echo \"%s\"'
+        bat '@type %%THEKEY%% > testfile'
+        def content = readFile 'testfile'
+        bat '@if \"' + content.trim() + '\"==\"%s\" echo \"%s\"'
+    }
+}
