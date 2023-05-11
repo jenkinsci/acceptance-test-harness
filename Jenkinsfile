@@ -107,10 +107,9 @@ for (int i = 0; i < splits.size(); i++) {
         retry(count: 2, conditions: [agent(), nonresumable()]) {
           node('docker-highmem') {
             checkout scm
-            def image = docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
             sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
             def cwd = pwd()
-            image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
+            docker.image('jenkins/ath').inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
               def exclusions = splits.get(index).join('\n')
               writeFile file: 'excludes.txt', text: exclusions
               realtimeJUnit(
