@@ -89,7 +89,12 @@ public class PluginManager extends ContainerPageObject {
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
         // And we check for the presence of the button again
-        WebElement checkButton = find(by.css("#button-refresh, .jenkins-button[href='checkUpdatesServer']"));
+        WebElement checkButton;
+        try {
+            checkButton = find(by.css("#button-refresh, .jenkins-button[href='checkUpdatesServer']"));
+        } catch (NoSuchElementException e) {
+            checkButton = find(by.link("Check now"));
+        }
         checkButton.click();
         // The wait criteria is: we have left the current page and returned to the same one
         waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
@@ -306,7 +311,7 @@ public class PluginManager extends ContainerPageObject {
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(pluginName);
-        
+
         // DEV MEMO: There is a {@code data-plugin-version} attribute on the {@code tr} tag holding the plugin line entry in the
         // plugin manager. By selecting the line, we can then retrieve the version directly without having to parse the line's content.
         final String xpathToPluginLine = "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr";
@@ -322,7 +327,7 @@ public class PluginManager extends ContainerPageObject {
             }
             return true;
         });
-        
+
         String version = find(by.xpath(xpathToPluginLine, pluginName)).getAttribute("data-plugin-version");
         return new VersionNumber(version);
     }
