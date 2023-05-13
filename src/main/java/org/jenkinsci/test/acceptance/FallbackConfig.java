@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance;
 
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import javax.inject.Named;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -17,15 +15,46 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
+import javax.inject.Named;
 
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.client.ClientUtil;
 import org.apache.commons.exec.OS;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResult;
+import org.junit.runners.model.Statement;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.UnsupportedCommandException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.GeckoDriverService;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.LocalFileDetector;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.client.ClientUtil;
+import com.cloudbees.sdk.extensibility.ExtensionList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.docker.Docker;
@@ -48,34 +77,8 @@ import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReport
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
-import org.junit.runners.model.Statement;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.UnsupportedCommandException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeDriverService;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.LocalFileDetector;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.safari.SafariDriver;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
-import com.cloudbees.sdk.extensibility.ExtensionList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import static org.jenkinsci.test.acceptance.recorder.HarRecorder.isCaptureHarEnabled;
+import static org.jenkinsci.test.acceptance.recorder.HarRecorder.*;
 
 /**
  * The default configuration for running tests.
@@ -223,7 +226,7 @@ public class FallbackConfig extends AbstractModule {
             final int displayNumber = vncPort - 5900;
 
             Path log = Files.createTempFile("ath-docker-browser", "log");
-            LOGGER.info("Starting selenium container. Logs in " + log);
+            LOGGER.info("Starting selenium container '" + image + "'. Logs in " + log);
 
             Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
             // While this only needs to expose two ports (controlPort, vncPort), it needs to be able to talk to Jenkins running
@@ -485,7 +488,7 @@ public class FallbackConfig extends AbstractModule {
             throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.", ex);
         }
     }
-    
+
     /**
      *  Provides a mechanism to create a report on which plugins were used
      *  during the test execution
