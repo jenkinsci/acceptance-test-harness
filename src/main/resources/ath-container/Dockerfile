@@ -63,7 +63,7 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   fi
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION=3.9.1
+ENV MAVEN_VERSION=3.9.2
 RUN curl -ffSLO https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-"$MAVEN_VERSION"-bin.tar.gz && \
     tar -xvzf apache-maven-"$MAVEN_VERSION"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
