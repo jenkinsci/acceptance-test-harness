@@ -17,7 +17,7 @@
       "allowedVersions": "<7.0.0",
       "matchPackageNames": ["com.google.inject:guice"],
       "description": "We focus on Guice 6 until core adapts 7",
-      "enabled": false
+      "enabled": true
     }
   ],
   "labels": [
