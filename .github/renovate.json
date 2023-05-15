@@ -10,7 +10,8 @@
     "org.apache.maven:maven-settings-builder",
     "org.apache.maven.resolver:maven-resolver-connector-basic",
     "org.apache.maven.resolver:maven-resolver-transport-file",
-    "org.apache.maven.resolver:maven-resolver-transport-http"
+    "org.apache.maven.resolver:maven-resolver-transport-http",
+    "com.google.inject:guice"
   ],
   "labels": [
     "dependencies"
