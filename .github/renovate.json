@@ -12,6 +12,13 @@
     "org.apache.maven.resolver:maven-resolver-transport-file",
     "org.apache.maven.resolver:maven-resolver-transport-http"
   ],
+  "packageRules": [
+    {
+      "allowedVersions": "<7.0.0",
+      "matchPackageNames": ["com.google.inject:guice"],
+      "description": "We focus on Guice 6 until core adapts 7"
+    }
+  ],
   "labels": [
     "dependencies"
   ],
