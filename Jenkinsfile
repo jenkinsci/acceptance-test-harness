@@ -47,10 +47,8 @@ stage('Record builds and sessions') {
     node('maven-11') {
       infra.checkoutSCM()
       def athCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-      launchable.install()
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-        launchable('verify')
-        launchable('record commit')
+        sh 'launchable verify && launchable record commit'
       }
       axes['jenkinsVersions'].each { jenkinsVersion ->
         infra.withArtifactCachingProxy {
@@ -62,15 +60,14 @@ stage('Record builds and sessions') {
          * JAR to this build.
          */
         withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-          launchable('verify')
-          launchable("record build --name ${env.BUILD_TAG}-${jenkinsVersion} --no-commit-collection --commit jenkinsci/acceptance-test-harness=${athCommit} --commit jenkinsci/jenkins=${coreCommit} --link \"View build in CI\"=${env.BUILD_URL}")
+          sh "launchable verify && launchable record build --name ${env.BUILD_TAG}-${jenkinsVersion} --no-commit-collection --commit jenkinsci/acceptance-test-harness=${athCommit} --commit jenkinsci/jenkins=${coreCommit}"
         }
       }
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
         axes.values().combinations {
           def (jenkinsVersion, platform, jdk, browser) = it
           def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
-          launchable("record session --build ${env.BUILD_TAG}-${jenkinsVersion} --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} --link \"View session in CI\"=${env.BUILD_URL} >${sessionFile}")
+          sh "launchable record session --build ${env.BUILD_TAG}-${jenkinsVersion} --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} >${sessionFile}"
           stash name: sessionFile, includes: sessionFile
         }
       }
@@ -131,13 +128,11 @@ for (int i = 0; i < splits.size(); i++) {
                         """
                   }
             }
-            launchable.install()
             withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-              launchable('verify')
               def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
               unstash sessionFile
               def session = readFile(sessionFile).trim()
-              launchable("record tests --session ${session} maven './target/ath-reports'")
+              sh "launchable verify && launchable record tests --session ${session} maven './target/ath-reports'"
             }
           }
         }
