@@ -109,10 +109,11 @@ public class WinstoneController extends LocalController {
     }
 
     private boolean supportsPortFileName() throws IOException {
-        JarFile warFile = new JarFile(war);
-        String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
-        VersionNumber version = new VersionNumber(jenkinsVersion);
-        return version.compareTo(v2339) >= 0;
+        try (JarFile warFile = new JarFile(war)) {
+            String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
+            VersionNumber version = new VersionNumber(jenkinsVersion);
+            return version.compareTo(v2339) >= 0;
+        }
     }
 
     @Override

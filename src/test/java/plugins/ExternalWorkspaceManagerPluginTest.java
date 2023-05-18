@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.openqa.selenium.By;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.commons.io.FileUtils.listFiles;
@@ -148,15 +149,16 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         jenkins.save();
     }
 
-    private void setUpNode(String label, String fakeMountingPoint) throws ExecutionException, InterruptedException {
-        SlaveController controller = new LocalSlaveController();
-        Slave linuxSlave = controller.install(jenkins).get();
-        linuxSlave.configure();
-        linuxSlave.setLabels(label);
+    private void setUpNode(String label, String fakeMountingPoint) throws ExecutionException, InterruptedException, IOException {
+        try (SlaveController controller = new LocalSlaveController()) {
+            Slave linuxSlave = controller.install(jenkins).get();
+            linuxSlave.configure();
+            linuxSlave.setLabels(label);
 
-        ExternalNodeConfig nodeConfig = new ExternalNodeConfig(linuxSlave);
-        nodeConfig.setConfig(DISK_POOL_ID, DISK_ONE, DISK_TWO, fakeMountingPoint);
-        linuxSlave.save();
+            ExternalNodeConfig nodeConfig = new ExternalNodeConfig(linuxSlave);
+            nodeConfig.setConfig(DISK_POOL_ID, DISK_ONE, DISK_TWO, fakeMountingPoint);
+            linuxSlave.save();
+        }
     }
 
     private WorkflowJob createWorkflowJob(String script) {
