@@ -58,14 +58,14 @@ public class AbstractPipelineTest extends AbstractJUnitTest {
         final String script = this.scriptForPipeline();
         PipelineTestUtils.checkScript(script);
 
-        return String.format(script, (Object[]) scriptParameters);
+        return String.format(script, scriptParameters);
     }
 
     public String scriptForPipelineFromResourceWithParameters(final String resourceName, final String... scriptParameters) throws IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResource(this.getClass(), resourceName);
         PipelineTestUtils.checkScript(script);
 
-        return String.format(script, (Object[]) scriptParameters);
+        return String.format(script, scriptParameters);
     }
 
     protected void assertJavadoc(final Job job) {

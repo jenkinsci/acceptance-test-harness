@@ -57,7 +57,7 @@ public class PipelineTestUtils {
         final String script = scriptForPipelineFromResource(resourceOwner, resourceName);
         checkScript(script);
 
-        return String.format(script, (Object[]) scriptParameters);
+        return String.format(script, scriptParameters);
     }
 
     public static void checkScript(final String script) {

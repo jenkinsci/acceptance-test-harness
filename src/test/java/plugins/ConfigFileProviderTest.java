@@ -264,7 +264,7 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         final String script = this.scriptForPipeline();
         PipelineTestUtils.checkScript(script);
 
-        return String.format(script, (Object[]) scriptParameters);
+        return String.format(script, scriptParameters);
     }
 
 }

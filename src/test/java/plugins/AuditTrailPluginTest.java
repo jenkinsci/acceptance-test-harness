@@ -35,12 +35,10 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
 
         // purpose of this is to just go through the motion of creating a new slave,
         // so this one can bypass SlaveController.
-        try (LocalSlaveController slaveController = new LocalSlaveController()) {
-            Slave slave = slaveController.install(jenkins).get();
+        Slave slave = new LocalSlaveController().install(jenkins).get();
 
-            List<String> events = auditTrail.getEvents();
-            assertThat(events, hasItem("/createItem (" + freeStyleJob.name + ")"));
-            assertThat(events, hasItem("/computer/createItem (" + slave.getName() + ")"));
-        }
+        List<String> events = auditTrail.getEvents();
+        assertThat(events, hasItem("/createItem (" + freeStyleJob.name + ")"));
+        assertThat(events, hasItem("/computer/createItem (" + slave.getName() + ")"));
     }
 }

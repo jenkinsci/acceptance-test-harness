@@ -40,7 +40,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      * @see ContainerPageObject#url(String) Method that lets you resolve relative paths easily.
      */
     public final URL url;
-
+    
     /**
      * If the object was created with some context, preserve it so that we can
      * easily get the real Jenkins root
@@ -143,7 +143,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      */
     public @NonNull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
         assert pathPrefix.startsWith("/"): "Path not absolute: " + pathPrefix;
-        final By by = PageObject.by.areaPath(pathPrefix);
+        final By by = this.by.areaPath(pathPrefix);
         final List<String> existing = extractPaths(all(by));
         final int existingSize = existing.size();
         action.run();
