@@ -46,11 +46,6 @@ public class PluginManager extends ContainerPageObject {
 
     private static final Logger LOGGER = Logger.getLogger(PluginManager.class.getName());
 
-    /**
-     * Did we fetch the update center metadata?
-     */
-    private boolean updated;
-
     public final Jenkins jenkins;
 
     @Inject
@@ -77,13 +72,13 @@ public class PluginManager extends ContainerPageObject {
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
+        mockUpdateCenter.ensureRunning(jenkins);
     }
 
     /**
      * Force update the plugin update center metadata.
      */
     public void checkForUpdates() {
-        mockUpdateCenter.ensureRunning(jenkins);
         visit("index");
         final String current = getCurrentUrl();
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
@@ -107,7 +102,6 @@ public class PluginManager extends ContainerPageObject {
             }
             return false;
         });
-        updated = true;
     }
 
     public enum InstallationStatus {NOT_INSTALLED, OUTDATED, UP_TO_DATE}
@@ -176,10 +170,6 @@ public class PluginManager extends ContainerPageObject {
     @Deprecated
     public boolean installPlugins(final PluginSpec... specs) throws UnableToResolveDependencies, IOException {
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
-
-        if (!updated) {
-            checkForUpdates();
-        }
 
         if (uploadPlugins) {
             LOGGER.warning("Installing plugins by direct upload. Better to use the default MockUpdateCenter.");

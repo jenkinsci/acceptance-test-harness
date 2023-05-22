@@ -205,6 +205,8 @@ public class MockUpdateCenter implements AutoCleaned {
         String override = "http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/update-center.json";
         LOGGER.log(Level.INFO, "replacing update site {0} with {1}", new Object[] {original, override});
         jenkins.runScript("DownloadService.signatureCheck = false; Jenkins.instance.updateCenter.sites.replaceBy([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", override);
+        // cause Jenkins to synchronously refresh its update site data 
+        jenkins.runScript("Jenkins.instance.updateCenter.updateAllSites()");
     }
 
     private ExceptionLogger serverExceptionHandler() {
