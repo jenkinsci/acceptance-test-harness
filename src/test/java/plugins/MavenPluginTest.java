@@ -47,8 +47,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installMaven;
 import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven;

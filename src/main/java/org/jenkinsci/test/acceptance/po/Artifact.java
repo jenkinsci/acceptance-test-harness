@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 

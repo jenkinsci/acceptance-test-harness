@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 
 import org.apache.commons.io.IOUtils;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.Description;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -140,7 +139,7 @@ public class Matchers {
      * @return the matcher
      */
     public static org.hamcrest.Matcher<String> containsString(final String format, final Object... args) {
-        return CoreMatchers.containsString(String.format(format, args));
+        return org.hamcrest.Matchers.containsString(String.format(format, args));
     }
 
     /**

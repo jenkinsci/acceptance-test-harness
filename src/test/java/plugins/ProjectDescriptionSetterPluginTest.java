@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.plugins.project_description_setter.ProjectD
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins({
