@@ -23,8 +23,8 @@ import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
 import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.StringContains.containsString;
 
 /**
  * Acceptance tests for External Workspace Manager Plugin.

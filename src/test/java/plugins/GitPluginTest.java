@@ -45,8 +45,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 
 @WithDocker
 @Category(DockerTest.class)

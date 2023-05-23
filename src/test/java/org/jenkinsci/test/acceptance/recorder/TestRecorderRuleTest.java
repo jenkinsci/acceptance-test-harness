@@ -8,8 +8,8 @@ import org.junit.runner.Description;
 import java.io.File;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.Is.is;
 import static org.jenkinsci.test.acceptance.Matchers.existingFile;
 
 public class TestRecorderRuleTest {
