@@ -16,8 +16,8 @@ import org.jvnet.hudson.test.Issue;
 
 import javax.inject.Inject;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 
 import java.io.IOException;

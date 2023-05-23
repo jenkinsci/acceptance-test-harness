@@ -33,7 +33,7 @@ import org.jenkinsci.test.acceptance.po.MatrixRun;
 import org.jenkinsci.test.acceptance.po.TextAxis;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins({

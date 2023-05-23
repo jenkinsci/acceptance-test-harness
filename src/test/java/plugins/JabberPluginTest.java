@@ -3,7 +3,6 @@ package plugins;
 import com.google.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
-import org.hamcrest.CoreMatchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JabberContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -26,6 +25,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 /**
  * This test case is set to @Ignore because the Jabber Plugin is not able to connect to conference.localhost
@@ -94,6 +94,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
         j.startBuild().shouldSucceed();
         sleep(20000);
         File logfile = jabber.getLogbotLogFile();
-        assertThat(FileUtils.readFileToString(logfile, StandardCharsets.UTF_8), CoreMatchers.containsString("SUCCESS"));
+        assertThat(FileUtils.readFileToString(logfile, StandardCharsets.UTF_8), containsString("SUCCESS"));
     }
 }

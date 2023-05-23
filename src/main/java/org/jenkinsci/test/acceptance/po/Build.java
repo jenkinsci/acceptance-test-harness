@@ -15,8 +15,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 

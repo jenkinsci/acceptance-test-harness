@@ -33,8 +33,10 @@ import org.zeroturnaround.zip.ZipUtil;
 import com.google.inject.Injector;
 
 import static java.util.Objects.requireNonNull;
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.assertTrue;
 
