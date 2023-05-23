@@ -12,28 +12,6 @@ if (env.BRANCH_IS_PRIMARY) {
 }
 
 def branches = [:]
-def splits
-def needSplittingFromWorkspace = true
-
-// TODO could use launchable split-subset to split this into bins
-
-for (build = currentBuild.previousCompletedBuild; build != null; build = build.previousCompletedBuild) {
-  if (build.resultIsBetterOrEqualTo('UNSTABLE')) {
-    // we have a reference build
-    echo "not splitting from workspace, reference build should be : ${build.projectName}:${build.number}, with state ${build.result}"
-    needSplittingFromWorkspace = false
-    break
-  }
-}
-
-if (needSplittingFromWorkspace) {
-  node { // When there are no previous build, we need to estimate splits from files which require workspace
-    checkout scm
-    splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
-  }
-} else {
-  splits = splitTests count(10)
-}
 
 def axes = [
   jenkinsVersions: ['lts', 'latest'],
@@ -41,6 +19,9 @@ def axes = [
   jdks: [11],
   browsers: ['firefox'],
 ]
+
+def isSubset = env.CHANGE_ID && pullRequest.labels.contains('dependencies')
+def subsetIds = [:]
 
 stage('Record builds and sessions') {
   retry(conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()], count: 2) {
@@ -68,7 +49,10 @@ stage('Record builds and sessions') {
           def (jenkinsVersion, platform, jdk, browser) = it
           def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
           sh "launchable record session --build ${env.BUILD_TAG}-${jenkinsVersion} --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} >${sessionFile}"
+          def session = readFile(sessionFile).trim()
           stash name: sessionFile, includes: sessionFile
+          def target = isSubset ? '30%' : '100%'
+          subsetIds["${jenkinsVersion}-${platform}-jdk${jdk}-${browser}"] = sh(returnStdout: true, script: "launchable subset --session ${session} --target ${target} --get-tests-from-previous-sessions --split maven").trim()
         }
       }
     }
@@ -94,7 +78,8 @@ branches['CI'] = {
   }
 }
 
-for (int i = 0; i < splits.size(); i++) {
+def bins = isSubset ? 1 : 5
+for (int i = 1; i <= bins; i++) {
   int index = i
   axes.values().combinations {
     def (jenkinsVersion, platform, jdk, browser) = it
@@ -106,27 +91,20 @@ for (int i = 0; i < splits.size(); i++) {
             checkout scm
             sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
             def cwd = pwd()
+            withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+              def subsetId = subsetIds["${jenkinsVersion}-${platform}-jdk${jdk}-${browser}"]
+              sh "launchable verify && launchable split-subset --subset-id ${subsetId} --bin ${index}/${bins} --output-exclusion-rules maven >excludes.txt"
+            }
             docker.image('jenkins/ath').inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
-              def exclusions = splits.get(index).join('\n')
-              writeFile file: 'excludes.txt', text: exclusions
-              realtimeJUnit(
-                  testResults: 'target/surefire-reports/TEST-*.xml',
-                  testDataPublishers: [[$class: 'AttachmentPublisher']],
-                  // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
-                  // The build failure prevents parallel tests executor to realize the tests are gone so same
-                  // split is run to execute and report zero tests - which fails the build. Permit the test
-                  // results to be empty to break the circle: build after removal executes one empty split
-                  // but not letting the build to fail will cause next build not to try those tests again.
-                  allowEmptyResults: true
-                  ) {
-                    sh """
-                        set-java.sh ${jdk}
-                        eval \$(vnc.sh)
-                        java -version
-                        run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                        cp --verbose target/surefire-reports/TEST-*.xml /reports
-                        """
-                  }
+              realtimeJUnit(testResults: 'target/surefire-reports/TEST-*.xml', testDataPublishers: [[$class: 'AttachmentPublisher']]) {
+                sh """
+                    set-java.sh ${jdk}
+                    eval \$(vnc.sh)
+                    java -version
+                    run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                    cp --verbose target/surefire-reports/TEST-*.xml /reports
+                    """
+              }
             }
             withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
               def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
