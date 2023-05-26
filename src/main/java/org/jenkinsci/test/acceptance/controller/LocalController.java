@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.MultipleFailureException;
 import org.openqa.selenium.TimeoutException;
-
 import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
 import com.github.olivergondza.dumpling.model.ModelObject;
 import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
@@ -331,38 +329,19 @@ public abstract class LocalController extends JenkinsController implements LogLi
         } catch (IllegalThreadStateException ignored) {
             // Process alive
         }
-
-        // Try to get stacktrace
-        Class<?> clazz;
-        Field pidField;
         try {
-            clazz = Class.forName("java.lang.UNIXProcess");
-            pidField = clazz.getDeclaredField("pid");
-            pidField.setAccessible(true);
-        } catch (Exception e) {
-            return null; // Unable to inspect
+            long pid = proc.pid();
+            ThreadDumpRuntime runtime = new PidRuntimeFactory().fromProcess(pid);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream printStream = new PrintStream(baos);
+            runtime.toString(printStream, ModelObject.Mode.MACHINE);
+            printStream.close();
+            return baos.toString();
+        } catch (UnsupportedOperationException ignored) {
+            // ignored
+        } catch (IOException | InterruptedException e) {
+            throw new AssertionError(e);
         }
-
-        if (clazz.isAssignableFrom(proc.getClass())) {
-            int pid;
-            try {
-                pid = (int) pidField.get(proc);
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
-
-            try {
-                ThreadDumpRuntime runtime = new PidRuntimeFactory().fromProcess(pid);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                PrintStream printStream = new PrintStream(baos);
-                runtime.toString(printStream, ModelObject.Mode.MACHINE);
-                printStream.close();
-                return baos.toString();
-            } catch (IOException | InterruptedException e) {
-                throw new AssertionError(e);
-            }
-        }
-
         return null;
     }
 
