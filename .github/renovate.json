@@ -5,6 +5,9 @@
     ":semanticCommitsDisabled",
     "schedule:earlyMondays"
   ],
+  "ignorePaths": [
+    "src/main/resources/org/**/Dockerfile"
+  ],
   "ignoreDeps": [
     "org.apache.maven:maven-resolver-provider",
     "org.apache.maven:maven-settings-builder",
@@ -23,6 +26,12 @@
     "dependencies"
   ],
   "regexManagers": [
+    {
+      "fileMatch": ["src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java"],
+      "matchStrings": ["selenium/standalone-(firefox|chrome):(?<currentValue>.*?)\""],
+      "depNameTemplate": "org.seleniumhq.selenium:selenium-java",
+      "datasourceTemplate": "maven"
+    },
     {
       "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
       "matchStrings": ["ENV GECKODRIVER_VERSION=(?<currentValue>.*?)\n"],
