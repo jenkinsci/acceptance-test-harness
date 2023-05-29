@@ -43,7 +43,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;

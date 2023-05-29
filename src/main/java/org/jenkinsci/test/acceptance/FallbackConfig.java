@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.apache.commons.exec.OS;
 import org.apache.commons.lang3.StringUtils;

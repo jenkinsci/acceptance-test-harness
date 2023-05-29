@@ -7,8 +7,8 @@ import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 
-import javax.inject.Named;
-import javax.inject.Provider;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
 import java.io.File;
 import java.io.IOException;
 import org.jenkinsci.test.acceptance.docker.DockerImage.Starter;

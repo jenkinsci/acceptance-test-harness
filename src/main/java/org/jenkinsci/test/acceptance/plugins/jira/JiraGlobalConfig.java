@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.jira;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.URL;
 
 import hudson.util.VersionNumber;

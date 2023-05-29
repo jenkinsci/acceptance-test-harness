@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.guice;
 
-import javax.inject.Provider;
+import jakarta.inject.Provider;
 
 /**
  * Keeps track of the current test name.

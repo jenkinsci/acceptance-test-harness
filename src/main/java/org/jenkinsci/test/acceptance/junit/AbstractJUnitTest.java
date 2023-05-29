@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.net.ServerSocket;
