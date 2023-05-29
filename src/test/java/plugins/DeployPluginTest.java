@@ -14,7 +14,7 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.net.URL;

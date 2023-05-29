@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.server;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;

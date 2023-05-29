@@ -6,7 +6,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * Global config page for the mailer plugin.

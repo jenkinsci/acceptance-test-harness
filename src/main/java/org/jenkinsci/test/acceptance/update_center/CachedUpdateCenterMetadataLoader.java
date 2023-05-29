@@ -5,8 +5,8 @@ import com.google.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
