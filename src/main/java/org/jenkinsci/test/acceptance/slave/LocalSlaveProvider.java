@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.slave;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * @author Kohsuke Kawaguchi

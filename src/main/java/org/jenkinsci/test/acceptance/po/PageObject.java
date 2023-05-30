@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;

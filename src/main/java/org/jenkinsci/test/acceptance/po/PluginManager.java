@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;

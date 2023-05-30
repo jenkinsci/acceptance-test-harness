@@ -2,7 +2,7 @@ package plugins;
 
 import java.util.Arrays;
 import java.util.List;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;

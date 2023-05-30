@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
