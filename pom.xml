@@ -803,7 +803,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.387.3</jenkins.version>
+        <jenkins.version>2.401.1</jenkins.version>
       </properties>
     </profile>
   </profiles>
