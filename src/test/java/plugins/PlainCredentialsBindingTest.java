@@ -44,7 +44,7 @@ import org.junit.Test;
 
 import java.net.URISyntaxException;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 

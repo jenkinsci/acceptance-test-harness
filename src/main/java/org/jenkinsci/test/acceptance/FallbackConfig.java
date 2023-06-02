@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.apache.commons.exec.OS;
 import org.apache.commons.lang3.StringUtils;
@@ -125,11 +125,9 @@ public class FallbackConfig extends AbstractModule {
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, buildFirefoxOptions(testName));
         case "firefox-container":
-            // TODO needs to be kept in sync with the selenium dependency
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.6.0", buildFirefoxOptions(testName));
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.9.1", buildFirefoxOptions(testName));
         case "chrome-container":
-            // TODO needs to be kept in sync with the selenium dependency
-            return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.6.0", new ChromeOptions());
+            return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.9.1", new ChromeOptions());
         case "ie":
         case "iexplore":
         case "iexplorer":

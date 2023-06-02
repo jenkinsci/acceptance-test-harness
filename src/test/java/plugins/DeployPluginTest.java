@@ -14,13 +14,13 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins("deploy")

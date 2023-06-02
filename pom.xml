@@ -31,8 +31,8 @@
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
 
-    <jenkins.version>2.404</jenkins.version>
-    <selenium.version>4.9.0</selenium.version>
+    <jenkins.version>2.407</jenkins.version>
+    <selenium.version>4.9.1</selenium.version>
     <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
     <maven-resolver.version>1.6.2</maven-resolver.version>
@@ -83,7 +83,7 @@
     <dependency>
       <groupId>com.cloudbees</groupId>
       <artifactId>extensibility</artifactId>
-      <version>1.6</version>
+      <version>1.7</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -236,11 +236,6 @@
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
-      <artifactId>trilead-ssh2</artifactId>
-      <version>trilead-ssh2-build-217-jenkins-17</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci</groupId>
       <artifactId>version-number</artifactId>
       <version>1.11</version>
     </dependency>
@@ -360,7 +355,7 @@
     <dependency>
       <groupId>jakarta.mail</groupId>
       <artifactId>jakarta.mail-api</artifactId>
-      <version>2.1.1</version>
+      <version>2.1.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -370,7 +365,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.15.0</version>
+        <version>2.15.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -378,7 +373,7 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.92.Final</version>
+        <version>4.1.93.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -392,7 +387,7 @@
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.11.0</version>
+        <version>2.12.0</version>
       </dependency>
       <!-- RequireUpperBoundDeps between Mockito and Selenium -->
       <dependency>

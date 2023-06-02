@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.guice;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 /**
  * {@link Cleaner} at the end of {@link Singleton}.

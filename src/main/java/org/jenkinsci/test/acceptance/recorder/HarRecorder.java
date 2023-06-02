@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;

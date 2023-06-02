@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assume.assumeFalse;
 
 @WithPlugins({"command-launcher", "ownership", "cloudbees-folder"})

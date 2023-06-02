@@ -29,8 +29,8 @@ import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.jenkinsci.test.acceptance.utils.MavenLocalRepository;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;

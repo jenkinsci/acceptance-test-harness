@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.jabber;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.Control;

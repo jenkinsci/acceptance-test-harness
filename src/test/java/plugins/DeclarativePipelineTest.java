@@ -10,12 +10,12 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
-import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 

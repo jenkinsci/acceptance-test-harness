@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.controller;
 import hudson.util.VersionNumber;
 import java.nio.charset.StandardCharsets;
 import java.util.jar.JarFile;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
