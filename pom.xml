@@ -33,7 +33,7 @@
 
     <jenkins.version>2.407</jenkins.version>
     <selenium.version>4.9.1</selenium.version>
-    <guava.version>31.1-jre</guava.version> <!-- aligned with selenium -->
+    <guava.version>32.0.0-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
     <maven-resolver.version>1.6.2</maven-resolver.version>
     <groovy.version>3.0.17</groovy.version>
