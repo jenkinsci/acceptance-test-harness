@@ -21,6 +21,12 @@
       "matchPackageNames": ["com.google.inject:guice"],
       "description": "We focus on Guice 6 until core adapts 7"
     }
+    {
+      "matchPackagePatterns": [
+        "selenium"
+      ],
+      "groupName": "Selenium"
+    },
   ],
   "labels": [
     "dependencies"
