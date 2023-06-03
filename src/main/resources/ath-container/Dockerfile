@@ -78,7 +78,7 @@ RUN echo \
       $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 
 # Ensure that version is fixed
-ARG DOCKER_VERSION=23.0.1
+ARG DOCKER_VERSION=24.0.2
 ARG DOCKER_BUILDX_VERSION=0.10.2
 RUN apt-get update --quiet \
   && apt-get install --yes --no-install-recommends \
