@@ -57,7 +57,6 @@ public class SSHCredentialsTest extends AbstractCredentialsTest {
     }
 
     @Test
-    @WithPlugins({"mock-security-realm"})
     public void managePersonalScopedSSHCredentialsTest() throws MalformedURLException {
         createMockUserAndLogin();
         createUpdateDeleteSSHCredentialsTest(true, null);

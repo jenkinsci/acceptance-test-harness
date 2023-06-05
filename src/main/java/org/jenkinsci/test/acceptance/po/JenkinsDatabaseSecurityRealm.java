@@ -44,7 +44,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
     }
 
     public User signup(String name) {
-        return signup(name, name, name, name + "@mailinator.com");
+        return signup().password(name).fullname(name).email(name + "@mailinator.com", false).signup(name);
     }
 
     public User signup(String name, String pwd, String fullName, String email) {
@@ -70,13 +70,24 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
             return this;
         }
 
-        public Signup email(String mail) {
+        /**
+         * Configure the users email address 
+         * @param mail the users email address
+         * @param required true if the email address is required (the field dependes on the present of {@code mailer} plugin.
+         */
+        public Signup email(String mail, boolean required) {
             try {
                 control(by.input("email")).set(mail);
             } catch (NoSuchElementException ex) {
-                throw new AssertionError("email field requires mailer plugin installed", ex);
+                if (required) {
+                    throw new AssertionError("email field requires mailer plugin installed", ex);
+                }
             }
             return this;
+        }
+
+        public Signup email(String mail) {
+            return email(mail, true);
         }
 
         public User signup(String name) {
