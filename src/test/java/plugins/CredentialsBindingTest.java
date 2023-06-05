@@ -105,7 +105,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     }
 
     @Test
-    @WithPlugins({"credentials-binding@1.17", "mock-security-realm", "authorize-project"})
+    @WithPlugins({"credentials-binding@1.17", "authorize-project"})
     public void pipelineUsernamePersonalCredentials() throws URISyntaxException, IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("usernameSplitPasswordScript"), CRED_ID, CRED_USER, USERNAME_CORRECT_MESSAGE, CRED_PWD, PASSWORD_CORRECT_MESSAGE);
         this.testPersonalCredentials(UserPwdCredential.class, null, script, USERNAME_CORRECT_MESSAGE, PASSWORD_CORRECT_MESSAGE);
@@ -113,35 +113,35 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
 
 
     @Test
-    @WithPlugins({"credentials-binding@1.17", "mock-security-realm", "authorize-project"})
+    @WithPlugins({"credentials-binding@1.17", "authorize-project"})
     public void pipelineUsernameTogetherPersonalCredentials() throws URISyntaxException, IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("usernameTogetherPasswordScript"), CRED_ID, CRED_USER + ":" + CRED_PWD, COMPLETE_PASSWORD_CORRECT_MESSAGE);
         this.testPersonalCredentials(UserPwdCredential.class, null, script, COMPLETE_PASSWORD_CORRECT_MESSAGE);
     }
 
     @Test
-    @WithPlugins({"credentials-binding@1.17", "mock-security-realm", "authorize-project"})
+    @WithPlugins({"credentials-binding@1.17", "authorize-project"})
     public void pipelineSecretTextPersonalCredentials() throws URISyntaxException, IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("secretTextScript"), CRED_ID, AbstractCredentialsTest.SECRET_TEXT, SECRET_TEXT_CORRECT_MESSAGE);
         this.testPersonalCredentials(StringCredentials.class, null, script, SECRET_TEXT_CORRECT_MESSAGE);
     }
 
     @Test
-    @WithPlugins({"credentials-binding@1.17", "mock-security-realm", "authorize-project"})
+    @WithPlugins({"credentials-binding@1.17", "authorize-project"})
     public void pipelineSecretFilePersonalCredentials() throws URISyntaxException, IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("secretFileScript"), CRED_ID, SECRET_FILE_TEXT, SECRET_FILE_CORRECT_MESSAGE);
         this.testPersonalCredentials(FileCredentials.class, SECRET_FILE, script, SECRET_FILE_CORRECT_MESSAGE);
     }
 
     @Test
-    @WithPlugins({"credentials-binding@1.17", "mock-security-realm", "authorize-project"})
+    @WithPlugins({"credentials-binding@1.17", "authorize-project"})
     public void pipelineSecretZipPersonalCredentials() throws URISyntaxException, IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("secretZipFileScript"), CRED_ID, SECRET_ZIP_FILE_TEXT, SECRET_ZIP_FILE_CORRECT_MESSAGE);
         this.testPersonalCredentials(FileCredentials.class, SECRET_ZIP_FILE, script, SECRET_ZIP_FILE_CORRECT_MESSAGE);
     }
 
     @Test
-    @WithPlugins({"credentials-binding@1.17", "mock-security-realm", "authorize-project"})
+    @WithPlugins({"credentials-binding@1.17", "authorize-project"})
     public void pipelineSSHUserPrivateKeyCredentials() throws URISyntaxException, IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), resolveScriptName("sshUserPrivateKeyScript"), CRED_ID, CRED_USER, USERNAME_CORRECT_MESSAGE, "", PASSWORD_CORRECT_MESSAGE, CRED_PWD, PRIVATE_KEY_CORRECT_MESSAGE);
         this.testPersonalCredentials(SshPrivateKeyCredential.class, null, script, USERNAME_CORRECT_MESSAGE, PASSWORD_CORRECT_MESSAGE, PRIVATE_KEY_CORRECT_MESSAGE);

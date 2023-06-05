@@ -23,20 +23,14 @@
  */
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
-import org.jenkinsci.test.acceptance.Matcher;
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.po.Login;
-import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Locale;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AbstractCredentialsTest extends AbstractJUnitTest {
 
@@ -60,20 +54,13 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
 
-        final MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
-        realm.configure(CRED_USER);
+        final JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        realm.allowUsersToSignUp(true);
         security.save();
 
-        //Make sure we have login successfully before continuing
-        assertLogin(Matchers.loggedInAs(CRED_USER));
-    }
-
-    private void assertLogin(Matcher<Login> matcher) {
-        Login login = jenkins.login();
-        login.doLogin(CRED_USER);
-        //Give some time to login to do background processes (found some times when the user page shows you are not logged even if the link is present)
-        elasticSleep(2000);
-        assertThat(login, matcher);
+        // create the user and sign in
+        realm.signup(CRED_USER);
+        jenkins.login().doLogin(CRED_USER);
     }
 
     protected CredentialsPage createCredentialsPage(Boolean userCredentials)  {
@@ -152,6 +139,7 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
     }
 
     private void reTryLogin() {
-        assertLogin(Matchers.loggedInAs(CREATED_USER));
+        jenkins.login().doLogin(CRED_USER);
     }
+
 }
