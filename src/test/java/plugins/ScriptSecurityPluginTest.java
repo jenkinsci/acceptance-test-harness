@@ -28,14 +28,14 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.groovy_postbuild.GroovyPostBuildStep;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
-import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.junit.Before;
 import org.junit.Test;
 
-@WithPlugins({"script-security", "mock-security-realm", "matrix-auth@2.3", "groovy-postbuild"})
+@WithPlugins({"script-security", "matrix-auth@2.3", "groovy-postbuild"})
 public class ScriptSecurityPluginTest extends AbstractJUnitTest {
     /** Admin user. */
     private static final String ADMIN = "admin";
@@ -51,8 +51,14 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
         {
-            MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
-            realm.configure(ADMIN, USER);
+            JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+            realm.allowUsersToSignUp(true);
+            security.save();
+            
+            realm.signup(ADMIN);
+            realm.signup(USER);
+            
+            security.open();
             MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
             mas.addUser(ADMIN).admin();
             mas.addUser(USER).developer();
