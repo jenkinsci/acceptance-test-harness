@@ -468,6 +468,7 @@ and
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <reuseForks>false</reuseForks>
           <systemPropertyVariables>
             <!-- allow large xpaths https://www.oracle.com/java/technologies/javase/11-0-15-relnotes.html#JDK-8270504 -->
             <jdk.xml.xpathExprOpLimit>200</jdk.xml.xpathExprOpLimit>
