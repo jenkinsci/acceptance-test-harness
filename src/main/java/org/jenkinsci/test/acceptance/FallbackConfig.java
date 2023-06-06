@@ -37,8 +37,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -94,11 +92,6 @@ public class FallbackConfig extends AbstractModule {
     /** Browser property to set the default locale. */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
 
-    /**
-     * PhantomJS browser property to set the default locale.
-     */
-    private static final String LANGUAGE_SELECTOR_PHANTOMJS = "phantomjs.page.customHeaders.Accept-Language";
-
     public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
     public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
     public static final String DOM_DISABLE_BEFOREUNLOAD = "dom.disable_beforeunload";
@@ -128,10 +121,6 @@ public class FallbackConfig extends AbstractModule {
             return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.9.1", buildFirefoxOptions(testName));
         case "chrome-container":
             return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.9.1", new ChromeOptions());
-        case "ie":
-        case "iexplore":
-        case "iexplorer":
-            return new InternetExplorerDriver();
         case "chrome":
             Map<String, String> prefs = new HashMap<String, String>();
             prefs.put(LANGUAGE_SELECTOR, "en");
@@ -146,8 +135,6 @@ public class FallbackConfig extends AbstractModule {
             return new ChromeDriver(options);
         case "safari":
             return new SafariDriver();
-        case "htmlunit":
-            return new HtmlUnitDriver(true);
         case "saucelabs":
         case "saucelabs-firefox":
             FirefoxOptions caps = new FirefoxOptions();
