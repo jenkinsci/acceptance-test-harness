@@ -273,7 +273,7 @@ public class FallbackConfig extends AbstractModule {
             // bind to the loopback to prevent exposing the proxy to the world.
             proxyAddr = InetAddress.getLoopbackAddress();
         }
-        BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr);
+        BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr, testName);
         proxy.newHar(testName);
         return ClientUtil.createSeleniumProxy(proxy, proxyAddr);
     }

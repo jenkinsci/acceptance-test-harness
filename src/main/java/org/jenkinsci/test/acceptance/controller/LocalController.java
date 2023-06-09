@@ -14,6 +14,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -22,6 +23,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.MultipleFailureException;
@@ -45,6 +47,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
      */
     @Inject @Named("jenkins.war")
     protected /*final*/ File war;
+
+    @Inject
+    protected ElasticTime time;
 
     /**
      * JENKINS_HOME directory for jenkins.war to be launched.
@@ -200,10 +205,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
         logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile, getLogPrinter());
         logWatcher.start();
         try {
-            LOGGER.info("Waiting for Jenkins to become running in "+ this);
+            LOGGER.info("Waiting for Jenkins (" + getLogId() + ") to become running in "+ this);
             this.logWatcher.waitTillReady();
             onReady();
-            LOGGER.info("Jenkins is running in " + this);
         } catch (Exception e) {
             diagnoseFailedLoad(e);
         }
@@ -212,12 +216,22 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * Called when the Jenkins instance is ready to be used.
      */
-    protected void onReady() throws IOException {}
+    protected void onReady() throws IOException {
+        LOGGER.info("Jenkins (" + getLogId() + ") is running in " + this);
+    }
 
     @Override
-    public void stopNow() throws IOException{
+    public void stopNow() throws IOException {
+        LOGGER.info("Stopping Jenkins (" + getLogId() + ") in " + this);
         process.getProcess().destroy();
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        try {
+            if (!process.getProcess().waitFor(time.seconds(20), TimeUnit.MILLISECONDS)) {
+                throw new IOException("Jenkins (" + getLogId() + ") failed to stop within the allowed timeout");
+            }
+        } catch (InterruptedException e) {
+            throw new IOException("Jenkins (" + getLogId() + ") failed to terminate due to interruption", e);
+        }
     }
 
     @Override

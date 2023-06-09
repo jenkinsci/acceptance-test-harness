@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
@@ -82,6 +83,7 @@ public class WinstoneController extends LocalController {
                 throw new IOException("Unable to parse port from " + s + ". Jenkins did not start.");
             }
         }
+        super.onReady();
     }
 
     @Override
@@ -123,6 +125,13 @@ public class WinstoneController extends LocalController {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getLogId() {
+        // as we will generally start with using a port of `0` we can not use the base classes implementation
+        // as the logging id will change through the lifecycle and not be initialized from the outset
+        return String.format("master%08d",  System.identityHashCode(this));
     }
 
     @Override
