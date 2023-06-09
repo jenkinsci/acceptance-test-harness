@@ -14,6 +14,8 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
 
 /**
@@ -24,6 +26,9 @@ import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
  */
 @GlobalRule
 public class HarRecorder extends TestWatcher {
+
+    private final static Logger LOGGER = Logger.getLogger(HarRecorder.class.getName());
+
     public enum State {
         OFF("off", false, false), FAILURES_ONLY("failuresOnly", true, false), ALWAYS("always", true, true);
 
@@ -72,8 +77,10 @@ public class HarRecorder extends TestWatcher {
      * Create a proxy to record the HAR listening on the specified address
      * @param networkAddress the specific address to bind to, or {@code null} to bind on all addresses
      */
-    public static BrowserUpProxy getProxy(InetAddress networkAddress) {
+    public static BrowserUpProxy getProxy(InetAddress networkAddress, String testName) {
+        LOGGER.log(Level.INFO, "Obtaining proxy for {0}...", testName);
         if (proxy == null) {
+            LOGGER.log(Level.INFO, "Creating new Proxy for {0}...", testName);
             // start the proxy
             proxy = new BrowserUpProxyServer();
             // enable more detailed HAR capture, if desired (see CaptureType for the complete list)
@@ -86,6 +93,10 @@ public class HarRecorder extends TestWatcher {
             proxy.setTrustAllServers(true);
             proxy.setMitmDisabled(true);
             proxy.start(0, networkAddress);
+            LOGGER.log(Level.INFO, "Proxy Created and listening on port {0}", proxy.getPort());
+        }
+        else {
+            LOGGER.log(Level.INFO, "Existing Proxy for {0} returned using port {1}", new Object[] {testName, proxy.getPort()});
         }
         return proxy;
     }
@@ -117,6 +128,7 @@ public class HarRecorder extends TestWatcher {
 
     private void recordHar() {
         if (proxy != null) {
+            LOGGER.log(Level.INFO, "Stopping proxy running on on port {0}", proxy.getPort());
             proxy.stop();
             Har har = proxy.getHar();
             File file = diagnostics.touch("jenkins.har");
