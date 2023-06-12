@@ -126,11 +126,20 @@ public class HarRecorder extends TestWatcher {
         }
     }
 
+    @Override
+    protected void starting(Description description) {
+        initializeHarForTest(description.getDisplayName());
+    }
+
+    private void initializeHarForTest(String name) {
+        if (proxy != null) {
+            proxy.newHar(name);
+        }
+    }
+
     private void recordHar() {
         if (proxy != null) {
-            LOGGER.log(Level.INFO, "Stopping proxy running on on port {0}", proxy.getPort());
-            proxy.stop();
-            Har har = proxy.getHar();
+            Har har = proxy.getHar(true);
             File file = diagnostics.touch("jenkins.har");
             try {
                 har.writeTo(file);
@@ -138,7 +147,6 @@ public class HarRecorder extends TestWatcher {
                 System.err.println("Unable to write HAR file to " + file);
                 e.printStackTrace(System.err);
             }
-            proxy = null;
         }
     }
 }
