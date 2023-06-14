@@ -274,7 +274,6 @@ public class FallbackConfig extends AbstractModule {
             proxyAddr = InetAddress.getLoopbackAddress();
         }
         BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr, testName);
-        proxy.newHar(testName);
         return ClientUtil.createSeleniumProxy(proxy, proxyAddr);
     }
 
