@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.io.IOException;
 import java.net.URL;
-
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;

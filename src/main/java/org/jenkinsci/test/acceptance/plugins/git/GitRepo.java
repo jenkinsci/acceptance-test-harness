@@ -1,5 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.git;
 
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -14,6 +20,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,20 +28,8 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.zeroturnaround.zip.ZipUtil;
-
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
-
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-
-import static java.lang.ProcessBuilder.Redirect.*;
-import static java.nio.file.attribute.PosixFilePermission.*;
-import static org.jenkinsci.test.acceptance.docker.fixtures.GitContainer.*;
+import org.zeroturnaround.zip.ZipUtil;
 
 /**
  * Manipulates git repository locally.
@@ -107,7 +102,7 @@ public class GitRepo implements Closeable {
                 FileUtils.writeStringToFile(ssh,
                         "#!/bin/sh\n" +
                                 "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " \"$@\"", Charset.defaultCharset());
-                Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(OWNER_READ, OWNER_EXECUTE)));
+                Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
             }
             return createTempDir("git");
         } catch (IOException e) {
@@ -136,8 +131,8 @@ public class GitRepo implements Closeable {
         String errorMessage = cmds + " failed";
         try {
             Process p = pb.directory(dir)
-                    .redirectInput(INHERIT)
-                    .redirectError(INHERIT)
+                    .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                    .redirectError(ProcessBuilder.Redirect.INHERIT)
                     .start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -302,7 +297,7 @@ public class GitRepo implements Closeable {
 
             ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
             InputStream in = channelExec.getInputStream();
-            channelExec.setCommand("unzip " + zippedFilename + " -d " + REPO_NAME);
+            channelExec.setCommand("unzip " + zippedFilename + " -d " + GitContainer.REPO_NAME);
             channelExec.connect();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {

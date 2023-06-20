@@ -1,5 +1,12 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+
+import java.util.concurrent.ExecutionException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.external_workspace_manager.ExternalGlobalConfig;
@@ -15,15 +22,6 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.openqa.selenium.By;
-
-import java.util.concurrent.ExecutionException;
-
-import static org.apache.commons.io.FileUtils.listFiles;
-import static org.apache.commons.io.filefilter.FileFilterUtils.directoryFileFilter;
-import static org.apache.commons.io.filefilter.FileFilterUtils.nameFileFilter;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
 
 /**
  * Acceptance tests for External Workspace Manager Plugin.
@@ -138,7 +136,7 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         assertThat(console, containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
         assertThat(console, containsString("[WS-CLEANUP] Deleting project workspace"));
         assertThat(console, containsString("[WS-CLEANUP] done"));
-        assertThat(listFiles(tmp.getRoot(), nameFileFilter("foobar.txt"), directoryFileFilter()), hasSize(0));
+        assertThat(FileUtils.listFiles(tmp.getRoot(), FileFilterUtils.nameFileFilter("foobar.txt"), FileFilterUtils.directoryFileFilter()), hasSize(0));
     }
 
     private void setUpGlobalConfig() {

@@ -1,8 +1,17 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.equalToIgnoringCase;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.junit.Assert.assertEquals;
+
+import jakarta.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
-import jakarta.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet.JobType;
@@ -15,15 +24,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.junit.Assert.assertEquals;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {

@@ -23,15 +23,15 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.configuration_as_code.JcascManage;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins("configuration-as-code")
 public class ConfigurationAsCodeTest extends AbstractJUnitTest {

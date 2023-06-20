@@ -23,6 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
+
+import edu.umd.cs.findbugs.annotations.NonNull;
+import java.util.List;
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -30,11 +35,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import edu.umd.cs.findbugs.annotations.NonNull;
-import java.util.List;
-
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
 
 /**
  * Result of form field validation.

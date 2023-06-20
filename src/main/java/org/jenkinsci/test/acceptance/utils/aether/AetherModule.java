@@ -5,6 +5,11 @@ import com.cloudbees.sdk.extensibility.ExtensionModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.maven.model.building.DefaultModelBuilderFactory;
 import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.repository.internal.DefaultArtifactDescriptorReader;
@@ -28,12 +33,6 @@ import org.eclipse.aether.transfer.TransferEvent;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.jenkinsci.test.acceptance.utils.MavenLocalRepository;
-
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Hook up Aether resolver.

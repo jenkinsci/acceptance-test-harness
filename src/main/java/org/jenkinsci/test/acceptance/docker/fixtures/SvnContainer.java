@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
-import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestException;
 
 /**
  * Runs stock svn  container.

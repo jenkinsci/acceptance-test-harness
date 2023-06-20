@@ -26,6 +26,7 @@ package plugins;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.*;
 
+import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
@@ -41,8 +42,6 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.google.inject.Inject;
 import org.junit.experimental.categories.Category;
 
 @WithPlugins("docker-build-step")

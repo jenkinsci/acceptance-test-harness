@@ -1,5 +1,10 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.config_file_provider.ConfigFileProvider;
@@ -15,12 +20,6 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-
-import org.apache.commons.lang3.SystemUtils;
 import org.openqa.selenium.Alert;
 
 /**

@@ -24,18 +24,16 @@
 
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
 import java.time.Duration;
-
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
-
-import com.google.inject.Injector;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {

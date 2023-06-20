@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.utils;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -30,8 +31,6 @@ import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.logging.Logger;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
 
 public class IOUtil {
 

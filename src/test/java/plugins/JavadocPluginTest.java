@@ -1,5 +1,10 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.javadoc.JavadocPublisher;
@@ -12,11 +17,6 @@ import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchFrameException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins("javadoc")
 public class JavadocPluginTest extends AbstractJUnitTest {

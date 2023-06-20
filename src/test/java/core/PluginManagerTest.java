@@ -23,6 +23,9 @@
  */
 package core;
 
+import static org.junit.Assert.assertThrows;
+
+import java.util.concurrent.ExecutionException;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
@@ -31,10 +34,6 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.Assert.assertThrows;
 
 public class PluginManagerTest extends AbstractJUnitTest {
 

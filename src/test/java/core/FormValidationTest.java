@@ -23,16 +23,16 @@
  */
 package core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.jenkinsci.test.acceptance.po.FormValidation.*;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.jenkinsci.test.acceptance.po.FormValidation.*;
 
 public class FormValidationTest extends AbstractJUnitTest {
 

@@ -23,7 +23,11 @@
  */
 package core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import com.google.inject.Inject;
+import java.util.concurrent.ExecutionException;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -32,11 +36,6 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.concurrent.ExecutionException;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * @author Orjan Percy <orjan.percy@sonymobile.com>

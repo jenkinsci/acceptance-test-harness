@@ -1,20 +1,18 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import java.io.IOException;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import java.io.IOException;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Indicates the native commands necessary to run tests.
@@ -25,8 +23,8 @@ import static java.lang.annotation.RetentionPolicy.*;
  * @author Kohsuke Kawaguchi
  * @deprecated Refactor to use containers for any kind of expected setup
  */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
 @Deprecated

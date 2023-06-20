@@ -1,5 +1,10 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+
+import java.util.List;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.audit_trail.AuditTrailLogger;
@@ -8,12 +13,6 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveController;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
-
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins("audit-trail")
 public class AuditTrailPluginTest extends AbstractJUnitTest {

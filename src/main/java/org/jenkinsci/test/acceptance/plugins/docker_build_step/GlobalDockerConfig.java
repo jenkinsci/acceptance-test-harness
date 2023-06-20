@@ -26,7 +26,6 @@ package org.jenkinsci.test.acceptance.plugins.docker_build_step;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import java.util.regex.Pattern;
-
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 

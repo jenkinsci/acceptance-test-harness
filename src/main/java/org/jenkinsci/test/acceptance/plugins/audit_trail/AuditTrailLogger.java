@@ -23,17 +23,16 @@
  */
 package org.jenkinsci.test.acceptance.plugins.audit_trail;
 
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.JenkinsLogger;
-import org.openqa.selenium.WebElement;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.JenkinsLogger;
+import org.openqa.selenium.WebElement;
 
 abstract public class AuditTrailLogger extends JenkinsLogger {
 

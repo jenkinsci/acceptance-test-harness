@@ -1,5 +1,7 @@
 package plugins;
 
+import static org.junit.Assert.assertFalse;
+
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -8,8 +10,6 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
 
 @WithPlugins({"favorite"})
 public class FavoriteTest extends AbstractJUnitTest {

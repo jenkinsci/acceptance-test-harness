@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URL;
-
-import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Injector;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 

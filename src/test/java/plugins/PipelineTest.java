@@ -23,6 +23,10 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.junit.Assert.assertNotNull;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.AbstractPipelineTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -32,10 +36,6 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests a complete pipeline flow:

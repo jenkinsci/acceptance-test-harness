@@ -1,20 +1,24 @@
 package core;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.plugins.credentials.*;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
-import org.junit.Test;
-import org.openqa.selenium.By;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
+import org.jenkinsci.test.acceptance.plugins.credentials.Domain;
+import org.jenkinsci.test.acceptance.plugins.credentials.DomainPage;
+import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
+import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
+import org.junit.Test;
+import org.openqa.selenium.By;
 
 /**
  * @author Vivek Pandey

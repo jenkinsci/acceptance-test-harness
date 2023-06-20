@@ -25,7 +25,6 @@ package org.jenkinsci.test.acceptance.plugins.scriptler;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jenkinsci.test.acceptance.po.Node;
 
 public class ScriptResult {

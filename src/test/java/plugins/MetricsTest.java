@@ -23,11 +23,8 @@
  */
 package plugins;
 
-import org.jenkinsci.test.acceptance.AbstractPipelineTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.junit.Test;
-import org.openqa.selenium.TimeoutException;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -35,9 +32,11 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import org.jenkinsci.test.acceptance.AbstractPipelineTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.junit.Test;
+import org.openqa.selenium.TimeoutException;
 
 public class MetricsTest extends AbstractPipelineTest {
 

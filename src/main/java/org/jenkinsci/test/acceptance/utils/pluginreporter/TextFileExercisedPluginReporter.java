@@ -27,7 +27,6 @@ package org.jenkinsci.test.acceptance.utils.pluginreporter;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
-
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;

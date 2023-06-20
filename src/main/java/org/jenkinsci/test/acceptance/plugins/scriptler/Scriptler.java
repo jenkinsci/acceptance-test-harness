@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.scriptler;
 
 import java.util.Map;
-
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;

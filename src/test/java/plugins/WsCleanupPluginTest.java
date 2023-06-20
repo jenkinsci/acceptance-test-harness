@@ -1,15 +1,15 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.po.Workspace.workspaceContains;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ws_cleanup.WsCleanup;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.po.Workspace.workspaceContains;
 
 @WithPlugins("ws-cleanup")
 public class WsCleanupPluginTest extends AbstractJUnitTest {

@@ -31,11 +31,9 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.compress_artifacts.CompressingArtifactManager;
@@ -49,6 +47,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
 @Since("1.532") // No artifact managers before 1.532
 @WithPlugins("compress-artifacts")

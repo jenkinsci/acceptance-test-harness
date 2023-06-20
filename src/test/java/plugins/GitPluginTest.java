@@ -23,6 +23,14 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+
+import jakarta.inject.Inject;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
@@ -38,15 +46,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
-
-import jakarta.inject.Inject;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 
 @WithDocker
 @Category(DockerTest.class)

@@ -1,7 +1,10 @@
 package org.jenkinsci.test.acceptance.update_center;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.inject.Injector;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.util.VersionNumber;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -17,19 +20,12 @@ import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.inject.Injector;
 
 /**
  * Databinding for installable plugin in UC.

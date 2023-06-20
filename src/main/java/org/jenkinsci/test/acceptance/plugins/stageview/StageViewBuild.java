@@ -1,8 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.stageview;
 
-import org.openqa.selenium.WebElement;
-
 import java.util.List;
+import org.openqa.selenium.WebElement;
 
 /**
  * Representation of buildjobs done. Rows in the table.

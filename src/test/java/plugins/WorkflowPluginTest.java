@@ -24,10 +24,15 @@
 
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
+
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -62,12 +67,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
 
 @WithPlugins("command-launcher")
 public class WorkflowPluginTest extends AbstractJUnitTest {

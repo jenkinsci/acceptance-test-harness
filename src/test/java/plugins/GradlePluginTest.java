@@ -23,19 +23,18 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.containsString;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
+import org.jenkinsci.test.acceptance.plugins.gradle.GradleTask;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleWrapper;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
-import static org.jenkinsci.test.acceptance.Matchers.containsString;
-import static org.jenkinsci.test.acceptance.plugins.gradle.GradleTask.HELLO;
-import static org.jenkinsci.test.acceptance.plugins.gradle.GradleTask.SECOND;
 
 @WithPlugins("gradle")
 public class GradlePluginTest extends AbstractJUnitTest {
@@ -77,13 +76,13 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final String location = "test";
         GradleWrapper.downloadWrapperFiles(job);
         GradleWrapper.moveWrapperFiles(job, location);
-        GradleWrapper.addWrapperStep(job, location, HELLO.getName());
+        GradleWrapper.addWrapperStep(job, location, GradleTask.HELLO.getName());
 
         job.save();
         final Build build = job.startBuild().shouldSucceed();
 
         assertThat(build.getConsole(), containsString(SUCCESSFUL_BUILD));
-        assertThat(build.getConsole(), containsString(HELLO.getPrintln()));
+        assertThat(build.getConsole(), containsString(GradleTask.HELLO.getPrintln()));
     }
 
     @Test
@@ -116,7 +115,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     @Test @WithPlugins("workflow-aggregator")
     public void run_gradle_pipeline_basic() {
         final Build build = setUpAndRunPipelineBuild("/gradle_plugin/pipeline_test_multiple_tasks.txt", GRADLE_SCRIPT);
-        assertThat(build.getConsole(), containsString(SECOND.getPrintln()));
+        assertThat(build.getConsole(), containsString(GradleTask.SECOND.getPrintln()));
     }
 
     /**

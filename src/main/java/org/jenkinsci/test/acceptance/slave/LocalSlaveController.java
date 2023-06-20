@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.slave;
 
+import java.io.IOException;
+import java.util.concurrent.Future;
 import org.apache.http.concurrent.BasicFuture;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
-
-import java.io.IOException;
-import java.util.concurrent.Future;
 
 /**
  * Launches slaves locally on the same box as the Jenkins master.

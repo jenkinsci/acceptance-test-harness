@@ -1,17 +1,10 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
+import static org.jenkinsci.test.acceptance.po.PageObject.*;
+
 import hudson.plugins.jira.soap.JiraSoapService;
 import hudson.plugins.jira.soap.RemoteComment;
 import hudson.plugins.jira.soap.RemoteIssue;
-
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.jira.JIRA;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
-
-import javax.xml.rpc.ServiceException;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -21,8 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import javax.xml.rpc.ServiceException;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.jira.JIRA;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 
 /**
  * @author Kohsuke Kawaguchi

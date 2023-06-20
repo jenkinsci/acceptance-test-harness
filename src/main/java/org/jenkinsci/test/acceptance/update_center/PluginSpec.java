@@ -24,11 +24,9 @@
 package org.jenkinsci.test.acceptance.update_center;
 
 import com.google.common.base.Splitter;
-import hudson.util.VersionNumber;
-
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
-
+import hudson.util.VersionNumber;
 import java.util.Iterator;
 import java.util.Objects;
 

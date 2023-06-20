@@ -23,13 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import hudson.util.VersionNumber;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.concurrent.Callable;
-
-import hudson.util.VersionNumber;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;

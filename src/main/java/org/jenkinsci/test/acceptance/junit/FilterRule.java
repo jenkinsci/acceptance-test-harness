@@ -23,18 +23,16 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
+import com.google.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import com.google.inject.Inject;
 
 /**
  * Test rule to filter tests to run.

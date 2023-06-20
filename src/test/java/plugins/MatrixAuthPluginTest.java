@@ -1,5 +1,8 @@
 package plugins;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
@@ -10,10 +13,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.junit.Test;
-
-import static org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixRow.*;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -46,7 +45,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
             a.admin();
 
             MatrixRow bob = mas.addUser("bob");
-            bob.on(OVERALL_READ);
+            bob.on(MatrixRow.OVERALL_READ);
         }
         sc.save();
 
@@ -96,7 +95,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
             a.admin();
 
             MatrixRow bob = mas.addUser("bob");
-            bob.on(OVERALL_READ);
+            bob.on(MatrixRow.OVERALL_READ);
         }
         sc.save();
 
@@ -122,7 +121,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
             ProjectMatrixProperty p = new ProjectMatrixProperty(j);
             p.enable.check();
             MatrixRow bob = p.addUser("bob");
-            bob.on(ITEM_READ);
+            bob.on(MatrixRow.ITEM_READ);
         }
         j.save();
 

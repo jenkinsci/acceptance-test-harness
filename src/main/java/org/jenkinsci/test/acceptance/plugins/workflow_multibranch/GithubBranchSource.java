@@ -1,14 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.workflow_multibranch;
 
+import java.time.Duration;
+import java.util.concurrent.Callable;
+import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSharedLibrary;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
-import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSharedLibrary;
 import org.openqa.selenium.support.ui.Select;
-
-import java.time.Duration;
-import java.util.concurrent.Callable;
 
 /**
  * Base type for {@link PageAreaImpl} for Github Branch Source.

@@ -23,8 +23,8 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.NoSuchElementException;
 import hudson.util.VersionNumber;
+import org.openqa.selenium.NoSuchElementException;
 
 @Describable({"Jenkins’ own user database", "Jenkins’s own user database"})
 public class JenkinsDatabaseSecurityRealm extends SecurityRealm {

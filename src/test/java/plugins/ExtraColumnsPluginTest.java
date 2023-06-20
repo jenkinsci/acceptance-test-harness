@@ -1,7 +1,11 @@
 package plugins;
 
-import java.util.List;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
+import java.util.List;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.extra_columns.LastConsoleColumn;
@@ -10,11 +14,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
 
 /**
  * Acceptance tests for the Extra Columns plugin.

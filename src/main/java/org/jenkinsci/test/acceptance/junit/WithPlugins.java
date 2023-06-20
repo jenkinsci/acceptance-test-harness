@@ -1,8 +1,16 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.google.inject.name.Named;
+import hudson.util.VersionNumber;
+import java.io.IOException;
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,8 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import com.google.common.annotations.VisibleForTesting;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Plugin;
 import org.jenkinsci.test.acceptance.po.PluginManager;
@@ -23,16 +29,6 @@ import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.name.Named;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-
-import hudson.util.VersionNumber;
-import java.io.IOException;
 
 /**
  * Indicates that a test requires the presence of the specified plugins.
@@ -63,8 +59,8 @@ import java.io.IOException;
  *
  * @author Kohsuke Kawaguchi
  */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
 @RuleAnnotation(value=WithPlugins.RuleImpl.class, priority=WithPlugins.PRIORITY)

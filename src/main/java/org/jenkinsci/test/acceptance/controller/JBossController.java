@@ -4,20 +4,17 @@ import com.cloudbees.sdk.extensibility.Extension;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
-
-import org.codehaus.plexus.util.FileUtils;
-import org.jenkinsci.test.acceptance.utils.IOUtil;
-import org.jenkinsci.utils.process.CommandBuilder;
-import org.jenkinsci.utils.process.ProcessInputStream;
-
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
+import org.codehaus.plexus.util.FileUtils;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.jenkinsci.utils.process.ProcessInputStream;
 
 /**
  * Launches Jenkins in JBoss.

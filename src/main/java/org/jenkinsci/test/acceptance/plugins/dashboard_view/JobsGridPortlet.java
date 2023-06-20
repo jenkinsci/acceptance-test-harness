@@ -1,15 +1,14 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * The basic jobs grid portlet shipped with the dashboard view plugin.

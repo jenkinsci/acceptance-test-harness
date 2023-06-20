@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.util.Objects;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapGroupMembershipStrategy;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * SecurityRealm for ldap plugin.
@@ -74,7 +73,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
             }
         });
         radio.click();
-        return newInstance(type, this.context, requireNonNull(getPath(radio)));
+        return newInstance(type, this.context, Objects.requireNonNull(getPath(radio)));
     }
 
     /**

@@ -23,9 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.maven;
 
+import com.google.inject.Injector;
 import java.net.URL;
+import java.util.Objects;
 import java.util.function.Consumer;
-
 import org.jenkinsci.test.acceptance.po.BatchCommandBuildStep;
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Control;
@@ -35,10 +36,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.openqa.selenium.WebElement;
-
-import com.google.inject.Injector;
-
-import static java.util.Objects.requireNonNull;
 
 @Describable("hudson.maven.MavenModuleSet")
 public class MavenModuleSet extends Job {
@@ -105,7 +102,7 @@ public class MavenModuleSet extends Job {
             }
         });
         checkbox.click();
-        T bs = newInstance(type, this, requireNonNull(getPath(checkbox)));
+        T bs = newInstance(type, this, Objects.requireNonNull(getPath(checkbox)));
 
         publishers.add(bs);
         return bs;

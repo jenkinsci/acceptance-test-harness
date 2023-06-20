@@ -23,10 +23,9 @@
  */
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
+import java.util.List;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
 
 @Describable("Invoke Gradle script")
 public class GradleStep extends AbstractStep implements BuildStep {

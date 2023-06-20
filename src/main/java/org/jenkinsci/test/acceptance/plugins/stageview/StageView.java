@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.stageview;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Basic container for the stageview implementation. The stageview is the graphical
