@@ -38,7 +38,7 @@ if (needSplittingFromWorkspace) {
 def axes = [
   jenkinsVersions: ['lts', 'latest'],
   platforms: ['linux'],
-  jdks: [11],
+  jdks: ['11', '17'],
   browsers: ['firefox'],
 ]
 
