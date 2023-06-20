@@ -33,6 +33,7 @@ import org.jenkinsci.test.acceptance.plugins.scriptler.Scriptler;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
+@Ignore("Needs adapting to https://github.com/jenkinsci/scriptler-plugin/pull/59, see https://github.com/jenkinsci/acceptance-test-harness/issues/1239")
 @WithPlugins("scriptler")
 public class ScriptlerPluginTest extends AbstractJUnitTest {
 

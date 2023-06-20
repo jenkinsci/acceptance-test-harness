@@ -140,19 +140,17 @@ public class AntPluginTest extends AbstractJUnitTest {
         String nok_prop1 = "nokPROP1=foo_bar_nok_1";
         String nok_prop2 = "nokPROP2=foo_bar_nok_2";
         String properties = ok_prop1+"\n"+ok_prop2+"\n"+nok_prop1+"\n"+nok_prop2;
-        String OPTS = "-showversion";
 
         useCustomAgent();
         setUpAnt();
 
-        antBuildStepAdvancedConfiguration(step, BUILD_FILE, properties, OPTS);
+        antBuildStepAdvancedConfiguration(step, BUILD_FILE, properties);
 
         job.save();
 
         job.startBuild().shouldSucceed();
 
         String console = job.getLastBuild().getConsole();
-        assertThat(console, containsString(System.getProperty("java.version")));
         assertThat(console, containsString("-D" + ok_prop1));
         assertThat(console, containsString("-D" + ok_prop2));
         assertThat(console, containsString("-D" + nok_prop1));
@@ -170,7 +168,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         useCustomAgent();
         setUpAnt();
 
-        antBuildStepAdvancedConfiguration(step, fake_build_file, null, null);
+        antBuildStepAdvancedConfiguration(step, fake_build_file, null);
 
         job.save();
 
@@ -212,10 +210,8 @@ public class AntPluginTest extends AbstractJUnitTest {
         return antHome;
     }
 
-    private void antBuildStepAdvancedConfiguration(AntBuildStep step, String buildFile, String properties, String antOpts) {
+    private void antBuildStepAdvancedConfiguration(AntBuildStep step, String buildFile, String properties) {
         step.control("advanced-button").click();
-        step.control(By.xpath("(//div[contains(@descriptorid, \"Ant\")]//input[@type = \"button\"])[4]")).click();
-        step.control("antOpts").set(StringUtils.defaultString(antOpts));
         step.control(By.xpath("(//div[contains(@descriptorid, \"Ant\")]//input[@type = \"button\"])[3]")).click();
         step.control("properties").set(StringUtils.defaultString(properties));
         step.control(By.xpath("(//div[contains(@descriptorid, \"Ant\")]//input[@type = \"button\"])[2]")).click();

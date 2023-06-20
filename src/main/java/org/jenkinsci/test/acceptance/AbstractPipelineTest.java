@@ -96,6 +96,6 @@ public class AbstractPipelineTest extends AbstractJUnitTest {
             }
         }
 
-        assertThat(driver, hasContent("com.cloudbees.manticore"));
+        assertThat(driver, hasContent("io.jenkins.tools"));
     }
 }
