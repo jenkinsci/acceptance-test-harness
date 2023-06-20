@@ -99,7 +99,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     @Test
     public void use_custom_groovy_version() {
-        GroovyInstallation.installGroovy(jenkins, "groovy-4.0.11", "Groovy 4.0.11");
+        GroovyInstallation.installGroovy(jenkins, "groovy-4.0.12", "Groovy 4.0.12");
 
         configureJob();
 
