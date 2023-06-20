@@ -33,7 +33,7 @@ public class GroovyInstallation extends ToolInstallation {
     public static final String DEFAULT_GROOVY_ID = "default_Groovy";
 
     public static void installSomeGroovy(Jenkins jenkins) {
-        installGroovy(jenkins, DEFAULT_GROOVY_ID, "4.0.11");
+        installGroovy(jenkins, DEFAULT_GROOVY_ID, "4.0.12");
     }
 
     public static void installGroovy(Jenkins jenkins, String name, String version) {

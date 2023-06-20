@@ -104,12 +104,12 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         configureJob();
 
         final GroovyStep step = job.addBuildStep(GroovyStep.class);
-        step.version.select("groovy-4.0.11");
+        step.version.select("groovy-4.0.12");
         step.script(
                 "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
         );
         job.save();
-        shouldReport("version: 4.0.11");
+        shouldReport("version: 4.0.12");
     }
 
     @Test @Native("groovy")
