@@ -1,6 +1,12 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertTrue;
+
 import com.google.inject.Inject;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
@@ -12,12 +18,6 @@ import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
 import org.jenkinsci.test.acceptance.po.*;
 import org.junit.Before;
 import org.junit.Test;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertTrue;
-
-import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 
 @SuppressWarnings("CdiInjectionPointsInspection")

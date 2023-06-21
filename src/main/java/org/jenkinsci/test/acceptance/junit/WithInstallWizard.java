@@ -1,22 +1,18 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+import com.google.inject.Inject;
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import com.google.inject.Inject;
 
 /**
  * Enables the install wizard to run the test. This is only possible for LocalControllers. Otherwise the test is
@@ -25,8 +21,8 @@ import com.google.inject.Inject;
  * Note the Jenkins will not have form-element-path installed automatically preventing {@link org.jenkinsci.test.acceptance.po.Control}
  * and {@link org.jenkinsci.test.acceptance.po.PageArea} to use "path" based navigation.
  */
-@Retention(RUNTIME)
-@Target({ TYPE, METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.TYPE, ElementType.METHOD })
 @Inherited
 @Documented
 @RuleAnnotation(value = WithInstallWizard.RuleImpl.class, priority = -10) // Run before Jenkins startup

@@ -1,12 +1,18 @@
 package plugins;
 
-import com.google.inject.Inject;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.BuildHistory.containsBuildOf;
 
+import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.LabelParameter;
 import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
@@ -15,16 +21,8 @@ import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.WebElement;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.BuildHistory.containsBuildOf;
 
 @WithPlugins({"command-launcher", "nodelabelparameter"})
 public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
@@ -44,7 +42,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.addParameter(NodeParameter.class).setName("slavename");
         j.save();
 
-        Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
+        Build b = j.startBuild(Collections.singletonMap("slavename", s.getName())).shouldSucceed();
         assertThat(b.getNode(), is(s));
     }
 
@@ -70,7 +68,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         assertThat(availableNodes.get(0).getText(), is("built-in"));
         assertThat(availableNodes.get(1).getText(), is(s.getName()));
-        Build b = j.startBuild(singletonMap("slavename", s.getName())).shouldSucceed();
+        Build b = j.startBuild(Collections.singletonMap("slavename", s.getName())).shouldSucceed();
         assertThat(s, is(b.getNode()));
     }
 
@@ -85,10 +83,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.addParameter(LabelParameter.class).setName("slavelabel");
         j.save();
 
-        Build b = j.startBuild(singletonMap("slavelabel", s1.getName())).shouldSucceed();
+        Build b = j.startBuild(Collections.singletonMap("slavelabel", s1.getName())).shouldSucceed();
         assertThat(b.getNode(), is(s1));
 
-        b = j.startBuild(singletonMap("slavelabel", String.format("!%s && !%s", s1.getName(), s2.getName()))).shouldSucceed();
+        b = j.startBuild(Collections.singletonMap("slavelabel", String.format("!%s && !%s", s1.getName(), s2.getName()))).shouldSucceed();
         assertThat(b.getNode(), is((Node) jenkins));
     }
 
@@ -106,7 +104,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.concurrentBuild.check();
         j.save();
 
-        j.startBuild(singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldSucceed();
+        j.startBuild(Collections.singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldSucceed();
 
         assertThat(j.getNextBuildNumber(), is(3));
 
@@ -141,7 +139,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s.isOffline(), is(true));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
-        Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
+        Build b = j.scheduleBuild(Collections.singletonMap("slavename", s.getName()));
         elasticSleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
         shouldBeTriggeredWithoutOnlineNode(b, s.getName());
 
@@ -180,7 +178,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s.isOffline(), is(true));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
-        Build b = j.scheduleBuild(singletonMap("slavename", s.getName()));
+        Build b = j.scheduleBuild(Collections.singletonMap("slavename", s.getName()));
         elasticSleep(3000);    // TODO: not the best way to wait for the scheduled job to go through the queue, but a bit of wait is needed
         shouldBeTriggeredWithoutValidOnlineNode(b, s.getName());
     }
@@ -217,7 +215,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s1.isOnline(), is(true));
 
         //select both slaves for this build
-        Build b = j.startBuild(singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldSucceed();
+        Build b = j.startBuild(Collections.singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldSucceed();
 
         //ensure that the build on the online slave has been done
         assertThat(j.getLastBuild().waitUntilFinished().getNumber(), is(equalTo(1)));
@@ -269,7 +267,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s1.isOnline(), is(true));
 
         //select both slaves for this build
-        Build b = j.startBuild(singletonMap("slavename", s1.getName()));
+        Build b = j.startBuild(Collections.singletonMap("slavename", s1.getName()));
 
         // wait for the build on slave 1 to finish
         b.waitUntilFinished();
@@ -278,7 +276,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s1.getBuildHistory().getBuildsOf(j), contains(b));
 
         //use scheduleBuild instead of startBuild to avoid a timeout waiting for Build being started
-        b = j.scheduleBuild(singletonMap("slavename", s2.getName()));
+        b = j.scheduleBuild(Collections.singletonMap("slavename", s2.getName()));
 
         waitFor(by.href("/queue/cancelItem?id=2")); // shown in queue
         elasticSleep(10000); // after some time
@@ -317,7 +315,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.save();
 
         // select both slaves for this build
-        Build build = j.startBuild(singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldFail();
+        Build build = j.startBuild(Collections.singletonMap("slavename", s1.getName() + "," + s2.getName())).shouldFail();
 
         // verify failed result prevents the job to be built on further nodes.
         // As the nodes get random names and the selected nodes are utilized in alphabetical order
@@ -374,14 +372,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.save();
 
         // select both slaves for this build
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
+        j.startBuild(Collections.singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         // verify failed result prevents the job to be built on further nodes.
         // As the nodes get random names and the selected nodes are utilized in alphabetical order
         // of their names, the first build will not necessarily be done on s1. Thus, it can only
         // be verified that the job has been built on one of the slaves.
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
+        j.startBuild(Collections.singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         assertThat(j.getNextBuildNumber(), is(2));
@@ -425,14 +423,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         j.save();
 
         // select both slaves for this build
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
+        j.startBuild(Collections.singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         // verify unstable result prevents the job to be built on further nodes.
         // As the nodes get random names and the selected nodes are utilized in alphabetical order
         // of their names, the first build will not necessarily be done on s1. Thus, it can only
         // be verified that the job has been built on one of the slaves.
-        j.startBuild(singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
+        j.startBuild(Collections.singletonMap("slavename", slaves.get(0).getName() + "," + slaves.get(1).getName()))
                 .shouldFail();
 
         assertThat(j.getNextBuildNumber(), is(2));
@@ -474,7 +472,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat("Amount of selectable nodes", slaves.size(), is(2));
         assertThat(slaves, containsInAnyOrder(s1.getName(), s2.getName()));
 
-        j.startBuild(singletonMap("slavename", s1.getName() + "," + s2.getName())).waitUntilFinished();
+        j.startBuild(Collections.singletonMap("slavename", s1.getName() + "," + s2.getName())).waitUntilFinished();
 
         assertThat(s1.getBuildHistory(), containsBuildOf(j));
         assertThat(s2.getBuildHistory(), containsBuildOf(j));

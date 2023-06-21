@@ -23,6 +23,11 @@
  */
 package org.jenkinsci.test.acceptance;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
+import java.io.IOException;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Folder;
@@ -31,12 +36,6 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchFrameException;
-
-import java.io.IOException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
 public class AbstractPipelineTest extends AbstractJUnitTest {

@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.maven;
 
 import java.net.URL;
-
 import org.jenkinsci.test.acceptance.po.Build;
 
 public class MavenModuleBuild extends Build {

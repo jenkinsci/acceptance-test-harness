@@ -1,6 +1,8 @@
 package plugins;
 
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
@@ -13,9 +15,6 @@ import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.io.IOException;
-import java.util.regex.Pattern;
 
 @WithPlugins("mailer")
 @Category(DockerTest.class)

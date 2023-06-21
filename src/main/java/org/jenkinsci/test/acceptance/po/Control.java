@@ -1,20 +1,16 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.time.Duration;
-
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.Nullable;
-
+import java.time.Duration;
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
-
-import com.google.inject.Injector;
-
-import org.jenkinsci.test.acceptance.junit.Resource;
 
 /**
  * Wraps a specific form element in {@link PageAreaImpl} to provide operations.

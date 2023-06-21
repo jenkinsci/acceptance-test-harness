@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
-import com.google.inject.Injector;
 
 /**
  * @author Kohsuke Kawaguchi

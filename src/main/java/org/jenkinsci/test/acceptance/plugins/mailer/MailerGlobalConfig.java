@@ -2,11 +2,10 @@ package org.jenkinsci.test.acceptance.plugins.mailer;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
+import jakarta.inject.Inject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-
-import jakarta.inject.Inject;
 
 /**
  * Global config page for the mailer plugin.

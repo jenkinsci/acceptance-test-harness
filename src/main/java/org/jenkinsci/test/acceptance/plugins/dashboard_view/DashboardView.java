@@ -1,6 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view;
 
 import com.google.inject.Injector;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.ColumnsArea;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.DashboardPortlets;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.controls.JobFiltersArea;
@@ -15,12 +20,6 @@ import org.jenkinsci.test.acceptance.po.View;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * PageObject of DashboardView Configuration Page.

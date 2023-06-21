@@ -1,27 +1,25 @@
 package org.jenkinsci.test.acceptance;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import hudson.util.VersionNumber;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.regex.Pattern;
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Login;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.User;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
-import hudson.util.VersionNumber;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * Hamcrest matchers.

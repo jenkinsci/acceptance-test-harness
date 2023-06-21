@@ -1,7 +1,12 @@
 package plugins;
 
-import com.google.inject.Inject;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
+import com.google.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JabberContainer;
@@ -11,21 +16,14 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig.AdvancedConfig;
-import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig.MUCConfig;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig.EnabledConfig;
+import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig.MUCConfig;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberPublisher;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberPublisher.Publishers;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 
 /**
  * This test case is set to @Ignore because the Jabber Plugin is not able to connect to conference.localhost

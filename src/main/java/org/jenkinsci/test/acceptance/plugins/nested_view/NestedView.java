@@ -1,12 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.nested_view;
 
+import com.google.inject.Injector;
 import java.net.URL;
-
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.po.ViewsMixIn;
-
-import com.google.inject.Injector;
 
 /**
  * @author Kohsuke Kawaguchi

@@ -1,15 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
-
-import com.google.inject.Injector;
 import org.openqa.selenium.WebElement;
 
 /**

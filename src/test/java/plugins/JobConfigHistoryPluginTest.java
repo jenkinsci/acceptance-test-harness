@@ -23,12 +23,13 @@
  */
 package plugins;
 
-import java.util.List;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
 
+import java.util.List;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.junit.Ignore;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.job_config_history.JobConfigHistory;
 import org.jenkinsci.test.acceptance.plugins.job_config_history.JobConfigHistory.Change;
@@ -36,11 +37,9 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
+import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("jobConfigHistory")
 @Ignore("Flaky see issue 1052") //https://github.com/jenkinsci/acceptance-test-harness/issues/1052

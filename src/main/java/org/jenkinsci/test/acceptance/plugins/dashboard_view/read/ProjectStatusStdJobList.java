@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view.read;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Provides some read accesses to the std job list in a dashboard view.

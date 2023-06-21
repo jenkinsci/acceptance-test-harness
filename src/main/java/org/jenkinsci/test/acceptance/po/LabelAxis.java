@@ -24,4 +24,3 @@ public class LabelAxis extends Axis {
         check(checkBox, true);
     }
 }
-

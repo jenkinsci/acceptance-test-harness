@@ -2,7 +2,14 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeMap;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.AssumptionViolatedException;
@@ -13,15 +20,6 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.jvnet.hudson.annotation_indexer.Index;
 import org.openqa.selenium.WebDriver;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * Runs Guice container that houses {@link JenkinsController}, {@link WebDriver}, and so on.

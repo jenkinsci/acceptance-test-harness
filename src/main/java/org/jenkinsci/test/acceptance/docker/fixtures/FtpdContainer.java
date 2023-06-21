@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
-
-import java.io.FileInputStream;
-import java.io.IOException;
 
 /**
  * Represents a server with FTPD.

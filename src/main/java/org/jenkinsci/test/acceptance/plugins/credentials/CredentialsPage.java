@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.jenkinsci.test.acceptance.po.*;
-
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import org.openqa.selenium.WebDriver;
 
 public class CredentialsPage extends ConfigurablePageObject {

@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Inject;
+import hudson.util.VersionNumber;
 import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
@@ -14,27 +16,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
 import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-
-import com.google.inject.Inject;
-
-import hudson.util.VersionNumber;
-
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 
 
 /**

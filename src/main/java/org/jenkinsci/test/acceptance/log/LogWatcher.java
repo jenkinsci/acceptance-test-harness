@@ -1,11 +1,10 @@
 package org.jenkinsci.test.acceptance.log;
 
-import org.apache.http.concurrent.BasicFuture;
-
 import java.io.IOException;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.http.concurrent.BasicFuture;
 
 /**
  * Receives log as {@link LogListener}, and  provides a regular expression pattern matching.

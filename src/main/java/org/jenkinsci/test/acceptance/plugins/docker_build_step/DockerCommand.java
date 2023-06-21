@@ -23,10 +23,9 @@
  */
 package org.jenkinsci.test.acceptance.plugins.docker_build_step;
 
+import com.google.common.base.Joiner;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-
-import com.google.common.base.Joiner;
 
 public abstract class DockerCommand extends PageAreaImpl {
 

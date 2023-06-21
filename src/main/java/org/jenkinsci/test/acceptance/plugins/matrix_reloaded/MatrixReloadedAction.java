@@ -23,14 +23,14 @@
  */
 package org.jenkinsci.test.acceptance.plugins.matrix_reloaded;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.openqa.selenium.By;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @ActionPageObject("matrix-reloaded")
 public class MatrixReloadedAction extends Action {

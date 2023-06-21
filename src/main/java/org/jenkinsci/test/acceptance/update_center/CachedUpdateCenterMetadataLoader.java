@@ -2,15 +2,14 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.Inject;
-import org.apache.commons.io.FileUtils;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.io.FileUtils;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 
 /**
  * Parses update-center.json.html possibly from a cache and determine plugins to install.

@@ -10,10 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.TeeInputStream;
 import org.jenkinsci.test.acceptance.log.LogListenable;
@@ -21,8 +21,6 @@ import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogReader;
 import org.jenkinsci.test.acceptance.log.LogSplitter;
 import org.jenkinsci.test.acceptance.log.LogWatcher;
-
-import static java.util.concurrent.TimeUnit.*;
 
 /**
  * {@link LogWatcher} for monitoring output from Jenkins
@@ -94,7 +92,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
      */
     public void waitTillReady() {
         try {
-            ready.get(JenkinsController.STARTUP_TIMEOUT, SECONDS);
+            ready.get(JenkinsController.STARTUP_TIMEOUT, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
             if (portConflict.isDone())
                 throw new RuntimeException("Port conflict detected");

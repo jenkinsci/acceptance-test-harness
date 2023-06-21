@@ -1,19 +1,18 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.Build;
-import org.jenkinsci.test.acceptance.po.WorkflowJob;
-import org.jenkinsci.test.acceptance.plugins.stageview.StageView;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.joining;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.stageview.StageView;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.Test;
 
 /**
  * Base Implementation of the stageview test as a component. Important aspect of this
@@ -193,7 +192,7 @@ public class StageViewTest extends AbstractJUnitTest {
     private String readFromRessourceFolder(String fileName) {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         return new BufferedReader(new InputStreamReader(classloader.getResourceAsStream(fileName)))
-                .lines().collect(joining("\n"));
+                .lines().collect(Collectors.joining("\n"));
     }
 
 
@@ -220,7 +219,7 @@ public class StageViewTest extends AbstractJUnitTest {
      * @return the repeated String
      */
     private String repeatString(String str, int times) {
-        return Stream.generate(() -> str).limit(times).collect(joining());
+        return Stream.generate(() -> str).limit(times).collect(Collectors.joining());
     }
 
 

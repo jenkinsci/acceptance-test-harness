@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.guice;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.Scope;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;

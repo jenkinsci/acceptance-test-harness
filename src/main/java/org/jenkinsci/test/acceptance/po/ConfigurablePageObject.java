@@ -23,19 +23,17 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import java.net.URL;
-import java.util.concurrent.Callable;
-
-import com.google.inject.Injector;
-
-import groovy.lang.Closure;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.*;
+
+import com.google.inject.Injector;
+import groovy.lang.Closure;
+import java.net.URL;
+import java.util.concurrent.Callable;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * {@link PageObject} that can be configured and saved.

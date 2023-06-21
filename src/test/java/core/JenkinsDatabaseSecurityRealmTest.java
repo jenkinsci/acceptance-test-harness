@@ -23,6 +23,11 @@
  */
 package core;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -31,11 +36,6 @@ import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 @WithPlugins("mailer")
 public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {

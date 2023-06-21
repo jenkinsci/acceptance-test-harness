@@ -2,22 +2,18 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-
 import hudson.util.VersionNumber;
-
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.Assume;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Minimal Jenkins version required to run the test.
@@ -26,8 +22,8 @@ import static java.lang.annotation.RetentionPolicy.*;
  *
  * @author Oliver Gondza
  */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
 @RuleAnnotation(Since.RuleImpl.class)

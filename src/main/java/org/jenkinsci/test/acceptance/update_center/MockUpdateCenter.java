@@ -27,6 +27,16 @@ package org.jenkinsci.test.acceptance.update_center;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.ExceptionLogger;
@@ -53,17 +63,6 @@ import org.jenkinsci.test.acceptance.po.UpdateCenter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Serves a fake update center locally.

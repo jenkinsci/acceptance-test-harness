@@ -4,19 +4,17 @@ import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.proxy.CaptureType;
 import com.browserup.harreader.model.Har;
-import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
-import org.jenkinsci.test.acceptance.junit.GlobalRule;
-import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-
 import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
+import org.jenkinsci.test.acceptance.junit.GlobalRule;
+import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 
 /**
  * The system property RECORD_BROWSER_TRAFFIC can be set to either off, failuresOnly or always to control when browser
@@ -69,7 +67,7 @@ public class HarRecorder extends TestWatcher {
         }
     }
 
-    static State CAPTURE_HAR = value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("RECORD_BROWSER_TRAFFIC", FAILURES_ONLY.getValue()));
+    static State CAPTURE_HAR = State.value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("RECORD_BROWSER_TRAFFIC", State.FAILURES_ONLY.getValue()));
 
     private static BrowserUpProxy proxy;
 

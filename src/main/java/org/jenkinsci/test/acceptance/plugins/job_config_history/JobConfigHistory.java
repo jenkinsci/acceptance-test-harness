@@ -25,7 +25,6 @@ package org.jenkinsci.test.acceptance.plugins.job_config_history;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;

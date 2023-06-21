@@ -2,16 +2,15 @@ package org.jenkinsci.test.acceptance.docker;
 
 import com.google.inject.Inject;
 import com.google.inject.TypeLiteral;
-import org.jenkinsci.test.acceptance.guice.AutoCleaned;
-import org.jenkinsci.test.acceptance.guice.TestCleaner;
-import org.jenkinsci.test.acceptance.guice.TestScope;
-import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
-
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import java.io.File;
 import java.io.IOException;
 import org.jenkinsci.test.acceptance.docker.DockerImage.Starter;
+import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.guice.TestCleaner;
+import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 
 /**
  * Inject this object to automate the cleanup of a running container at the end of the test case.

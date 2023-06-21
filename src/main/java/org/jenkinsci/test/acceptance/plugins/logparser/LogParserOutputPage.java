@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.logparser;
 
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The logparser plugin uses two frames.

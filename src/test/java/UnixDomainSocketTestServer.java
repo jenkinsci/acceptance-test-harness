@@ -1,12 +1,11 @@
-import jnr.unixsocket.UnixServerSocketChannel;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
-import org.apache.commons.io.IOUtils;
-
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
+import jnr.unixsocket.UnixServerSocketChannel;
+import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Unix domain socket test.

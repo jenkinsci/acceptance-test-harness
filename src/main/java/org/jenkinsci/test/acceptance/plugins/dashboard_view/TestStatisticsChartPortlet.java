@@ -1,14 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+import javax.imageio.ImageIO;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.net.URL;
 
 /**
  * The test statistics chart shipped with the dashboard view plugin.

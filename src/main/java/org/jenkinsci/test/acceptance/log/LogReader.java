@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.Future;
 import java.util.logging.Logger;
-
 import org.apache.http.concurrent.BasicFuture;
 
 /**

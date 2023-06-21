@@ -1,24 +1,24 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
 import com.google.inject.Inject;
 import hudson.util.VersionNumber;
+import java.util.Collections;
+import java.util.List;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.plugins.matrix_reloaded.MatrixReloadedAction;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.matrix_reloaded.MatrixReloadedAction;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.List;
-
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
+import org.jvnet.hudson.test.Issue;
 
 @WithPlugins({"matrix-project"})
 public class MatrixPluginTest extends AbstractJUnitTest {
@@ -148,12 +148,12 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("condition");
         job.save();
 
-        MatrixBuild b = job.startBuild(singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild(Collections.singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldNotExist();
         b.getConfiguration("run=no").shouldNotExist();
 
-        b = job.startBuild(singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
+        b = job.startBuild(Collections.singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldExist();
         b.getConfiguration("run=no").shouldNotExist();

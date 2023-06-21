@@ -1,5 +1,12 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+
+import jakarta.inject.Inject;
+import java.io.IOException;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.*;
@@ -13,16 +20,6 @@ import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-
-import jakarta.inject.Inject;
-
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-
-import java.io.IOException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 
 /**

@@ -1,24 +1,23 @@
 package org.jenkinsci.test.acceptance.po;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URL;
 import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Wait;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 
 /**
  * @author Kohsuke Kawaguchi

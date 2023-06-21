@@ -1,21 +1,18 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.jenkinsci.test.acceptance.Matchers.*;
 import static org.junit.Assert.assertEquals;
-import static org.hamcrest.MatcherAssert.*;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.junit.Test;
-
-import hudson.util.VersionNumber;
-
 import org.jenkinsci.test.acceptance.plugins.jacoco.JacocoPublisher;
 import org.jenkinsci.test.acceptance.plugins.jacoco.JacocoResultPage;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.Test;
 
 /**
  * Checks the successfully execution of jacoco coverage reports.

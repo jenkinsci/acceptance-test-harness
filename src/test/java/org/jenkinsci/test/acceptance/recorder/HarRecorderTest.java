@@ -1,18 +1,17 @@
 package org.jenkinsci.test.acceptance.recorder;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.existingFile;
+
 import com.browserup.bup.BrowserUpProxy;
+import java.io.File;
+import java.net.InetAddress;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.Description;
-
-import java.io.File;
-import java.net.InetAddress;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.existingFile;
 
 public class HarRecorderTest {
     @Rule

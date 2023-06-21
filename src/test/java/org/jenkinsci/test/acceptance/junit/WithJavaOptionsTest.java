@@ -1,11 +1,11 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import org.junit.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.junit.Assert.assertNull;
+
+import org.junit.Test;
 
 public class WithJavaOptionsTest {
 

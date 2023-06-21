@@ -6,7 +6,6 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
