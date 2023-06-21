@@ -207,7 +207,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>1.73</version>
+      <version>1.75</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
