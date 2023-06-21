@@ -38,13 +38,13 @@ if (needSplittingFromWorkspace) {
 def axes = [
   jenkinsVersions: ['lts', 'latest'],
   platforms: ['linux'],
-  jdks: ['11', '17'],
+  jdks: ['17'],
   browsers: ['firefox'],
 ]
 
 stage('Record builds and sessions') {
   retry(conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()], count: 2) {
-    node('maven-11') {
+    node('maven-17') {
       infra.checkoutSCM()
       def athCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
@@ -78,7 +78,7 @@ stage('Record builds and sessions') {
 branches['CI'] = {
   stage('CI') {
     retry(count: 2, conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()]) {
-      node('maven-11') {
+      node('maven-17') {
         checkout scm
         def mavenOptions = [
           '-Dset.changelist',
@@ -87,7 +87,7 @@ branches['CI'] = {
           'clean',
           'install',
         ]
-        infra.runMaven(mavenOptions, 11)
+        infra.runMaven(mavenOptions, 17)
         infra.prepareToPublishIncrementals()
       }
     }
