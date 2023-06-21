@@ -1,9 +1,8 @@
 package org.jenkinsci.test.acceptance.slave;
 
 import com.google.inject.Inject;
-import org.jenkinsci.test.acceptance.guice.TestCleaner;
-
 import jakarta.inject.Provider;
+import org.jenkinsci.test.acceptance.guice.TestCleaner;
 
 /**
  * Obtains {@link SlaveController}.

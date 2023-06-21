@@ -1,5 +1,10 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assume.assumeFalse;
+
+import com.google.inject.Inject;
 import hudson.util.VersionNumber;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -7,14 +12,10 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
-
-import com.google.inject.Inject;
-
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipAction;
@@ -22,11 +23,8 @@ import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipGlobalConfig;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.WebDriver;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assume.assumeFalse;
 
 @WithPlugins({"command-launcher", "ownership", "cloudbees-folder"})
 public class OwnershipPluginTest extends AbstractJUnitTest {

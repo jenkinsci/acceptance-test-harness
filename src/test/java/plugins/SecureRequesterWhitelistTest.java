@@ -23,14 +23,14 @@
  */
 package plugins;
 
+import static org.junit.Assert.assertEquals;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests the secure-requester-whitelist plugin.

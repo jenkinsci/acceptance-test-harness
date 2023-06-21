@@ -1,9 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.time.Duration;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import java.time.Duration;
 
 /**
  * Mix-in for {@link PageObject}s that own a group of views, like

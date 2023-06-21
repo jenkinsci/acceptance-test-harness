@@ -1,10 +1,9 @@
 package org.jenkinsci.test.acceptance.utils.groovy;
 
 import groovy.ui.Console;
-
-import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.JFrame;
 
 /**
  * Interactive Groovy console that's useful while developing a test.

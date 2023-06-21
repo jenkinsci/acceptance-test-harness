@@ -1,12 +1,10 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Joiner;
 import java.util.regex.Pattern;
-
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
-
-import com.google.common.base.Joiner;
 
 /**
  * An agent page object.

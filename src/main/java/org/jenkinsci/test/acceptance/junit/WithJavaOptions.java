@@ -1,21 +1,18 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.WinstoneController;
 import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * 
@@ -26,8 +23,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * The options can be set only when the test are being run with a {@link WinstoneController}.
  * This annotation is a way to extend JENKINS_JAVA_OPTS and JENKINS_OPTS at test level
  */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
 @RuleAnnotation(value = WithJavaOptions.RuleImpl.class, priority = -10)

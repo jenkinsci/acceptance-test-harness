@@ -1,5 +1,12 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+
+import jakarta.inject.Inject;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -9,15 +16,6 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
-
-import jakarta.inject.Inject;
-
-import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 
 @Since("2.7.1")
 @WithPlugins("command-launcher")

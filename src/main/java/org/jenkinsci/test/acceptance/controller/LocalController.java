@@ -1,6 +1,9 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import java.util.logging.Level;
+import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
+import com.github.olivergondza.dumpling.model.ModelObject;
+import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jakarta.inject.Inject;
@@ -15,8 +18,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
@@ -28,12 +31,6 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.MultipleFailureException;
 import org.openqa.selenium.TimeoutException;
-import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
-import com.github.olivergondza.dumpling.model.ModelObject;
-import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
-import com.google.inject.Injector;
-
-import static java.lang.System.*;
 
 /**
  * Abstract base class for those JenkinsController that runs the JVM locally on
@@ -103,7 +100,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
         File givenPluginDir = null;
         for (String d : Arrays.asList(
-                getenv("PLUGINS_DIR"),
+                System.getenv("PLUGINS_DIR"),
                 new File(war.getParentFile(), "plugins").getAbsolutePath(),
                 WORKSPACE + "/plugins",
                 "plugins")) {
@@ -177,12 +174,12 @@ public abstract class LocalController extends JenkinsController implements LogLi
     }
 
     public File getJavaHome() {
-        String javaHome = getenv("JENKINS_JAVA_HOME");
+        String javaHome = System.getenv("JENKINS_JAVA_HOME");
         File home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
         if (home != null && home.isDirectory()) {
             return home;
         }
-        javaHome = getenv("JAVA_HOME");
+        javaHome = System.getenv("JAVA_HOME");
         home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
         if (home != null && home.isDirectory()) {
             return home;
@@ -245,18 +242,18 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
         }
 
-        if (getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")) {
+        if (System.getenv("INTERACTIVE") != null && System.getenv("INTERACTIVE").equals("true")) {
             if (cause instanceof MultipleFailureException) {
                 System.out.println("Multiple exceptions occurred:");
                 for (Throwable c : ((MultipleFailureException) cause).getFailures()) {
-                    out.println();
-                    c.printStackTrace(out);
-                    out.println();
+                    System.out.println();
+                    c.printStackTrace(System.out);
+                    System.out.println();
                 }
             } else {
-                cause.printStackTrace(out);
+                cause.printStackTrace(System.out);
             }
-            out.println("Commencing interactive debugging. Browser session was kept open.");
+            System.out.println("Commencing interactive debugging. Browser session was kept open.");
             // Broken in current surefire
 //            out.println("Press return to proceed.");
 //            try {

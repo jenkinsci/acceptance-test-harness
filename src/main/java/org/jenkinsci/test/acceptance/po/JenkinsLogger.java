@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
-
 import java.time.Duration;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi

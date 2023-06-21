@@ -1,9 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
+import java.io.File;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.NoSuchElementException;
-
-import java.io.File;
 
 /**
  * Mix-in for slaves.

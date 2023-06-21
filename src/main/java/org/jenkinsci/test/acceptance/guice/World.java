@@ -7,10 +7,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
+import jakarta.inject.Singleton;
 import org.jenkinsci.test.acceptance.Config;
 import org.jenkinsci.test.acceptance.FallbackConfig;
-
-import jakarta.inject.Singleton;
 
 /**
  * Holder of the Guice world for running tests. Singleton.

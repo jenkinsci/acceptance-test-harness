@@ -1,12 +1,10 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import org.junit.rules.TestRule;
 import org.jvnet.hudson.annotation_indexer.Indexed;
 
@@ -18,8 +16,8 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
  *
  * @author ogondza
  */
-@Retention(RUNTIME)
-@Target(TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 @Documented
 @Indexed
 public @interface GlobalRule {

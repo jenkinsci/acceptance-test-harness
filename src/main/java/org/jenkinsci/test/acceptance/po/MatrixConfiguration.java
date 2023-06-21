@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
-
 import java.net.URL;
 
 /**

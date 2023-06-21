@@ -1,10 +1,9 @@
 package org.jenkinsci.test.acceptance.plugins.subversion;
 
+import java.net.URL;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Scm;
-
-import java.net.URL;
 
 /**
  * PageArea for the WebSvn repository browser

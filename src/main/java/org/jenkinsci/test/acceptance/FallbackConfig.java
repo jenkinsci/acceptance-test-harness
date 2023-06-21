@@ -1,5 +1,13 @@
 package org.jenkinsci.test.acceptance;
 
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.client.ClientUtil;
+import com.cloudbees.sdk.extensibility.ExtensionList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import jakarta.inject.Named;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -15,44 +23,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
-import jakarta.inject.Named;
-
 import org.apache.commons.exec.OS;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResult;
-import org.junit.runners.model.Statement;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.Proxy;
-import org.openqa.selenium.UnsupportedCommandException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeDriverService;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.LocalFileDetector;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.safari.SafariDriver;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.client.ClientUtil;
-import com.cloudbees.sdk.extensibility.ExtensionList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
-
-import edu.umd.cs.findbugs.annotations.CheckForNull;
-
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
 import org.jenkinsci.test.acceptance.docker.Docker;
@@ -75,8 +51,26 @@ import org.jenkinsci.test.acceptance.utils.pluginreporter.ExercisedPluginsReport
 import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPluginReporter;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
-
-import static org.jenkinsci.test.acceptance.recorder.HarRecorder.*;
+import org.junit.runners.model.Statement;
+import org.openqa.selenium.Alert;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.MutableCapabilities;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.UnsupportedCommandException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.GeckoDriverService;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.LocalFileDetector;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * The default configuration for running tests.
@@ -126,7 +120,7 @@ public class FallbackConfig extends AbstractModule {
             prefs.put(LANGUAGE_SELECTOR, "en");
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
-            if (isCaptureHarEnabled()) {
+            if (HarRecorder.isCaptureHarEnabled()) {
                 options.setAcceptInsecureCerts(true);
                 options.setProxy(createSeleniumProxy(testName.get()));
             }
@@ -141,7 +135,7 @@ public class FallbackConfig extends AbstractModule {
             caps.setCapability("version", "29");
             caps.setCapability("platform", "Windows 7");
             caps.setCapability("name", testName.get());
-            if (isCaptureHarEnabled()) {
+            if (HarRecorder.isCaptureHarEnabled()) {
                 caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
             }
 
@@ -187,7 +181,7 @@ public class FallbackConfig extends AbstractModule {
         firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
         firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
         firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false);
-        if (isCaptureHarEnabled()) {
+        if (HarRecorder.isCaptureHarEnabled()) {
             firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
         }
         if (System.getenv("FIREFOX_BIN") != null) {
@@ -198,7 +192,7 @@ public class FallbackConfig extends AbstractModule {
 
     private ChromeOptions buildChromeOptions(TestName testName) throws IOException {
         ChromeOptions chromeOptions = new ChromeOptions();
-        if (isCaptureHarEnabled()) {
+        if (HarRecorder.isCaptureHarEnabled()) {
             chromeOptions.setProxy(createSeleniumProxy(testName.get()));
         }
         return chromeOptions;

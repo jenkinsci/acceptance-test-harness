@@ -1,13 +1,11 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import org.junit.rules.TestRule;
-
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
+import org.junit.rules.TestRule;
 
 /**
  * Meta-annotation for annotations that introduces a {@link TestRule} for test.
@@ -17,8 +15,8 @@ import static java.lang.annotation.RetentionPolicy.*;
  *
  * @author Kohsuke Kawaguchi
  */
-@Retention(RUNTIME)
-@Target(ANNOTATION_TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.ANNOTATION_TYPE)
 @Documented
 public @interface RuleAnnotation {
     /**

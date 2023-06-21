@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;

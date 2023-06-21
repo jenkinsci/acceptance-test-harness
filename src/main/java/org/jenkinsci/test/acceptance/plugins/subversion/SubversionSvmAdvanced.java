@@ -1,9 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.subversion;
 
+import java.net.URL;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageObject;
-
-import java.net.URL;
 
 /**
  * PageObject for the Subversion "advanced" section.

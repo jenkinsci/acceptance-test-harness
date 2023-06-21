@@ -2,9 +2,7 @@ package org.jenkinsci.test.acceptance.update_center;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import hudson.util.VersionNumber;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,7 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.junit.AssumptionViolatedException;
 

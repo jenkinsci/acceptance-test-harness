@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import java.time.Duration;
-
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
+
+import java.time.Duration;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * Page object for login page.

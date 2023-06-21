@@ -1,24 +1,23 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+
 import com.google.inject.Inject;
+import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.fixtures.XvncSlaveContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.xvnc.XvncGlobalJobConfig;
 import org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
-import org.jenkinsci.test.acceptance.docker.fixtures.XvncSlaveContainer;
-import org.jenkinsci.test.acceptance.junit.WithDocker;
-import static org.jenkinsci.test.acceptance.plugins.xvnc.XvncJobConfig.*;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 
@@ -50,8 +49,8 @@ public class XvncPluginTest extends AbstractJUnitTest {
         job.save();
 
         Build build = job.startBuild().shouldSucceed();
-        assertThat(build, runXvnc());
-        assertThat(build, tookScreenshot());
+        assertThat(build, XvncJobConfig.runXvnc());
+        assertThat(build, XvncJobConfig.tookScreenshot());
         build.getArtifact("screenshot.jpg").assertThatExists(true);
     }
 
@@ -68,8 +67,8 @@ public class XvncPluginTest extends AbstractJUnitTest {
         job.save();
 
         Build build = job.startBuild().shouldSucceed();
-        assertThat(build, runXvnc());
-        assertThat(build, usedDisplayNumber(42));
+        assertThat(build, XvncJobConfig.runXvnc());
+        assertThat(build, XvncJobConfig.usedDisplayNumber(42));
     }
 
     @WithPlugins({"xvnc@1.22", "workflow-aggregator@1.8"})
@@ -81,8 +80,8 @@ public class XvncPluginTest extends AbstractJUnitTest {
         job.save();
         Build build = job.startBuild().shouldSucceed();
         assertThat(build.getConsole(), containsString("+ xmessage hello"));
-        assertThat(build, runXvnc());
-        assertThat(build, tookScreenshot());
+        assertThat(build, XvncJobConfig.runXvnc());
+        assertThat(build, XvncJobConfig.tookScreenshot());
         build.getArtifact("screenshot.jpg").assertThatExists(true); // TODO should this be moved into tookScreenshot?
     }
 

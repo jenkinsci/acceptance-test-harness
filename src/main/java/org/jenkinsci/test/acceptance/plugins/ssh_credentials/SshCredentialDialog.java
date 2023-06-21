@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
+import java.time.Duration;
 import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -10,8 +11,6 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import java.time.Duration;
 
 /**
  * Modal dialog to enter a credential.

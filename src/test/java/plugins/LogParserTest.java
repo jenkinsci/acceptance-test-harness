@@ -1,24 +1,23 @@
 package plugins;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.logparser.LogParserGlobalConfig;
-import org.jenkinsci.test.acceptance.plugins.logparser.LogParserPublisher;
-import org.jenkinsci.test.acceptance.po.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.jenkinsci.test.acceptance.junit.Resource;
-import org.openqa.selenium.WebElement;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.Resource;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.logparser.LogParserGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserOutputPage;
+import org.jenkinsci.test.acceptance.plugins.logparser.LogParserPublisher;
+import org.jenkinsci.test.acceptance.po.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {

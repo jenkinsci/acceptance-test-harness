@@ -24,10 +24,10 @@
 package org.jenkinsci.test.acceptance.plugins.compress_artifacts;
 
 import org.jenkinsci.test.acceptance.po.ArtifactManagement;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ArtifactManagement.Factory;
 import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 
 @Describable("Compress Artifacts")
 public class CompressingArtifactManager extends Factory {

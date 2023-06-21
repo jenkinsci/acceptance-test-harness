@@ -1,5 +1,14 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import com.google.inject.Inject;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerImage;
 import org.junit.AssumptionViolatedException;
@@ -7,25 +16,13 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import com.google.inject.Inject;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
-
 /**
  * Indicates the docker is necessary to run the test.
  * <p>
  * Otherwise the test is skipped.
  */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
 @RuleAnnotation(value = WithDocker.RuleImpl.class, priority = -10) // Run before Jenkins startup

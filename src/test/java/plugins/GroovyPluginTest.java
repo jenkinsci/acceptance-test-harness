@@ -25,7 +25,6 @@ package plugins;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;

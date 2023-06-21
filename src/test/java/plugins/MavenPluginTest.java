@@ -23,7 +23,14 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
+
 import com.google.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -34,6 +41,7 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.mailer.Mailer;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuild;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenBuildStep;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenProjectConfig;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -41,17 +49,7 @@ import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
-import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installMaven;
-import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven;
 
 @WithPlugins("maven-plugin")
 @Category(DockerTest.class)
@@ -66,7 +64,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven_for_freestyle_job() {
-        installMaven(jenkins, "maven_3.6.3", "3.6.3");
+        MavenInstallation.installMaven(jenkins, "maven_3.6.3", "3.6.3");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -80,7 +78,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven3_for_freestyle_job() {
-        installMaven(jenkins, "maven_3.6.3", "3.6.3");
+        MavenInstallation.installMaven(jenkins, "maven_3.6.3", "3.6.3");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -94,7 +92,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void use_local_maven_repo() {
-        installSomeMaven(jenkins);
+        MavenInstallation.installSomeMaven(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
@@ -108,7 +106,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void set_maven_options() {
-        installSomeMaven(jenkins);
+        MavenInstallation.installSomeMaven(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -122,7 +120,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void set_global_maven_options() {
-        installSomeMaven(jenkins);
+        MavenInstallation.installSomeMaven(jenkins);
         jenkins.configure();
         new MavenProjectConfig(jenkins.getConfigPage()).opts.set("-showversion");
         jenkins.save();
@@ -140,7 +138,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
     @Issue("JENKINS-10539")
     @Since("1.527")
     public void preserve_backslash_in_property() {
-        installSomeMaven(jenkins);
+        MavenInstallation.installSomeMaven(jenkins);
 
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.configure();
@@ -163,7 +161,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void build_multimodule() {
-        installSomeMaven(jenkins);
+        MavenInstallation.installSomeMaven(jenkins);
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
         job.configure();
@@ -184,7 +182,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test @Issue({"JENKINS-20209", "JENKINS-21045"})
     public void send_mail() throws Exception {
-        installSomeMaven(jenkins);
+        MavenInstallation.installSomeMaven(jenkins);
         MailhogContainer mailhog = mailhogProvider.get();
 
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);

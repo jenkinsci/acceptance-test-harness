@@ -1,15 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.jenkinsci.test.acceptance.utils.IOUtil;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 
 /**
  * Artifact of a build

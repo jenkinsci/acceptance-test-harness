@@ -1,5 +1,6 @@
 package plugins;
 
+import java.util.function.Consumer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Build;
@@ -7,8 +8,6 @@ import org.jenkinsci.test.acceptance.po.Container;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.jenkinsci.test.acceptance.po.Job;
-
-import java.util.function.Consumer;
 
 /**
  * Base class for tests related to Jobs.

@@ -6,15 +6,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import hudson.util.VersionNumber;
-import org.hamcrest.Matchers;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import org.hamcrest.Matchers;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.junit.Test;
 
 /**
  * @author ogondza.

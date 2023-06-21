@@ -2,12 +2,10 @@ package org.jenkinsci.test.acceptance.plugins.nodelabelparameter;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Parameter;
-
 import org.openqa.selenium.WebElement;
 
 /**

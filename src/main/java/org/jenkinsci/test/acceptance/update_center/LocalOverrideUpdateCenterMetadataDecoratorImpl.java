@@ -1,16 +1,15 @@
 package org.jenkinsci.test.acceptance.update_center;
 
 import com.cloudbees.sdk.extensibility.Extension;
+import java.io.File;
+import java.util.Map;
+import javax.xml.parsers.DocumentBuilderFactory;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.util.version.GenericVersionScheme;
 import org.eclipse.aether.version.Version;
 import org.eclipse.aether.version.VersionScheme;
 import org.jenkinsci.test.acceptance.utils.MavenLocalRepository;
 import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.util.Map;
 
 /**
  * Allow local plugins specified via environment variables to override plugin metadata from update center.

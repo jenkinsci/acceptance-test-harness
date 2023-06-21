@@ -1,8 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.net.URL;
-
 import com.google.inject.Injector;
+import java.net.URL;
 import org.openqa.selenium.WebElement;
 
 /**

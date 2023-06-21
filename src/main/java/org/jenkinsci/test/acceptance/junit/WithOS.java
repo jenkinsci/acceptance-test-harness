@@ -1,15 +1,13 @@
 package org.jenkinsci.test.acceptance.junit;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+import com.google.inject.Inject;
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
-
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
@@ -17,8 +15,6 @@ import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
-
-import com.google.inject.Inject;
 
 /**
  * 
@@ -33,8 +29,8 @@ import com.google.inject.Inject;
  * the test may pass or fail when it should not. If tests are not being run with a 
  * LocalController, the test will be skipped.
  */
-@Retention(RUNTIME)
-@Target({METHOD, TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
 @RuleAnnotation(value = WithOS.RuleImpl.class, priority = -10)

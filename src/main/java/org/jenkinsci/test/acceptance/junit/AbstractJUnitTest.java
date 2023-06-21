@@ -1,5 +1,9 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import jakarta.inject.Inject;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.logging.Logger;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.SupportBundle;
@@ -7,12 +11,6 @@ import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
 import org.junit.After;
 import org.junit.Rule;
 import org.openqa.selenium.WebDriver;
-
-import jakarta.inject.Inject;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.logging.Logger;
 
 /**
  * Convenience base class to derive your plain-old JUnit tests from.

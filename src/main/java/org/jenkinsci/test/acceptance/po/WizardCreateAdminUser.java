@@ -26,11 +26,9 @@ package org.jenkinsci.test.acceptance.po;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
+import com.google.inject.Inject;
 import java.time.Duration;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
-
-import com.google.inject.Inject;
-import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -100,4 +98,3 @@ public class WizardCreateAdminUser extends PageObject {
     }
 
 }
-

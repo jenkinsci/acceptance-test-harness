@@ -1,9 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.subversion;
 
+import java.net.URL;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.Scm;
-
-import java.net.URL;
 
 /**
  * Superclass for the different repository browser accessable in the svn plugin

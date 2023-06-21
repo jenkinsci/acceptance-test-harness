@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view.controls;
 
+import java.util.Arrays;
+import java.util.List;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Provides the control area for setting the Columns to display in the default job list.

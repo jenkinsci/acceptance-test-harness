@@ -1,14 +1,13 @@
 package org.jenkinsci.test.acceptance.recorder;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.utils.SupportBundleRequest;
 import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
 
 public class SupportBundle extends TestWatcher {
     private static final Logger LOGGER = Logger.getLogger(SupportBundle.class.getName());

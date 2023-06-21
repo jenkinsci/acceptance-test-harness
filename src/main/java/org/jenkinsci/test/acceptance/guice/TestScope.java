@@ -1,14 +1,12 @@
 package org.jenkinsci.test.acceptance.guice;
 
 import com.google.inject.ScopeAnnotation;
-
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * Indicates that instances of this component are scoped to each test case.
@@ -18,8 +16,8 @@ import static java.lang.annotation.RetentionPolicy.*;
  *
  * @author Kohsuke Kawaguchi
  */
-@Retention(RUNTIME)
-@Target({TYPE, METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
 @ScopeAnnotation

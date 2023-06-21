@@ -23,14 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
+import java.io.File;
+import java.util.Locale;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.openqa.selenium.WebElement;
-
-import java.io.File;
-import java.util.Locale;
 
 public class AbstractCredentialsTest extends AbstractJUnitTest {
 

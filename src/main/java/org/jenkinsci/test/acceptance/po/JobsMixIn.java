@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.Callable;
-
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;

@@ -23,7 +23,12 @@
  */
 package plugins;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.inject.Inject;
+import jakarta.mail.MessagingException;
+import java.io.IOException;
+import java.util.regex.Pattern;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -39,14 +44,9 @@ import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
+import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.AssumptionViolatedException;
-
-import jakarta.mail.MessagingException;
-import java.io.IOException;
-import java.util.regex.Pattern;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests the display-url-api plugin.

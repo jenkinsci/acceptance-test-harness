@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.scriptler;
 
 import java.util.Map;
-
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Node;

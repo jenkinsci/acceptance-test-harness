@@ -1,28 +1,25 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Injector;
 import hudson.util.VersionNumber;
-import java.nio.charset.StandardCharsets;
-import java.util.jar.JarFile;
 import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
-
-import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Injector;
 
 /**
  * Launches Jenkins via "java -jar jenkins.war" on the local machine.

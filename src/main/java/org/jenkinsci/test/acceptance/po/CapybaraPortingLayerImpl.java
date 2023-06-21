@@ -1,15 +1,17 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Joiner;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import jakarta.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
@@ -24,11 +26,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import com.google.common.base.Joiner;
-import com.google.inject.Injector;
-
-import static java.util.Arrays.*;
 
 /**
  * For assisting porting from Capybara.
@@ -468,7 +465,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 return type.cast(c.newInstance(args));
             }
 
-            throw new AssertionError("No matching constructor found in " + type + ": " + asList(args));
+            throw new AssertionError("No matching constructor found in " + type + ": " + Arrays.asList(args));
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("Failed to invoke a constructor of " + type, e);
         }

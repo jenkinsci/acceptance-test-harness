@@ -23,6 +23,12 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+import java.net.MalformedURLException;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.AbstractCredentialsTest;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
@@ -33,13 +39,6 @@ import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCreden
 import org.jenkinsci.test.acceptance.po.Control;
 import org.junit.Test;
 import org.openqa.selenium.By;
-
-import java.net.MalformedURLException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 @WithPlugins({"ssh-credentials", "credentials@2.1.5"})
 public class SSHCredentialsTest extends AbstractCredentialsTest {

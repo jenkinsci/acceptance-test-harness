@@ -1,9 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.jira;
 
+import hudson.util.VersionNumber;
 import jakarta.inject.Inject;
 import java.net.URL;
-
-import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
