@@ -30,7 +30,6 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-
     <jenkins.version>2.411-rc33888.30f88b_c2ceb_1</jenkins.version>
     <selenium.version>4.9.1</selenium.version>
     <guava.version>32.0.0-jre</guava.version> <!-- aligned with selenium -->
@@ -207,7 +206,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>1.73</version>
+      <version>1.75</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
@@ -227,7 +226,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>crypto-util</artifactId>
-      <version>1.8</version>
+      <version>1.9</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -373,20 +372,20 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.93.Final</version>
+        <version>4.1.94.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.12.0</version>
+        <version>2.13.0</version>
       </dependency>
       <!-- RequireUpperBoundDeps between Mockito and Selenium -->
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.14.4</version>
+        <version>1.14.5</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -447,13 +446,13 @@ and
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-          <additionalparam>-Xdoclint:none</additionalparam>
+          <doclint>none</doclint>
         </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
             <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
+              <doclint>none</doclint>
             </configuration>
           </execution>
         </executions>
