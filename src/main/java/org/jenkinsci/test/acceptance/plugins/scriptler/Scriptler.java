@@ -53,7 +53,7 @@ public class Scriptler extends Action {
         control("/id").set(name);
         control("/name").set(name);
         new CodeMirror(this, "/script").set(text);
-        clickButton("Submit");
+        clickButton("Save");
 
         Script script = new Script(this, name);
 
