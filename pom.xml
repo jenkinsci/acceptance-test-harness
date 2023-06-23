@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.98</version>
+    <version>1.100</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -433,16 +433,6 @@ and
   <build>
     <defaultGoal>test</defaultGoal>
     <plugins>
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
