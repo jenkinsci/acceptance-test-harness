@@ -313,7 +313,7 @@ public class Build extends ContainerPageObject {
 
         if (isInProgress()) {
             WebElement stopButton = find(by.href("stop"));
-            runThenConfirmAlert(stopButton::click);
+            runThenHandleDialog(stopButton::click);
         }
     }
 

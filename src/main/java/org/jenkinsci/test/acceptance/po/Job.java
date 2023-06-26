@@ -458,7 +458,7 @@ public class Job extends TopLevelItem {
      */
     public void delete() {
         open();
-        runThenConfirmAlert(() -> clickLink("Delete Project"),2);
+        runThenHandleDialog(() -> clickLink("Delete Project"));
     }
 
     public static org.hamcrest.Matcher<WebDriver> disabled() {

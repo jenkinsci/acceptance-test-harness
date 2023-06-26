@@ -102,7 +102,7 @@ public class WorkflowJob extends Job {
 
     public void delete() {
         open();
-        runThenConfirmAlert(() -> clickLink("Delete Pipeline"),2);
+        runThenHandleDialog(() -> clickLink("Delete Pipeline"));
     }
 
     /**
