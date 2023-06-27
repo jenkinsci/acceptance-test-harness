@@ -31,6 +31,8 @@ import com.google.inject.Injector;
 import groovy.lang.Closure;
 import java.net.URL;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;

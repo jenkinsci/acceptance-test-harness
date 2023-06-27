@@ -3,6 +3,8 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
