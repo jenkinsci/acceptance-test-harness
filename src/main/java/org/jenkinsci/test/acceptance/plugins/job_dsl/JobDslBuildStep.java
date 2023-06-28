@@ -32,7 +32,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
 
     private final Control lookupStrategy = control("lookupStrategy");
     private final Control additionalClasspath = control("additionalClasspath");
-    private final Control expandClasspathArea = control(by.xpath("//div[div/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//[@type='button']"));
+    private final Control expandClasspathArea = control(by.xpath("//div[div/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//*[@type='button']"));
 
     private final Control failOnMissingPlugin = control("failOnMissingPlugin");
     private final Control unstableOnDeprecation = control("unstableOnDeprecation");
