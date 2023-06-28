@@ -212,9 +212,9 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     private void antBuildStepAdvancedConfiguration(AntBuildStep step, String buildFile, String properties) {
         step.control("advanced-button").click();
-        step.control(By.xpath("(//div[contains(@descriptorid, \"Ant\")]//input[@type = \"button\"])[3]")).click();
+        step.control(By.xpath("(//div[contains(@descriptorid, \"Ant\")]//[@type = \"button\"])[3]")).click();
         step.control("properties").set(StringUtils.defaultString(properties));
-        step.control(By.xpath("(//div[contains(@descriptorid, \"Ant\")]//input[@type = \"button\"])[2]")).click();
+        step.control(By.xpath("(//div[contains(@descriptorid, \"Ant\")]//[@type = \"button\"])[2]")).click();
         step.control("buildFile").set(StringUtils.defaultString(buildFile));
     }
 }
