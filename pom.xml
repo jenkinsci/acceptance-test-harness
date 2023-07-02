@@ -256,7 +256,7 @@
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>166.v912b_95083ffe</version>
+      <version>178.v2c7d2343886b_</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
