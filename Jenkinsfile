@@ -1,11 +1,14 @@
 // For ci.jenkins.io
 // https://github.com/jenkins-infra/documentation/blob/master/ci.adoc
 
-properties([disableConcurrentBuilds(abortPrevious: true)])
+properties([
+  disableConcurrentBuilds(abortPrevious: true),
+  buildDiscarder(logRotator(numToKeepStr: '5')),
+])
 
 if (env.BRANCH_IS_PRIMARY) {
   properties([
-          buildDiscarder(logRotator(numToKeepStr: '50')),
+          buildDiscarder(logRotator(numToKeepStr: '10')),
           pipelineTriggers([cron('0 18 * * 2')]),
           disableConcurrentBuilds(abortPrevious: true),
   ])
