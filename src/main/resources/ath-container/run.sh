@@ -26,8 +26,7 @@ if [[ $# -lt 2 ]]; then
 	exit 2
 fi
 
-# MVN='mvn -V -e -ntp'
-MVN='mvn -V -e' # debug, to be removed
+MVN='mvn -V -e -ntp'
 if [[ -n ${MAVEN_SETTINGS-} ]]; then
 	MVN="${MVN} -s ${MAVEN_SETTINGS}"
 fi
