@@ -245,7 +245,13 @@ public class PluginManager extends ContainerPageObject {
                 for (PluginSpec n : update) {
                     tickPluginToInstall(n);
                 }
-                clickButton("Download now and install after restart");
+
+                // Temporary until https://github.com/jenkinsci/jenkins/pull/8025 is in LTS
+                if (find(by.button("Download now and install after restart")) != null) {
+                    clickButton("Download now and install after restart");
+                } else {
+                    clickButton("Update");
+                }
             }
         }
 
