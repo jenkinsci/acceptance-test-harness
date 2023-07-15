@@ -3,7 +3,7 @@
 @REM set CONFIG=%~dp0%config.groovy
 set DISPLAY=:0
 set INTERACTIVE=false
-set BROWSER=remote-webdriver-firefox
+set BROWSER=remote-webdriver-chrome
 set REMOTE_WEBDRIVER_URL=http://127.0.0.1:4444/wd/hub
 set JENKINS_JAVA_OPTS=-Xmx1280m
 
@@ -22,6 +22,6 @@ IF NOT DEFINED IP (
 set SELENIUM_PROXY_HOSTNAME=%IP%
 set JENKINS_LOCAL_HOSTNAME=%IP%
 @echo.
-@echo To start the remote firefox container run the following command:
-@echo docker run --shm-size=256m -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e no_proxy=localhost -e SCREEN_WIDTH=1680 -e SCREEN_HEIGHT=1090 selenium/standalone-firefox:4.6.0
+@echo To start the remote chrome container run the following command:
+@echo docker run --shm-size=256m -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e no_proxy=localhost -e SCREEN_WIDTH=1680 -e SCREEN_HEIGHT=1090 selenium/standalone-chrome:4.6.0
 

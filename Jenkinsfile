@@ -42,7 +42,7 @@ def axes = [
   jenkinsVersions: ['lts', 'latest'],
   platforms: ['linux'],
   jdks: ['17'],
-  browsers: ['firefox'],
+  browsers: ['chrome'],
 ]
 
 stage('Record builds and sessions') {
@@ -55,7 +55,7 @@ stage('Record builds and sessions') {
       }
       axes['jenkinsVersions'].each { jenkinsVersion ->
         infra.withArtifactCachingProxy {
-          sh "rm -rf target && DISPLAY=:0 ./run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
+          sh "rm -rf target && DISPLAY=:0 ./run.sh chrome ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
         }
         def coreCommit = sh(script: './core-commit.sh', returnStdout: true).trim()
         /*

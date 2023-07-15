@@ -36,18 +36,20 @@ RUN apt-get update && \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
-# Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
-ARG FIREFOX_VERSION=108.0.2
+# https://www.ubuntuupdates.org/package/google_chrome/stable/main/base/google-chrome-stable
+ARG CHROME_VERSION=114.0.5735.198-1
+ARG CHROMEDRIVER=114.0.5735.90
+ENV CHROME_BIN="/usr/bin/google-chrome"
 # hadolint: Do not pin packages as they are requirements only for firefox installation (and not ofr the rest of the ATH) and the effort required to track each version would be too huge
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 libasound2 libdbus-glib-1-2 libx11-xcb-dev libpci-dev libgl1-mesa-glx wget bzip2 \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
-  && curl --silent https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 --output /tmp/firefox.tar.bz2 \
-  && rm -rf /opt/firefox \
-  && tar -C /opt -xjf /tmp/firefox.tar.bz2 \
-  && rm /tmp/firefox.tar.bz2 \
-  && mv /opt/firefox /opt/firefox-${FIREFOX_VERSION} \
-  && ln -fs /opt/firefox-${FIREFOX_VERSION}/firefox /usr/bin/firefox
+  && curl --silent https://chromedriver.storage.googleapis.com/${CHROMEDRIVER}/chromedriver_linux64.zip -o /tmp/chromedriver.zip \
+  && unzip -d ${CHROME_BIN} /tmp/chromedriver.zip \
+  && rm /tmp/chromedriver.zip \
+  && curl --silent https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}_amd64.deb -o /tmp/chrome.deb \
+  && apt-get --no-install-recommends install -y /tmp/chrome.deb \
+  && rm /tmp/chrome.deb
 
 # Selenium needs a geckodriver in order to work properly
 ENV GECKODRIVER_VERSION=0.33.0

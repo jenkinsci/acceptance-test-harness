@@ -169,7 +169,7 @@ public class FallbackConfig extends AbstractModule {
     }
     private String getBrowser() {
         String browser = System.getenv("BROWSER");
-        if (browser==null) browser = "firefox";
+        if (browser==null) browser = "chrome";
         browser = browser.toLowerCase(Locale.ENGLISH);
         return browser;
     }
