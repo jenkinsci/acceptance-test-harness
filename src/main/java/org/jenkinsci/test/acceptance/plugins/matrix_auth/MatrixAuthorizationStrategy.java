@@ -20,7 +20,7 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Adds a new user to this matrix.
      */
     public MatrixRow addUser(String name) {
-        runThenHandleAlert(() -> this.name.resolve().findElement(by.xpath("../div/span/span/button | ../button")).click(),
+        runThenHandleAlert(() -> this.name.resolve().findElement(by.xpath("../div/span/span/button | ../div/button")).click(),
                 a -> {
             a.sendKeys(name);
             a.accept();
