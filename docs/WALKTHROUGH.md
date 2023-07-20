@@ -11,15 +11,13 @@ In this walkthrough I will be using Docker, IntelliJ and a terminal.
 > **Note** The next two steps are optional, this makes it easy to make a PR to Jenkins if you wish to do so later
 3) Create a new branch and give it a sensible name
 4) Make your changes to your copy of Jenkins, commit changes to your branch, feel free to push your changes to your local fork 
-
+5) When you have made changes to your local copy of Jenkins, in a terminal window `cd` into your local copy of Jenkins and run `mvn verify`, this will run the integration tests inside the jenkins repo. 
 
 
 ## Running the ATH
 
-When you have made changes to your local copy of Jenkins, in a terminal window `cd` into your local copy of Jenkins and run `mvn verify`, this will run the integration tests inside the jenkins repo. 
-
-When you are ready to test your changes with this ATH, you will need to run `mvn install` on your local copy of Jenkins. This achieves multiple things:
-1) `mvn install` will let you use your local Jenkins version as a dependency, as it generates you a `SNAPSHOT` version. 
+When you are ready to test your changes with this ATH, you will need to run `mvn package` on your local copy of Jenkins. This achieves multiple things:
+1) `mvn package` will let you use your local Jenkins version as a dependency, as it generates you a `SNAPSHOT` version. 
 
    - In the example output below, you can see that I have generated a `2.415-SNAPSHOT` version in my .m2 folder. Now I can use `2.415-SNAPSHOT` as a dependency in another project.
     ```shell
@@ -46,14 +44,12 @@ When you are ready to test your changes with this ATH, you will need to run `mvn
 
 ### Testing with this ATH
 1) Clone a copy of this ATH repo to your local machine and `cd` into the directory
-2) Open the `pom.xml` in your local copy of the ATH
-3) Change the `<jenkins.version>` to your SNAPSHOT version of jenkins (mine is `2.415-SNAPSHOT`)
 
 > **Note:** There are many ways to run these tests, I will be running the tests using Windows, your commands may differ slightly if using a different OS. See the [README.md](README.md) for alternatives and configuration options.  
 
-4) In a terminal window type `set JENKINS_WAR=C:\Users\julie\jenkins\war\target\jenkins.war` This sets a new environment variable called `JENKINS_WAR` to the path of your copy of the jenkins war *(You created this in the `mvn install step`, change it to your directory path instead of mine)*
-5) Type `vars.cmd` to the same terminal window. This is a script for setting all the variables in order to run the ATH locally on windows, it also outputs a docker command. 
-6) Copy the docker command that was output to your terminal after the last step, and paste it into the same terminal window. This will run the docker container with your local copy of Jenkins.
+2) In a terminal window type `set JENKINS_WAR=C:\Users\julie\jenkins\war\target\jenkins.war` This sets a new environment variable called `JENKINS_WAR` to the path of your copy of the jenkins war *(You created this in the `mvn package step`, change it to your directory path instead of mine)*
+3) Type `vars.cmd` to the same terminal window. This is a script for setting all the variables in order to run the ATH locally on windows, it also outputs a docker command. 
+4) Copy the docker command that was output to your terminal after the last step, and paste it into the same terminal window. This will run the docker container with your local copy of Jenkins.
 
 **You are now ready to run tests.**
 
@@ -62,8 +58,7 @@ If you want to run all the tests, run `mvn test`, if you want to run a specific 
 ### Tips and tricks
 - When running your tests with `mvn test`, adding the parameter `-DforkCount=` with a number higher than 1 will run tests in parallel. This is useful for running tests in a shorter amount of time. See [here](https://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html) for more details.
 - If you make changes to your local jenkins version after running ATH tests, and you want to re-run the tests again, make sure you:
-  - run `mvn install` again in your local jenkins repository and double-check your SNAPSHOT version
-  - stop the docker container you were running previously and re-run it. You can re-run `vars.cmd` again to get the docker command.
+  - run `mvn package` again in your local jenkins repository
 
 ## Debugging
 > **Note:** there are lots of good IDEs out there, I will be using IntelliJ for this walkthrough.
