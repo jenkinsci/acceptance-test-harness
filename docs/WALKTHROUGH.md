@@ -16,31 +16,7 @@ In this walkthrough I will be using Docker, IntelliJ and a terminal.
 
 ## Running the ATH
 
-When you are ready to test your changes with this ATH, you will need to run `mvn package` on your local copy of Jenkins. This achieves multiple things:
-1) `mvn package` will let you use your local Jenkins version as a dependency, as it generates you a `SNAPSHOT` version. 
-
-   - In the example output below, you can see that I have generated a `2.415-SNAPSHOT` version in my .m2 folder. Now I can use `2.415-SNAPSHOT` as a dependency in another project.
-    ```shell
-    [INFO] --- install:3.1.1:install (default-install) @ jenkins-coverage ---
-    [INFO] Installing C:\Users\julie\jenkins\coverage\target\jenkins-coverage-2.415-SNAPSHOT.pom to C:\Users\julie\.m2\repository\org\jenkins-ci\main\jenkins-coverage\2.415-SNAPSHOT\jenkins-coverage-2.415-SNAPSHOT.pom
-    [INFO] ------------------------------------------------------------------------
-    [INFO] Reactor Summary for Jenkins main module 2.415-SNAPSHOT:
-    [INFO]
-    [INFO] Jenkins main module ................................ SUCCESS [  3.112 s]
-    [INFO] Jenkins BOM ........................................ SUCCESS [  0.066 s]
-    [INFO] Internal SPI for WebSocket ......................... SUCCESS [  4.168 s]
-    [INFO] Jetty 10 implementation for WebSocket .............. SUCCESS [  3.645 s]
-    [INFO] Jenkins cli ........................................ SUCCESS [  7.500 s]
-    [INFO] Jenkins core ....................................... SUCCESS [01:10 min]
-    [INFO] Jenkins war ........................................ SUCCESS [ 28.499 s]
-    [INFO] Tests for Jenkins core ............................. SUCCESS [ 13.749 s]
-    [INFO] Jenkins coverage ................................... SUCCESS [  0.363 s]
-    [INFO] ------------------------------------------------------------------------
-    [INFO] BUILD SUCCESS
-    [INFO] ------------------------------------------------------------------------
-    ```
-
-2) Navigate in your local Jenkins repo to `…\war\target` and you will see a war file for you to use later
+When you are ready to test your changes with this ATH, you will need to run `mvn package` on your local copy of Jenkins. Navigate in your local Jenkins repo to `…\war\target` and you will see a war file for you to use later.
 
 ### Testing with this ATH
 1) Clone a copy of this ATH repo to your local machine and `cd` into the directory
