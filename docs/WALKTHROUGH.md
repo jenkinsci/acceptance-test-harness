@@ -33,8 +33,7 @@ If you want to run all the tests, run `mvn test`, if you want to run a specific 
 
 ### Tips and tricks
 - When running your tests with `mvn test`, adding the parameter `-DforkCount=` with a number higher than 1 will run tests in parallel. This is useful for running tests in a shorter amount of time. See [here](https://maven.apache.org/surefire/maven-surefire-plugin/examples/fork-options-and-parallel-execution.html) for more details.
-- If you make changes to your local jenkins version after running ATH tests, and you want to re-run the tests again, make sure you:
-  - run `mvn package` again in your local jenkins repository
+- If you make changes to your local jenkins version after running ATH tests, and you want to re-run the tests again, make sure you run `mvn package` again in your local jenkins repository
 
 ## Debugging
 > **Note:** there are lots of good IDEs out there, I will be using IntelliJ for this walkthrough.
