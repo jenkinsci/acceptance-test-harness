@@ -8,7 +8,7 @@ In this walkthrough I will be using Docker, IntelliJ and a terminal.
 
 1) Make your own fork of https://github.com/jenkinsci/jenkins
 2) Clone the fork to your local machine
-> **Note:** The next two steps are optional, this makes it easy to make a PR to Jenkins if you wish to do so later
+> **Note** The next two steps are optional, this makes it easy to make a PR to Jenkins if you wish to do so later
 3) Create a new branch and give it a sensible name
 4) Make your changes to your copy of Jenkins, commit changes to your branch, feel free to push your changes to your local fork 
 
