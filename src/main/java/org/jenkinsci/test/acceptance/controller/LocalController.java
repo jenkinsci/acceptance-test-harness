@@ -1,8 +1,5 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
-import com.github.olivergondza.dumpling.model.ModelObject;
-import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -11,7 +8,10 @@ import jakarta.inject.Named;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.lang.ProcessBuilder.Redirect;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
@@ -342,15 +344,16 @@ public abstract class LocalController extends JenkinsController implements LogLi
         }
         try {
             long pid = proc.pid();
-            ThreadDumpRuntime runtime = new PidRuntimeFactory().fromProcess(pid);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream printStream = new PrintStream(baos);
-            runtime.toString(printStream, ModelObject.Mode.MACHINE);
-            printStream.close();
-            return baos.toString();
+            ProcessBuilder pb = new ProcessBuilder("jstack", "-l", Long.toString(pid));
+            pb.redirectErrorStream(true);
+            Process jstackProc = pb.start();
+            jstackProc.getOutputStream().close();
+            try (InputStream is = jstackProc.getInputStream()) {
+                return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            }
         } catch (UnsupportedOperationException ignored) {
             // ignored
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             throw new AssertionError(e);
         }
         return null;

@@ -106,17 +106,6 @@
       <version>0.38.20</version>
     </dependency>
     <dependency>
-      <groupId>com.github.olivergondza.dumpling</groupId>
-      <artifactId>dumpling</artifactId>
-      <version>2.6</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.code.findbugs</groupId>
-          <artifactId>jsr305</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
       <optional>true</optional>

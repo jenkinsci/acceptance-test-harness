@@ -8,9 +8,10 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
  * @author Kohsuke Kawaguchi
  */
 public class ProjectMatrixProperty extends PageAreaImpl {
-    public final Control enable = control("useProjectSecurity");
 
-    public final Control name = control(/* 2.x */"useProjectSecurity/[1]/data", /* 1.x */"useProjectSecurity/data");
+    private final Control useProjectSecurity = control("useProjectSecurity");
+
+    private final Control table = control("useProjectSecurity/data");
 
     public ProjectMatrixProperty(Job job) {
         super(job, "/properties/hudson-security-AuthorizationMatrixProperty");
@@ -20,7 +21,7 @@ public class ProjectMatrixProperty extends PageAreaImpl {
      * Adds a new user/group to this matrix.
      */
     public MatrixRow addUser(String name) {
-        runThenHandleAlert(() -> this.name.resolve().findElement(by.xpath("../div/span/span/button | ../div/button")).click(),
+        runThenHandleAlert(() -> this.table.resolve().findElement(by.xpath("../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']")).click(),
                 a -> {
             a.sendKeys(name);
             a.accept();
@@ -33,5 +34,19 @@ public class ProjectMatrixProperty extends PageAreaImpl {
      */
     public MatrixRow getUser(String name) {
         return new MatrixRow(this,"useProjectSecurity/data/USER:"+name);
+    }
+
+    /**
+     * Enable project based security for this project.
+     */
+    public void enable() {
+        useProjectSecurity.check(true);
+    }
+
+    /**
+     * Disables project based security for this project.
+     */
+    public void disable() {
+        useProjectSecurity.check(false);
     }
 }
