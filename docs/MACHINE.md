@@ -67,8 +67,8 @@ To run Jenkins on EC2 Machine with multi-tenant Machines:
         ...
     }
 
-Just like JenkinsController, you can also inject `SlaveController`. See [SlaveController](SLAVE.md) on how to bind Jenkins
-masters and slaves as different SubWorlds.
+Just like JenkinsController, you can also inject `SlaveController`. See [SlaveController](AGENT.md) on how to bind Jenkins
+masters and agents as different SubWorlds.
 
 ## Machine pooling
 
