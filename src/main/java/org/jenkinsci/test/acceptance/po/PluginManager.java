@@ -93,7 +93,6 @@ public class PluginManager extends ContainerPageObject {
                 if (current.equals(getCurrentUrl())) {
                     return true;
                 }
-                return true;
             } catch(NoSuchElementException e) {
                 return false;
             }
