@@ -19,6 +19,8 @@ The simplest way to start the harness is calling `BROWSER=firefox JENKINS_VERSIO
 takes hours to run due to the number of covered components/use-cases, the cost of Jenkins setup, and selenium interactions.
 That can be avoided by selecting a subset of tests to be run - smoke tests for instance.
 
+Here is a [walkthrough](docs/WALKTHROUGH.md) for running ATH tests on changes made to a local version of Jenkins.
+
 ## Running tests
 
 The harness provides a variety of ways to configure the execution including:
