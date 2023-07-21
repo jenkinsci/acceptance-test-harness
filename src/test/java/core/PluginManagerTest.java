@@ -48,9 +48,15 @@ public class PluginManagerTest extends AbstractJUnitTest {
     @WithPlugins("gerrit-trigger")
     public void uninstall_plugin() throws InterruptedException, ExecutionException {
         jenkins.getPluginManager().visit("installed");
-        WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
-        form.submit();
-        waitFor(form).until(CapybaraPortingLayerImpl::isStale);
+        try {
+            WebElement uninstallButton = find(by.xpath(".//button[./@data-href = 'plugin/gerrit-trigger/doUninstall']"));
+            uninstallButton.click();
+            waitFor(by.button("Yes"));
+        } catch (NoSuchElementException te) {
+            WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
+            form.submit();
+            waitFor(form).until(CapybaraPortingLayerImpl::isStale);
+        }
         clickButton("Yes");
         jenkins.restart();
         jenkins.getPluginManager().visit("installed");

@@ -93,7 +93,7 @@ public class User extends ContainerPageObject {
 
     public void delete() {
         try {
-            runThenConfirmAlert(() -> clickLink("Delete"),2);
+            runThenHandleDialog(() -> clickLink("Delete"));
         } catch (TimeoutException te) {
             visit("delete");
             clickButton("Yes");

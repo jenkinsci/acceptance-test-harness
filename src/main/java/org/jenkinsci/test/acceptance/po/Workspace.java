@@ -33,7 +33,7 @@ public class Workspace extends PageObject {
 
     public void wipeOut() {
         open();
-        runThenConfirmAlert(() -> clickLink("Wipe Out Current Workspace"));
+        runThenHandleDialog(() -> clickLink("Wipe Out Current Workspace"));
     }
 
     public static Matcher<Job> workspaceContains(final String file) {
