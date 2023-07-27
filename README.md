@@ -55,7 +55,7 @@ without author's notice for the sake of suite reliability.
 * Writing tests
     * [Video tutorial](https://www.youtube.com/watch?v=ZHAiywgMG-M) by Kohsuke on how to write tests
     * [Writing JUnit test](docs/JUNIT.md)
-* [Testing slaves](docs/SLAVE.md)
+* [Testing agents](docs/AGENT.md)
 * [Hamcrest matchers](docs/MATCHERS.md)
 * [EC2 provider configuration](docs/EC2-CONFIG.md)
 * [Investigation](docs/INVESTIGATION.md)
