@@ -72,7 +72,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         if (shouldContain) {
             portlet.openJob(jobName);
 
-            assertThat(driver, hasContent("Project " + jobName));
+            assertThat(driver, hasContent(jobName));
             assertThat(getCurrentUrl().contains(jobName), is(true));
         }
     }
