@@ -301,7 +301,7 @@ public class Build extends ContainerPageObject {
     }
 
     public String getDisplayName() {
-        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]/h1"));
+        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]//h1"));
         return displayNameElement.getText();
     }
 
