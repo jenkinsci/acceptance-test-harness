@@ -56,7 +56,7 @@ public abstract class View extends ContainerPageObject {
     public void delete() {
         configure();
         try {
-            runThenConfirmAlert(() -> clickLink("Delete View"), 2);
+            runThenHandleDialog(() -> clickLink("Delete View"));
         } catch (TimeoutException te) {
             visit("delete");
             waitFor(by.button("Yes"));

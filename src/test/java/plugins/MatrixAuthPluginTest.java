@@ -119,7 +119,7 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         j.configure();
         {
             ProjectMatrixProperty p = new ProjectMatrixProperty(j);
-            p.enable.check();
+            p.enable();
             MatrixRow bob = p.addUser("bob");
             bob.on(MatrixRow.ITEM_READ);
         }

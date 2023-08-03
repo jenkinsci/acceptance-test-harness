@@ -301,7 +301,7 @@ public class Build extends ContainerPageObject {
     }
 
     public String getDisplayName() {
-        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]/h1"));
+        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]//h1"));
         return displayNameElement.getText();
     }
 
@@ -313,7 +313,7 @@ public class Build extends ContainerPageObject {
 
         if (isInProgress()) {
             WebElement stopButton = find(by.href("stop"));
-            runThenConfirmAlert(stopButton::click);
+            runThenHandleDialog(stopButton::click);
         }
     }
 
