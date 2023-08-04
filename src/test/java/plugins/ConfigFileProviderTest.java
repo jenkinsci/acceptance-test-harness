@@ -20,7 +20,6 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Alert;
 
 /**
  * Tests config-file-provider plugin inside a Pipeline.
@@ -163,10 +162,11 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         // We want to delete the config file and re-run the job to see it fail
         jenkins.visit("configfiles");
-        driver.findElement(
+        runThenHandleDialog(() -> {
+            driver.findElement(
                 by.xpath("//td/code['%s']/parent::td/parent::tr/td[1]/a[2]", mvnConfig.id()) // this won't age well
-        ).click();
-        handleAlert(Alert::accept);
+            ).click();
+        });
 
         jobLog = this.buildJobAndGetConsole(job, false);
 

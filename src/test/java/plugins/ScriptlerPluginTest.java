@@ -43,7 +43,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore("Needs adapting to https://github.com/jenkinsci/scriptler-plugin/pull/59, see https://github.com/jenkinsci/acceptance-test-harness/issues/1239")
 @WithPlugins("scriptler")
 public class ScriptlerPluginTest extends AbstractJUnitTest {
 

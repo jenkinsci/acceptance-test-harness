@@ -16,7 +16,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
     private final Control lookOnFilesystem = control(by.radioButton("Look on Filesystem"));
 
     private final Control targets = control("targets");
-    private final Control expandTargetsArea = control(by.xpath("//div[div/input[@id='textarea._.targets' and @name='_.targets']]//input[@type='button']"));
+    private final Control expandTargetsArea = control(by.xpath("//div[div/input[@id='textarea._.targets' and @name='_.targets']]//*[@type='button']"));
     private final Control ignoreMissingFiles = control("ignoreMissingFiles");
 
     private final Control useSandbox = control("sandbox");
@@ -32,7 +32,7 @@ public class JobDslBuildStep extends AbstractStep implements BuildStep {
 
     private final Control lookupStrategy = control("lookupStrategy");
     private final Control additionalClasspath = control("additionalClasspath");
-    private final Control expandClasspathArea = control(by.xpath("//div[div/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//input[@type='button']"));
+    private final Control expandClasspathArea = control(by.xpath("//div[div/input[@id='textarea._.additionalClasspath' and @name='_.additionalClasspath']]//*[@type='button']"));
 
     private final Control failOnMissingPlugin = control("failOnMissingPlugin");
     private final Control unstableOnDeprecation = control("unstableOnDeprecation");

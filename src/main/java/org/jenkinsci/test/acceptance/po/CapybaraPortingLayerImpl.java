@@ -23,6 +23,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -387,6 +388,26 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public void check(String locator) {
         check(find(by.checkbox(locator)));
+    }
+
+    /**
+     * Helper to execute something that shows a confirmation dialog
+     * with a "Yes" button or a classical browser confirm
+     *
+     * Executes the runnable, wait for "Yes" button
+     * of the modal dialog and presses the "Yes" button"
+     * In case the runnable opens a classical browse dialog this is accepted.
+     *
+     * @param runnable
+     */
+    public void runThenHandleDialog(Runnable runnable) {
+        try {
+            runnable.run();
+            waitFor(by.button("Yes"));
+            clickButton("Yes");
+        } catch (UnhandledAlertException uae) {
+            runThenConfirmAlert(runnable, 2);
+        }
     }
 
     public void handleAlert(Consumer<Alert> action) {

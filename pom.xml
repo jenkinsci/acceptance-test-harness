@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.98</version>
+    <version>1.103</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -31,12 +31,12 @@
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
 
-    <jenkins.version>2.411-rc33882.de52c6482e63</jenkins.version>
-    <selenium.version>4.9.1</selenium.version>
+    <jenkins.version>2.417</jenkins.version>
+    <selenium.version>4.10.0</selenium.version>
     <guava.version>32.0.0-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
     <maven-resolver.version>1.6.2</maven-resolver.version>
-    <groovy.version>3.0.17</groovy.version>
+    <groovy.version>3.0.18</groovy.version>
     <monte.version>0.7.7.0</monte.version>
     <slf4j.version>2.0.7</slf4j.version>
     <jffi.version>1.3.11</jffi.version>
@@ -107,17 +107,6 @@
       <version>0.38.20</version>
     </dependency>
     <dependency>
-      <groupId>com.github.olivergondza.dumpling</groupId>
-      <artifactId>dumpling</artifactId>
-      <version>2.6</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.code.findbugs</groupId>
-          <artifactId>jsr305</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
       <optional>true</optional>
@@ -177,7 +166,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version>
+      <version>3.13.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -207,7 +196,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>1.73</version>
+      <version>1.76</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
@@ -227,7 +216,7 @@
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>crypto-util</artifactId>
-      <version>1.8</version>
+      <version>1.9</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci</groupId>
@@ -251,17 +240,17 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3107.v665000b_51092</version>
+      <version>3142.vcfca_0cd92128</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>166.v912b_95083ffe</version>
+      <version>178.v2c7d2343886b_</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20230227</version>
+      <version>20230618</version>
     </dependency>
     <dependency>
       <groupId>org.kohsuke</groupId>
@@ -317,7 +306,7 @@
     <dependency>
       <groupId>org.zeroturnaround</groupId>
       <artifactId>zt-zip</artifactId>
-      <version>1.15</version>
+      <version>1.16</version>
     </dependency>
     <!--
       This is just for dependency updates.
@@ -373,20 +362,20 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.93.Final</version>
+        <version>4.1.96.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.12.0</version>
+        <version>2.13.0</version>
       </dependency>
       <!-- RequireUpperBoundDeps between Mockito and Selenium -->
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.14.4</version>
+        <version>1.14.5</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -434,26 +423,16 @@ and
     <defaultGoal>test</defaultGoal>
     <plugins>
       <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-          <additionalparam>-Xdoclint:none</additionalparam>
+          <doclint>none</doclint>
         </configuration>
         <executions>
           <execution>
             <id>attach-javadocs</id>
             <configuration>
-              <additionalparam>-Xdoclint:none</additionalparam>
+              <doclint>none</doclint>
             </configuration>
           </execution>
         </executions>
@@ -797,7 +776,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.387.3</jenkins.version>
+        <jenkins.version>2.401.3</jenkins.version>
       </properties>
     </profile>
   </profiles>

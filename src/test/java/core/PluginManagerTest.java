@@ -45,15 +45,22 @@ public class PluginManagerTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithPlugins("gerrit-trigger")
+    @WithPlugins("matrix-auth")
     public void uninstall_plugin() throws InterruptedException, ExecutionException {
         jenkins.getPluginManager().visit("installed");
-        WebElement form = find(by.action("plugin/gerrit-trigger/uninstall"));
-        form.submit();
-        waitFor(form).until(CapybaraPortingLayerImpl::isStale);
+        try {
+            WebElement uninstallButton = find(by.xpath(".//button[./@data-href = 'plugin/matrix-auth/doUninstall']"));
+            uninstallButton.click();
+            waitFor(by.button("Yes"));
+        } catch (NoSuchElementException te) {
+            // TODO remove this handling when Jenkins 2.415 is the lowest we support
+            WebElement form = find(by.action("plugin/matrix-auth/uninstall"));
+            form.submit();
+            waitFor(form).until(CapybaraPortingLayerImpl::isStale);
+        }
         clickButton("Yes");
         jenkins.restart();
         jenkins.getPluginManager().visit("installed");
-        assertThrows(NoSuchElementException.class, () -> find(by.url("plugin/gerrit-trigger")));
+        assertThrows(NoSuchElementException.class, () -> find(by.url("plugin/matrix-auth")));
     }
 }
