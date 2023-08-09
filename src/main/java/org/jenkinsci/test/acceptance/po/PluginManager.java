@@ -220,10 +220,13 @@ public class PluginManager extends ContainerPageObject {
             // End JENKINS-50790
 
             final ArrayList<PluginSpec> update = new ArrayList<>();
+
+            boolean somePluginsInstalled = false; // track if we have nothing to install.
             for (final PluginSpec n : specs) {
                 switch (installationStatus(n)) {
                     case NOT_INSTALLED:
                         tickPluginToInstall(n);
+                        somePluginsInstalled = true;
                     break;
                     case OUTDATED:
                         update.add(n);
@@ -234,8 +237,10 @@ public class PluginManager extends ContainerPageObject {
                     default: assert false: "Unreachable";
                 }
             }
-
-            clickButton("Install");
+            if (somePluginsInstalled) {
+                // don't attempt to click install if there is nothing to install (e.g. we are updating)
+                control(by.button("Install")).clickAndWaitToBecomeStale();
+            }
 
             // Plugins that are already installed in older version will be updated
             System.out.println("Plugins to be updated: " + update);
@@ -247,16 +252,16 @@ public class PluginManager extends ContainerPageObject {
 
                 // Temporary until https://github.com/jenkinsci/jenkins/pull/8025 is in LTS
                 if (find(by.button("Download now and install after restart")) != null) {
-                    clickButton("Download now and install after restart");
+                    control(by.button("Download now and install after restart")).clickAndWaitToBecomeStale();
                 } else {
-                    clickButton("Update");
+                    control(by.button("Update")).clickAndWaitToBecomeStale();
                 }
             }
         }
 
         // Jenkins will be restarted if necessary
         boolean hasBeenRestarted = new UpdateCenter(jenkins).waitForInstallationToComplete(specs);
-        if (!hasBeenRestarted && specs.length > 0 && jenkins.getVersion().isNewerThan(new VersionNumber("2.188"))) {
+        if (!hasBeenRestarted && specs.length > 0) {
             jenkins.getLogger("all").waitForLogged(Pattern.compile("Completed installation of .*"), 1000);
         }
 
