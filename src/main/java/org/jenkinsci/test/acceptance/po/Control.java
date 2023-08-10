@@ -11,6 +11,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -118,7 +119,7 @@ public class Control extends CapybaraPortingLayerImpl {
         WebElement webElement = resolve();
         // webElement.submit() despite advertising it does exactly this just blows up :(
         webElement.click();
-        waitFor(webElement).withTimeout(timeout).until(Control::isStale);
+        waitFor(webElement).withTimeout(timeout).until(Control::isHiddenOrStale);
     }
 
 
@@ -185,7 +186,7 @@ public class Control extends CapybaraPortingLayerImpl {
         waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(() -> !we.isDisplayed());
+        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(10)).until(Control::isHiddenOrStale);
     }
 
     public void selectDropdownMenu(String displayName) {
@@ -206,22 +207,26 @@ public class Control extends CapybaraPortingLayerImpl {
         @Override
         protected WebElement find(String caption) {
             WebElement menuButton = resolve();
-
-            // With enough implementations registered the one we are looking for might
-            // require scrolling in menu to become visible. This dirty hack stretch
-            // yui menu so that all the items are visible.
-            executeScript("" +
-                            "YAHOO.util.Dom.batch(" +
-                            "    document.querySelector('.yui-menu-body-scrolled')," +
-                            "    function (el) {" +
-                            "        el.style.height = 'auto';" +
-                            "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
-                            "    }" +
-                            ");"
-            );
-            // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
-            WebElement menu = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-            return findElement(menu, by.link(caption));
+            try {
+                WebElement menu = findElement(menuButton, by.xpath(".."));
+                return findElement(menu, by.button(caption));
+            } catch (NoSuchElementException e) {
+                // With enough implementations registered the one we are looking for might
+                // require scrolling in menu to become visible. This dirty hack stretch
+                // yui menu so that all the items are visible.
+                executeScript("" +
+                        "YAHOO.util.Dom.batch(" +
+                        "    document.querySelector('.yui-menu-body-scrolled')," +
+                        "    function (el) {" +
+                        "        el.style.height = 'auto';" +
+                        "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
+                        "    }" +
+                        ");"
+                );
+                // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
+                WebElement menu = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+                return findElement(menu, by.link(caption));
+            }
         }
     };
 

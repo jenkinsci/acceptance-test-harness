@@ -366,6 +366,14 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
+    protected static boolean isHiddenOrStale(WebElement we) {
+        try {
+            return !we.isDisplayed();
+        } catch (StaleElementReferenceException ser) {
+            return true;
+        }
+    }
+
     /**
      * Executes JavaScript.
      */
