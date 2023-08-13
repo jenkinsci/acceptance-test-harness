@@ -64,30 +64,30 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
     @Test
     public void autoinstall_maven_for_freestyle_job() {
-        MavenInstallation.installMaven(jenkins, "maven_3.6.3", "3.6.3");
+        MavenInstallation.installMaven(jenkins, "maven_3.9.4", "3.9.4");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
-        step.version.select("maven_3.6.3");
+        step.version.select("maven_3.9.4");
         step.targets.set("-version");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.6.3");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.9.4");
     }
 
     @Test
     public void autoinstall_maven3_for_freestyle_job() {
-        MavenInstallation.installMaven(jenkins, "maven_3.6.3", "3.6.3");
+        MavenInstallation.installMaven(jenkins, "maven_3.9.4", "3.9.4");
 
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         MavenBuildStep step = job.addBuildStep(MavenBuildStep.class);
-        step.version.select("maven_3.6.3");
+        step.version.select("maven_3.9.4");
         step.targets.set("-version");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.6.3");
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Apache Maven 3.9.4");
     }
 
     @Test

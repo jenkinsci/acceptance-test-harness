@@ -46,7 +46,7 @@ public class DeclarativePipelineTest extends AbstractJUnitTest {
         Build helloWorldBuild = helloWorldJob.startBuild().shouldSucceed();
         assertThat(helloWorldBuild.getConsole(), containsRegexp("Hello world", Pattern.MULTILINE));
 
-        MavenInstallation.installMaven(jenkins, "M3", "3.1.0");
+        MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
         slave.configure((Callable<Void>) () -> {
             slave.labels.set("remote");
@@ -83,7 +83,7 @@ public class DeclarativePipelineTest extends AbstractJUnitTest {
         Build toolsEnvAgentBuild = toolsEnvAgentJob.startBuild().shouldSucceed();
         String toolsEnvAgentConsole = toolsEnvAgentBuild.getConsole();
         assertThat(toolsEnvAgentConsole, containsRegexp("\\(first\\)", Pattern.MULTILINE));
-        assertThat(toolsEnvAgentConsole, containsRegexp("Apache Maven 3\\.1\\.0", Pattern.MULTILINE));
+        assertThat(toolsEnvAgentConsole, containsRegexp("Apache Maven 3\\.9\\.4", Pattern.MULTILINE));
         assertThat(toolsEnvAgentConsole, containsRegexp("\\(second\\)", Pattern.MULTILINE));
         assertThat(toolsEnvAgentConsole, containsRegexp("FOO is BAR", Pattern.MULTILINE));
 
