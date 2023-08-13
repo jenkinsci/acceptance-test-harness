@@ -50,7 +50,12 @@ public class BuildTimeout extends PageAreaImpl {
     public void abortBuild() {
         if (addAction != null) {
             addAction.click();
-            clickLink("Abort the build");
+            try {
+                waitFor(by.button("Abort the build"));
+                clickButton("Abort the build");
+            } catch (NoSuchElementException te) {
+                clickLink("Abort the build");
+            }
         }
     }
 
