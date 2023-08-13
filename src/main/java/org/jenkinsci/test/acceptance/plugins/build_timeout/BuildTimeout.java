@@ -65,7 +65,12 @@ public class BuildTimeout extends PageAreaImpl {
         }
         catch (NoSuchElementException ex) {
             addAction.click();
-            clickLink("Writing the build description");
+            try {
+                waitFor(by.button("Writing the build description"));
+                clickButton("Writing the build description");
+            } catch (NoSuchElementException te) {
+                clickLink("Writing the build description");
+            }
         }
     }
 }
