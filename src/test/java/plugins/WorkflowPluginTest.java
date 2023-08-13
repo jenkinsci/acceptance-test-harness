@@ -125,7 +125,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
             "node('remote') {\n" +
-            "  git 'https://github.com/jglick/simple-maven-project-with-tests.git'\n" +
+            "  git 'https://github.com/jenkinsci/hello-world-maven-builder.git'\n" +
             "  def v = version()\n" +
             "  if (v) {\n" +
             "    echo(/Building version $v/)\n" +
@@ -167,7 +167,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             // TODO if resultIs were public and there were a disjunction combinator for Matcher we could use it here.
             build.shouldBeUnstable();
         }
-        new Artifact(build, "target/simple-maven-project-with-tests-1.0-SNAPSHOT.jar").assertThatExists(true);
+        new Artifact(build, "target/example-1.0-SNAPSHOT.jar").assertThatExists(true);
         build.open();
         clickLink("Test Result");
         assertThat(driver, hasContent("All Tests"));
