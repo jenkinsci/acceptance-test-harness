@@ -196,7 +196,7 @@ public class Control extends CapybaraPortingLayerImpl {
         waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(() -> !we.isDisplayed());
+        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(Control::isHiddenOrStale);
     }
 
     /**
