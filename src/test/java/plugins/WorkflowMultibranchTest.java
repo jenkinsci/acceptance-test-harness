@@ -30,7 +30,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     @Before
     public void setup() {
-        MavenInstallation.installMaven(jenkins, "M3", "3.3.9");
+        MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
     }
 
     @Ignore("cannot run quickly as anonymous due to github rate limiting")

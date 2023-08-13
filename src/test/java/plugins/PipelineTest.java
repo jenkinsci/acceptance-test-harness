@@ -50,7 +50,7 @@ public class PipelineTest extends AbstractPipelineTest {
 
     @Before
     public void setup() {
-        MavenInstallation.installMaven(jenkins, "M3", "3.6.3");
+        MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
     }
 
     @Test
