@@ -109,7 +109,7 @@ for (int i = 0; i < splits.size(); i++) {
             checkout scm
             sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
             def cwd = pwd()
-            docker.image('jenkins/ath').inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
+            docker.image('jenkins/ath').inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g --add-host jenkins.127.0.0.1.sslip.io:127.0.0.1") {
               def exclusions = splits.get(index).join('\n')
               writeFile file: 'excludes.txt', text: exclusions
               infra.withArtifactCachingProxy {
