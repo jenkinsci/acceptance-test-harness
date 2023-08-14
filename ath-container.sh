@@ -37,5 +37,6 @@ docker run \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v "$(pwd):/home/ath-user/sources" \
 	-v "${HOME}/.m2/repository:/home/ath-user/.m2/repository" \
+	--add-host jenkins.127.0.0.1.sslip.io:127.0.0.1 \
 	$tag \
 	/bin/bash -c "set-java.sh $java_version; bash"
