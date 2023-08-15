@@ -38,14 +38,14 @@ RUN apt-get update && \
 
 # JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk21-2023-08-09-06-56-beta/OpenJDK21U-jdk_aarch64_linux_hotspot_2023-08-09-06-56.tar.gz
 ARG JDK21_VERSION=2023-08-09-06-56-beta
-RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk21-${JDK21_VERSION}/OpenJDK21U-jdk_x64_linux_hotspot_${JDK21_VERSION//-beta/}.tar.gz" \
-  && mkdir /usr/lib/jvm/java-21-openjdk-amd64 \
-  && tar -C /usr/lib/jvm/java-21-openjdk-amd64 -xzf /tmp/jdk21.tar.gz --strip-components=1 \
+RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk21-${JDK21_VERSION}/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION//-beta/}.tar.gz" \
+  && mkdir "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" \
+  && tar -C "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" -xzf /tmp/jdk21.tar.gz --strip-components=1 \
   && rm -fv /tmp/jdk21.tar.gz
-RUN update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-21-openjdk-amd64/bin/java 21 \
-  && update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-21-openjdk-amd64/bin/javac 21 \
-  && update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java \
-  && update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
+RUN update-alternatives --install /usr/bin/java java "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/java" 21 \
+  && update-alternatives --install /usr/bin/javac javac "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/javac" 21 \
+  && update-alternatives --set java "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/java" \
+  && update-alternatives --set javac "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/javac"
 
 # Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
 ARG FIREFOX_VERSION=108.0.2
