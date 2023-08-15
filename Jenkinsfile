@@ -41,13 +41,13 @@ if (needSplittingFromWorkspace) {
 def axes = [
   jenkinsVersions: ['lts', 'latest'],
   platforms: ['linux'],
-  jdks: ['17'],
+  jdks: [11, 21],
   browsers: ['firefox'],
 ]
 
 stage('Record builds and sessions') {
   retry(conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()], count: 2) {
-    node('maven-17') {
+    node('maven-21') {
       infra.checkoutSCM()
       def athCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
@@ -81,7 +81,7 @@ stage('Record builds and sessions') {
 branches['CI'] = {
   stage('CI') {
     retry(count: 2, conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()]) {
-      node('maven-17') {
+      node('maven-21') {
         checkout scm
         def mavenOptions = [
           '-Dset.changelist',
@@ -90,7 +90,7 @@ branches['CI'] = {
           'clean',
           'install',
         ]
-        infra.runMaven(mavenOptions, 17)
+        infra.runMaven(mavenOptions, 21)
         infra.prepareToPublishIncrementals()
       }
     }
@@ -101,6 +101,12 @@ for (int i = 0; i < splits.size(); i++) {
   int index = i
   axes.values().combinations {
     def (jenkinsVersion, platform, jdk, browser) = it
+    if (jdk == 21 && jenkinsVersion != 'latest') {
+      return
+    }
+    if (jdk != 21 && jenkinsVersion == 'latest') {
+      return
+    }
     def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
     branches[name] = {
       stage(name) {
