@@ -8,12 +8,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
+import static org.junit.Assert.*;
+
 @WithDocker
 @Category(DockerTest.class)
 @WithPlugins("gitlab-plugin")
-@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitlab-plugin"})
+@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitlabplugin", "/org/jenkinsci/test/acceptance/docker/fixtures/GitLabContainer"})
 public class GitLabPluginTest extends AbstractJUnitTest {
-    private static final String USERNAME = "gitplugin";
 
     @Inject
     DockerContainerHolder<GitLabContainer> gitLabServer;
@@ -34,8 +35,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Test
     public void dummy_test() {
-        System.out.println(container.getRepoUrl());
-        System.out.println(container.host());
-        System.out.println(container.port());
+        assertNotNull(container.getRepoUrl());
+        assertTrue(container.getRepoUrl().contains("ssh://git@"));
+        assertNotNull(container.host());
     }
 }
