@@ -7,6 +7,7 @@ import org.jenkinsci.test.acceptance.junit.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import okhttp3.Response;
 
 import static org.junit.Assert.*;
 
@@ -38,5 +39,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertNotNull(container.getRepoUrl());
         assertTrue(container.getRepoUrl().contains("ssh://git@"));
         assertNotNull(container.host());
+    }
+
+    @Test
+    public void createRepo() {
+        //This sends a request to make a new repo in the gitlab server with the name "testrepo" + a random number
+        //The random number is there so that the test can be run multiple times without failing
+        Response response = container.createRepo("testrepo"+(int)Math.floor(Math.random()*100));
+        assertEquals(201, response.code()); // 201 means the repo was created successfully
     }
 }
