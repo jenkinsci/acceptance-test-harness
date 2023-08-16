@@ -40,15 +40,5 @@ public class GitLabContainer extends DockerContainer {
     public String getRepoUrlInsideDocker(String alias) throws IOException {
         return "ssh://git@" + alias + REPO_DIR;
     }
-
-    /**
-     * Add an additional certificate to {@code ~/.ssh/authorized_keys}
-     * @param pubKey the certificate public key
-     */
-    public void addSSHCertificate(String pubKey) throws IOException, InterruptedException {
-        Docker.cmd("exec", getCid()).add("/bin/bash",  "-c",  "echo " + pubKey + " >> /home/git/.ssh/authorized_keys")
-                .popen()
-                .verifyOrDieWith("Unable to add SSH public key to authorized keys");
-    }
-
+    
 }
