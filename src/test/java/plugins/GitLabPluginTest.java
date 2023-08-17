@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import okhttp3.Response;
-
 import static org.junit.Assert.*;
 
 @WithDocker
@@ -31,7 +30,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         repoUrl = container.getRepoUrl();
         host = container.host();
         port = container.port();
-
     }
 
     @Test
@@ -44,8 +42,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @Test
     public void createRepo() {
         //This sends a request to make a new repo in the gitlab server with the name "testrepo" + a random number (random number is there so the test can be run multiple times without failing)
-        //TODO: This test fails if there is already a repo with the same name, make a delete repo method and delete repo after making it, then we can remove the random number and test should pass every time
-        Response response = container.createRepo("testrepo"+(int)Math.floor(Math.random()*100));
+        Response response = container.createRepo("testrepo");
         assertEquals(201, response.code()); // 201 means the repo was created successfully
+
+        // delete the repo when finished
+        container.deleteRepo();
     }
 }

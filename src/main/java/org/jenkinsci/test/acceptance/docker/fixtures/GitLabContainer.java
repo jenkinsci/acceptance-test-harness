@@ -1,6 +1,9 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import org.jenkinsci.test.acceptance.docker.Docker;
+import org.gitlab4j.api.GitLabApi;
+import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.ProjectApi;
+import org.gitlab4j.api.models.Project;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
@@ -13,13 +16,16 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static org.junit.Assert.assertTrue;
+
 @DockerFixture(id = "gitlab-plugin", ports = 22)
 public class GitLabContainer extends DockerContainer {
     protected static final String REPO_DIR = "/home/gitlab/gitlabRepo";
 
-    private final String PRIVATE_TOKEN ="TEMP_TOKEN"; //TODO: Change this for a real token
+    private final String PRIVATE_TOKEN ="glpat-vvCBF-x5K2qYsiGezMm3"; //TODO: Change this for a real token
 
     private static OkHttpClient client = new OkHttpClient();
+
 
     public String host() {
         return ipBound(22);
@@ -68,4 +74,17 @@ public class GitLabContainer extends DockerContainer {
         return response;
     }
 
+    public void deleteRepo() {
+        // get the project id and delete the project
+        GitLabApi gitlabapi = new GitLabApi("http://localhost/", PRIVATE_TOKEN);
+        ProjectApi projApi = new ProjectApi(gitlabapi);
+
+        try {
+            Project project = projApi.getProjects().get(0);
+            projApi.deleteProject(project.getId());
+            assertTrue(projApi.getProjects().size()==0);
+        } catch (GitLabApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
