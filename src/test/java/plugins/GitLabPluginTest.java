@@ -8,6 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import okhttp3.Response;
+
+import java.io.IOException;
+
 import static org.junit.Assert.*;
 
 @WithDocker
@@ -24,12 +27,26 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     private String host;
     private int port;
 
+    private String privateToken;
+
+    public String getPrivateToken() {
+        return privateToken;
+    }
+
     @Before
     public void init() {
         container = gitLabServer.get();
         repoUrl = container.getRepoUrl();
         host = container.host();
         port = container.port();
+
+        try {
+            privateToken = container.createUserToken();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -41,11 +58,19 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Test
     public void createRepo() {
-        //This sends a request to make a new repo in the gitlab server with the name "testrepo" + a random number (random number is there so the test can be run multiple times without failing)
-        Response response = container.createRepo("testrepo");
-        assertEquals(201, response.code()); // 201 means the repo was created successfully
+        //This sends a request to make a new repo in the gitlab server with the name "testrepo")
+        try {
+            Response response = container.createRepo("testrepo", getPrivateToken());
+            assertEquals(201, response.code()); // 201 means the repo was created successfully
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        // delete the repo when finished
-        container.deleteRepo();
+        try {
+            // delete the repo when finished
+            container.deleteRepo(getPrivateToken());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -4,6 +4,7 @@ import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.ProjectApi;
 import org.gitlab4j.api.models.Project;
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
@@ -22,10 +23,7 @@ import static org.junit.Assert.assertTrue;
 public class GitLabContainer extends DockerContainer {
     protected static final String REPO_DIR = "/home/gitlab/gitlabRepo";
 
-    private final String PRIVATE_TOKEN ="glpat-vvCBF-x5K2qYsiGezMm3"; //TODO: Change this for a real token
-
     private static OkHttpClient client = new OkHttpClient();
-
 
     public String host() {
         return ipBound(22);
@@ -57,10 +55,10 @@ public class GitLabContainer extends DockerContainer {
         return "ssh://git@" + alias + REPO_DIR;
     }
 
-    public Response createRepo(String repoName) {
+    public Response createRepo(String repoName, String token) throws IOException {
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, "{ \"name\": \"" + repoName + "\" }");
-        Request request = new Request.Builder().url("http://localhost/api/v4/projects").post(body).addHeader("Content-Type", "application/json").addHeader("PRIVATE-TOKEN", PRIVATE_TOKEN).build();
+        Request request = new Request.Builder().url("http://" + getIpAddress()+"/api/v4/projects").post(body).addHeader("Content-Type", "application/json").addHeader("PRIVATE-TOKEN", token).build();
         return sendRequest(request);
     }
 
@@ -74,9 +72,9 @@ public class GitLabContainer extends DockerContainer {
         return response;
     }
 
-    public void deleteRepo() {
+    public void deleteRepo(String token) throws IOException {
         // get the project id and delete the project
-        GitLabApi gitlabapi = new GitLabApi("http://localhost/", PRIVATE_TOKEN);
+        GitLabApi gitlabapi = new GitLabApi("http://" + getIpAddress(), token);
         ProjectApi projApi = new ProjectApi(gitlabapi);
 
         try {
@@ -86,5 +84,11 @@ public class GitLabContainer extends DockerContainer {
         } catch (GitLabApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public String createUserToken() throws IOException, InterruptedException {
+        return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "gitlab-rails runner -e production /usr/bin/create_user.rb")
+                .popen()
+                .verifyOrDieWith("Unable to create user").trim();
     }
 }
