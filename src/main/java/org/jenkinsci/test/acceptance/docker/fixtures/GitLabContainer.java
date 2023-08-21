@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.io.IOUtils;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.ProjectApi;
@@ -11,15 +9,12 @@ import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 
@@ -100,10 +95,12 @@ public class GitLabContainer extends DockerContainer {
                 .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes
                 .until( () ->  {
                     try {
-                        URLConnection connection = getURL().openConnection();
-                        connection.setConnectTimeout(1000); // Prevent waiting too long for connection to timeout
-                        String s = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
-                        return s.contains("GitLab Community Edition");
+                          HttpRequest request = HttpRequest.newBuilder()
+                                .uri(new URI("http://" + getIpAddress()))
+                                .GET()
+                                .build();
+                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                        return response.body().contains("GitLab Community Edition");
                     } catch (SocketException e) {
                         return null;
                     }
