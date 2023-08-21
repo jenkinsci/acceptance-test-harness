@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.io.IOUtils;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.ProjectApi;
@@ -9,13 +11,19 @@ import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 
 import static org.junit.Assert.assertTrue;
 
@@ -84,6 +92,26 @@ public class GitLabContainer extends DockerContainer {
         } catch (GitLabApiException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public URL getURL() throws IOException {
+        return new URL("http://" + getIpAddress());
+    }
+
+    public void waitForReady(CapybaraPortingLayer p) {
+        p.waitFor().withMessage("Waiting for GitLab to come up")
+                .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes
+                .until( () ->  {
+                    try {
+                        URLConnection connection = getURL().openConnection();
+                        connection.setConnectTimeout(1000); // Prevent waiting too long for connection to timeout
+                        String s = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
+                        return s.contains("GitLab Community Edition");
+                    } catch (SocketException e) {
+                        return null;
+                    }
+
+                });
     }
 
     public String createUserToken() throws IOException, InterruptedException {

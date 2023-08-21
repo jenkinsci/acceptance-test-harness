@@ -39,7 +39,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         repoUrl = container.getRepoUrl();
         host = container.host();
         port = container.port();
-
+        container.waitForReady(this);
+        
         try {
             privateToken = container.createUserToken();
         } catch (InterruptedException e) {
