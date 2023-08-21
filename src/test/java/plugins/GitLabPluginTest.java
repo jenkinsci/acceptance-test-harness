@@ -7,7 +7,8 @@ import org.jenkinsci.test.acceptance.junit.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import okhttp3.Response;
+
+import java.net.http.HttpResponse;
 
 import java.io.IOException;
 
@@ -61,8 +62,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     public void createRepo() {
         //This sends a request to make a new repo in the gitlab server with the name "testrepo")
         try {
-            Response response = container.createRepo("testrepo", getPrivateToken());
-            assertEquals(201, response.code()); // 201 means the repo was created successfully
+            HttpResponse<String> response = container.createRepo("testrepo", getPrivateToken());
+            assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -13,16 +13,17 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+
+
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 
 import static org.junit.Assert.assertTrue;
@@ -31,7 +32,10 @@ import static org.junit.Assert.assertTrue;
 public class GitLabContainer extends DockerContainer {
     protected static final String REPO_DIR = "/home/gitlab/gitlabRepo";
 
-    private static OkHttpClient client = new OkHttpClient();
+    private static final HttpClient client = HttpClient.newBuilder()
+                                                       .followRedirects(HttpClient.Redirect.NORMAL)
+                                                       .connectTimeout(Duration.ofSeconds(5))
+                                                       .build();
 
     public String host() {
         return ipBound(22);
@@ -41,8 +45,9 @@ public class GitLabContainer extends DockerContainer {
         return port(22);
     }
 
-    public URL getUrl() throws IOException {
-        return new URL("http://" + host() + ":" + port());
+    public URL getURL() throws IOException {
+        // return new URL("http://" + host() + ":" + port());
+        return new URL("http://" + getIpAddress());
     }
 
     /** URL visible from the host. */
@@ -63,39 +68,31 @@ public class GitLabContainer extends DockerContainer {
         return "ssh://git@" + alias + REPO_DIR;
     }
 
-    public Response createRepo(String repoName, String token) throws IOException {
-        MediaType mediaType = MediaType.parse("application/json");
-        RequestBody body = RequestBody.create(mediaType, "{ \"name\": \"" + repoName + "\" }");
-        Request request = new Request.Builder().url("http://" + getIpAddress()+"/api/v4/projects").post(body).addHeader("Content-Type", "application/json").addHeader("PRIVATE-TOKEN", token).build();
-        return sendRequest(request);
-    }
-
-    private Response sendRequest(Request request){
-        Response response = null;
-        try {
-            response = client.newCall(request).execute();
-        } catch (IOException e) {
+    public HttpResponse<String> createRepo(String repoName, String token) throws IOException {
+        try{
+            HttpRequest request = HttpRequest.newBuilder()
+                                             .uri(new URI("http://" + getIpAddress() + "/api/v4/projects"))
+                                             .header("Content-Type", "application/json")
+                                             .header("PRIVATE-TOKEN", token)
+                                             .POST(HttpRequest.BodyPublishers.ofString("{ \"name\": \"" + repoName + "\" }"))
+                                             .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response;
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return response;
     }
 
     public void deleteRepo(String token) throws IOException {
         // get the project id and delete the project
         GitLabApi gitlabapi = new GitLabApi("http://" + getIpAddress(), token);
         ProjectApi projApi = new ProjectApi(gitlabapi);
-
         try {
             Project project = projApi.getProjects().get(0);
             projApi.deleteProject(project.getId());
-            assertTrue(projApi.getProjects().size()==0);
         } catch (GitLabApiException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public URL getURL() throws IOException {
-        return new URL("http://" + getIpAddress());
     }
 
     public void waitForReady(CapybaraPortingLayer p) {

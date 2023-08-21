@@ -56,11 +56,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp</artifactId>
-      <version>5.0.0-alpha.11</version>
-    </dependency>
-    <dependency>
       <groupId>org.gitlab4j</groupId>
       <artifactId>gitlab4j-api</artifactId>
       <version>5.2.0</version>
@@ -265,11 +260,6 @@
       <groupId>org.kohsuke</groupId>
       <artifactId>wordnet-random-name</artifactId>
       <version>1.5</version>
-    </dependency>
-    <dependency>
-      <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp</artifactId>
-      <version>5.0.0-alpha.11</version>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
