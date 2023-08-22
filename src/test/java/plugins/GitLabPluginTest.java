@@ -1,6 +1,7 @@
 package plugins;
 
 import jakarta.inject.Inject;
+import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.*;
@@ -60,9 +61,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Test
     public void createRepo() {
-        //This sends a request to make a new repo in the gitlab server with the name "testrepo")
+        String repoName = "testrepo";
+        //This sends a request to make a new repo in the gitlab server with the name "testrepo"
         try {
-            HttpResponse<String> response = container.createRepo("testrepo", getPrivateToken());
+            HttpResponse<String> response = container.createRepo(repoName, getPrivateToken());
             assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -70,8 +72,11 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         try {
             // delete the repo when finished
-            container.deleteRepo(getPrivateToken());
+            container.deleteRepo(getPrivateToken(), repoName);
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        catch (GitLabApiException e) {
             throw new RuntimeException(e);
         }
     }

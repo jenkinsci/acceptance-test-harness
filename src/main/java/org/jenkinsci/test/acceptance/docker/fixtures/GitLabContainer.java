@@ -16,12 +16,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-
-
-
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 
 import static org.junit.Assert.assertTrue;
+
 
 @DockerFixture(id = "gitlab-plugin", ports = 22)
 public class GitLabContainer extends DockerContainer {
@@ -78,16 +76,13 @@ public class GitLabContainer extends DockerContainer {
         }
     }
 
-    public void deleteRepo(String token) throws IOException {
-        // get the project id and delete the project
+    public void deleteRepo(String token, String repoName) throws IOException, GitLabApiException {
+        // get the project and delete the project
         GitLabApi gitlabapi = new GitLabApi("http://" + getIpAddress(), token);
         ProjectApi projApi = new ProjectApi(gitlabapi);
-        try {
-            Project project = projApi.getProjects().get(0);
-            projApi.deleteProject(project.getId());
-        } catch (GitLabApiException e) {
-            throw new RuntimeException(e);
-        }
+
+        Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
+        projApi.deleteProject(project);
     }
 
     public void waitForReady(CapybaraPortingLayer p) {
