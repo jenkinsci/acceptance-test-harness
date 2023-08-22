@@ -107,8 +107,8 @@ public class GitLabContainer extends DockerContainer {
                 });
     }
 
-    public String createUserToken() throws IOException, InterruptedException {
-        return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "gitlab-rails runner -e production /usr/bin/create_user.rb")
+    public String createUserToken(String userName, String password, String email, String isAdmin) throws IOException, InterruptedException {
+        return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "gitlab-rails runner -e production /usr/bin/create_user.rb" + " " + userName + " " + password + " " + email + " " + isAdmin)
                 .popen()
                 .verifyOrDieWith("Unable to create user").trim();
     }

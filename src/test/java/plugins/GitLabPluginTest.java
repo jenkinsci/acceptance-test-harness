@@ -31,6 +31,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private String privateToken;
 
+    private String password = "arandompassword12#"; // I guess the password can be the same for all users
+
     public String getPrivateToken() {
         return privateToken;
     }
@@ -43,7 +45,11 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         port = container.port();
         container.waitForReady(this);
 
-        privateToken = container.createUserToken();
+        // create an admin user
+        privateToken = container.createUserToken("testadmin", password, "testadmin@gmail.com", "true");
+
+        // create another user
+        privateToken = container.createUserToken("testsimple", password, "testsimple@gmail.com", "false");
     }
 
     @Test

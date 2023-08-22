@@ -1,10 +1,12 @@
+input_array = ARGV
+
 user = User.create();
-user.name = 'test';
-user.username = 'test';
-user.password = 'oparolaoarecare12!';
+user.name = input_array[0];
+user.username = input_array[0];
+user.password = input_array[1];
 user.confirmed_at = '01/01/1990';
-user.admin = true;
-user.email = '$test@example.com';
+user.admin = input_array[3];
+user.email = input_array[2];
 user.save!;
 
 token = user.personal_access_tokens.create(scopes: [:api], name: 'MyToken');
