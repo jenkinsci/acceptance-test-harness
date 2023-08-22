@@ -36,20 +36,14 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     @Before
-    public void init() {
+    public void init() throws InterruptedException, IOException {
         container = gitLabServer.get();
         repoUrl = container.getRepoUrl();
         host = container.host();
         port = container.port();
         container.waitForReady(this);
-        
-        try {
-            privateToken = container.createUserToken();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+
+        privateToken = container.createUserToken();
     }
 
     @Test
@@ -60,24 +54,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void createRepo() {
+    public void createRepo() throws IOException, GitLabApiException {
         String repoName = "testrepo";
         //This sends a request to make a new repo in the gitlab server with the name "testrepo"
-        try {
-            HttpResponse<String> response = container.createRepo(repoName, getPrivateToken());
-            assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        HttpResponse<String> response = container.createRepo(repoName, getPrivateToken());
+        assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
 
-        try {
-            // delete the repo when finished
-            container.deleteRepo(getPrivateToken(), repoName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        catch (GitLabApiException e) {
-            throw new RuntimeException(e);
-        }
+        // delete the repo when finished
+        container.deleteRepo(getPrivateToken(), repoName);
     }
 }

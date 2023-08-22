@@ -17,6 +17,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
 
 import static org.junit.Assert.assertTrue;
 
@@ -29,6 +30,8 @@ public class GitLabContainer extends DockerContainer {
                                                        .followRedirects(HttpClient.Redirect.NORMAL)
                                                        .connectTimeout(Duration.ofSeconds(5))
                                                        .build();
+
+    private static final ElasticTime time = new ElasticTime();
 
     public String host() {
         return ipBound(22);
@@ -86,8 +89,9 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public void waitForReady(CapybaraPortingLayer p) {
+        int timeout = (int) time.milliseconds(200000);
         p.waitFor().withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes
+                .withTimeout(Duration.ofSeconds(timeout)) // GitLab starts in about 2 minutes
                 .until( () ->  {
                     try {
                           HttpRequest request = HttpRequest.newBuilder()
@@ -97,7 +101,7 @@ public class GitLabContainer extends DockerContainer {
                         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         return response.body().contains("GitLab Community Edition");
                     } catch (SocketException e) {
-                        return null;
+                        return false;
                     }
 
                 });
