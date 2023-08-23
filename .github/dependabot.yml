@@ -81,3 +81,7 @@ updates:
     ignore:
       - dependency-name: "ubuntu"
         versions: [">=22.04"]
+  - package-ecosystem: "docker"
+    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/GitLabContainer"
+    schedule:
+      interval: "weekly"
