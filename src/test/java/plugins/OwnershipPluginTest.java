@@ -17,16 +17,17 @@ import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipAction;
 import org.jenkinsci.test.acceptance.plugins.ownership.OwnershipGlobalConfig;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.WebDriver;
 
-@WithPlugins({"command-launcher", "ownership", "cloudbees-folder"})
+//@WithPlugins({"command-launcher", "ownership", "cloudbees-folder"})
+@Ignore("The ownwership plugin depends on Jenkins 1.x, has had no releases since 2020 and is unmaintained")
 public class OwnershipPluginTest extends AbstractJUnitTest {
 
     @Inject
