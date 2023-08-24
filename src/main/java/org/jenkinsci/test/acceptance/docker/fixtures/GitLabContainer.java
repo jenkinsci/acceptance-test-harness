@@ -16,13 +16,14 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 
 import static org.junit.Assert.assertTrue;
 
 
-@DockerFixture(id = "gitlab-plugin", ports = 22)
+@DockerFixture(id = "gitlab-plugin", ports = {80, 443, 22})
 public class GitLabContainer extends DockerContainer {
     protected static final String REPO_DIR = "/home/gitlab/gitlabRepo";
 
@@ -46,6 +47,11 @@ public class GitLabContainer extends DockerContainer {
         return new URL("http://" + getIpAddress());
     }
 
+    public URL getHttpUrl() throws IOException {
+        String url = "http://" + ipBound(80) + ':' + port(80);
+        return new URL(url);
+    }
+
     /** URL visible from the host. */
     public String getRepoUrl() {
         return "ssh://git@" + host() + ":" + port() + REPO_DIR;
@@ -67,7 +73,7 @@ public class GitLabContainer extends DockerContainer {
     public HttpResponse<String> createRepo(String repoName, String token) throws IOException {
         try{
             HttpRequest request = HttpRequest.newBuilder()
-                                             .uri(new URI("http://" + getIpAddress() + "/api/v4/projects"))
+                                             .uri(new URI(getHttpUrl() + "/api/v4/projects"))
                                              .header("Content-Type", "application/json")
                                              .header("PRIVATE-TOKEN", token)
                                              .POST(HttpRequest.BodyPublishers.ofString("{ \"name\": \"" + repoName + "\" }"))
@@ -95,7 +101,7 @@ public class GitLabContainer extends DockerContainer {
                 .until( () ->  {
                     try {
                           HttpRequest request = HttpRequest.newBuilder()
-                                .uri(new URI("http://" + getIpAddress()))
+                                .uri(new URI(getHttpUrl().toString()))
                                 .GET()
                                 .build();
                         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
