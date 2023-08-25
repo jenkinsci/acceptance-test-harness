@@ -29,7 +29,7 @@ public class GitLabContainer extends DockerContainer {
 
     private static final HttpClient client = HttpClient.newBuilder()
                                                        .followRedirects(HttpClient.Redirect.NORMAL)
-                                                       .connectTimeout(Duration.ofSeconds(5))
+                                                        .connectTimeout(Duration.ofMillis(200))
                                                        .build();
 
     private static final ElasticTime time = new ElasticTime();
@@ -95,19 +95,22 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public void waitForReady(CapybaraPortingLayer p) {
-        int timeout = (int) time.milliseconds(200000);
+        long timeout =  time.seconds(200); // GitLab starts in about 2 minutes add some headway
         p.waitFor().withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofSeconds(timeout)) // GitLab starts in about 2 minutes
+                .withTimeout(Duration.ofMillis(timeout))
+                .pollingEvery(Duration.ofSeconds(2))
                 .until( () ->  {
                     try {
                           HttpRequest request = HttpRequest.newBuilder()
-                                .uri(new URI(getHttpUrl().toString()))
-                                .GET()
-                                .build();
+                                  .uri(getHttpUrl().toURI())
+                                  .GET()
+                                  .timeout(Duration.ofSeconds(1))
+                                  .build();
                         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         return response.body().contains("GitLab Community Edition");
-                    } catch (SocketException e) {
-                        return false;
+                    } catch (IOException ignored) {
+                        // we can not use .ignoring as this is a checked exception (even though a callable can throw this!)
+                        return Boolean.FALSE;
                     }
 
                 });
