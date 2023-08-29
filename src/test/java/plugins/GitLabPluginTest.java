@@ -5,6 +5,7 @@ import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabServerConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -68,5 +69,14 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // delete the repo when finished
         container.deleteRepo(getPrivateToken(), repoName);
+    }
+
+    @Test
+    public void configureGitLabServer() throws IOException {
+        jenkins.configure();
+        GitLabServerConfig serverConfig = new GitLabServerConfig(jenkins);
+        String message = serverConfig.configureServer(container.getHttpUrl().toString(), privateToken);
+        assertEquals("Success", message);
+
     }
 }
