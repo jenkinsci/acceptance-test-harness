@@ -5,6 +5,8 @@ import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabConnectionConfig;
+import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabCredentials;
 import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabServerConfig;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +20,7 @@ import static org.junit.Assert.*;
 
 @WithDocker
 @Category(DockerTest.class)
-@WithPlugins("gitlab-plugin")
+@WithPlugins({"gitlab-plugin", "gitlab-branch-source"})
 @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitlabplugin", "/org/jenkinsci/test/acceptance/docker/fixtures/GitLabContainer"})
 public class GitLabPluginTest extends AbstractJUnitTest {
 
@@ -71,12 +73,29 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.deleteRepo(getPrivateToken(), repoName);
     }
 
-    @Test
     public void configureGitLabServer() throws IOException {
         jenkins.configure();
+        // connection configuration
+        GitLabConnectionConfig connectionConfig = new GitLabConnectionConfig(jenkins);
+        connectionConfig.configureConnection(container.getHttpUrl().toString());
+
+        // server configuration
         GitLabServerConfig serverConfig = new GitLabServerConfig(jenkins);
-        String message = serverConfig.configureServer(container.getHttpUrl().toString(), privateToken);
-        assertEquals("Success", message);
+        serverConfig.configureServer(container.getHttpUrl().toString());
+        jenkins.save();
+
+    }
+
+    @Test
+    public void testGitLabMultibranchPipeline() throws IOException {
+        GitLabCredentials cred = new GitLabCredentials(jenkins);
+        // create the GitLab API token
+        cred.createCredentials(privateToken, "GitLab API token");
+
+        // create the GitLab personal access token
+        cred.createCredentials(privateToken, "GitLab Personal Access Token");
+
+        configureGitLabServer();
 
     }
 }

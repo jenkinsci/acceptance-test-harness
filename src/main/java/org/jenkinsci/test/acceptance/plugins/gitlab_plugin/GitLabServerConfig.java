@@ -5,27 +5,24 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.By;
 
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 public class GitLabServerConfig extends PageAreaImpl {
 
     @Inject
     public GitLabServerConfig(Jenkins jenkins) {
-        super(jenkins, "/com-dabsquared-gitlabjenkins-connection-GitLabConnectionConfig/connections");
+        super(jenkins, "/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers");
     }
 
-    public String configureServer(String url, String token) {
-        control("name").set("servername");
-        control("url").set(url);
-        control(By.cssSelector("button.credentials-add-menu")).click();
-        control(By.cssSelector("li.yuimenuitem")).click();
-        find(by.option("GitLab API token")).click();
-        find(by.path("/credentials/apiToken")).sendKeys(token);
+    public void configureServer(String url) {
+        find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/name")).sendKeys("servername");
+        find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/serverUrl")).clear();
+        find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/serverUrl")).sendKeys(url);
 
-        find(by.id("credentials-add-submit-button")).click();
-        sleep(2000);
-        find(by.option("GitLab API token")).click();
+        find(by.option("GitLab Personal Access Token")).click();
 
-        control("validate-button").click();
-        sleep(2000);
-        return control(By.cssSelector("div.jenkins-validate-button__container__status")).text();
+        find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/validate-button")).click();
+
+        waitFor(driver, hasContent("Credentials verified for user"), 2);
     }
 }
