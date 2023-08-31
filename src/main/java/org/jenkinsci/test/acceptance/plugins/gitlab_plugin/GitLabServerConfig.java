@@ -3,8 +3,6 @@ package org.jenkinsci.test.acceptance.plugins.gitlab_plugin;
 import jakarta.inject.Inject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.openqa.selenium.By;
-
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 public class GitLabServerConfig extends PageAreaImpl {
