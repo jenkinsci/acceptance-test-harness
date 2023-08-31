@@ -22,9 +22,6 @@
       "description": "We focus on Guice 6 until core adapts 7"
     },
     {
-      "matchPackageNames": ["gitlab/gitlab-ce"]
-    },
-    {
       "matchPackagePatterns": ["selenium"],
       "groupName": "Selenium"
     }
