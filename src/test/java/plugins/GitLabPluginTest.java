@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.*;
+import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -16,11 +17,16 @@ import java.net.http.HttpResponse;
 
 import java.io.IOException;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.*;
 
 @WithDocker
 @Category(DockerTest.class)
-@WithPlugins("gitlab-branch-source")
+@WithPlugins({"gitlab-branch-source", "workflow-multibranch"})
 public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -72,6 +78,16 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.deleteRepo(getPrivateToken(), repoName);
     }
 
+    public void createGitLabToken(String token, String id) {
+        CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
+        cp.open();
+
+        GitLabPersonalAccessTokenCredential tk = cp.add(GitLabPersonalAccessTokenCredential.class);
+        tk.setToken(token);
+        tk.setId(id);
+        tk.create();
+    }
+
     public void configureGitLabServer() throws IOException {
         jenkins.configure();
 
@@ -85,15 +101,29 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     public void testGitLabMultibranchPipeline() throws IOException {
         createGitLabToken(privateToken, "GitLab Personal Access Token");
         configureGitLabServer();
+
+        final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
+        this.configureJobWithGitLabBranchSource(multibranchJob);
+        multibranchJob.save();
+        multibranchJob.waitForBranchIndexingFinished(20);
+
+        this.assertBranchIndexing(multibranchJob);
+
     }
 
-    public void createGitLabToken(String token, String id) {
-        CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
-        cp.open();
+    private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
+        assertThat(driver, hasContent("Scan GitLab Project Now"));
+        final String branchIndexingLog = job.getBranchIndexingLog();
 
-        GitLabPersonalAccessTokenCredential tk = cp.add(GitLabPersonalAccessTokenCredential.class);
-        tk.setToken(token);
-        tk.setId(id);
-        tk.create();
+        assertThat(branchIndexingLog, containsString("Scheduled build for branch: main"));
+        assertThat(branchIndexingLog, containsString("Scheduled build for branch: newnewbr"));
+        assertThat(branchIndexingLog, containsString("Scheduled build for branch: MR-1"));
+        assertThat(branchIndexingLog, containsString("1 merge requests were processed"));
+    }
+
+    private void configureJobWithGitLabBranchSource(final WorkflowMultiBranchJob job) {
+        final GitLabBranchSource ghBranchSource = job.addBranchSource(GitLabBranchSource.class);
+        ghBranchSource.setOwner("testadmin");
+        ghBranchSource.setProject("testadmin", "andra1");
     }
 }
