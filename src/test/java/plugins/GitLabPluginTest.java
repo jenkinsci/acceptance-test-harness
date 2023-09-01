@@ -18,9 +18,7 @@ import java.net.http.HttpResponse;
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.containsString;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.*;
 
@@ -41,6 +39,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private String password = "arandompassword12#"; // I guess the password can be the same for all users
 
+    private String repoName = "testrepo";
+
+    private String adminUserName = "testadmin";
+
+    private String userName = "testsimple";
+
     public String getPrivateToken() {
         return privateToken;
     }
@@ -54,10 +58,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.waitForReady(this);
 
         // create an admin user
-        privateToken = container.createUserToken("testadmin", password, "testadmin@gmail.com", "true");
+        privateToken = container.createUserToken(adminUserName, password, "testadmin@gmail.com", "true");
 
         // create another user
-        privateToken = container.createUserToken("testsimple", password, "testsimple@gmail.com", "false");
+        privateToken = container.createUserToken(userName, password, "testsimple@gmail.com", "false");
     }
 
     @Test
@@ -69,7 +73,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Test
     public void createRepo() throws IOException, GitLabApiException {
-        String repoName = "testrepo";
         //This sends a request to make a new repo in the gitlab server with the name "testrepo"
         HttpResponse<String> response = container.createRepo(repoName, getPrivateToken());
         assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
@@ -98,12 +101,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void testGitLabMultibranchPipeline() throws IOException {
+    public void testGitLabMultibranchPipeline() throws IOException, GitLabApiException {
         createGitLabToken(privateToken, "GitLab Personal Access Token");
         configureGitLabServer();
+        createRepo();
 
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
-        this.configureJobWithGitLabBranchSource(multibranchJob);
+        this.configureJobWithGitLabBranchSource(multibranchJob, adminUserName, repoName);
         multibranchJob.save();
         multibranchJob.waitForBranchIndexingFinished(20);
 
@@ -121,9 +125,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertThat(branchIndexingLog, containsString("1 merge requests were processed"));
     }
 
-    private void configureJobWithGitLabBranchSource(final WorkflowMultiBranchJob job) {
+    private void configureJobWithGitLabBranchSource(final WorkflowMultiBranchJob job, String userName, String project) {
         final GitLabBranchSource ghBranchSource = job.addBranchSource(GitLabBranchSource.class);
-        ghBranchSource.setOwner("testadmin");
-        ghBranchSource.setProject("testadmin", "andra1");
+        ghBranchSource.setOwner(adminUserName);
+        ghBranchSource.setProject(adminUserName, project);
     }
 }
