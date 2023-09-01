@@ -3,7 +3,10 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.ProjectApi;
+import org.gitlab4j.api.models.Branch;
+import org.gitlab4j.api.models.MergeRequestParams;
 import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.RepositoryFile;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
@@ -83,6 +86,58 @@ public class GitLabContainer extends DockerContainer {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void createBranch(String token, String repoName) throws IOException, GitLabApiException {
+        GitLabApi gitlabapi = new GitLabApi("http://" + getIpAddress(), token);
+        ProjectApi projApi = new ProjectApi(gitlabapi);
+        Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
+
+        RepositoryFile file = new RepositoryFile();
+        file.setFileName("Jenkinsfile");
+        file.setFilePath("Jenkinsfile");
+        file.setContent("pipeline {\n" +
+                "    agent any\n" +
+                "\n" +
+                "    stages {\n" +
+                "        stage('Build') {\n" +
+                "            steps {\n" +
+                "                echo 'Building..'\n" +
+                "            }\n" +
+                "        }\n" +
+                "        stage('Test') {\n" +
+                "            steps {\n" +
+                "                echo 'Testing..'\n" +
+                "            }\n" +
+                "        }\n" +
+                "        stage('Deploy') {\n" +
+                "            steps {\n" +
+                "                echo 'Deploying....'\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}");
+
+        // create Jenkinsfile on the main branch
+        gitlabapi.getRepositoryFileApi().createFile(project.getId(), file, "main", "Add Jenkinsfile");
+
+        // create 2 new branches
+        gitlabapi.getRepositoryApi().createBranch(project.getId(), "firstbranch", "main");
+        gitlabapi.getRepositoryApi().createBranch(project.getId(), "secondbranch", "main");
+
+        RepositoryFile newFile = new RepositoryFile();
+        newFile.setFileName("README.md");
+        newFile.setFilePath("readme.md");
+        newFile.setContent("read me");
+        // update Jenkinsfile on the secondbranch
+        gitlabapi.getRepositoryFileApi().createFile(project.getId(), newFile, "secondbranch", "Add Jenkinsfile");
+
+        // create a MR
+        MergeRequestParams params = new MergeRequestParams()
+                .withSourceBranch("secondbranch")
+                .withTargetBranch("main")
+                .withTitle("test_mr");
+        gitlabapi.getMergeRequestApi().createMergeRequest(project, params);
     }
 
     public void deleteRepo(String token, String repoName) throws IOException, GitLabApiException {

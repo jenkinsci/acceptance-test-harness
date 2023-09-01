@@ -61,7 +61,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         privateToken = container.createUserToken(adminUserName, password, "testadmin@gmail.com", "true");
 
         // create another user
-        privateToken = container.createUserToken(userName, password, "testsimple@gmail.com", "false");
+    //    privateToken = container.createUserToken(userName, password, "testsimple@gmail.com", "false");
     }
 
     @Test
@@ -71,14 +71,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertNotNull(container.host());
     }
 
-    @Test
     public void createRepo() throws IOException, GitLabApiException {
         //This sends a request to make a new repo in the gitlab server with the name "testrepo"
         HttpResponse<String> response = container.createRepo(repoName, getPrivateToken());
         assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
 
         // delete the repo when finished
-        container.deleteRepo(getPrivateToken(), repoName);
+       // container.deleteRepo(getPrivateToken(), repoName);
     }
 
     public void createGitLabToken(String token, String id) {
@@ -105,6 +104,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         createGitLabToken(privateToken, "GitLab Personal Access Token");
         configureGitLabServer();
         createRepo();
+        container.createBranch(getPrivateToken(), repoName);
 
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
         this.configureJobWithGitLabBranchSource(multibranchJob, adminUserName, repoName);
@@ -120,7 +120,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         final String branchIndexingLog = job.getBranchIndexingLog();
 
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: main"));
-        assertThat(branchIndexingLog, containsString("Scheduled build for branch: newnewbr"));
+        assertThat(branchIndexingLog, containsString("Scheduled build for branch: firstbranch"));
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: MR-1"));
         assertThat(branchIndexingLog, containsString("1 merge requests were processed"));
     }
