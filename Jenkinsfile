@@ -114,7 +114,7 @@ for (int i = 0; i < splits.size(); i++) {
         retry(count: 2, conditions: [agent(), nonresumable()]) {
           String nodeLabel = 'docker-highmem-nonspot'
           if (retryCounts == 1) {
-            // use a spot instance for the first try
+            // Use a spot instance for the first try
             nodeLabel = 'docker-highmem'
           }
           retryCounts = retryCounts + 1 // increment the retry count before allocating a node in case it fails
