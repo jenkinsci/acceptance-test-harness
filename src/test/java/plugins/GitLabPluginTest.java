@@ -1,6 +1,7 @@
 package plugins;
 
 import jakarta.inject.Inject;
+import org.apache.commons.io.IOUtils;
 import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
@@ -8,14 +9,20 @@ import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.*;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.openqa.selenium.WebElement;
 
 import java.net.http.HttpResponse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -113,6 +120,14 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         this.assertBranchIndexing(multibranchJob);
 
+        final WorkflowJob successJob1 = multibranchJob.getJob("main");
+        final WorkflowJob successJob2 = multibranchJob.getJob("firstbranch");
+        final WorkflowJob successJob3 = multibranchJob.getJob("MR-1");
+        final WorkflowJob failureJob = multibranchJob.getJob("failedjob");
+        this.assertExistAndRun(successJob1, true);
+        this.assertExistAndRun(successJob2, true);
+        this.assertExistAndRun(successJob3, true);
+        this.assertExistAndRun(failureJob, false);
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
@@ -121,13 +136,27 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: main"));
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: firstbranch"));
+        assertThat(branchIndexingLog, containsString("Scheduled build for branch: failedjob"));
         assertThat(branchIndexingLog, containsString("Scheduled build for branch: MR-1"));
         assertThat(branchIndexingLog, containsString("1 merge requests were processed"));
     }
 
-    private void configureJobWithGitLabBranchSource(final WorkflowMultiBranchJob job, String userName, String project) {
+    private void configureJobWithGitLabBranchSource(final WorkflowMultiBranchJob job, String adminUserName, String project) {
         final GitLabBranchSource ghBranchSource = job.addBranchSource(GitLabBranchSource.class);
         ghBranchSource.setOwner(adminUserName);
         ghBranchSource.setProject(adminUserName, project);
+    }
+
+    private void assertExistAndRun(final WorkflowJob job, final boolean withSuccess) {
+        try {
+            IOUtils.toString(job.url("").openStream(), StandardCharsets.UTF_8);
+        } catch (final IOException ex) {
+            Assert.fail("Job has not been created");
+        }
+
+        final Build.Result expectedResult = (withSuccess) ? Build.Result.SUCCESS : Build.Result.FAILURE;
+        System.out.println("care e numarul urmator " + job.getNextBuildNumber());
+        assertEquals(job.getNextBuildNumber(), 2);
+        assertEquals(job.build(1).getResult(), expectedResult.name());
     }
 }

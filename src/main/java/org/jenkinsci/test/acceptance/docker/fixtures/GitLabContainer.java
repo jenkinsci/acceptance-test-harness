@@ -125,12 +125,19 @@ public class GitLabContainer extends DockerContainer {
         gitlabapi.getRepositoryApi().createBranch(project.getId(), "firstbranch", "main");
         gitlabapi.getRepositoryApi().createBranch(project.getId(), "secondbranch", "main");
 
+        // add a file on the secondbranch
         RepositoryFile newFile = new RepositoryFile();
         newFile.setFileName("README.md");
         newFile.setFilePath("readme.md");
         newFile.setContent("read me");
-        // update Jenkinsfile on the secondbranch
-        gitlabapi.getRepositoryFileApi().createFile(project.getId(), newFile, "secondbranch", "Add Jenkinsfile");
+        gitlabapi.getRepositoryFileApi().createFile(project.getId(), newFile, "secondbranch", "Add readme");
+
+
+        // create a branch with a broken Jenkinsfile
+        gitlabapi.getRepositoryApi().createBranch(project.getId(), "failedjob", "main");
+        file.setContent("pipeline {\n" +
+                "    agent any\n" );
+        gitlabapi.getRepositoryFileApi().updateFile(project.getId(), file, "failedjob", "this will not work");
 
         // create a MR
         MergeRequestParams params = new MergeRequestParams()
