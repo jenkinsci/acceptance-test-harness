@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.ProjectApi;
-import org.gitlab4j.api.models.Branch;
 import org.gitlab4j.api.models.MergeRequestParams;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.RepositoryFile;
@@ -12,7 +11,6 @@ import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
@@ -22,8 +20,6 @@ import java.time.Duration;
 
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
-
-import static org.junit.Assert.assertTrue;
 
 
 @DockerFixture(id = "gitlab-plugin", ports = {80, 443, 22})
@@ -45,9 +41,17 @@ public class GitLabContainer extends DockerContainer {
         return port(22);
     }
 
+
+    public int webPort() {
+        return port(443);
+    }
+
+    public String webHost() {
+        return ipBound(443);
+    }
+
     public URL getURL() throws IOException {
-        // return new URL("http://" + host() + ":" + port());
-        return new URL("http://" + getIpAddress());
+        return new URL("http://" + getIpAddress() + port());
     }
 
     public URL getHttpUrl() throws IOException {
@@ -149,7 +153,7 @@ public class GitLabContainer extends DockerContainer {
 
     public void deleteRepo(String token, String repoName) throws IOException, GitLabApiException {
         // get the project and delete the project
-        GitLabApi gitlabapi = new GitLabApi("http://" + getIpAddress(), token);
+        GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), token);
         ProjectApi projApi = new ProjectApi(gitlabapi);
 
         Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);

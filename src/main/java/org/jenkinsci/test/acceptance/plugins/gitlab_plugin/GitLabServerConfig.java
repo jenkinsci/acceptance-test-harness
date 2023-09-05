@@ -17,7 +17,7 @@ public class GitLabServerConfig extends PageAreaImpl {
         find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/serverUrl")).clear();
         find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/serverUrl")).sendKeys(url);
 
-        find(by.option("GitLab Personal Access Token")).click();
+        waitFor(by.option("GitLab Personal Access Token")).click();
 
         find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/validate-button")).click();
 

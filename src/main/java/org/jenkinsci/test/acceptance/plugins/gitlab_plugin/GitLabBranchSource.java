@@ -22,6 +22,6 @@ public class GitLabBranchSource extends BranchSource {
 
     public void setProject(String owner, String project) {
         find(by.path("/sources/source/projectPath")).click();
-        find(by.option(owner + "/" + project)).click();
+        waitFor(by.option(owner + "/" + project)).click();
     }
 }

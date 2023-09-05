@@ -40,8 +40,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private String privateToken;
 
-    private String password = "arandompassword12#"; // I guess the password can be the same for all users
-
     private String repoName = "testrepo";
 
     private String adminUserName = "testadmin";
@@ -61,7 +59,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.waitForReady(this);
 
         // create an admin user
-        privateToken = container.createUserToken(adminUserName, password, "testadmin@gmail.com", "true");
+        privateToken = container.createUserToken(adminUserName, "arandompassword12#", "testadmin@example.com", "true");
 
         // create another user
     //    privateToken = container.createUserToken(userName, password, "testsimple@gmail.com", "false");
@@ -78,9 +76,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         //This sends a request to make a new repo in the gitlab server with the name "testrepo"
         HttpResponse<String> response = container.createRepo(repoName, getPrivateToken());
         assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
-
-        // delete the repo when finished
-       // container.deleteRepo(getPrivateToken(), repoName);
     }
 
     public void createGitLabToken(String token, String id) {
@@ -125,6 +120,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         this.assertExistAndResult(successJob2, true);
         this.assertExistAndResult(successJob3, true);
         this.assertExistAndResult(failureJob, false);
+
+        // delete the repo when finished
+        container.deleteRepo(getPrivateToken(), repoName);
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
