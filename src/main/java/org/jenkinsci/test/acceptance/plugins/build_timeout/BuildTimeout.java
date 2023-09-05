@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 
 /**
  * Build timeout plugin setting in the job config page.
@@ -50,7 +51,12 @@ public class BuildTimeout extends PageAreaImpl {
     public void abortBuild() {
         if (addAction != null) {
             addAction.click();
-            clickLink("Abort the build");
+            try {
+                waitFor(by.button("Abort the build"));
+                clickButton("Abort the build");
+            } catch (TimeoutException te) {
+                clickLink("Abort the build");
+            }
         }
     }
 
@@ -60,7 +66,12 @@ public class BuildTimeout extends PageAreaImpl {
         }
         catch (NoSuchElementException ex) {
             addAction.click();
-            clickLink("Writing the build description");
+            try {
+                waitFor(by.button("Writing the build description"));
+                clickButton("Writing the build description");
+            } catch (TimeoutException te) {
+                clickLink("Writing the build description");
+            }
         }
     }
 }

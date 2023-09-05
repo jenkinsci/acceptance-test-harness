@@ -8,6 +8,8 @@ if [[ $1 == '11' ]]; then
 	selection='11-openjdk'
 elif [[ $1 == '17' ]]; then
 	selection='17-openjdk'
+elif [[ $1 == '21' ]]; then
+	selection='21-openjdk'
 else
 	echo >&2 "Unsupported java version '${1}'"
 	exit 1
