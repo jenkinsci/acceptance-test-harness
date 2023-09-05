@@ -110,8 +110,15 @@ for (int i = 0; i < splits.size(); i++) {
     def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
     branches[name] = {
       stage(name) {
+        int retryCounts = 1
         retry(count: 2, conditions: [agent(), nonresumable()]) {
-          node('docker-highmem') {
+          String nodeLabel = 'docker-highmem-nonspot'
+          if (retryCounts == 1) {
+            // Use a spot instance for the first try
+            nodeLabel = 'docker-highmem'
+          }
+          retryCounts = retryCounts + 1 // increment the retry count before allocating a node in case it fails
+          node(nodeLabel) {
             checkout scm
             sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
             def cwd = pwd()
