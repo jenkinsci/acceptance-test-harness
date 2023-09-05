@@ -2,10 +2,9 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
+import org.gitlab4j.api.GroupApi;
 import org.gitlab4j.api.ProjectApi;
-import org.gitlab4j.api.models.MergeRequestParams;
-import org.gitlab4j.api.models.Project;
-import org.gitlab4j.api.models.RepositoryFile;
+import org.gitlab4j.api.models.*;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
@@ -186,5 +185,13 @@ public class GitLabContainer extends DockerContainer {
         return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "gitlab-rails runner -e production /usr/bin/create_user.rb" + " " + userName + " " + password + " " + email + " " + isAdmin)
                 .popen()
                 .verifyOrDieWith("Unable to create user").trim();
+    }
+
+    public void createGroup(String groupName, String userName, String privateTokenAdmin) throws IOException, GitLabApiException {
+        GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), privateTokenAdmin);
+        GroupApi groupApi = new GroupApi(gitlabapi);
+        GroupParams groupParams = new GroupParams().withName(groupName).withPath("path").withMembershipLock(false);
+        Group group = groupApi.createGroup(groupParams);
+        groupApi.addMember(group.getId(), gitlabapi.getUserApi().getOptionalUser(userName).get().getId(), AccessLevel.DEVELOPER);
     }
 }

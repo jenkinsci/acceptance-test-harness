@@ -38,7 +38,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     private String host;
     private int port;
 
-    private String privateToken;
+    private String privateTokenAdmin;
+
+    private String privateTokenUser;
 
     private String repoName = "testrepo";
 
@@ -46,10 +48,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private String userName = "testsimple";
 
-    public String getPrivateToken() {
-        return privateToken;
+    public String getPrivateTokenAdmin() {
+        return privateTokenAdmin;
     }
 
+    public String getPrivateTokenUser() {
+        return privateTokenUser;
+    }
     @Before
     public void init() throws InterruptedException, IOException {
         container = gitLabServer.get();
@@ -59,10 +64,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.waitForReady(this);
 
         // create an admin user
-        privateToken = container.createUserToken(adminUserName, "arandompassword12#", "testadmin@example.com", "true");
+        privateTokenAdmin = container.createUserToken(adminUserName, "arandompassword12#", "testadmin@example.com", "true");
 
         // create another user
-    //    privateToken = container.createUserToken(userName, password, "testsimple@gmail.com", "false");
+        privateTokenUser = container.createUserToken(userName, "passwordforsimpleuser12#", "testsimple@example.com", "false");
     }
 
     @Test
@@ -74,7 +79,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     public void createRepo() throws IOException, GitLabApiException {
         //This sends a request to make a new repo in the gitlab server with the name "testrepo"
-        HttpResponse<String> response = container.createRepo(repoName, getPrivateToken());
+        HttpResponse<String> response = container.createRepo(repoName, getPrivateTokenAdmin());
         assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
     }
 
@@ -99,10 +104,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Test
     public void testGitLabMultibranchPipeline() throws IOException, GitLabApiException {
-        createGitLabToken(privateToken, "GitLab Personal Access Token");
+        createGitLabToken(privateTokenAdmin, "GitLab Personal Access Token");
         configureGitLabServer();
         createRepo();
-        container.createBranch(getPrivateToken(), repoName);
+        container.createBranch(getPrivateTokenAdmin(), repoName);
 
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
         this.configureJobWithGitLabBranchSource(multibranchJob, adminUserName, repoName);
@@ -122,7 +127,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         this.assertExistAndResult(failureJob, false);
 
         // delete the repo when finished
-        container.deleteRepo(getPrivateToken(), repoName);
+        container.deleteRepo(getPrivateTokenAdmin(), repoName);
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
@@ -147,5 +152,21 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         waitFor(job, Matchers.pageObjectExists(), (int)time.seconds(3));
         assertEquals(job.getLastBuild().getResult(), expectedResult.name());
     }
+
+    @Test
+    public void gitLabGroupFolderOrganization() throws GitLabApiException, IOException {
+        createGroup();
+        createGitLabToken(privateTokenAdmin, "GitLab Personal Access Token");
+        configureGitLabServer();
+
+        final GitLabOrganizationFolder organizationFolder = jenkins.jobs.create(GitLabOrganizationFolder.class);
+        organizationFolder.create(adminUserName);
+        organizationFolder.save();
+    }
+
+    private void createGroup() throws GitLabApiException, IOException {
+        container.createGroup("firstgroup", userName, privateTokenAdmin);
+    }
+
 
 }
