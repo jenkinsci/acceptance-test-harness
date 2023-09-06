@@ -1,12 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.gitlab_plugin;
 
 import com.google.inject.Injector;
-import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
+import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.*;
 
+import java.io.IOException;
 import java.net.URL;
-
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 @Describable("jenkins.branch.OrganizationFolder")
 public class GitLabOrganizationFolder extends Job {
@@ -23,5 +24,21 @@ public class GitLabOrganizationFolder extends Job {
     @Override
     public URL getConfigUrl() {
         return null;
+    }
+
+    public String getCheckLog() {
+        try {
+            return IOUtils.toString(url("computation/console").openStream(), StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
+    public GitLabOrganizationFolder waitForCheckFinished(final int timeout) {
+        waitFor()
+                .withTimeout(Duration.ofMillis(super.time.seconds(timeout)))
+                .until(() -> GitLabOrganizationFolder.this.getCheckLog().contains("Finished: "));
+
+        return this;
     }
 }

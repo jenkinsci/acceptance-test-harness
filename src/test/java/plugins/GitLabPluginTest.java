@@ -48,6 +48,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private String userName = "testsimple";
 
+    private String groupName = "firstgroup";
+
     public String getPrivateTokenAdmin() {
         return privateTokenAdmin;
     }
@@ -160,13 +162,25 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         configureGitLabServer();
 
         final GitLabOrganizationFolder organizationFolder = jenkins.jobs.create(GitLabOrganizationFolder.class);
-        organizationFolder.create(adminUserName);
+        organizationFolder.create(groupName);
         organizationFolder.save();
+
+        // test the pipeline
+        organizationFolder.waitForCheckFinished((int)time.seconds(20));
+
+        this.assertCheckFinished(organizationFolder);
+
+
     }
 
     private void createGroup() throws GitLabApiException, IOException {
-        container.createGroup("firstgroup", userName, privateTokenAdmin);
+        container.createGroup(groupName, userName, privateTokenAdmin, repoName);
     }
 
+    private void assertCheckFinished(final GitLabOrganizationFolder job) {
+        assertThat(driver, hasContent("Scan GitLab Group Now"));
+        final String branchIndexingLog = job.getCheckLog();
 
+        assertThat(branchIndexingLog, containsString("2 projects were processed"));
+    }
 }

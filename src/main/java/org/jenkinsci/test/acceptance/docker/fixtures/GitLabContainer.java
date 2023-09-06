@@ -76,6 +76,28 @@ public class GitLabContainer extends DockerContainer {
         return "ssh://git@" + alias + REPO_DIR;
     }
 
+    public void waitForReady(CapybaraPortingLayer p) {
+        long timeout =  time.seconds(200); // GitLab starts in about 2 minutes add some headway
+        p.waitFor().withMessage("Waiting for GitLab to come up")
+                .withTimeout(Duration.ofMillis(timeout))
+                .pollingEvery(Duration.ofSeconds(2))
+                .until( () ->  {
+                    try {
+                        HttpRequest request = HttpRequest.newBuilder()
+                                .uri(getHttpUrl().toURI())
+                                .GET()
+                                .timeout(Duration.ofSeconds(1))
+                                .build();
+                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                        return response.body().contains("GitLab Community Edition");
+                    } catch (IOException ignored) {
+                        // we can not use .ignoring as this is a checked exception (even though a callable can throw this!)
+                        return Boolean.FALSE;
+                    }
+
+                });
+    }
+
     public HttpResponse<String> createRepo(String repoName, String token) throws IOException {
         try{
             HttpRequest request = HttpRequest.newBuilder()
@@ -159,39 +181,37 @@ public class GitLabContainer extends DockerContainer {
         projApi.deleteProject(project);
     }
 
-    public void waitForReady(CapybaraPortingLayer p) {
-        long timeout =  time.seconds(200); // GitLab starts in about 2 minutes add some headway
-        p.waitFor().withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofMillis(timeout))
-                .pollingEvery(Duration.ofSeconds(2))
-                .until( () ->  {
-                    try {
-                          HttpRequest request = HttpRequest.newBuilder()
-                                  .uri(getHttpUrl().toURI())
-                                  .GET()
-                                  .timeout(Duration.ofSeconds(1))
-                                  .build();
-                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                        return response.body().contains("GitLab Community Edition");
-                    } catch (IOException ignored) {
-                        // we can not use .ignoring as this is a checked exception (even though a callable can throw this!)
-                        return Boolean.FALSE;
-                    }
-
-                });
-    }
-
     public String createUserToken(String userName, String password, String email, String isAdmin) throws IOException, InterruptedException {
         return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "gitlab-rails runner -e production /usr/bin/create_user.rb" + " " + userName + " " + password + " " + email + " " + isAdmin)
                 .popen()
                 .verifyOrDieWith("Unable to create user").trim();
     }
 
-    public void createGroup(String groupName, String userName, String privateTokenAdmin) throws IOException, GitLabApiException {
+    public void createGroup(String groupName, String userName, String privateTokenAdmin, String repoName) throws IOException, GitLabApiException {
         GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), privateTokenAdmin);
         GroupApi groupApi = new GroupApi(gitlabapi);
-        GroupParams groupParams = new GroupParams().withName(groupName).withPath("path").withMembershipLock(false);
-        Group group = groupApi.createGroup(groupParams);
+        GroupParams groupParams = new GroupParams().withName(groupName).withPath(groupName).withMembershipLock(false);
+        Group group = groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
         groupApi.addMember(group.getId(), gitlabapi.getUserApi().getOptionalUser(userName).get().getId(), AccessLevel.DEVELOPER);
+
+        // create a project in the group
+        Project project = new Project().withPublic(false)
+                .withPath(repoName)
+                .withNamespaceId(group.getId());
+        ProjectApi projApi = new ProjectApi(gitlabapi);
+        projApi.createProject(project);
+
+        // populate the repository
+        createBranch(privateTokenAdmin, repoName);
+
+        // create another project within the group
+        project = new Project().withPublic(false)
+                .withPath("anotherproject")
+                .withNamespaceId(group.getId());
+
+        projApi.createProject(project);
+
+        // populate the repository
+        createBranch(privateTokenAdmin, "anotherproject");
     }
 }

@@ -21,6 +21,6 @@ public class GitLabServerConfig extends PageAreaImpl {
 
         find(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/validate-button")).click();
 
-        waitFor(driver, hasContent("Credentials verified for user"), 2);
+        waitFor(driver, hasContent("Credentials verified for user"), 10);
     }
 }
