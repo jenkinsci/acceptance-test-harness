@@ -41,10 +41,4 @@ public class GitLabOrganizationFolder extends Folder {
 
         return this;
     }
-
-    public GitLabOrganizationFolder getJob(final String name) {
-        return this.getJobs().get(GitLabOrganizationFolder.class, "firstgroup%252Fanotherproject").getJobs().get(GitLabOrganizationFolder.class, "main");
-
-    }
-
 }

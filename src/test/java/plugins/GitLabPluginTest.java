@@ -44,6 +44,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private String repoName = "testrepo";
 
+    private String anotherRepoName = "anotherproject";
+
     private String adminUserName = "testadmin";
 
     private String userName = "testsimple";
@@ -170,12 +172,29 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         this.assertCheckFinishedSuccessfully(organizationFolder);
 
-        final GitLabOrganizationFolder successJob1 = organizationFolder.getJob("main");
+        // test the builds for the first project
+        final WorkflowMultiBranchJob first_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName+"%2F"+repoName);
+        checksBuildsWithinProject(first_project);
 
+        // test the builds for the second project
+        final WorkflowMultiBranchJob second_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName+"%2F"+anotherRepoName);
+        checksBuildsWithinProject(second_project);
+    }
+
+    private void checksBuildsWithinProject(WorkflowMultiBranchJob project) {
+        final WorkflowJob successJob1 = project.getJob("main");
+        final WorkflowJob successJob2 = project.getJob("firstbranch");
+        final WorkflowJob successJob3 = project.getJob("MR-1");
+        final WorkflowJob failureJob = project.getJob("failedjob");
+
+        this.assertExistAndResult(successJob1, true);
+        this.assertExistAndResult(successJob2, true);
+        this.assertExistAndResult(successJob3, true);
+        this.assertExistAndResult(failureJob, false);
     }
 
     private void createGroup() throws GitLabApiException, IOException {
-        container.createGroup(groupName, userName, privateTokenAdmin, repoName);
+        container.createGroup(groupName, userName, privateTokenAdmin, repoName, anotherRepoName);
     }
 
     private void assertCheckFinishedSuccessfully(final GitLabOrganizationFolder job) {

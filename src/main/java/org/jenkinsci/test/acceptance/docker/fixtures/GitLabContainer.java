@@ -187,7 +187,7 @@ public class GitLabContainer extends DockerContainer {
                 .verifyOrDieWith("Unable to create user").trim();
     }
 
-    public void createGroup(String groupName, String userName, String privateTokenAdmin, String repoName) throws IOException, GitLabApiException {
+    public void createGroup(String groupName, String userName, String privateTokenAdmin, String repoName, String anotherRepoName) throws IOException, GitLabApiException {
         GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), privateTokenAdmin);
         GroupApi groupApi = new GroupApi(gitlabapi);
         GroupParams groupParams = new GroupParams().withName(groupName).withPath(groupName).withMembershipLock(false);
@@ -206,12 +206,12 @@ public class GitLabContainer extends DockerContainer {
 
         // create another project within the group
         project = new Project().withPublic(false)
-                .withPath("anotherproject")
+                .withPath(anotherRepoName)
                 .withNamespaceId(group.getId());
 
         projApi.createProject(project);
 
         // populate the repository
-        createBranch(privateTokenAdmin, "anotherproject");
+        createBranch(privateTokenAdmin, anotherRepoName);
     }
 }
