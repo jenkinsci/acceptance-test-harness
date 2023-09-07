@@ -168,8 +168,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         // test the pipeline
         organizationFolder.waitForCheckFinished((int)time.seconds(20));
 
-        this.assertCheckFinished(organizationFolder);
+        this.assertCheckFinishedSuccessfully(organizationFolder);
 
+        final GitLabOrganizationFolder successJob1 = organizationFolder.getJob("main");
 
     }
 
@@ -177,10 +178,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.createGroup(groupName, userName, privateTokenAdmin, repoName);
     }
 
-    private void assertCheckFinished(final GitLabOrganizationFolder job) {
+    private void assertCheckFinishedSuccessfully(final GitLabOrganizationFolder job) {
         assertThat(driver, hasContent("Scan GitLab Group Now"));
         final String branchIndexingLog = job.getCheckLog();
 
-        assertThat(branchIndexingLog, containsString("2 projects were processed"));
+        assertThat(branchIndexingLog, containsString("Finished: SUCCESS"));
     }
 }

@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 @Describable("jenkins.branch.OrganizationFolder")
-public class GitLabOrganizationFolder extends Job {
+public class GitLabOrganizationFolder extends Folder {
     public GitLabOrganizationFolder(Injector injector, URL url, String name) {
         super(injector, url, name);
     }
@@ -41,4 +41,10 @@ public class GitLabOrganizationFolder extends Job {
 
         return this;
     }
+
+    public GitLabOrganizationFolder getJob(final String name) {
+        return this.getJobs().get(GitLabOrganizationFolder.class, "firstgroup%252Fanotherproject").getJobs().get(GitLabOrganizationFolder.class, "main");
+
+    }
+
 }
