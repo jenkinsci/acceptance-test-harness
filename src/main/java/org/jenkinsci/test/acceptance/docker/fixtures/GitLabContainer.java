@@ -41,12 +41,12 @@ public class GitLabContainer extends DockerContainer {
     }
 
 
-    public int webPort() {
-        return port(443);
+    public int httpPort() {
+        return port(80);
     }
 
-    public String webHost() {
-        return ipBound(443);
+    public String httpHost() {
+        return ipBound(80);
     }
 
     public URL getURL() throws IOException {
@@ -54,7 +54,7 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public URL getHttpUrl() throws IOException {
-        String url = "http://" + ipBound(80) + ':' + port(80);
+        String url = "http://" + httpHost() + ':' + httpPort();
         return new URL(url);
     }
 

@@ -34,7 +34,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     DockerContainerHolder<GitLabContainer> gitLabServer;
 
     private GitLabContainer container;
-    private String repoUrl;
     private String host;
     private int port;
 
@@ -62,7 +61,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @Before
     public void init() throws InterruptedException, IOException {
         container = gitLabServer.get();
-        repoUrl = container.getRepoUrl();
         host = container.host();
         port = container.sshPort();
         container.waitForReady(this);
@@ -72,13 +70,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // create another user
         privateTokenUser = container.createUserToken(userName, "passwordforsimpleuser12#", "testsimple@example.com", "false");
-    }
-
-    @Test
-    public void dummy_test() {
-        assertNotNull(container.getRepoUrl());
-        assertTrue(container.getRepoUrl().contains("ssh://git@"));
-        assertNotNull(container.host());
     }
 
     public void createRepo() throws RuntimeException {
