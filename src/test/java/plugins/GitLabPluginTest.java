@@ -64,7 +64,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container = gitLabServer.get();
         repoUrl = container.getRepoUrl();
         host = container.host();
-        port = container.port();
+        port = container.sshPort();
         container.waitForReady(this);
 
         // create an admin user
@@ -81,7 +81,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertNotNull(container.host());
     }
 
-    public void createRepo() throws IOException, GitLabApiException {
+    public void createRepo() throws RuntimeException {
         //This sends a request to make a new repo in the gitlab server with the name "testrepo"
         HttpResponse<String> response = container.createRepo(repoName, getPrivateTokenAdmin());
         assertEquals(201, response.statusCode()); // 201 means the repo was created successfully

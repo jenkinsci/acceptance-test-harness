@@ -36,7 +36,7 @@ public class GitLabContainer extends DockerContainer {
         return ipBound(22);
     }
 
-    public int port() {
+    public int sshPort() {
         return port(22);
     }
 
@@ -50,7 +50,7 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public URL getURL() throws IOException {
-        return new URL("http://" + getIpAddress() + port());
+        return new URL("http://" + getIpAddress() + sshPort());
     }
 
     public URL getHttpUrl() throws IOException {
@@ -60,20 +60,7 @@ public class GitLabContainer extends DockerContainer {
 
     /** URL visible from the host. */
     public String getRepoUrl() {
-        return "ssh://git@" + host() + ":" + port() + REPO_DIR;
-    }
-
-    @Deprecated
-    public String getRepoUrlInsideDocker() throws IOException {
-        return "ssh://git@" + getIpAddress() + REPO_DIR;
-    }
-
-    /**
-     * URL visible from other Docker containers.
-     * @param alias an alias for this container’s {@link #getCid} passed to {@code --link}
-     */
-    public String getRepoUrlInsideDocker(String alias) throws IOException {
-        return "ssh://git@" + alias + REPO_DIR;
+        return "ssh://git@" + host() + ":" + sshPort() + REPO_DIR;
     }
 
     public void waitForReady(CapybaraPortingLayer p) {
@@ -98,7 +85,7 @@ public class GitLabContainer extends DockerContainer {
                 });
     }
 
-    public HttpResponse<String> createRepo(String repoName, String token) throws IOException {
+    public HttpResponse<String> createRepo(String repoName, String token) throws RuntimeException {
         try{
             HttpRequest request = HttpRequest.newBuilder()
                                              .uri(new URI(getHttpUrl() + "/api/v4/projects"))
@@ -114,7 +101,7 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public void createBranch(String token, String repoName) throws IOException, GitLabApiException {
-        GitLabApi gitlabapi = new GitLabApi("http://" + getIpAddress(), token);
+        GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), token);
         ProjectApi projApi = new ProjectApi(gitlabapi);
         Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
 
