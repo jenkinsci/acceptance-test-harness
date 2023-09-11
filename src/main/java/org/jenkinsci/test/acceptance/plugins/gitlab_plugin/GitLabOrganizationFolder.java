@@ -27,11 +27,8 @@ public class GitLabOrganizationFolder extends Folder {
     }
 
     public String getCheckLog() {
-        try {
-            return IOUtils.toString(url("computation/console").openStream(), StandardCharsets.UTF_8);
-        } catch (IOException ex) {
-            throw new AssertionError(ex);
-        }
+        return driver.getPageSource();
+
     }
 
     public GitLabOrganizationFolder waitForCheckFinished(final int timeout) {
