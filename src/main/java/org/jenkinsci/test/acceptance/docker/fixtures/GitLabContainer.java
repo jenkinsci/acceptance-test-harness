@@ -64,9 +64,8 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public void waitForReady(CapybaraPortingLayer p) {
-        long timeout =  time.seconds(200); // GitLab starts in about 2 minutes add some headway
         p.waitFor().withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofMillis(timeout))
+                .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes add some headway
                 .pollingEvery(Duration.ofSeconds(2))
                 .until( () ->  {
                     try {
@@ -100,65 +99,6 @@ public class GitLabContainer extends DockerContainer {
         }
     }
 
-    public void createBranch(String token, String repoName) throws IOException, GitLabApiException {
-        GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), token);
-        ProjectApi projApi = new ProjectApi(gitlabapi);
-        Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
-
-        RepositoryFile file = new RepositoryFile();
-        file.setFileName("Jenkinsfile");
-        file.setFilePath("Jenkinsfile");
-        file.setContent("pipeline {\n" +
-                "    agent any\n" +
-                "\n" +
-                "    stages {\n" +
-                "        stage('Build') {\n" +
-                "            steps {\n" +
-                "                echo 'Building..'\n" +
-                "            }\n" +
-                "        }\n" +
-                "        stage('Test') {\n" +
-                "            steps {\n" +
-                "                echo 'Testing..'\n" +
-                "            }\n" +
-                "        }\n" +
-                "        stage('Deploy') {\n" +
-                "            steps {\n" +
-                "                echo 'Deploying....'\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "}");
-
-        // create Jenkinsfile on the main branch
-        gitlabapi.getRepositoryFileApi().createFile(project.getId(), file, "main", "Add Jenkinsfile");
-
-        // create 2 new branches
-        gitlabapi.getRepositoryApi().createBranch(project.getId(), "firstbranch", "main");
-        gitlabapi.getRepositoryApi().createBranch(project.getId(), "secondbranch", "main");
-
-        // add a file on the secondbranch
-        RepositoryFile newFile = new RepositoryFile();
-        newFile.setFileName("README.md");
-        newFile.setFilePath("readme.md");
-        newFile.setContent("read me");
-        gitlabapi.getRepositoryFileApi().createFile(project.getId(), newFile, "secondbranch", "Add readme");
-
-
-        // create a branch with a broken Jenkinsfile
-        gitlabapi.getRepositoryApi().createBranch(project.getId(), "failedjob", "main");
-        file.setContent("pipeline {\n" +
-                "    agent any\n" );
-        gitlabapi.getRepositoryFileApi().updateFile(project.getId(), file, "failedjob", "this will not work");
-
-        // create a MR
-        MergeRequestParams params = new MergeRequestParams()
-                .withSourceBranch("secondbranch")
-                .withTargetBranch("main")
-                .withTitle("test_mr");
-        gitlabapi.getMergeRequestApi().createMergeRequest(project, params);
-    }
-
     public void deleteRepo(String token, String repoName) throws IOException, GitLabApiException {
         // get the project and delete the project
         GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), token);
@@ -172,33 +112,5 @@ public class GitLabContainer extends DockerContainer {
         return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "gitlab-rails runner -e production /usr/bin/create_user.rb" + " " + userName + " " + password + " " + email + " " + isAdmin)
                 .popen()
                 .verifyOrDieWith("Unable to create user").trim();
-    }
-
-    public void createGroup(String groupName, String userName, String privateTokenAdmin, String repoName, String anotherRepoName) throws IOException, GitLabApiException {
-        GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), privateTokenAdmin);
-        GroupApi groupApi = new GroupApi(gitlabapi);
-        GroupParams groupParams = new GroupParams().withName(groupName).withPath(groupName).withMembershipLock(false);
-        Group group = groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
-        groupApi.addMember(group.getId(), gitlabapi.getUserApi().getOptionalUser(userName).get().getId(), AccessLevel.DEVELOPER);
-
-        // create a project in the group
-        Project project = new Project().withPublic(false)
-                .withPath(repoName)
-                .withNamespaceId(group.getId());
-        ProjectApi projApi = new ProjectApi(gitlabapi);
-        projApi.createProject(project);
-
-        // populate the repository
-        createBranch(privateTokenAdmin, repoName);
-
-        // create another project within the group
-        project = new Project().withPublic(false)
-                .withPath(anotherRepoName)
-                .withNamespaceId(group.getId());
-
-        projApi.createProject(project);
-
-        // populate the repository
-        createBranch(privateTokenAdmin, anotherRepoName);
     }
 }

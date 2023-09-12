@@ -9,8 +9,8 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 public class GitLabServerConfig extends PageAreaImpl {
 
-    private Control serverName = control(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/name"));
-    private Control serverUrl = control(by.path("/io-jenkins-plugins-gitlabserverconfig-servers-GitLabServers/servers/serverUrl"));
+    private Control serverName = control("servers/name");
+    private Control serverUrl = control("servers/serverUrl");
 
     @Inject
     public GitLabServerConfig(Jenkins jenkins) {

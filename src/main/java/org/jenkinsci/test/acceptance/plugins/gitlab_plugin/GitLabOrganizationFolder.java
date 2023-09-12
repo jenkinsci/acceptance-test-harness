@@ -33,7 +33,7 @@ public class GitLabOrganizationFolder extends Folder {
 
     public GitLabOrganizationFolder waitForCheckFinished(final int timeout) {
         waitFor()
-                .withTimeout(Duration.ofMillis(super.time.seconds(timeout)))
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(() -> GitLabOrganizationFolder.this.getCheckLog().contains("Finished: "));
 
         return this;
