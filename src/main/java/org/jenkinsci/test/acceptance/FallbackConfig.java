@@ -317,7 +317,7 @@ public class FallbackConfig extends AbstractModule {
         // Make sure the window has minimal resolution set, even when out of the visible screen.
         // Note - not maximizing here any more because that doesn't do anything.
         Dimension oldSize = base.manage().window().getSize();
-        if (oldSize.height < 1090 || oldSize.width < 1680) {
+        if (oldSize.height < 1050 || oldSize.width < 1680) {
             base.manage().window().setSize(new Dimension(1680, 1050));
         }
 
