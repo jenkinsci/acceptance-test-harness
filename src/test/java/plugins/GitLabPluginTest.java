@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -158,6 +159,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.deleteRepo(getPrivateTokenAdmin(), repoName);
     }
 
+    // TODO: re-enable when flaky tests have been resolved. see: https://github.com/jenkinsci/acceptance-test-harness/pull/1365
+    @Ignore("flaky test")
     @Test
     public void gitLabGroupFolderOrganization() throws GitLabApiException, IOException {
         createGroup();
