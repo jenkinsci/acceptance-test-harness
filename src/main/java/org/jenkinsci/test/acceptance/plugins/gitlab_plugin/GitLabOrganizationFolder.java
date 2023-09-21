@@ -16,9 +16,9 @@ public class GitLabOrganizationFolder extends Folder {
     }
 
     public void create(String owner) {
-        control(by.path("/hetero-list-add[navigators]")).click();
-        waitFor(by.partialLinkText("GitLab Group"), 3);
-        find(by.partialLinkText("GitLab Group")).click();
+//        control(by.path("/hetero-list-add[navigators]")).click();
+//        find(by.partialLinkText("GitLab Group")).click();
+        control(by.path("/hetero-list-add[navigators]")).selectDropdownMenu("GitLab Group");
         find(by.path("/navigators/projectOwner")).sendKeys(owner);
     }
 
