@@ -65,8 +65,8 @@ public class GitLabContainer extends DockerContainer {
 
     public void waitForReady(CapybaraPortingLayer p) {
         p.waitFor().withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes add some headway
-                .pollingEvery(Duration.ofSeconds(2))
+                .withTimeout(Duration.ofSeconds(time.seconds(2000))) // GitLab starts in about 2 minutes add some headway
+                .pollingEvery(Duration.ofSeconds(time.seconds(2))
                 .until( () ->  {
                     try {
                         HttpRequest request = HttpRequest.newBuilder()
