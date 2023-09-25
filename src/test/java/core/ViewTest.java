@@ -61,4 +61,13 @@ public class ViewTest extends AbstractJUnitTest {
         view.save();
         assertThat(view, containsJob(job));
     }
+
+    @Test
+    public void viewDescription() {
+        ListView view = jenkins.views.create(ListView.class, "a_view");
+        view.configure();
+        view.setDescription("This is a description");
+        view.save();
+        assertThat(view, hasDescription("This is a description"));
+    }
 }
