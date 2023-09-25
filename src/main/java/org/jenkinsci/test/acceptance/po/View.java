@@ -24,6 +24,8 @@ public abstract class View extends ContainerPageObject {
     private final Control recurseIntoFolder = control("/recurse");
     public final Control includeRegex = control("/useincluderegex/includeRegex");
 
+    public final Control description = control("/description");
+
     public final JobsMixIn jobs;
 
     public View(Injector injector, URL url) {
@@ -106,7 +108,7 @@ public abstract class View extends ContainerPageObject {
      * @param description The description of the view.
      */
     public void setDescription(final String description) {
-        WebElement descrElem = find(by.name("description"));
+        WebElement descrElem = this.description.resolve();
         descrElem.clear();
         descrElem.sendKeys(description);
     }
@@ -117,6 +119,16 @@ public abstract class View extends ContainerPageObject {
 
     public String getSubmitButtonText(){
         return "OK";
+    }
+
+    public static Matcher<View> hasDescription(String description) {
+        return new Matcher<>("Has description " + description) {
+            @Override
+            public boolean matchesSafely(View item) {
+                WebElement webElement = item.getElement(By.xpath(String.format("//div[@id='description']/div[text()='%s']", description)));
+                return webElement != null;
+            }
+        };
     }
 
     public static Matcher<View> containsColumnHeaderTooltip(String tooltip) {
