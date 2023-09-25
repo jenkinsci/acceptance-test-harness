@@ -99,13 +99,14 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container = gitLabServer.get();
         host = container.host();
         port = container.sshPort();
+        long intial = System.currentTimeMillis();
         container.waitForReady(this);
-
         // create an admin user
         privateTokenAdmin = container.createUserToken(adminUserName, "arandompassword12#", "testadmin@invalid.test", "true");
 
         // create another user
         privateTokenUser = container.createUserToken(userName, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
+        System.out.println("Time it takes: " + (System.currentTimeMillis() - intial)/(1000*60));
     }
 
     @Test
@@ -159,8 +160,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.deleteRepo(getPrivateTokenAdmin(), repoName);
     }
 
-    // TODO: re-enable when flaky tests have been resolved. see: https://github.com/jenkinsci/acceptance-test-harness/pull/1365
-    @Ignore("flaky test")
     @Test
     public void gitLabGroupFolderOrganization() throws GitLabApiException, IOException {
         createGroup();
