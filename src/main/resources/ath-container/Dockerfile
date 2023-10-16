@@ -33,12 +33,13 @@ RUN apt-get update && \
         openjdk-17-jdk \
         xfonts-base \
         openssh-client \
+        jq \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
-# JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk21-2023-08-09-06-56-beta/OpenJDK21U-jdk_aarch64_linux_hotspot_2023-08-09-06-56.tar.gz
-ARG JDK21_VERSION=2023-08-09-06-56-beta
-RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk21-${JDK21_VERSION}/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION//-beta/}.tar.gz" \
+# JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21%2B35/OpenJDK21U-jdk_aarch64_linux_hotspot_21_35.tar.gz
+ARG JDK21_VERSION=21+35
+RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(echo "$JDK21_VERSION" | jq "@uri" -jRr)/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION/+/_}.tar.gz" \
   && mkdir "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" \
   && tar -C "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" -xzf /tmp/jdk21.tar.gz --strip-components=1 \
   && rm -fv /tmp/jdk21.tar.gz
