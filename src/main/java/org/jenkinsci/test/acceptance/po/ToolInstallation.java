@@ -27,6 +27,7 @@ import hudson.util.VersionNumber;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
@@ -150,7 +151,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
 
     protected String fakeHome(String binary, String homeEnvName) {
         try {
-            final File home = File.createTempFile("toolhome", binary);
+            final File home = Files.createTempFile("toolhome", binary).toFile();
 
             home.delete();
             new File(home, "bin").mkdirs();

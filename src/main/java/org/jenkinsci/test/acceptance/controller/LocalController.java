@@ -159,7 +159,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             if (!jenkinsHome.isDirectory() && ! jenkinsHome.mkdirs()) {
                 throw new IOException("Could not create directory: " + jenkinsHome);
             }
-            File template = File.createTempFile("template", ".dat");
+            File template = Files.createTempFile("template", ".dat").toFile();
             try {
                 FileUtils.writeByteArrayToFile(template, _template);
                 Expand expand = new Expand();

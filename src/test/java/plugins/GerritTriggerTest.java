@@ -121,7 +121,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
 
     @Before
     public void setupSSHWrapper() throws IOException {
-        ssh = File.createTempFile("jenkins", "ssh");
+        ssh = Files.createTempFile("jenkins", "ssh").toFile();
         ssh.deleteOnExit();
 
         FileUtils.writeStringToFile(ssh,

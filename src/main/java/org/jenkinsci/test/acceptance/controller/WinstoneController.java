@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,7 +94,7 @@ public class WinstoneController extends LocalController {
         cb.add("-Duser.language=en",
                 "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
         if (supportsPortFileName()) {
-            portFile = File.createTempFile("jenkins-port", ".txt");
+            portFile = Files.createTempFile("jenkins-port", ".txt").toFile();
             portFile.deleteOnExit();
             cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
         }

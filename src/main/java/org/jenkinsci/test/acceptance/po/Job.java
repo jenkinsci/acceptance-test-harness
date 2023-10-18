@@ -271,7 +271,7 @@ public class Job extends TopLevelItem {
     public void copyFile(File file) {
         File tmp = null;
         try {
-            tmp = File.createTempFile("jenkins-acceptance-tests", "dir");
+            tmp = Files.createTempFile("jenkins-acceptance-tests", "dir").toFile();
             ZipUtil.pack(file, tmp);
             byte[] archive = IOUtils.toByteArray(Files.newInputStream(tmp.toPath()));
 
