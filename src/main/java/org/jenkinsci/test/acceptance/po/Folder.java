@@ -70,8 +70,7 @@ public class Folder extends TopLevelItem implements Container {
     @Override
     public void delete() {
         open();
-        clickLink("Delete Folder");
-        waitFor(by.button("Yes")).click();
+        runThenHandleDialog(() -> clickLink("Delete Folder"));
     }
 
     public void setEnvironmentalVariables(final Map<String, String> envVbles) {
