@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.105</version>
+    <version>1.106</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -30,7 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.424</jenkins.version>
+    <jenkins.version>2.426</jenkins.version>
     <selenium.version>4.11.0</selenium.version>
     <guava.version>32.0.0-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
@@ -156,7 +156,7 @@
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.9.0</version>
+      <version>3.10.0</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -253,7 +253,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20230618</version>
+      <version>20231013</version>
     </dependency>
     <dependency>
       <groupId>org.kohsuke</groupId>
@@ -347,7 +347,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.15.2</version>
+        <version>2.15.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -355,14 +355,14 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.98.Final</version>
+        <version>4.1.100.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.13.0</version>
+        <version>2.14.0</version>
       </dependency>
       <!-- RequireUpperBoundDeps between Mockito and Selenium -->
       <dependency>
