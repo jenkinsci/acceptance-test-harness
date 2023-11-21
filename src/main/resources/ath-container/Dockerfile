@@ -33,12 +33,13 @@ RUN apt-get update && \
         openjdk-17-jdk \
         xfonts-base \
         openssh-client \
+        jq \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
-# JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk21-2023-08-09-06-56-beta/OpenJDK21U-jdk_aarch64_linux_hotspot_2023-08-09-06-56.tar.gz
-ARG JDK21_VERSION=2023-08-09-06-56-beta
-RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk21-${JDK21_VERSION}/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION//-beta/}.tar.gz" \
+# JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21%2B35/OpenJDK21U-jdk_aarch64_linux_hotspot_21_35.tar.gz
+ARG JDK21_VERSION=21+35
+RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(echo "$JDK21_VERSION" | jq "@uri" -jRr)/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION/+/_}.tar.gz" \
   && mkdir "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" \
   && tar -C "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" -xzf /tmp/jdk21.tar.gz --strip-components=1 \
   && rm -fv /tmp/jdk21.tar.gz
@@ -74,7 +75,7 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   fi
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION=3.9.4
+ENV MAVEN_VERSION=3.9.5
 RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/"${MAVEN_VERSION}"/binaries/apache-maven-"${MAVEN_VERSION}"-bin.tar.gz && \
     tar -xvzf apache-maven-"${MAVEN_VERSION}"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
@@ -89,7 +90,7 @@ RUN echo \
       $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 
 # Ensure that version is fixed
-ARG DOCKER_VERSION=24.0.6
+ARG DOCKER_VERSION=24.0.7
 ARG DOCKER_BUILDX_VERSION=0.10.2
 RUN apt-get update --quiet \
   && apt-get install --yes --no-install-recommends \
