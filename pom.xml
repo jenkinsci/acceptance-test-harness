@@ -243,7 +243,7 @@
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3148.v532a_7e715ee3</version>
+      <version>3192.v713e3b_039fb_e</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
