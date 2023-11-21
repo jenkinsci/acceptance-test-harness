@@ -1,7 +1,7 @@
 # Use the official GitLab Community Edition image as the base
-FROM gitlab/gitlab-ce:16.4.0-ce.0
+FROM gitlab/gitlab-ce:16.4.1-ce.0
 
 COPY create_user.rb /usr/bin/
-
+COPY gitlab.rb /etc/gitlab/
 # Expose the required ports
 EXPOSE 80 443 22

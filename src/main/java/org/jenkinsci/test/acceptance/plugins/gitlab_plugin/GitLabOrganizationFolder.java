@@ -17,15 +17,11 @@ public class GitLabOrganizationFolder extends Folder {
     }
 
     public void create(String owner) {
-        By selector = by.path("/hetero-list-add[navigators]");
-        waitFor(selector);
-        control(selector).selectDropdownMenu(GitLabOrganizationFolder.class, 5);
+        By navigators = by.path("/hetero-list-add[navigators]");
+        waitFor(navigators);
+        control(navigators)
+                .selectDropdownMenu("GitLab Group", 5);
         waitFor(by.path("/navigators/projectOwner")).sendKeys(owner);
-    }
-
-    @Override
-    public URL getConfigUrl() {
-        return null;
     }
 
     public String getCheckLog() {

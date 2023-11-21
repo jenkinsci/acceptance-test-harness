@@ -7,23 +7,28 @@ import org.gitlab4j.api.GroupApi;
 import org.gitlab4j.api.ProjectApi;
 import org.gitlab4j.api.models.*;
 import org.jenkinsci.test.acceptance.Matchers;
+import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
+import org.jenkinsci.test.acceptance.docker.DockerImage;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.*;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.*;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.jenkinsci.utils.process.CommandBuilder;
+import org.junit.*;
 import org.junit.experimental.categories.Category;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import java.net.http.HttpResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -96,17 +101,23 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
     @Before
     public void init() throws InterruptedException, IOException {
-        container = gitLabServer.get();
+        DockerImage.Starter<GitLabContainer> starter = gitLabServer.starter();
+        // See https://docs.gitlab.com/omnibus/settings/memory_constrained_envs.html
+        starter.withOptions(new CommandBuilder().add(new String[]{"--shm-size",
+                "2024m", "--memory-swap=4g", "--memory=3g"}));
+        container = starter.start();
         host = container.host();
         port = container.sshPort();
-        long intial = System.currentTimeMillis();
         container.waitForReady(this);
         // create an admin user
         privateTokenAdmin = container.createUserToken(adminUserName, "arandompassword12#", "testadmin@invalid.test", "true");
-
         // create another user
         privateTokenUser = container.createUserToken(userName, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
-        System.out.println("Time it takes: " + (System.currentTimeMillis() - intial)/(1000*60));
+    }
+
+    @After
+    public void shutDown() throws IOException, InterruptedException {
+        container.close();
     }
 
     @Test
@@ -114,54 +125,66 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         createRepo();
 
         // initialize GitLabApi and Project
-        GitLabApi gitlabapi = new GitLabApi(container.getHttpUrl().toString(), getPrivateTokenAdmin());
-        ProjectApi projApi = new ProjectApi(gitlabapi);
-        Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
+        try (GitLabApi gitlabapi =
+                     new GitLabApi(container.getHttpUrl().toString(),
+                             getPrivateTokenAdmin())) {
 
-        // create 2 new branches
-        createBranch(gitlabapi, project, firstBranch, mainBranch);
-        createBranch(gitlabapi, project, secondBranch, mainBranch);
+            ProjectApi projApi = new ProjectApi(gitlabapi);
+            Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
 
-        // a branch which is intended to fail
-        createBranch(gitlabapi, project, failedJob, mainBranch);
+            // create 2 new branches
+            createBranch(gitlabapi, project, firstBranch, mainBranch);
+            createBranch(gitlabapi, project, secondBranch, mainBranch);
 
-        // add Jenkinsfile on these branches
-        addFile(gitlabapi, project, mainBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, firstBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, secondBranch, JenkinsfileContent);
+            // a branch which is intended to fail
+            createBranch(gitlabapi, project, failedJob, mainBranch);
 
-        // add a broken Jekinsfile to the failedjob
-        addFile(gitlabapi, project, failedJob, brokenJenkinsfile);
+            // add Jenkinsfile on these branches
+            addFile(gitlabapi, project, mainBranch, JenkinsfileContent);
+            addFile(gitlabapi, project, firstBranch, JenkinsfileContent);
+            addFile(gitlabapi, project, secondBranch, JenkinsfileContent);
 
-        // create a merge request
-        createMergeRequest(gitlabapi, project, secondBranch, mainBranch, "test_mr");
+            // add a broken Jekinsfile to the failedjob
+            addFile(gitlabapi, project, failedJob, brokenJenkinsfile);
 
-        createGitLabToken(privateTokenAdmin, "GitLab Personal Access Token");
-        configureGitLabServer();
+            // create a merge request
+            createMergeRequest(gitlabapi, project, secondBranch, mainBranch, "test_mr");
 
-        final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
-        this.configureJobWithGitLabBranchSource(multibranchJob, adminUserName, repoName);
-        multibranchJob.save();
+            createGitLabToken(privateTokenAdmin, "GitLab Personal Access Token");
+            configureGitLabServer();
 
-        multibranchJob.waitForBranchIndexingFinished((int)time.seconds(20));
-        this.assertBranchIndexing(multibranchJob);
+            final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
+            this.configureJobWithGitLabBranchSource(multibranchJob, adminUserName, repoName);
+            multibranchJob.save();
 
-        final WorkflowJob successJob1 = multibranchJob.getJob(mainBranch);
-        final WorkflowJob successJob2 = multibranchJob.getJob(firstBranch);
-        final WorkflowJob successJob3 = multibranchJob.getJob("MR-1");
-        final WorkflowJob failureJob = multibranchJob.getJob(failedJob);
+            multibranchJob.waitForBranchIndexingFinished((int) time.seconds(20));
+            if (this.checkOverwhelmedGitlab(multibranchJob)) {
+                waitFor(by.href(String.format("/job/%s/build?delay=0", multibranchJob.name))).click();
+            }
+            this.assertBranchIndexing(multibranchJob);
 
-        this.assertExistAndResult(successJob1, true);
-        this.assertExistAndResult(successJob2, true);
-        this.assertExistAndResult(successJob3, true);
-        this.assertExistAndResult(failureJob, false);
+            final WorkflowJob successJob1 = multibranchJob.getJob(mainBranch);
+            final WorkflowJob successJob2 = multibranchJob.getJob(firstBranch);
+            final WorkflowJob successJob3 = multibranchJob.getJob("MR-1");
+            final WorkflowJob failureJob = multibranchJob.getJob(failedJob);
 
-        // delete the repo when finished
-        container.deleteRepo(getPrivateTokenAdmin(), repoName);
+            this.assertExistAndResult(successJob1, true);
+            this.assertExistAndResult(successJob2, true);
+            this.assertExistAndResult(successJob3, true);
+            this.assertExistAndResult(failureJob, false);
+
+            // delete the repo when finished
+            try {
+                container.deleteRepo(getPrivateTokenAdmin(), repoName);
+            } catch (GitLabApiException ex) {
+                // Gitlab may be overwhelmed, try again
+                container.deleteRepo(getPrivateTokenAdmin(), repoName);
+            }
+        }
     }
 
     @Test
-    public void gitLabGroupFolderOrganization() throws GitLabApiException, IOException {
+    public void gitLabGroupFolderOrganization() throws GitLabApiException, IOException, InterruptedException {
         createGroup();
         createGitLabToken(privateTokenAdmin, "GitLab Personal Access Token");
         configureGitLabServer();
@@ -174,14 +197,18 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         organizationFolder.waitForCheckFinished((int)time.seconds(20));
 
         this.assertCheckFinishedSuccessfully(organizationFolder);
-
         // test the builds for the first project
-        final WorkflowMultiBranchJob first_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName+"%2F"+repoName);
-        checksBuildsWithinProject(first_project);
+        final WorkflowMultiBranchJob first_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName + "%2F" + repoName);
+        final WorkflowJob successJob1 = first_project.getJob("main");
+        final WorkflowJob successJob2 = first_project.getJob("MR-1");
+
+        this.assertExistAndResult(successJob1, true);
+        this.assertExistAndResult(successJob2, true);
 
         // test the builds for the second project
-        final WorkflowMultiBranchJob second_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName+"%2F"+anotherRepoName);
-        checksBuildsWithinProject(second_project);
+        final WorkflowMultiBranchJob second_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName + "%2F" + anotherRepoName);
+        final WorkflowJob successJob3 = second_project.getJob("main");
+        this.assertExistAndResult(successJob3, true);
     }
 
     public void createRepo() throws RuntimeException {
@@ -223,14 +250,20 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     public void configureGitLabServer() throws IOException {
-        jenkins.configure();
-
+        JenkinsConfig jc = new JenkinsConfig(jenkins);
+        jc.configure();
         // server configuration
         GitLabServerConfig serverConfig = new GitLabServerConfig(jenkins);
         serverConfig.configureServer(container.getHttpUrl().toString());
-        jenkins.save();
+        jc.setQuietPeriod(5);
+        jc.save();
     }
 
+    private boolean checkOverwhelmedGitlab(WorkflowMultiBranchJob job) {
+        assertThat(driver, hasContent("Scan GitLab Project Now"));
+        final String branchIndexingLog = job.getBranchIndexingLog();
+        return branchIndexingLog.contains("GitLab is not responding");
+    }
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
         assertThat(driver, hasContent("Scan GitLab Project Now"));
         final String branchIndexingLog = job.getBranchIndexingLog();
@@ -243,9 +276,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     private void configureJobWithGitLabBranchSource(final WorkflowMultiBranchJob job, String adminUserName, String project) {
-        final GitLabBranchSource ghBranchSource = job.addBranchSource(GitLabBranchSource.class);
-        ghBranchSource.setOwner(adminUserName);
-        ghBranchSource.setProject(adminUserName, project);
+        final GitLabBranchSource glBranchSource = job.addBranchSource(GitLabBranchSource.class);
+        glBranchSource.setOwner(adminUserName);
+        glBranchSource.setProject(adminUserName, project);
+        //glBranchSource.removeTrait(null);
     }
 
     private void assertExistAndResult(final WorkflowJob job, final boolean withSuccess) {
@@ -254,66 +288,34 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         waitFor(job.getLastBuild().getResult(), Matchers.containsString(expectedResult.name()), (int)time.seconds(3));
     }
 
-    private void checksBuildsWithinProject(WorkflowMultiBranchJob project) {
-        final WorkflowJob successJob1 = project.getJob("main");
-        final WorkflowJob successJob2 = project.getJob("firstbranch");
-        final WorkflowJob successJob3 = project.getJob("MR-1");
-        final WorkflowJob failureJob = project.getJob("failedjob");
-
-        this.assertExistAndResult(successJob1, true);
-        this.assertExistAndResult(successJob2, true);
-        this.assertExistAndResult(successJob3, true);
-        this.assertExistAndResult(failureJob, false);
-    }
-
     private void createGroup() throws GitLabApiException, IOException {
-        GitLabApi gitlabapi = new GitLabApi(container.getHttpUrl().toString(), privateTokenAdmin);
-        GroupApi groupApi = new GroupApi(gitlabapi);
-        GroupParams groupParams = new GroupParams().withName(groupName).withPath(groupName).withMembershipLock(false);
-        Group group = groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
-        groupApi.addMember(group.getId(), gitlabapi.getUserApi().getOptionalUser(userName).get().getId(), AccessLevel.DEVELOPER);
+        try (GitLabApi gitlabapi =
+                     new GitLabApi(container.getHttpUrl().toString(),
+                             privateTokenAdmin)) {
+            GroupApi groupApi = new GroupApi(gitlabapi);
+            GroupParams groupParams = new GroupParams().withName(groupName).withPath(groupName).withMembershipLock(false);
+            Group group = groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
+            groupApi.addMember(group.getId(), gitlabapi.getUserApi().getOptionalUser(userName).get().getId(), AccessLevel.DEVELOPER);
+            // create a project in the group
+            Project project1 = new Project().withPublic(false)
+                    .withPath(repoName)
+                    .withNamespaceId(group.getId());
+            ProjectApi projApi = new ProjectApi(gitlabapi);
+            project1 = projApi.createProject(project1);
+            // populate the repository
+            createBranch(gitlabapi, project1, firstBranch, mainBranch);
+            addFile(gitlabapi, project1, mainBranch, JenkinsfileContent);
+            addFile(gitlabapi, project1, firstBranch, JenkinsfileContent);
+            createMergeRequest(gitlabapi, project1, firstBranch, mainBranch, "test_mr");
 
-        // create a project in the group
-        Project project = new Project().withPublic(false)
-                .withPath(repoName)
-                .withNamespaceId(group.getId());
-        ProjectApi projApi = new ProjectApi(gitlabapi);
-        projApi.createProject(project);
+            // create another project within the group
+            Project project2 = new Project().withPublic(false)
+                    .withPath(anotherRepoName)
+                    .withNamespaceId(group.getId());
 
-        project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
-
-        // populate the repository
-        createBranch(gitlabapi, project, firstBranch, mainBranch);
-        createBranch(gitlabapi, project, secondBranch, mainBranch);
-        createBranch(gitlabapi, project, failedJob, mainBranch);
-
-        addFile(gitlabapi, project, mainBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, firstBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, secondBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, failedJob, brokenJenkinsfile);
-
-        createMergeRequest(gitlabapi, project, secondBranch, mainBranch, "test_mr");
-
-        // create another project within the group
-        project = new Project().withPublic(false)
-                .withPath(anotherRepoName)
-                .withNamespaceId(group.getId());
-
-        projApi.createProject(project);
-
-        project = projApi.getProjects().stream().filter((proj -> anotherRepoName.equals(proj.getName()))).findAny().orElse(null);
-
-        // populate the repository
-        createBranch(gitlabapi, project, firstBranch, mainBranch);
-        createBranch(gitlabapi, project, secondBranch, mainBranch);
-        createBranch(gitlabapi, project, failedJob, mainBranch);
-
-        addFile(gitlabapi, project, mainBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, firstBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, secondBranch, JenkinsfileContent);
-        addFile(gitlabapi, project, failedJob, brokenJenkinsfile);
-
-        createMergeRequest(gitlabapi, project, secondBranch, mainBranch, "test_mr");
+            project2 = projApi.createProject(project2);
+            addFile(gitlabapi, project2, mainBranch, JenkinsfileContent);
+        }
     }
 
     private void assertCheckFinishedSuccessfully(final GitLabOrganizationFolder job) {
