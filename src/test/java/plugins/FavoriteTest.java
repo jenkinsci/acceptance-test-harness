@@ -28,20 +28,15 @@ public class FavoriteTest extends AbstractJUnitTest {
         realm.signup(USER);
         jenkins.login().doLogin(USER);
 
-        waitFor(by.id("fav_my-project")).click();
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']")).click();
         // ensure the project is now a favourite
-        waitFor(by.css(".icon-fav-active"));
+        waitFor(by.css(".icon-fav-active:not(.jenkins-hidden)"));
 
         final User user = new User(jenkins, USER);
-        jenkins.visit(user.getConfigUrl().toString());
-        // will fail if the project has not been favourited
-        waitFor(by.id("favorites"));
-        waitFor(by.id("fav_my-project")).click();
+        jenkins.visit(user.url("favorites").toString());
+        // will fail if the project has not been favorited
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='true']")).click();
         // ensure the project is no longer a favourite
-        waitFor(by.css(".icon-fav-inactive"));
-
-        jenkins.visit(user.getConfigUrl().toString());
-        waitFor(driver).until(Matchers.hasContent("Favorites"));
-        assertFalse(findIfNotVisible(by.id("favorites")).isDisplayed());
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']"));
     }
 }
