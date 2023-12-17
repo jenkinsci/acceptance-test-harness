@@ -116,6 +116,7 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
 
     @Test
     @WithPlugins("groovy-postbuild")
+    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1444")
     public void signatureNeedsApproval() throws Exception {
         final FreeStyleJob job = createFailedJobWithGroovyPostBuild("def h = java.lang.System.getProperties()", true);
         login(ADMIN);
