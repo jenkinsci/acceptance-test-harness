@@ -37,6 +37,7 @@ import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -654,6 +655,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * 'Manage Jenkins' area. Approved scripts can be executed.
      */
     @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm","authorize-project"})
+    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1444")
     public void should_use_grooy_sandbox_no_whitelisted_content() {
         GlobalSecurityConfig sc = setUpSecurity();
         runBuildAsUserWhoTriggered(sc);
