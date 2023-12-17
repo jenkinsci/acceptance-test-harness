@@ -308,7 +308,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         By error = by.css(errorElementCSS);
         
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time\""));
-        clickLink("Close");
+        closeDialog();
 
         j.configure();
         j.addTrigger(TimerTrigger.class);
@@ -316,7 +316,16 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         clickButton("Apply");
 
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time_either\""));
-        clickLink("Close");
+        closeDialog();
+    }
+
+    private void closeDialog() {
+        try {
+            clickButton("Close");
+        } catch (NoSuchElementException x) {
+            // before https://github.com/jenkinsci/jenkins/pull/8394
+            clickLink("Close");
+        }
     }
 
     @Test
