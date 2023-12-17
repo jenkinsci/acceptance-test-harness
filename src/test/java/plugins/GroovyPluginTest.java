@@ -35,6 +35,7 @@ import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @WithPlugins("groovy")
@@ -75,6 +76,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1444")
     public void run_system_groovy_from_file() {
         configureJob();
 
