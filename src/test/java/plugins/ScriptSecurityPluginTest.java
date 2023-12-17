@@ -35,6 +35,7 @@ import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 @WithPlugins({"script-security", "matrix-auth"})
@@ -115,6 +116,7 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
 
     @Test
     @WithPlugins("groovy-postbuild")
+    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1444")
     public void signatureNeedsApproval() throws Exception {
         final FreeStyleJob job = createFailedJobWithGroovyPostBuild("def h = java.lang.System.getProperties()", true);
         login(ADMIN);
@@ -141,6 +143,7 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
 
     @Test
     @WithPlugins({"workflow-job","workflow-cps"})
+    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1444")
     public void pipelineSignatureNeedsApproval() throws Exception {
         final WorkflowJob job = createFailedPipeline("def h = java.lang.System.getProperty('java.version')", true);
         login(ADMIN);
