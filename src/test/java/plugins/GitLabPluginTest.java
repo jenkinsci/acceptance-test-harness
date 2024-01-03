@@ -109,6 +109,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1461")
     public void testGitLabMultibranchPipeline() throws IOException, GitLabApiException {
         createRepo();
 
