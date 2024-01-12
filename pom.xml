@@ -248,7 +248,7 @@
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
       <artifactId>docker-fixtures</artifactId>
-      <version>178.v2c7d2343886b_</version>
+      <version>999999--IPV6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
