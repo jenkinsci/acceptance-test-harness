@@ -54,7 +54,11 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public URL getHttpUrl() throws IOException {
-        String url = "http://" + httpHost() + ':' + httpPort();
+        String host = httpHost();
+        if (ipv6Enabled()) {
+            host = String.format("[%s]", httpHost());
+        }
+        String url = "http://" + host + ':' + httpPort();
         return new URL(url);
     }
 

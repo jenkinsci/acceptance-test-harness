@@ -23,17 +23,29 @@ public class GitContainer extends DockerContainer {
     }
 
     public URL getUrl() throws IOException {
-        return new URL("http://" + host() + ":" + port());
+        String host = host();
+        if (ipv6Enabled()) {
+            host = String.format("[%s]", host());
+        }
+        return new URL("http://" + host + ":" + port());
     }
 
     /** URL visible from the host. */
     public String getRepoUrl() {
-        return "ssh://git@" + host() + ":" + port() + REPO_DIR;
+        String host = host();
+        if (ipv6Enabled()) {
+            host = String.format("[%s]", host());
+        }
+        return "ssh://git@" + host + ":" + port() + REPO_DIR;
     }
 
     @Deprecated
     public String getRepoUrlInsideDocker() throws IOException {
-        return "ssh://git@" + getIpAddress() + REPO_DIR;
+        String ipAddress = getIpAddress();
+        if (ipv6Enabled()) {
+            ipAddress = String.format("[%s]", getIpAddress());
+        }
+        return "ssh://git@" + ipAddress + REPO_DIR;
     }
 
     /**
