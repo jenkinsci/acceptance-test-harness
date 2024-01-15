@@ -63,7 +63,11 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * @return default ldap connection details without the manager credentials
      */
     private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) {
-        return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
+        String host = ldapContainer.getHost();
+        if (LdapContainer.ipv6Enabled()) {
+            host = String.format("[%s]", ldapContainer.getHost());
+        }
+        return new LdapDetails(host, ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
     }
 
     @Test

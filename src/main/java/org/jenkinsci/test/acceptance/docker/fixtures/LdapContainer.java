@@ -38,7 +38,11 @@ public class LdapContainer extends DockerContainer {
      * @return default ldap connection details from current running docker LdapContainer.
      */
     public LdapDetails createDefault() {
-        return new LdapDetails(getHost(), getPort(), getManagerDn(), getManagerPassword(), getRootDn());
+        String host = getHost();
+        if (ipv6Enabled()) {
+            host = String.format("[%s]", getHost());
+        }
+        return new LdapDetails(host, getPort(), getManagerDn(), getManagerPassword(), getRootDn());
     }
 
 }
