@@ -285,10 +285,6 @@ public class GitRepo implements Closeable {
             JSch jSch = new JSch();
             jSch.addIdentity(privateKey.getAbsolutePath());
 
-            if(DockerContainer.ipv6Enabled()) {
-                host = String.format("[%s]", host);
-            }
-            
             Session session = jSch.getSession("git", host, port);
             session.setConfig(props);
             session.connect();

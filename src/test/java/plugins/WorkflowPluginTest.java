@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
@@ -231,7 +232,11 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         GitContainer gitContainer = gitServer.get();
         try (GitRepo repo = new GitRepo()) {
             repo.changeAndCommitFoo("Initial commit");
-            repo.transferToDockerContainer(gitContainer.host(), gitContainer.port());
+            String host = gitContainer.host();
+            if(DockerContainer.ipv6Enabled()) {
+                host = String.format("[%s]", gitContainer.host());
+            }
+            repo.transferToDockerContainer(host, gitContainer.port());
             DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
             slave.setExecutors(1);
             slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
