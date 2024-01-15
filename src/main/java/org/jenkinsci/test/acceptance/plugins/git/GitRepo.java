@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -284,6 +285,10 @@ public class GitRepo implements Closeable {
             JSch jSch = new JSch();
             jSch.addIdentity(privateKey.getAbsolutePath());
 
+            if(DockerContainer.ipv6Enabled()) {
+                host = String.format("[%s]", host);
+            }
+            
             Session session = jSch.getSession("git", host, port);
             session.setConfig(props);
             session.connect();
