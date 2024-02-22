@@ -48,9 +48,7 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
      * @return build statistics table
      */
     public WebElement getTable() {
-        WebElement portlet = find(By.xpath("//div[contains(.,'" + PORTLET_NAME + "')]/following::table[1]"));
-
-        return portlet.findElement(By.id("statistics"));
+        return find(By.xpath("//div[contains(.,'" + PORTLET_NAME + "')]/following::table[1]"));
     }
 
     /**
