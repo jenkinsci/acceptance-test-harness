@@ -31,10 +31,12 @@ public class SnippetGenerator extends PageObject {
      * @return the generated script
      */
     public String generateScript() {
-        WebElement button = find(By.id("generatePipelineScript-button"));
-        button.click();
-        elasticSleep(500);
-        WebElement textarea = find(By.id("prototypeText"));
-        return StringUtils.defaultString(textarea.getAttribute("value"));
+        WebElement generateButton = find(By.id("generatePipelineScript-button"));
+        generateButton.click();
+
+        WebElement snippet = find(By.id("prototypeText"));
+        waitFor().until(() -> StringUtils.isNotBlank(snippet.getAttribute("value")));
+
+        return StringUtils.defaultString(snippet.getAttribute("value"));
     }
 }
