@@ -24,9 +24,6 @@
 
 package org.jenkinsci.test.acceptance.update_center;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -37,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.ExceptionLogger;
@@ -56,13 +54,18 @@ import org.apache.http.protocol.RequestConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.UpdateCenter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Serves a fake update center locally.
@@ -84,6 +87,10 @@ public class MockUpdateCenter implements AutoCleaned {
     private HttpServer server;
 
     public void ensureRunning(Jenkins jenkins) {
+        if (System.getenv("SKIP_UPDATES") != null) {
+            LOGGER.info("skipping time-consuming initialization of mock update center - make sure that all required plugins are already installed in PLUGINS_DIR");
+            return;
+        }
         if (original != null) {
             return;
         }
