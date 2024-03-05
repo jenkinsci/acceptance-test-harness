@@ -769,7 +769,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.426.3</jenkins.version>
+        <jenkins.version>2.440.2-rc34559.fb_1a_3238c46e</jenkins.version>
       </properties>
     </profile>
   </profiles>
