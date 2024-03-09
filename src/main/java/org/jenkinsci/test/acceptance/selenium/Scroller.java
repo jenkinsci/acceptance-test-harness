@@ -15,7 +15,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
+import org.openqa.selenium.support.events.WebDriverListener;
 
 /**
  * Automatically scrolls the element into view.
@@ -71,14 +71,16 @@ import org.openqa.selenium.support.events.AbstractWebDriverEventListener;
  * @author ogondza
  * @author Kohsuke Kawaguchi
  */
-public class Scroller extends AbstractWebDriverEventListener {
+public class Scroller implements WebDriverListener {
 
     private final Logger LOGGER = Logger.getLogger(Scroller.class.getName());
 
     private final String scrollJs;
     private final String disableStickyElementsJs;
+    private final WebDriver driver;
 
-    public Scroller() {
+    public Scroller(WebDriver driver) {
+        this.driver = driver;
         try {
             scrollJs = IOUtils.toString(getClass()
                     .getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
@@ -90,25 +92,29 @@ public class Scroller extends AbstractWebDriverEventListener {
     }
 
     @Override
-    public void beforeClickOn(WebElement element, WebDriver driver) {
-        scrollIntoView(element, driver);
+    public void beforeClick(WebElement element) {
+        scrollIntoView(element);
     }
 
     @Override
-    public void beforeChangeValueOf(WebElement element, WebDriver driver, CharSequence[] keysToSend) {
-        scrollIntoView(element, driver);
+    public void beforeSendKeys(WebElement element, CharSequence[] keysToSend) {
+        scrollIntoView(element);
     }
 
     @Override
-    public void afterNavigateTo(String url, WebDriver driver) {
-        super.afterNavigateTo(url, driver);
+    public void beforeClear(WebElement element) {
+        scrollIntoView(element);
+    }
+
+    @Override
+    public void afterGet(WebDriver driver, String url) {
         try {
             // if there's an alert we can't run JavaScript
             // if we catch the exception from running JavaScript then FormValidationTest hangs
             // not the nicest hack, but it works
             driver.switchTo().alert();
         } catch (NoAlertPresentException e) {
-            disableStickyElements(driver);
+            disableStickyElements();
         }
     }
 
@@ -117,7 +123,7 @@ public class Scroller extends AbstractWebDriverEventListener {
      * appear on top of other elements, making those elements inaccessible. This method removes the sticky
      * nature of these elements meaning that they'll no longer appear on top of other elements.
      */
-    public void disableStickyElements(WebDriver driver) {
+    public void disableStickyElements() {
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         try {
             executor.executeScript(disableStickyElementsJs);
@@ -130,7 +136,7 @@ public class Scroller extends AbstractWebDriverEventListener {
      * The framework is expected to take care of the correct scrolling. When you are tempted to scroll from PageObjects
      * or tests, there is likely a framework problem to be fixed.
      */
-    public void scrollIntoView(WebElement e, WebDriver driver) {
+    public void scrollIntoView(WebElement e) {
         WebElement element = e;
         if (Objects.equals(element.getTagName(), "option")) {
             element = e.findElement(By.xpath("..")); // scroll select into view not option

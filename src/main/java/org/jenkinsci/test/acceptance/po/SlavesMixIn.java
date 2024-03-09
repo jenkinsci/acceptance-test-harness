@@ -43,7 +43,7 @@ public class SlavesMixIn extends MixIn {
         S s = newInstance(type, jenkins, name);
         // Automatic disabling of sticky elements doesn't occur after a redirect
         // so force it after the configuration page has loaded
-        new Scroller().disableStickyElements(driver);
+        new Scroller(driver).disableStickyElements();
 
 
         // reasonable starting point values

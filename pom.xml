@@ -363,7 +363,13 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.14.11</version>
+        <version>1.14.12</version>
+      </dependency>
+      <!-- RequireUpperBoundDeps between jersey (via GitLab API) and browserup -->
+      <dependency>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>3.29.0-GA</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>

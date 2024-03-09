@@ -59,7 +59,7 @@ public class SshCredentialDialog extends PageAreaImpl {
 
         final Actions builder = new Actions(driver);
 
-        new Scroller().scrollIntoView(addSubmitButton, driver);
+        new Scroller(driver).scrollIntoView(addSubmitButton);
         addSubmitButton.click();
         builder.perform();
     }
