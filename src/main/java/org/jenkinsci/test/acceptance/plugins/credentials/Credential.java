@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -27,11 +28,18 @@ public abstract class Credential extends PageAreaImpl {
      * Adds this credential and close the dialog.
      */
     public void add() {
-        WebElement dialog = find(by.id("credentialsDialog"));
-        WebElement we = find(by.id("credentials-add-submit-button"));
+        WebElement dialog = find(by.id("credentials-dialog-form"));
+        WebElement we = find(submitButton());
         we.click();
         // wait for the form to be removed from the UI
         waitFor(driver).until(ExpectedConditions.invisibilityOf(dialog));
+    }
+
+    /**
+     * @return dialog submit button selector
+     */
+    public static By submitButton() {
+        return by.css(".jenkins-button[data-id='ok']");
     }
 
 }

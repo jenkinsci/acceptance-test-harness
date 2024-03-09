@@ -22,13 +22,15 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
      */
     @SuppressWarnings("checkstyle:javadocvariable")
     public enum JobType {
-        FAILED(2), UNSTABLE(3), SUCCESS(4), PENDING(5),
-        DISABLED(6), ABORTED(7), NOT_BUILT(8), TOTAL(9);
+        FAILED(1, "td"), UNSTABLE(2, "td"), SUCCESS(3, "td"), PENDING(4, "td"),
+        DISABLED(5, "td"), ABORTED(6, "td"), NOT_BUILT(7, "td"), TOTAL(8, "th");
 
         private final int row;
+        private final String name;
 
-        JobType(int r) {
+        JobType(int r, String name) {
             row = r;
+            this.name = name;
         }
     }
 
@@ -48,9 +50,7 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
      * @return build statistics table
      */
     public WebElement getTable() {
-        WebElement portlet = find(By.xpath("//div[contains(.,'" + PORTLET_NAME + "')]/following::table[1]"));
-
-        return portlet.findElement(By.id("statistics"));
+        return find(By.xpath("//div[contains(.,'" + PORTLET_NAME + "')]/following::table[1]"));
     }
 
     /**
@@ -60,7 +60,7 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
      * @return number of builds
      */
     public int getNumberOfBuilds(JobType type) {
-        return Integer.parseInt(getTable().findElement(By.xpath(".//tbody/tr[" + type.row + "]/td[3]")).getText().trim());
+        return Integer.parseInt(getTable().findElement(By.xpath(".//tbody/tr[" + type.row + "]/" + type.name + "[3]")).getText().trim());
     }
 
     /**
@@ -70,6 +70,6 @@ public class BuildStatisticsPortlet extends AbstractDashboardViewPortlet {
      * @return percentage of builds
      */
     public String getPercentageOfBuilds(JobType type) {
-        return getTable().findElement(By.xpath(".//tbody/tr[" + type.row + "]/td[4]")).getText().trim();
+        return getTable().findElement(By.xpath(".//tbody/tr[" + type.row + "]/" + type.name + "[4]")).getText().trim();
     }
 }
