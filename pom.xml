@@ -350,7 +350,7 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.104.Final</version>
+        <version>4.1.107.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
