@@ -1,7 +1,8 @@
 package org.jenkinsci.test.acceptance.po;
 
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.lift.Matchers;
+
+import java.time.Duration;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -19,7 +20,7 @@ public class LabelAxis extends Axis {
             find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel1']//a")).click();
             find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel2']//a")).click();
 
-            waitFor(checkBox, Matchers.displayed(), 3);
+            waitFor().withTimeout(Duration.ofSeconds(3)).until(checkBox::isDisplayed);
         }
         check(checkBox, true);
     }
