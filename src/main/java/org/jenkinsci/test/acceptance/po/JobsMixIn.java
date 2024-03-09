@@ -45,7 +45,7 @@ public class JobsMixIn extends MixIn {
 
         // Automatic disabling of sticky elements doesn't seem to occur after a redirect,
         // so force it after the configuration page has loaded
-        new Scroller().disableStickyElements(driver);
+        new Scroller(driver).disableStickyElements();
 
         final T j = get(type, name);
 

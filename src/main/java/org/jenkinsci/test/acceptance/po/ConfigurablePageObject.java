@@ -105,7 +105,7 @@ public abstract class ConfigurablePageObject extends PageObject {
     public void configure() {
         // Automatic disabling of sticky elements doesn't seem to occur after a redirect,
         // so force it after the configuration page has loaded
-        new Scroller().disableStickyElements(driver);
+        new Scroller(driver).disableStickyElements();
 
         if (!driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
             visit(getConfigUrl());

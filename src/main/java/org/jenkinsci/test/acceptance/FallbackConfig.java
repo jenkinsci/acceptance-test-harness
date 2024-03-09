@@ -69,7 +69,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
+import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
@@ -112,9 +112,9 @@ public class FallbackConfig extends AbstractModule {
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, buildFirefoxOptions(testName));
         case "firefox-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.14.1", buildFirefoxOptions(testName));
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.18.1", buildFirefoxOptions(testName));
         case "chrome-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.14.1", new ChromeOptions());
+            return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.18.1", new ChromeOptions());
         case "chrome":
             Map<String, String> prefs = new HashMap<String, String>();
             prefs.put(LANGUAGE_SELECTOR, "en");
@@ -320,9 +320,9 @@ public class FallbackConfig extends AbstractModule {
         if (oldSize.height < 1050 || oldSize.width < 1680) {
             base.manage().window().setSize(new Dimension(1680, 1050));
         }
-
-        final EventFiringWebDriver d = new EventFiringWebDriver(base);
-        d.register(new Scroller());
+        Scroller scroller = new Scroller(base);
+        final EventFiringDecorator<WebDriver> decorator = new EventFiringDecorator<>(scroller);
+        WebDriver d = decorator.decorate(base);
 
         try {
             d.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(PAGE_LOAD_TIMEOUT)));
