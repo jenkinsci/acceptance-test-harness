@@ -43,13 +43,11 @@ public class SshCredentialDialog extends PageAreaImpl {
      * Adds this credential and close the modal dialog.
      */
     public void add() {
-        final By addSubmitButton = by.id("credentials-add-submit-button");
-
-        this.findAndPerformClick(addSubmitButton);
+        this.findAndPerformClick(Credential.submitButton());
 
         waitFor().withTimeout(Duration.ofSeconds(5)).until(() -> {
             try {
-                return !find(addSubmitButton).isDisplayed();
+                return !find(Credential.submitButton()).isDisplayed();
             } catch (final NoSuchElementException | StaleElementReferenceException ex) {
                 return true;
             }
