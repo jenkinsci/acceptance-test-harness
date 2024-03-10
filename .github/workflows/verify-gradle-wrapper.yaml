@@ -1,0 +1,11 @@
+name: Validate Gradle wrapper
+on: [pull_request, push]
+jobs:
+  build_pr:
+    if: github.repository_owner == 'jenkinsci'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
