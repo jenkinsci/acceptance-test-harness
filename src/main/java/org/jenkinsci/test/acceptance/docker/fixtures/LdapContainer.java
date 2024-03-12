@@ -40,7 +40,7 @@ public class LdapContainer extends DockerContainer {
     public LdapDetails createDefault() {
         String host = getHost();
         if (ipv6Enabled()) {
-            host = String.format("[%s]", getHost());
+            host = encloseInBrackets(host);
         }
         return new LdapDetails(host, getPort(), getManagerDn(), getManagerPassword(), getRootDn());
     }

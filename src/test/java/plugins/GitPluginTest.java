@@ -129,8 +129,8 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + 
                 repoUrl.replace("[", "\\[").replace("]", "\\]"));
-    }   
-    
+    }
+
     @Test
     public void checkout_local_branch() {
         buildGitRepo()

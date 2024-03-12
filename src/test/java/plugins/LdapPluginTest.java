@@ -65,7 +65,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) {
         String host = ldapContainer.getHost();
         if (LdapContainer.ipv6Enabled()) {
-            host = String.format("[%s]", ldapContainer.getHost());
+            host = LdapContainer.encloseInBrackets(host);
         }
         return new LdapDetails(host, ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
     }
@@ -194,7 +194,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
         String host = ldapContainer.getHost();
         if (LdapContainer.ipv6Enabled()) {
-            host = String.format("[%s]", ldapContainer.getHost());
+            host = LdapContainer.encloseInBrackets(host);
         }
         
         ldapDetails.setHostWithPort((

@@ -234,7 +234,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             repo.changeAndCommitFoo("Initial commit");
             String host = gitContainer.host();
             if(DockerContainer.ipv6Enabled()) {
-                host = String.format("[%s]", gitContainer.host());
+                host = DockerContainer.encloseInBrackets(host);
             }
             repo.transferToDockerContainer(host, gitContainer.port());
             DumbSlave slave = jenkins.slaves.create(DumbSlave.class);

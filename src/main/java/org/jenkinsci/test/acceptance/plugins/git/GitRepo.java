@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.zeroturnaround.zip.ZipUtil;
 
