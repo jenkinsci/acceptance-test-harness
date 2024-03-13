@@ -36,7 +36,6 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.DockerAgentContainer;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
