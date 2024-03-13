@@ -232,11 +232,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         GitContainer gitContainer = gitServer.get();
         try (GitRepo repo = new GitRepo()) {
             repo.changeAndCommitFoo("Initial commit");
-            String host = gitContainer.host();
-            if(DockerContainer.ipv6Enabled()) {
-                host = DockerContainer.encloseInBrackets(host);
-            }
-            repo.transferToDockerContainer(host, gitContainer.port());
+            repo.transferToDockerContainer(GitContainer.addBracketsIfNeeded(gitContainer.host()), gitContainer.port());
             DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
             slave.setExecutors(1);
             slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer

@@ -54,7 +54,7 @@ public class GitContainer extends DockerContainer {
                 .verifyOrDieWith("Unable to add SSH public key to authorized keys");
     }
     
-    private String addBracketsIfNeeded(String ipAddress) {
+    public static String addBracketsIfNeeded(String ipAddress) {
         return ipv6Enabled() && !ipAddress.contains("[") ? String.format("[%s]", ipAddress) : ipAddress;
     }
 }

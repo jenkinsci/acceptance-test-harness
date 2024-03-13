@@ -41,7 +41,7 @@ public class LdapContainer extends DockerContainer {
         return new LdapDetails(addBracketsIfNeeded(getHost()), getPort(), getManagerDn(), getManagerPassword(), getRootDn());
     }
 
-    private String addBracketsIfNeeded(String ipAddress) {
+    public static String addBracketsIfNeeded(String ipAddress) {
         return ipv6Enabled() && !ipAddress.contains("[") ? String.format("[%s]", ipAddress) : ipAddress;
     }
 }
