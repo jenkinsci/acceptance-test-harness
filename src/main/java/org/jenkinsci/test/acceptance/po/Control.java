@@ -180,23 +180,31 @@ public class Control extends CapybaraPortingLayerImpl {
      *      Class with {@link Describable} annotation.
      */
     public void selectDropdownMenu(Class<?> type) {
+        selectDropdownMenu(type, 1);
+    }
+
+    public void selectDropdownMenu(String displayName) {
+        selectDropdownMenu(displayName, 1);
+    }
+
+    public void selectDropdownMenu(String displayName, long timeoutInSeconds) {
         click();
-        WebElement we = findCaption(type,findDropDownMenuItem);
+        WebElement we = findDropDownMenuItem.find(displayName);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
+        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(timeoutInSeconds)).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
         waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(10)).until(Control::isHiddenOrStale);
     }
 
-    public void selectDropdownMenu(String displayName) {
+    public void selectDropdownMenu(Class<?> type, long timeoutInSeconds) {
         click();
-        WebElement we = findDropDownMenuItem.find(displayName);
+        WebElement we = findCaption(type,findDropDownMenuItem);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
+        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(timeoutInSeconds)).until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(Control::isHiddenOrStale);
+        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(10)).until(Control::isHiddenOrStale);
     }
 
     /**
