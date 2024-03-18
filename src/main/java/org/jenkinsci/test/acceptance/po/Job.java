@@ -363,7 +363,7 @@ public class Job extends TopLevelItem {
 
         control(by.checkbox("This project is parameterized")).check();
 
-        control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
+        control(by.xpath("//button[normalize-space(text()='Add Parameter')]")).selectDropdownMenu(type);
 
         // TODO selectDropdownMenu should not need this sleep - try and remove it
         elasticSleep(500);
