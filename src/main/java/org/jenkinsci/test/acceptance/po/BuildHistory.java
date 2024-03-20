@@ -28,7 +28,7 @@ public class BuildHistory extends PageObject {
         open();
 
         // build history is progressively rendered so wait until that is complete
-        WebElement progressiveRendering = findIfNotVisible(by.xpath("//table[@tooltip='Computation in progress.']"));
+        WebElement progressiveRendering = findIfNotVisible(by.xpath("//*[@tooltip='Computation in progress.']"));
         waitFor(progressiveRendering).until(we -> !we.isDisplayed());
 
         LinkedHashSet<Build> builds = new LinkedHashSet<Build>();

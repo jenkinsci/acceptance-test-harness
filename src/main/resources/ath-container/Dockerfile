@@ -62,7 +62,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 liba
   && ln -fs /opt/firefox-${FIREFOX_VERSION}/firefox /usr/bin/firefox
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION=0.33.0
+ENV GECKODRIVER_VERSION=0.34.0
 # gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
@@ -75,7 +75,7 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   fi
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION=3.9.5
+ENV MAVEN_VERSION=3.9.6
 RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/"${MAVEN_VERSION}"/binaries/apache-maven-"${MAVEN_VERSION}"-bin.tar.gz && \
     tar -xvzf apache-maven-"${MAVEN_VERSION}"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
@@ -90,7 +90,7 @@ RUN echo \
       $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 
 # Ensure that version is fixed
-ARG DOCKER_VERSION=24.0.6
+ARG DOCKER_VERSION=25.0.4
 ARG DOCKER_BUILDX_VERSION=0.10.2
 RUN apt-get update --quiet \
   && apt-get install --yes --no-install-recommends \

@@ -52,8 +52,9 @@ public class UnstableJobsPortlet extends AbstractDashboardViewPortlet {
      * @return True, if this Portlet contains a job with the given name.
      */
     public boolean hasJob(String jobName) {
+        WebElement table = getTable();
         try {
-            return !getTable().findElements(By.partialLinkText(jobName)).isEmpty();
+            return !table.findElements(By.partialLinkText(jobName)).isEmpty();
         } catch (NoSuchElementException e) {
             return false;
         }

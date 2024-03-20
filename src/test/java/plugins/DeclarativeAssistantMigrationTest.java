@@ -53,7 +53,7 @@ public class DeclarativeAssistantMigrationTest
         assertThat(driver, hasElement( By.className( "rectangle-conversion-success")));
         assertThat(driver, hasElement(By.className("review-converted")));
         assertThat(driver, hasElement(By.id("jenkinsfile-content")));
-        String jenkinsFile =  driver.findElement(By.id("jenkinsfile-content")).getAttribute("value");
+        String jenkinsFile =  driver.findElement(By.id("jenkinsfile-content")).getText();
         assertThat(jenkinsFile, containsString( "echo 1" ));
     }
 }

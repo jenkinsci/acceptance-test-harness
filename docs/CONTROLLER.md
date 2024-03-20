@@ -12,13 +12,18 @@ section describes them.
 
 For more sophisticated customization, see [WIRING.md](WIRING.md).
 
+To reduce the overall startup time, you can also use a pool of JUT instances, see [PRELAUNCH.md](PRELAUNCH.md) for more details.
+
 ## Local family controllers
 All local controllers run both test harness and Jenkins under Test on the local machine. Common environment variables for local controllers:
 
 * `JENKINS_JAVA_HOME` the JVM home to use for running Jenkins. If not specified, the first of `JAVA_HOME`, or the JVM
    used to launch the tests will be used.
 * `JENKINS_JAVA_OPTS` Adds additional options to the java process like `-Xms=XXm -Xmx=XXXm`.
-* `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
+* `INTERACTIVE` keep browser session opened after a failed scenario for interactive investigation.
+* `SKIP_UPDATES` skip Jenkins plugin updates before starting the tests. Dramatically reduces the startup time for tests.  
+   Using this option makes sense when you are running tests against a Jenkins instance that is already set up with the 
+   plugins you need (see environment variable `PLUGINS_DIR`).  
 
 You can disable the logging output of Jenkins by setting the system property `quiet` on 
 the command line.
