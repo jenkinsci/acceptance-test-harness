@@ -23,17 +23,17 @@ public class GitContainer extends DockerContainer {
     }
 
     public URL getUrl() throws IOException {
-        return new URL("http://" + host() + ":" + port());
+        return new URL("http", host(), port(), "");
     }
 
     /** URL visible from the host. */
     public String getRepoUrl() {
-        return "ssh://git@" + host() + ":" + port() + REPO_DIR;
+        return "ssh://git@" + addBracketsIfNeeded(host()) + ":" + port() + REPO_DIR;
     }
 
     @Deprecated
     public String getRepoUrlInsideDocker() throws IOException {
-        return "ssh://git@" + getIpAddress() + REPO_DIR;
+        return "ssh://git@" + addBracketsIfNeeded(getIpAddress()) + REPO_DIR;
     }
 
     /**
@@ -53,5 +53,8 @@ public class GitContainer extends DockerContainer {
                 .popen()
                 .verifyOrDieWith("Unable to add SSH public key to authorized keys");
     }
-
+    
+    public static String addBracketsIfNeeded(String ipAddress) {
+        return ipv6Enabled() && !ipAddress.contains("[") ? String.format("[%s]", ipAddress) : ipAddress;
+    }
 }

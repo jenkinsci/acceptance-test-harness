@@ -63,7 +63,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * @return default ldap connection details without the manager credentials
      */
     private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) {
-        return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
+        return new LdapDetails(LdapContainer.addBracketsIfNeeded(ldapContainer.getHost()), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
     }
 
     @Test
@@ -188,7 +188,9 @@ public class LdapPluginTest extends AbstractJUnitTest {
         int freePort = this.findAvailablePort();
         LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
-        ldapDetails.setHostWithPort("localhost:" + freePort + ' ' + ldapContainer.getHost() + ':' + ldapContainer.getPort());
+        String host = LdapContainer.addBracketsIfNeeded(ldapContainer.getHost());
+        ldapDetails.setHostWithPort((
+                LdapContainer.ipv6Enabled() ? "[::1]:" : "localhost:") + freePort + ' ' + host + ':' + ldapContainer.getPort());
         realm.configure(ldapDetails);
         securityConfig.save();
 
