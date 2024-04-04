@@ -1,17 +1,20 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 
 /**
- * openLDAP (slapd) Container with a small user directory.
- * The configuration of this ldap is located next to its Dockerfile.
- * To edit/add users or groups just add them to config/base.ldif and rebuild the image.
+ * openLDAP (slapd) Container with a small user directory. The configuration of
+ * this ldap is located next to its Dockerfile. To edit/add users or groups just
+ * add them to config/base.ldif and rebuild the image.
  *
  * @author Michael Prankl
  */
-@DockerFixture(id = "ldap", ports = {389, 636})
+@DockerFixture(id = "ldap", ports = { 389, 636 })
 public class LdapContainer extends DockerContainer {
 
     public String getHost() {
@@ -35,13 +38,12 @@ public class LdapContainer extends DockerContainer {
     }
 
     /**
-     * @return default ldap connection details from current running docker LdapContainer.
+     * @return default ldap connection details from current running docker
+     *         LdapContainer.
+     * @throws MalformedURLException 
      */
-    public LdapDetails createDefault() {
-        return new LdapDetails(addBracketsIfNeeded(getHost()), getPort(), getManagerDn(), getManagerPassword(), getRootDn());
-    }
-
-    public static String addBracketsIfNeeded(String ipAddress) {
-        return ipv6Enabled() && !ipAddress.contains("[") ? String.format("[%s]", ipAddress) : ipAddress;
+    public LdapDetails createDefault() throws MalformedURLException {
+        return new LdapDetails((new URL("http", getHost(), 0, "").getHost()), getPort(), getManagerDn(), getManagerPassword(),
+                getRootDn());
     }
 }

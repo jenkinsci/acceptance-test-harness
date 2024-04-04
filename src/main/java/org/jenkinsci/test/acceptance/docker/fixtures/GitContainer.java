@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
@@ -26,14 +27,15 @@ public class GitContainer extends DockerContainer {
         return new URL("http", host(), port(), "");
     }
 
-    /** URL visible from the host. */
-    public String getRepoUrl() {
-        return "ssh://git@" + addBracketsIfNeeded(host()) + ":" + port() + REPO_DIR;
+    /** URL visible from the host. 
+     * @throws MalformedURLException */
+    public String getRepoUrl() throws MalformedURLException {
+        return "ssh://git@" + (new URL("http", host(), 0, "").getHost()) + ":" + port() + REPO_DIR;
     }
 
     @Deprecated
     public String getRepoUrlInsideDocker() throws IOException {
-        return "ssh://git@" + addBracketsIfNeeded(getIpAddress()) + REPO_DIR;
+        return "ssh://git@" + (new URL("http", getIpAddress(), 0, "").getHost()) + REPO_DIR;
     }
 
     /**
@@ -52,9 +54,5 @@ public class GitContainer extends DockerContainer {
         Docker.cmd("exec", getCid()).add("/bin/bash",  "-c",  "echo " + pubKey + " >> /home/git/.ssh/authorized_keys")
                 .popen()
                 .verifyOrDieWith("Unable to add SSH public key to authorized keys");
-    }
-    
-    public static String addBracketsIfNeeded(String ipAddress) {
-        return ipv6Enabled() && !ipAddress.contains("[") ? String.format("[%s]", ipAddress) : ipAddress;
     }
 }
