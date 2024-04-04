@@ -127,8 +127,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("test -f foo && git remote -v");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + 
-                repoUrl.replace("[", "\\[").replace("]", "\\]"));
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + Pattern.quote(repoUrl)); 
     }
 
     @Test
