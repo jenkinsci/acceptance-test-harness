@@ -30,12 +30,12 @@ public class GitContainer extends DockerContainer {
     /** URL visible from the host. 
      * @throws MalformedURLException */
     public String getRepoUrl() throws MalformedURLException {
-        return "ssh://git@" + (new URL("http", host(), 0, "").getHost()) + ":" + port() + REPO_DIR;
+        return "ssh://git@" + addBracketsIfNeeded(host()) + ":" + port() + REPO_DIR;
     }
 
     @Deprecated
     public String getRepoUrlInsideDocker() throws IOException {
-        return "ssh://git@" + (new URL("http", getIpAddress(), 0, "").getHost()) + REPO_DIR;
+        return "ssh://git@" + addBracketsIfNeeded(getIpAddress()) + REPO_DIR;
     }
 
     /**
@@ -54,5 +54,9 @@ public class GitContainer extends DockerContainer {
         Docker.cmd("exec", getCid()).add("/bin/bash",  "-c",  "echo " + pubKey + " >> /home/git/.ssh/authorized_keys")
                 .popen()
                 .verifyOrDieWith("Unable to add SSH public key to authorized keys");
+    }
+    
+    public static String addBracketsIfNeeded(String host) throws MalformedURLException {
+        return new URL("http", host, 0, "").getHost();
     }
 }

@@ -68,7 +68,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * @throws MalformedURLException 
      */
     private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) throws MalformedURLException {
-        return new LdapDetails((new URL("http", ldapContainer.getHost(), 0, "").getHost()), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
+        return new LdapDetails(LdapContainer.addBracketsIfNeeded(ldapContainer.getHost()), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
     }
 
     @Test
@@ -193,7 +193,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         int freePort = this.findAvailablePort();
         LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
-        String host = (new URL("http", ldapContainer.getHost(), 0, "").getHost());
+        String host = LdapContainer.addBracketsIfNeeded(ldapContainer.getHost());
         ldapDetails.setHostWithPort((
                 LdapContainer.ipv6Enabled() ? "[::1]:" : "localhost:") + freePort + ' ' + host + ':' + ldapContainer.getPort());
         realm.configure(ldapDetails);

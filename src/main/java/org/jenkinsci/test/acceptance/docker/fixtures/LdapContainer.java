@@ -43,7 +43,11 @@ public class LdapContainer extends DockerContainer {
      * @throws MalformedURLException 
      */
     public LdapDetails createDefault() throws MalformedURLException {
-        return new LdapDetails((new URL("http", getHost(), 0, "").getHost()), getPort(), getManagerDn(), getManagerPassword(),
+        return new LdapDetails(addBracketsIfNeeded(getHost()), getPort(), getManagerDn(), getManagerPassword(),
                 getRootDn());
+    }
+
+    public static String addBracketsIfNeeded(String host) throws MalformedURLException {
+        return new URL("http", host, 0, "").getHost();
     }
 }

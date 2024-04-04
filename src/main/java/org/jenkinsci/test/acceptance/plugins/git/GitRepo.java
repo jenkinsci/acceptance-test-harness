@@ -284,7 +284,7 @@ public class GitRepo implements Closeable {
             JSch jSch = new JSch();
             jSch.addIdentity(privateKey.getAbsolutePath());
 
-            Session session = jSch.getSession("git", host, port);
+            Session session = jSch.getSession("git", GitContainer.addBracketsIfNeeded(host), port);
             session.setConfig(props);
             session.connect();
 

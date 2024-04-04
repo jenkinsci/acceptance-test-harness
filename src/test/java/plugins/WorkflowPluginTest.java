@@ -32,7 +32,6 @@ import static org.junit.Assert.*;
 
 import jakarta.inject.Inject;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -232,7 +231,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         GitContainer gitContainer = gitServer.get();
         try (GitRepo repo = new GitRepo()) {
             repo.changeAndCommitFoo("Initial commit");
-            repo.transferToDockerContainer((new URL("http", gitContainer.host(), 0, "").getHost()), gitContainer.port());
+            repo.transferToDockerContainer(gitContainer.host(), gitContainer.port());
             DumbSlave slave = jenkins.slaves.create(DumbSlave.class);
             slave.setExecutors(1);
             slave.remoteFS.set("/home/test"); // TODO perhaps should be a constant in SshdContainer
