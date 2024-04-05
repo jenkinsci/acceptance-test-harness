@@ -7,6 +7,9 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
 import org.jenkinsci.test.acceptance.junit.*;
@@ -51,8 +54,9 @@ public class LdapPluginTest extends AbstractJUnitTest {
      *
      * @param ldapContainer a docker LdapContainer
      * @return default ldap connection details
+     * @throws MalformedURLException 
      */
-    private LdapDetails createDefaults(LdapContainer ldapContainer) {
+    private LdapDetails createDefaults(LdapContainer ldapContainer) throws MalformedURLException {
         return ldapContainer.createDefault();
     }
     
@@ -61,13 +65,14 @@ public class LdapPluginTest extends AbstractJUnitTest {
      * 
      * @param ldapContainer
      * @return default ldap connection details without the manager credentials
+     * @throws MalformedURLException 
      */
-    private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) {
-        return new LdapDetails(ldapContainer.getHost(), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
+    private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) throws MalformedURLException {
+        return new LdapDetails(LdapContainer.addBracketsIfNeeded(ldapContainer.getHost()), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
     }
 
     @Test
-    public void login_ok() {
+    public void login_ok() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
@@ -78,7 +83,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void login_ok_anonymous_binding() {
+    public void login_ok_anonymous_binding() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaultsWithoutManagerCred(ldap.get()));
         // When
@@ -89,7 +94,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void login_wrong_password() {
+    public void login_wrong_password() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
@@ -100,7 +105,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void login_no_such_user() {
+    public void login_no_such_user() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
@@ -130,7 +135,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void login_search_base_people_ok() {
+    public void login_search_base_people_ok() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchBase("ou=People"));
         // When
@@ -141,7 +146,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void login_search_base_people_not_found() {
+    public void login_search_base_people_not_found() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchBase("ou=People"));
         // When
@@ -152,7 +157,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void login_email_ok() {
+    public void login_email_ok() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchFilter("mail={0}"));
         // When
@@ -163,7 +168,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
     
     @Test
-    public void invalid_user_search_filter() {
+    public void invalid_user_search_filter() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).userSearchFilter("invalid={0}"));
         // When
@@ -179,7 +184,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void login_use_fallback_server() {
+    public void login_use_fallback_server() throws MalformedURLException {
         // Given
         LdapContainer ldapContainer = ldap.get();
         GlobalSecurityConfig securityConfig = new GlobalSecurityConfig(jenkins);
@@ -188,7 +193,9 @@ public class LdapPluginTest extends AbstractJUnitTest {
         int freePort = this.findAvailablePort();
         LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
-        ldapDetails.setHostWithPort("localhost:" + freePort + ' ' + ldapContainer.getHost() + ':' + ldapContainer.getPort());
+        String host = LdapContainer.addBracketsIfNeeded(ldapContainer.getHost());
+        ldapDetails.setHostWithPort((
+                LdapContainer.ipv6Enabled() ? "[::1]:" : "localhost:") + freePort + ' ' + host + ':' + ldapContainer.getPort());
         realm.configure(ldapDetails);
         securityConfig.save();
 
@@ -202,7 +209,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void resolve_email() {
+    public void resolve_email() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
@@ -215,7 +222,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void do_not_resolve_email() {
+    public void do_not_resolve_email() throws MalformedURLException {
         // Given
         LdapDetails details = createDefaults(ldap.get());
         details.setDisableLdapEmailResolver(true);
@@ -243,7 +250,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void use_environment_varibales() {
+    public void use_environment_varibales() throws MalformedURLException {
         // Given
         LdapDetails details = createDefaultsWithoutManagerCred(ldap.get());
         details.addEnvironmentVariable(new LdapEnvironmentVariable("java.naming.security.protocol", "ssl"));
@@ -256,7 +263,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
    
     @Test
-    public void resolve_group_memberships_with_defaults() {
+    public void resolve_group_memberships_with_defaults() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
@@ -269,7 +276,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void resolve_group_memberships_with_defaults_negative() {
+    public void resolve_group_memberships_with_defaults_negative() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
@@ -282,7 +289,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void custom_group_search_base() {
+    public void custom_group_search_base() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).groupSearchBase("ou=Applications"));
         // When
@@ -296,7 +303,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
 
     @Test
     @Issue("JENKINS-18355")
-    public void resolve_display_name_with_defaults() {
+    public void resolve_display_name_with_defaults() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()));
         // When
@@ -309,7 +316,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
 
     @Test
     @Issue("JENKINS-18355")
-    public void custom_display_name() {
+    public void custom_display_name() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).displayNameAttributeName("cn"));
         // When
@@ -321,7 +328,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void custom_invalid_group_membership_filter() {
+    public void custom_invalid_group_membership_filter() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("(member={0})"));
         // When
@@ -334,7 +341,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
     
     @Test
-    public void custom_valid_group_membership_filter() {
+    public void custom_valid_group_membership_filter() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("memberUid={1}"));
         // When
@@ -347,7 +354,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
     }
     
     @Test
-    public void custom_mail_filter() {
+    public void custom_mail_filter() throws MalformedURLException {
         // Given
         useLdapAsSecurityRealm(createDefaults(ldap.get()).mailAdressAttributeName("givenName"));
         // When

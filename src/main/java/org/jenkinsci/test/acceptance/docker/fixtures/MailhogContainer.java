@@ -61,7 +61,7 @@ public class MailhogContainer extends DockerContainer {
 
     private JsonNode fetchJsonMessages() {
         try {
-            URL url = new URL("http://" + ipBound(8025) + ":" + port(8025) + "/api/v1/messages");
+            URL url = new URL("http", ipBound(8025), port(8025), "/api/v1/messages");
             HttpURLConnection c = IOUtil.openConnection(url);
             try {
                 return new ObjectMapper().readTree(c.getInputStream());
