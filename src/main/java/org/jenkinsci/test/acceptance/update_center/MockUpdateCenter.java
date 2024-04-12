@@ -74,6 +74,7 @@ import org.jenkinsci.test.acceptance.po.UpdateCenter;
 public class MockUpdateCenter implements AutoCleaned {
 
     private static final Logger LOGGER = Logger.getLogger(MockUpdateCenter.class.getName());
+    private static final Integer MINUS_ONE = Integer.valueOf(-1);
 
     @Inject
     public Injector injector;
@@ -227,7 +228,11 @@ public class MockUpdateCenter implements AutoCleaned {
         Object old = plugin.opt(key);
         plugin.put(key, val);
         if (!String.valueOf(val).equals(String.valueOf(old))) {
-            LOGGER.log(Level.INFO, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
+            if (MINUS_ONE == val && "size".equals(key)) {
+                LOGGER.log(Level.FINE, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
+            } else {
+                LOGGER.log(Level.INFO, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
+            }
         }
     }
 
