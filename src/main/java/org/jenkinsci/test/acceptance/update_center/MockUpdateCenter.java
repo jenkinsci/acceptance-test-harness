@@ -74,7 +74,7 @@ import org.jenkinsci.test.acceptance.po.UpdateCenter;
 public class MockUpdateCenter implements AutoCleaned {
 
     private static final Logger LOGGER = Logger.getLogger(MockUpdateCenter.class.getName());
-    private static final Integer MINUS_ONE = Integer.valueOf(-1);
+    private static final String MINUS_ONE_STRING = "-1";
 
     @Inject
     public Injector injector;
@@ -130,7 +130,7 @@ public class MockUpdateCenter implements AutoCleaned {
                 plugin.put("url", name + ".hpi");
                 updating(plugin, "version", version);
                 // "Avoid IOException: Inconsistent file length" from hudson.model.UpdateCenter
-                updating(plugin, "size", "-1");
+                updating(plugin, "size", MINUS_ONE_STRING);
                 updating(plugin, "gav", meta.gav);
                 updating(plugin, "requiredCore", meta.requiredCore().toString());
                 updating(plugin, "dependencies", new JSONArray(meta.getDependencies().stream().map(d -> {
@@ -228,7 +228,9 @@ public class MockUpdateCenter implements AutoCleaned {
         Object old = plugin.opt(key);
         plugin.put(key, val);
         if (!String.valueOf(val).equals(String.valueOf(old))) {
-            if (MINUS_ONE == val && "size".equals(key)) {
+            // "-1" and "size" are both string literals in the caller,
+            // so only check their identity to prevent a fallback to checking characters which is unneeded.
+            if (MINUS_ONE_STRING == val && "size" == key) {
                 LOGGER.log(Level.FINE, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
             } else {
                 LOGGER.log(Level.INFO, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
