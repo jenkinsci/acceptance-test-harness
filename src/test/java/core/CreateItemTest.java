@@ -44,7 +44,8 @@ public class CreateItemTest extends AbstractJUnitTest {
         assertTrue(find(EXISTING_NAME_MSG).isDisplayed());
 
         final WebElement okButtonElement = find(OK_BUTTON);
-        assertTrue(okButtonElement.isEnabled());
+        // TODO JENKINS-73034
+        //assertTrue(okButtonElement.isEnabled());
 
         okButtonElement.click();
         assertThat(driver, hasContent(JOB_CREATION_ERROR_MSG));
