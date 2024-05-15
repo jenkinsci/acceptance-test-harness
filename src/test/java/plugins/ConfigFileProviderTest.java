@@ -164,7 +164,7 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         jenkins.visit("configfiles");
         runThenHandleDialog(() -> {
             driver.findElement(
-                by.xpath("//td/code['%s']/parent::td/parent::tr/td[1]/a[2]", mvnConfig.id()) // this won't age well
+                by.xpath("//td[.='%s']/parent::tr/td[2]/a[1]", mvnConfig.id()) // this won't age well
             ).click();
         });
 
