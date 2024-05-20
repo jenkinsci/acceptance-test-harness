@@ -3,7 +3,7 @@
 #
 #    The initial password is 'admin:admin'
 #
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # Pin JIRA version to make the tests more predictable and less fragile
 # In particular, pinned to 6.X because from 7.X the SOAP API is gone, and it's
@@ -12,11 +12,11 @@ FROM ubuntu:22.04
 ENV JIRA_VERSION 6.3
 
 # base package installation
-RUN apt-get update && apt-get install -y apt-transport-https wget gnupg2 && echo "deb https://packages.atlassian.com/debian/atlassian-sdk-deb/ stable contrib" >> /etc/apt/sources.list
+RUN apt-get update && apt-get install -y apt-transport-https wget gnupg2 software-properties-common && add-apt-repository -s "deb https://packages.atlassian.com/debian/atlassian-sdk-deb/ stable contrib"
 RUN wget https://packages.atlassian.com/api/gpg/key/public
 RUN apt-key add public
 
-RUN apt-get update && apt-get install -y openjdk-8-jdk atlassian-plugin-sdk netcat
+RUN apt-get update && apt-get install -y openjdk-8-jdk atlassian-plugin-sdk netcat-openbsd
 
 # this will install the whole thing, launches Tomcat,
 # asks the user to do Ctrl+C to quit, then it shuts down presumably because it

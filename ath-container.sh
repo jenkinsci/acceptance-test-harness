@@ -8,7 +8,7 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null && pwd)"
 uid=$(id -u)
 gid=$(id -g)
 tag='jenkins/ath'
-java_version="${java_version:-11}"
+java_version="${java_version:-17}"
 
 # high chance of uid / group already existing in the container
 # known to happen on macOS
