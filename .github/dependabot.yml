@@ -13,10 +13,6 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "docker"
-    directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/DockerAgentContainer"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "docker"
     directory: "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/FtpdContainer"
     schedule:
       interval: "weekly"
