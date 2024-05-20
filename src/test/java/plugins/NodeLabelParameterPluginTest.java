@@ -511,7 +511,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     private org.hamcrest.Matcher<String> isPending(String nodename) {
         return allOf(
                 containsString("Job triggered without a valid online node, given where: " + nodename),
-                containsString("Pending")
+                containsStringIgnoringCase("Pending")
         );
     }
 
