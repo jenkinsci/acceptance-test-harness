@@ -511,7 +511,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     private org.hamcrest.Matcher<String> isPending(String nodename) {
         return allOf(
                 containsString("Job triggered without a valid online node, given where: " + nodename),
-                containsString("pending")
+                containsString("Pending")
         );
     }
 
@@ -524,7 +524,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         build.job.open();
 
         // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
-        // so if the original response doesn't contain it, we have to wait for the refersh of the build history.
+        // so if the original response doesn't contain it, we have to wait for the refresh of the build history.
         // so give it a bigger wait.
         return find(by.css("#buildHistoryPage")).getText();
     }
