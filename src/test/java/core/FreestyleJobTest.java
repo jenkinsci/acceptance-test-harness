@@ -100,8 +100,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         b.open();
         assertThat("Permalink link is current URL", driver.getCurrentUrl(), is(expectedUrl));
         assertThat("Build number is correct", b.getNumber(), is(1));
-        // TODO JENKINS-73168
-        //assertThat("Build has no changes", driver, hasContent("No changes"));
+        assertThat("Build has no changes", driver, hasContent("No changes"));
         assertThat("Build is success", b.getResult(), is(Build.Result.SUCCESS.name()));
     }
 
