@@ -103,7 +103,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        String expectedVersion = "1.10.5"; // this is the version installed in the java container by the ubuntu bionic
+        String expectedVersion = "1.10.14"; // this is the version installed in the java container by the ubuntu noble
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
 
@@ -118,7 +118,7 @@ public class AntPluginTest extends AbstractJUnitTest {
                 "}";
         String antHome = setUpAntInstallation();
 
-        String expectedVersion = "1.10.5"; // this is the version installed in the java container by the ubuntu bionic;
+        String expectedVersion = "1.10.14"; // this is the version installed in the java container by the ubuntu noble;
 
         WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
         workflowJob.script.set(script_pipeline_ant);
