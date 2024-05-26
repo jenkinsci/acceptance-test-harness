@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     git \
     zip \
     openjdk-11-jdk \
+    openjdk-17-jdk \
     && rm -rf /var/lib/apt/lists/*
 
 # create a git user and create .ssh dir

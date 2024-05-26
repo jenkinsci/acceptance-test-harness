@@ -1,18 +1,17 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import com.google.inject.Inject;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.codehaus.plexus.util.FileUtils;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import com.google.inject.Inject;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Attach diagnostic file related to a test failure.

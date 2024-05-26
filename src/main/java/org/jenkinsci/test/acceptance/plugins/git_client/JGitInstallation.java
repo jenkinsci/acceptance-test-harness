@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.git_client;
 
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
-
-import java.util.regex.Pattern;
 
 @ToolInstallationPageObject (name="Git", installer="hudson.tools.ZipExtractionInstaller")
 public class JGitInstallation extends ToolInstallation {

@@ -4,17 +4,17 @@ import com.browserup.bup.BrowserUpProxy;
 import com.browserup.bup.BrowserUpProxyServer;
 import com.browserup.bup.proxy.CaptureType;
 import com.browserup.harreader.model.Har;
+import jakarta.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.junit.GlobalRule;
 import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-
-import javax.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
 
 /**
  * The system property RECORD_BROWSER_TRAFFIC can be set to either off, failuresOnly or always to control when browser
@@ -24,6 +24,9 @@ import static org.jenkinsci.test.acceptance.recorder.HarRecorder.State.*;
  */
 @GlobalRule
 public class HarRecorder extends TestWatcher {
+
+    private final static Logger LOGGER = Logger.getLogger(HarRecorder.class.getName());
+
     public enum State {
         OFF("off", false, false), FAILURES_ONLY("failuresOnly", true, false), ALWAYS("always", true, true);
 
@@ -64,7 +67,7 @@ public class HarRecorder extends TestWatcher {
         }
     }
 
-    static State CAPTURE_HAR = value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("RECORD_BROWSER_TRAFFIC", FAILURES_ONLY.getValue()));
+    static State CAPTURE_HAR = State.value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("RECORD_BROWSER_TRAFFIC", State.FAILURES_ONLY.getValue()));
 
     private static BrowserUpProxy proxy;
 
@@ -72,8 +75,10 @@ public class HarRecorder extends TestWatcher {
      * Create a proxy to record the HAR listening on the specified address
      * @param networkAddress the specific address to bind to, or {@code null} to bind on all addresses
      */
-    public static BrowserUpProxy getProxy(InetAddress networkAddress) {
+    public static BrowserUpProxy getProxy(InetAddress networkAddress, String testName) {
+        LOGGER.log(Level.INFO, "Obtaining proxy for {0}...", testName);
         if (proxy == null) {
+            LOGGER.log(Level.INFO, "Creating new Proxy for {0}...", testName);
             // start the proxy
             proxy = new BrowserUpProxyServer();
             // enable more detailed HAR capture, if desired (see CaptureType for the complete list)
@@ -86,6 +91,10 @@ public class HarRecorder extends TestWatcher {
             proxy.setTrustAllServers(true);
             proxy.setMitmDisabled(true);
             proxy.start(0, networkAddress);
+            LOGGER.log(Level.INFO, "Proxy Created and listening on port {0}", proxy.getPort());
+        }
+        else {
+            LOGGER.log(Level.INFO, "Existing Proxy for {0} returned using port {1}", new Object[] {testName, proxy.getPort()});
         }
         return proxy;
     }
@@ -115,10 +124,20 @@ public class HarRecorder extends TestWatcher {
         }
     }
 
+    @Override
+    protected void starting(Description description) {
+        initializeHarForTest(description.getDisplayName());
+    }
+
+    private void initializeHarForTest(String name) {
+        if (proxy != null) {
+            proxy.newHar(name);
+        }
+    }
+
     private void recordHar() {
         if (proxy != null) {
-            proxy.stop();
-            Har har = proxy.getHar();
+            Har har = proxy.getHar(true);
             File file = diagnostics.touch("jenkins.har");
             try {
                 har.writeTo(file);
@@ -126,7 +145,6 @@ public class HarRecorder extends TestWatcher {
                 System.err.println("Unable to write HAR file to " + file);
                 e.printStackTrace(System.err);
             }
-            proxy = null;
         }
     }
 }

@@ -1,5 +1,9 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.cobertura.CoberturaAction;
@@ -7,10 +11,6 @@ import org.jenkinsci.test.acceptance.plugins.cobertura.CoberturaPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 
 @WithPlugins("cobertura")
 public class CoberturaPluginTest extends AbstractJUnitTest {

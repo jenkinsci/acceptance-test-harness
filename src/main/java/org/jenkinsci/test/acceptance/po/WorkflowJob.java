@@ -24,18 +24,16 @@
 
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
-
+import java.time.Duration;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
-
-import com.google.inject.Injector;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {
@@ -80,7 +78,7 @@ public class WorkflowJob extends Job {
 
     private static void waitForRenderOf(@NonNull final String cssSelector, @NonNull final Jenkins jenkins) {
         jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
-                .withTimeout(20, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(20))
                 .until(() -> isRendered(cssSelector, jenkins))
         ;
     }
@@ -104,7 +102,7 @@ public class WorkflowJob extends Job {
 
     public void delete() {
         open();
-        runThenConfirmAlert(() -> clickLink("Delete Pipeline"),2);
+        runThenHandleDialog(() -> clickLink("Delete Pipeline"));
     }
 
     /**

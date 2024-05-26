@@ -25,6 +25,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 
 public class User extends ContainerPageObject {
 
@@ -91,8 +92,12 @@ public class User extends ContainerPageObject {
     }
 
     public void delete() {
-        visit("delete");
-        clickButton("Yes");
+        try {
+            runThenHandleDialog(() -> clickLink("Delete"));
+        } catch (TimeoutException te) {
+            visit("delete");
+            clickButton("Yes");
+        }
     }
 
     @Override

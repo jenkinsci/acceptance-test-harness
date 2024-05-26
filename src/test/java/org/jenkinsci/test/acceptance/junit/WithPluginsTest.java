@@ -23,14 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
-import org.jenkinsci.test.acceptance.update_center.PluginSpec;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.junit.Test;
 
 /**
  * @author ogondza.

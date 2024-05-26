@@ -23,6 +23,10 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.junit.Assert.assertNotNull;
+
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.AbstractPipelineTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -32,10 +36,6 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * Tests a complete pipeline flow:
@@ -50,7 +50,7 @@ public class PipelineTest extends AbstractPipelineTest {
 
     @Before
     public void setup() {
-        MavenInstallation.installMaven(jenkins, "M3", "3.3.9");
+        MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
     }
 
     @Test
@@ -71,8 +71,8 @@ public class PipelineTest extends AbstractPipelineTest {
                     "  cbEnv = [\"PATH+MVN=${mvnHome}/bin\", \"MAVEN_HOME=${mvnHome}\"]\n" +
                     "  \n" +
                     "  withEnv(cbEnv) {\n" +
-                    "      sh \"mvn test -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -Dmaven.test.failure.ignore=true\"\n" +
-                    "      junit 'target/surefire-reports/TEST-com.cloudbees.manticore.AppTest.xml'\n" +
+                    "      sh \"mvn test\"\n" +
+                    "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n" +
                     "      \n" +
                     "      sh \"mvn javadoc:javadoc -f pom.xml\"\n" +
                     "      step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])\n" +
@@ -86,8 +86,8 @@ public class PipelineTest extends AbstractPipelineTest {
                     "  cbEnv = [\"PATH+MVN=${mvnHome}/bin\", \"MAVEN_HOME=${mvnHome}\"]\n" +
                     "  \n" +
                     "  withEnv(cbEnv) {\n" +
-                    "      bat \"mvn test -Dmaven.compiler.source=1.6 -Dmaven.compiler.target=1.6 -Dmaven.test.failure.ignore=true\"\n" +
-                    "      junit 'target/surefire-reports/TEST-com.cloudbees.manticore.AppTest.xml'\n" +
+                    "      bat \"mvn test\"\n" +
+                    "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n" +
                     "      \n" +
                     "      bat \"mvn javadoc:javadoc -f pom.xml\"\n" +
                     "      step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])\n" +
@@ -97,7 +97,7 @@ public class PipelineTest extends AbstractPipelineTest {
     }
 
     private String githubRepoURL() {
-        return "https://github.com/amuniz/maven-helloworld";
+        return "https://github.com/jenkinsci/hello-world-maven-builder";
     }
 
     private void assertTestResult(final Build b) {
@@ -108,6 +108,6 @@ public class PipelineTest extends AbstractPipelineTest {
         assertThat(driver, hasContent("2 failures"));
 
         testResultLink.click();
-        assertThat(driver, hasContent("com.cloudbees.manticore.AppTest.testApp"));
+        assertThat(driver, hasContent("io.jenkins.tools.MainTest.testApp"));
     }
 }

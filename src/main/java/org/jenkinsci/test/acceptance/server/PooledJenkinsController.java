@@ -1,13 +1,20 @@
 package org.jenkinsci.test.acceptance.server;
 
-import javax.inject.Inject;
+import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Injector;
+import hudson.remoting.Callable;
+import hudson.remoting.Channel;
+import hudson.remoting.Channel.Mode;
+import hudson.remoting.ChannelBuilder;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
-
+import jnr.unixsocket.UnixSocketAddress;
+import jnr.unixsocket.UnixSocketChannel;
 import org.jenkinsci.remoting.RoleChecker;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -15,17 +22,6 @@ import org.jenkinsci.test.acceptance.controller.LocalController.LocalFactoryImpl
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogSplitter;
-
-import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Injector;
-
-import hudson.remoting.Callable;
-import hudson.remoting.Channel;
-import hudson.remoting.Channel.Mode;
-import hudson.remoting.ChannelBuilder;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
-import static java.lang.System.*;
 
 /**
  * {@link JenkinsController} that talks to {@link JenkinsControllerPoolProcess} over Unix domain socket.
@@ -136,12 +132,12 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     @Override
     public void diagnose(Throwable cause) {
         // TODO: Report jenkins log
-        cause.printStackTrace(out);
-        if(getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")){
-            out.println("Commencing interactive debugging. Browser session was kept open.");
-            out.println("Press return to proceed.");
+        cause.printStackTrace(System.out);
+        if(System.getenv("INTERACTIVE") != null && System.getenv("INTERACTIVE").equals("true")){
+            System.out.println("Commencing interactive debugging. Browser session was kept open.");
+            System.out.println("Press return to proceed.");
             try {
-                in.read();
+                System.in.read();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

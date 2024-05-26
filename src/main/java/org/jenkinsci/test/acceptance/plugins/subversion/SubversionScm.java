@@ -1,11 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.subversion;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 /**
  * Encapsulates the PageArea of the Subversion SCM

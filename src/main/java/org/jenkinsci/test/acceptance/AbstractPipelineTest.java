@@ -23,6 +23,11 @@
  */
 package org.jenkinsci.test.acceptance;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
+import java.io.IOException;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.Folder;
@@ -31,12 +36,6 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchFrameException;
-
-import java.io.IOException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasAction;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
 public class AbstractPipelineTest extends AbstractJUnitTest {
@@ -58,14 +57,14 @@ public class AbstractPipelineTest extends AbstractJUnitTest {
         final String script = this.scriptForPipeline();
         PipelineTestUtils.checkScript(script);
 
-        return String.format(script, scriptParameters);
+        return String.format(script, (Object[]) scriptParameters);
     }
 
     public String scriptForPipelineFromResourceWithParameters(final String resourceName, final String... scriptParameters) throws IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResource(this.getClass(), resourceName);
         PipelineTestUtils.checkScript(script);
 
-        return String.format(script, scriptParameters);
+        return String.format(script, (Object[]) scriptParameters);
     }
 
     protected void assertJavadoc(final Job job) {
@@ -96,6 +95,6 @@ public class AbstractPipelineTest extends AbstractJUnitTest {
             }
         }
 
-        assertThat(driver, hasContent("com.cloudbees.manticore"));
+        assertThat(driver, hasContent("io.jenkins.tools"));
     }
 }

@@ -28,14 +28,16 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.groovy_postbuild.GroovyPostBuildStep;
 import org.jenkinsci.test.acceptance.plugins.matrix_auth.MatrixAuthorizationStrategy;
-import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.plugins.script_security.ScriptApproval;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
 import org.junit.Test;
 
-@WithPlugins({"script-security", "mock-security-realm", "matrix-auth@2.3", "groovy-postbuild"})
+@WithPlugins({"script-security", "matrix-auth"})
 public class ScriptSecurityPluginTest extends AbstractJUnitTest {
     /** Admin user. */
     private static final String ADMIN = "admin";
@@ -51,8 +53,14 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
         {
-            MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
-            realm.configure(ADMIN, USER);
+            JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+            realm.allowUsersToSignUp(true);
+            security.save();
+            
+            realm.signup(ADMIN);
+            realm.signup(USER);
+            
+            security.open();
             MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
             mas.addUser(ADMIN).admin();
             mas.addUser(USER).developer();
@@ -60,7 +68,7 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
         security.save();
     }
 
-    private FreeStyleJob createFailedJob(String script, boolean sandbox) {
+    private FreeStyleJob createFailedJobWithGroovyPostBuild(String script, boolean sandbox) {
         final FreeStyleJob job;
         login(USER);
         {
@@ -73,14 +81,29 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
         return job;
     }
 
-    private void shouldSucceed(FreeStyleJob job) {
+    private WorkflowJob createFailedPipeline(String script, boolean sandbox) {
+        final WorkflowJob job;
+        login(USER);
+        {
+            job = jenkins.jobs.create(WorkflowJob.class);
+            job.configure();
+            job.script.set(script);
+            job.sandbox.check(sandbox);
+            job.save();
+            job.scheduleBuild().shouldFail(); // Script not approved
+        }
+        return job;
+    }
+
+    private void shouldSucceed(Job job) {
         login(USER);
         job.scheduleBuild().shouldSucceed();
     }
 
     @Test
+    @WithPlugins("groovy-postbuild")
     public void scriptNeedsApproval() throws Exception {
-        final FreeStyleJob job = createFailedJob("def a = 4", false);
+        final FreeStyleJob job = createFailedJobWithGroovyPostBuild("def a = 4", false);
         login(ADMIN);
         {
             ScriptApproval sa = new ScriptApproval(jenkins);
@@ -91,13 +114,40 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
     }
 
     @Test
+    @WithPlugins("groovy-postbuild")
     public void signatureNeedsApproval() throws Exception {
-        final FreeStyleJob job = createFailedJob("def h = java.lang.System.getProperties()", true);
+        final FreeStyleJob job = createFailedJobWithGroovyPostBuild("def h = java.lang.System.getProperties()", true);
         login(ADMIN);
         {
             ScriptApproval sa = new ScriptApproval(jenkins);
             sa.open();
             sa.findSignature("getProperties").approve();
+        }
+        shouldSucceed(job); // Script approved
+    }
+
+    @Test
+    @WithPlugins({"workflow-job", "workflow-cps"})
+    public void pipelineNeedsApproval() throws Exception {
+        final WorkflowJob job = createFailedPipeline("def a = 5", false);
+        login(ADMIN);
+        {
+            ScriptApproval sa = new ScriptApproval(jenkins);
+            sa.open();
+            sa.find(job.name).approve();
+        }
+        shouldSucceed(job); // Script approved
+    }
+
+    @Test
+    @WithPlugins({"workflow-job","workflow-cps"})
+    public void pipelineSignatureNeedsApproval() throws Exception {
+        final WorkflowJob job = createFailedPipeline("def h = java.lang.System.getProperty('java.version')", true);
+        login(ADMIN);
+        {
+            ScriptApproval sa = new ScriptApproval(jenkins);
+            sa.open();
+            sa.findSignature("getProperty").approve();
         }
         shouldSucceed(job); // Script approved
     }

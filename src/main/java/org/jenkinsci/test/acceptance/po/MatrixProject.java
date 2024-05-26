@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;

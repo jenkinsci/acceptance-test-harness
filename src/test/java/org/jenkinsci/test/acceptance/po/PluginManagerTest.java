@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.junit.Test;
 

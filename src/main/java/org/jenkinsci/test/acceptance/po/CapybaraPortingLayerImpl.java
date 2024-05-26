@@ -1,15 +1,17 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.common.base.Joiner;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.junit.Wait;
@@ -21,14 +23,10 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import com.google.common.base.Joiner;
-import com.google.inject.Injector;
-
-import static java.util.Arrays.*;
 
 /**
  * For assisting porting from Capybara.
@@ -118,8 +116,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public <T> Wait<T> waitFor(T subject) {
         return new Wait<>(subject, time)
-                .pollingEvery(500, TimeUnit.MILLISECONDS)
-                .withTimeout(120, TimeUnit.SECONDS)
+                .pollingEvery(Duration.ofMillis(500))
+                .withTimeout(Duration.ofSeconds(120))
         ;
     }
 
@@ -134,7 +132,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement waitFor(final By selector, final int timeoutSec) {
         return waitFor(this).withMessage("Element matching %s is present", selector)
-                .withTimeout(timeoutSec, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeoutSec))
                 .ignoring(NoSuchElementException.class)
                 .until(() -> find(selector));
     }
@@ -153,7 +151,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override @Deprecated
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
-        return waitFor(this).withTimeout(timeoutSec, TimeUnit.SECONDS).until(block);
+        return waitFor(this).withTimeout(Duration.ofSeconds(timeoutSec)).until(block);
     }
 
     @Override @Deprecated
@@ -166,7 +164,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         StringDescription desc = new StringDescription();
         matcher.describeTo(desc);
         waitFor(item).withMessage(desc.toString())
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(matcher)
         ;
     }
@@ -180,7 +178,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement find(final By selector) {
         try {
-            return waitFor().withTimeout(time.seconds(1), TimeUnit.MILLISECONDS).until(new Callable<WebElement>() {
+            return waitFor().withTimeout(Duration.ofMillis(time.seconds(1))).until(new Callable<WebElement>() {
                 @Override public WebElement call() {
                     for (WebElement element : driver.findElements(selector)) {
                         if (isDisplayed(element)) return element;
@@ -368,6 +366,14 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
+    protected static boolean isHiddenOrStale(WebElement we) {
+        try {
+            return !we.isDisplayed();
+        } catch (StaleElementReferenceException ser) {
+            return true;
+        }
+    }
+
     /**
      * Executes JavaScript.
      */
@@ -392,6 +398,26 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         check(find(by.checkbox(locator)));
     }
 
+    /**
+     * Helper to execute something that shows a confirmation dialog
+     * with a "Yes" button or a classical browser confirm
+     *
+     * Executes the runnable, wait for "Yes" button
+     * of the modal dialog and presses the "Yes" button"
+     * In case the runnable opens a classical browse dialog this is accepted.
+     *
+     * @param runnable
+     */
+    public void runThenHandleDialog(Runnable runnable) {
+        try {
+            runnable.run();
+            waitFor(by.button("Yes"));
+            clickButton("Yes");
+        } catch (UnhandledAlertException uae) {
+            runThenConfirmAlert(runnable, 2);
+        }
+    }
+
     public void handleAlert(Consumer<Alert> action) {
         runThenHandleAlert(null, action);
     }
@@ -406,8 +432,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             runnable.run();
         }
         Wait<WebDriver> wait = new Wait<>(driver, time)
-                .pollingEvery(500, TimeUnit.MILLISECONDS)
-                .withTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .pollingEvery(Duration.ofMillis(500))
+                .withTimeout(Duration.ofSeconds(timeoutSeconds))
         ;
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         try {
@@ -468,7 +494,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 return type.cast(c.newInstance(args));
             }
 
-            throw new AssertionError("No matching constructor found in " + type + ": " + asList(args));
+            throw new AssertionError("No matching constructor found in " + type + ": " + Arrays.asList(args));
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("Failed to invoke a constructor of " + type, e);
         }

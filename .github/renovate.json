@@ -1,0 +1,59 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base",
+    ":semanticCommitsDisabled",
+    "schedule:earlyMondays"
+  ],
+  "ignorePaths": [
+    "src/main/resources/org/**/Dockerfile"
+  ],
+  "ignoreDeps": [
+    "org.apache.maven:maven-resolver-provider",
+    "org.apache.maven:maven-settings-builder",
+    "org.apache.maven.resolver:maven-resolver-connector-basic",
+    "org.apache.maven.resolver:maven-resolver-transport-file",
+    "org.apache.maven.resolver:maven-resolver-transport-http"
+  ],
+  "packageRules": [
+    {
+      "allowedVersions": "<7.0.0",
+      "matchPackageNames": ["com.google.inject:guice"],
+      "description": "We focus on Guice 6 until core adapts 7"
+    },
+    {
+      "matchPackagePatterns": ["selenium"],
+      "groupName": "Selenium"
+    }
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java"],
+      "matchStrings": ["selenium/standalone-(firefox|chrome):(?<currentValue>.*?)\""],
+      "depNameTemplate": "org.seleniumhq.selenium:selenium-java",
+      "datasourceTemplate": "maven"
+    },
+    {
+      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
+      "matchStrings": ["ENV GECKODRIVER_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "mozilla/geckodriver",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
+      "matchStrings": ["ENV MAVEN_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "org.apache.maven:maven-core",
+      "datasourceTemplate": "maven"
+    },
+    {
+      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
+      "matchStrings": ["DOCKER_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "docker",
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "rebaseWhen": "conflicted"
+}

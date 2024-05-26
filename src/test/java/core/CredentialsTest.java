@@ -1,20 +1,24 @@
 package core;
 
-import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jenkinsci.test.acceptance.plugins.credentials.*;
-import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.junit.Test;
-import org.openqa.selenium.By;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
+import org.jenkinsci.test.acceptance.plugins.credentials.Domain;
+import org.jenkinsci.test.acceptance.plugins.credentials.DomainPage;
+import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
+import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
+import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
+import org.junit.Test;
+import org.openqa.selenium.By;
 
 /**
  * @author Vivek Pandey
@@ -77,7 +81,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         createUpdateDeleteTest(null, CRED_DOMAIN, SYSTEM_SCOPE);
     }
 
-    @Test @WithPlugins("mock-security-realm")
+    @Test
     public void managePersonalScopedCredentialsTest() throws Exception {
         this.createUserAndLogin();
         this.createUpdateDeleteTest(JENKINS_USER, ManagedCredentials.DEFAULT_DOMAIN, null);
@@ -165,7 +169,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         verifyValueInDomain(ManagedCredentials.DEFAULT_DOMAIN, null, global.checkIfCredentialsExist(CRED_DESCR), globalCredUser);
     }
 
-    @Test @WithPlugins("mock-security-realm")
+    @Test
     public void credentialsVisibilityTest() {
         this.createUserPwdCredential(ManagedCredentials.DEFAULT_DOMAIN, null, SYSTEM_SCOPE, "credSystem", null);
         this.createUserPwdCredential(ManagedCredentials.DEFAULT_DOMAIN, null, GLOBAL_SCOPE, "credGlobal", null);
@@ -278,10 +282,10 @@ public class CredentialsTest extends AbstractJUnitTest {
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
 
-        MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
-        realm.configure(JENKINS_USER);
+        JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        realm.allowUsersToSignUp(true);
         security.save();
-
+        realm.signup(JENKINS_USER);
         jenkins.login().doLogin(JENKINS_USER);
     }
 

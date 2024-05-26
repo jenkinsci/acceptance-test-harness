@@ -24,13 +24,11 @@
 
 package org.jenkinsci.test.acceptance.utils.aether;
 
+import jakarta.inject.Inject;
 import java.io.File;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.inject.Inject;
-
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.apache.maven.settings.building.DefaultSettingsBuildingRequest;

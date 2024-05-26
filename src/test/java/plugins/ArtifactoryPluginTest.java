@@ -1,5 +1,15 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
+import com.google.inject.Inject;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.ArtifactoryContainer;
@@ -9,31 +19,19 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryGlobalConfig.Server;
-import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryPublisher;
 import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryGradleConfiguratior;
+import org.jenkinsci.test.acceptance.plugins.artifactory.ArtifactoryPublisher;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
+import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import com.google.inject.Inject;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation.installSomeMaven;
 
 /**
  * Checks the successful integration of Artifactory plugin.
@@ -68,7 +66,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
 
     @Test @WithPlugins("maven-plugin") @Ignore @Issue("JENKINS-66791")
     public void maven_integration() {
-        installSomeMaven(jenkins);
+        MavenInstallation.installSomeMaven(jenkins);
         final ArtifactoryContainer artifactory = artifactoryContainer.get();
         waitForArtifactory(artifactory);
         configureArtifactory(artifactory);

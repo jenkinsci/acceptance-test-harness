@@ -1,15 +1,13 @@
 package org.jenkinsci.test.acceptance;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * More factories for {@link By} objects.
@@ -62,12 +60,12 @@ public class ByFactory {
         }
         // Fill the pattern with unique placeholders so we can safely identify what appears where so we do not
         // have to support various String.format specifiers.
-        String marker = String.format(format, placeholders);
+        String marker = String.format(format, (Object[]) placeholders);
         // Then replace the placeholders with quotes around them with unquoted format sequences
         String unquotedFormat = marker.replaceAll("(['\" ])placeholder(\\d+)\\1", "%$2\\$s");
 
         // Format the template with quoted arguments
-        String quotedSanitizedFormat = String.format(unquotedFormat, sanitized);
+        String quotedSanitizedFormat = String.format(unquotedFormat, (Object[]) sanitized);
 
         // Placeholders that are part of longer string literal will not be escaped
         String finalFormat = quotedSanitizedFormat.replaceAll("placeholder(\\d+)", "%$1\\$s");

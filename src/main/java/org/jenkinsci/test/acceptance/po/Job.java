@@ -1,6 +1,14 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.inject.Inject;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.assertTrue;
+
+import com.google.inject.Injector;
+import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -14,11 +22,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Base64;
@@ -29,14 +37,6 @@ import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
-
-import com.google.inject.Injector;
-
-import static java.util.Objects.requireNonNull;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Job Page object superclass.
@@ -83,7 +83,7 @@ public class Job extends TopLevelItem {
 
         check(radio);
 
-        return newInstance(type, this, requireNonNull(getPath(radio)));
+        return newInstance(type, this, Objects.requireNonNull(getPath(radio)));
     }
 
     public <T extends BuildStep> T addPreBuildStep(Class<T> type) {
@@ -458,7 +458,7 @@ public class Job extends TopLevelItem {
      */
     public void delete() {
         open();
-        runThenConfirmAlert(() -> clickLink("Delete Project"),2);
+        runThenHandleDialog(() -> clickLink("Delete Project"));
     }
 
     public static org.hamcrest.Matcher<WebDriver> disabled() {

@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.scriptler;
 
 import java.util.Map;
-
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Node;
@@ -108,7 +107,7 @@ public class Script extends CapybaraPortingLayerImpl {
     public void configureParams(Map<String, String> params) {
         visitAction("editScript");
         setParams(params);
-        clickButton("Submit");
+        clickButton("Save");
     }
 
     private void fillParams(Map<String, String> params) {
@@ -135,6 +134,7 @@ public class Script extends CapybaraPortingLayerImpl {
         control("/defineParams").check();
 
         String prefix = "/defineParams/parameters/";
+        int i = 0;
         for (Map.Entry<String, String> pair : params.entrySet()) {
 
             control(prefix + "name").set(pair.getKey());
@@ -144,9 +144,7 @@ public class Script extends CapybaraPortingLayerImpl {
             if (addButton != null) {
                 addButton.click();
 
-                elasticSleep(1000); // wait for new parameter to appear
-                String path = find(by.button("Add Parameter")).getAttribute("path");
-                prefix = path.substring(0, path.length() - 25);
+                prefix = String.format("/defineParams/parameters[%d]/", ++i);
             }
         }
     }

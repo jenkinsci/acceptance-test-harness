@@ -1,5 +1,10 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.is;
+
+import java.util.List;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.audit_trail.AuditTrailLogger;
@@ -8,12 +13,6 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveController;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @WithPlugins("audit-trail")
 public class AuditTrailPluginTest extends AbstractJUnitTest {
@@ -35,10 +34,12 @@ public class AuditTrailPluginTest extends AbstractJUnitTest {
 
         // purpose of this is to just go through the motion of creating a new slave,
         // so this one can bypass SlaveController.
-        Slave slave = new LocalSlaveController().install(jenkins).get();
+        try (LocalSlaveController slaveController = new LocalSlaveController()) {
+            Slave slave = slaveController.install(jenkins).get();
 
-        List<String> events = auditTrail.getEvents();
-        assertThat(events, hasItem("/createItem (" + freeStyleJob.name + ")"));
-        assertThat(events, hasItem("/computer/createItem (" + slave.getName() + ")"));
+            List<String> events = auditTrail.getEvents();
+            assertThat(events, hasItem("/createItem (" + freeStyleJob.name + ")"));
+            assertThat(events, hasItem("/computer/createItem (" + slave.getName() + ")"));
+        }
     }
 }

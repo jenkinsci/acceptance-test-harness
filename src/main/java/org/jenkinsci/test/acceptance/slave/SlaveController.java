@@ -1,18 +1,16 @@
 package org.jenkinsci.test.acceptance.slave;
 
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import com.google.inject.ProvidedBy;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.concurrent.Future;
-
 import org.apache.http.concurrent.BasicFuture;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.openqa.selenium.WebDriver;
-
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
-import com.google.inject.ProvidedBy;
 
 /**
  * Controls where/how to run slaves.

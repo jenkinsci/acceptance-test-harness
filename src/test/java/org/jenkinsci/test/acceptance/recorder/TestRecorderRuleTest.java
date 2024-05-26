@@ -1,16 +1,15 @@
 package org.jenkinsci.test.acceptance.recorder;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.existingFile;
+
+import java.io.File;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.junit.Test;
 import org.junit.runner.Description;
-
-import java.io.File;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.Is.is;
-import static org.jenkinsci.test.acceptance.Matchers.existingFile;
 
 public class TestRecorderRuleTest {
 

@@ -1,23 +1,21 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.cloudbees.sdk.extensibility.ExtensionPoint;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.Credentials;
 import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.NullPrinter;
-
-import com.cloudbees.sdk.extensibility.ExtensionPoint;
-import com.google.inject.Injector;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.

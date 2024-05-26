@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.utils;
 
-import org.openqa.selenium.json.Json;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.openqa.selenium.json.Json;
 
 public class SupportBundleRequest {
     private final File outputFile;

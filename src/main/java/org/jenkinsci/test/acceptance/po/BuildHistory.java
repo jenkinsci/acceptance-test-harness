@@ -5,7 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.WebElement;
@@ -29,7 +28,7 @@ public class BuildHistory extends PageObject {
         open();
 
         // build history is progressively rendered so wait until that is complete
-        WebElement progressiveRendering = findIfNotVisible(by.xpath("//table[@tooltip='Computation in progress.']"));
+        WebElement progressiveRendering = findIfNotVisible(by.xpath("//*[@tooltip='Computation in progress.']"));
         waitFor(progressiveRendering).until(we -> !we.isDisplayed());
 
         LinkedHashSet<Build> builds = new LinkedHashSet<Build>();

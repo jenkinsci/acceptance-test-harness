@@ -26,10 +26,12 @@ package org.jenkinsci.test.acceptance.po;
 
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
-import org.jenkinsci.test.acceptance.controller.JenkinsController;
-
 import com.google.inject.Inject;
+import java.time.Duration;
+import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * Page object for Wizard Create admin user
@@ -74,9 +76,18 @@ public class WizardCreateAdminUser extends PageObject {
 
     public void confirmURLSettings(){
         By confirmJenkinsUrl = by.css(".btn-primary.save-configure-instance");
-        waitFor(confirmJenkinsUrl,2);
+        waitFor(driver).withTimeout(Duration.ofSeconds(time.seconds(2)))
+                .withMessage("Unable to locate the save button to configure jenkins url")
+                .until(ExpectedConditions.presenceOfElementLocated(confirmJenkinsUrl));
+        waitFor(driver).withTimeout(Duration.ofSeconds(time.seconds(2)))
+                .withMessage("Unable to click the save button to configure jenkins url")
+                .until(ExpectedConditions.elementToBeClickable(confirmJenkinsUrl));
         Control control = control(confirmJenkinsUrl);
-        control.click();
+        try {
+            control.clickAndWaitToBecomeStale(Duration.ofSeconds(time.seconds(30)));
+        } catch (TimeoutException ex) {
+            System.err.println("The button to accept the url settings in the setup wizard is not becoming stale");
+        }
     }
 
     public void wizardShouldFinishSuccessfully() {
@@ -87,4 +98,3 @@ public class WizardCreateAdminUser extends PageObject {
     }
 
 }
-

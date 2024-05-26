@@ -1,8 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.NoSuchElementException;
-
 import java.net.URL;
+import org.openqa.selenium.NoSuchElementException;
 
 /**
  * @author Matthias Karl

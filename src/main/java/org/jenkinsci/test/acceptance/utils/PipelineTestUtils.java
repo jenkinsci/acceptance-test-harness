@@ -23,19 +23,18 @@
  */
 package org.jenkinsci.test.acceptance.utils;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.jenkinsci.test.acceptance.po.JobsMixIn;
-import org.jenkinsci.test.acceptance.po.WorkflowJob;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Locale;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
+import org.jenkinsci.test.acceptance.po.JobsMixIn;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 
 public class PipelineTestUtils {
 
@@ -57,7 +56,7 @@ public class PipelineTestUtils {
         final String script = scriptForPipelineFromResource(resourceOwner, resourceName);
         checkScript(script);
 
-        return String.format(script, scriptParameters);
+        return String.format(script, (Object[]) scriptParameters);
     }
 
     public static void checkScript(final String script) {

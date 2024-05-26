@@ -74,6 +74,10 @@ fi
 
 shift 2
 
+if [[ $# -eq 0 ]]; then
+	extra_args+=' test'
+fi
+
 set -x
 
-BROWSER=$browser JENKINS_WAR=$war $MVN test $extra_args "$@"
+BROWSER=$browser JENKINS_WAR=$war $MVN $extra_args "$@"

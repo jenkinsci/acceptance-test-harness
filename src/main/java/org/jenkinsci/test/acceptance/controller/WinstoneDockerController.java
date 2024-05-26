@@ -1,19 +1,17 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.URL;
-
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerImage;
 import org.jenkinsci.test.acceptance.docker.fixtures.JavaContainer;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
-
-import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 /**
  * Runs jenkins.war inside docker so that it gets a different IP address even though it's run on the same host.
@@ -119,4 +117,3 @@ public class WinstoneDockerController extends LocalController {
         }
     }
 }
-

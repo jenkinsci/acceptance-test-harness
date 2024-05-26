@@ -23,19 +23,19 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import java.net.URL;
-import java.util.concurrent.Callable;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 import com.google.inject.Injector;
-
 import groovy.lang.Closure;
+import java.net.URL;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
 
 /**
  * {@link PageObject} that can be configured and saved.
@@ -105,7 +105,7 @@ public abstract class ConfigurablePageObject extends PageObject {
     public void configure() {
         // Automatic disabling of sticky elements doesn't seem to occur after a redirect,
         // so force it after the configuration page has loaded
-        new Scroller().disableStickyElements(driver);
+        new Scroller(driver).disableStickyElements();
 
         if (!driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
             visit(getConfigUrl());

@@ -1,23 +1,21 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import com.google.common.base.Function;
 import org.kohsuke.randname.RandomNameGenerator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Injector;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -35,12 +33,12 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     protected ObjectMapper jsonParser;
 
     /**
-     * Full URL of the object that this page object represents. Ends with '/', like "http://localhsot:8080/job/foo/"
+     * Full URL of the object that this page object represents. Ends with '/', like "http://localhost:8080/job/foo/"
      *
      * @see ContainerPageObject#url(String) Method that lets you resolve relative paths easily.
      */
     public final URL url;
-    
+
     /**
      * If the object was created with some context, preserve it so that we can
      * easily get the real Jenkins root
@@ -143,12 +141,12 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      */
     public @NonNull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
         assert pathPrefix.startsWith("/"): "Path not absolute: " + pathPrefix;
-        final By by = this.by.areaPath(pathPrefix);
+        final By by = PageObject.by.areaPath(pathPrefix);
         final List<String> existing = extractPaths(all(by));
         final int existingSize = existing.size();
         action.run();
 
-        return waitFor().withTimeout(10, TimeUnit.SECONDS).until(new Function<CapybaraPortingLayer, String>() {
+        return waitFor().withTimeout(Duration.ofSeconds(10)).until(new Function<CapybaraPortingLayer, String>() {
             @Nullable @Override public String apply(@Nullable CapybaraPortingLayer input) {
                 List<String> current = extractPaths(all(by));
                 int size = current.size();

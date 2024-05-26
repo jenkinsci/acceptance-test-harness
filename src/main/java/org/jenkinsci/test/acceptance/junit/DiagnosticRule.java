@@ -1,9 +1,9 @@
 package org.jenkinsci.test.acceptance.junit;
 
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
-import javax.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;

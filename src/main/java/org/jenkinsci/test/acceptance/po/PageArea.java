@@ -1,10 +1,9 @@
 package org.jenkinsci.test.acceptance.po;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
 
 /**
  * @author christian.fritz

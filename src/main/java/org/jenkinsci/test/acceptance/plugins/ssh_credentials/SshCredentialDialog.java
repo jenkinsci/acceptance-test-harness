@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
+import java.time.Duration;
 import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -10,8 +11,6 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Modal dialog to enter a credential.
@@ -44,13 +43,11 @@ public class SshCredentialDialog extends PageAreaImpl {
      * Adds this credential and close the modal dialog.
      */
     public void add() {
-        final By addSubmitButton = by.id("credentials-add-submit-button");
+        this.findAndPerformClick(Credential.submitButton());
 
-        this.findAndPerformClick(addSubmitButton);
-
-        waitFor().withTimeout(5, TimeUnit.SECONDS).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(5)).until(() -> {
             try {
-                return !find(addSubmitButton).isDisplayed();
+                return !find(Credential.submitButton()).isDisplayed();
             } catch (final NoSuchElementException | StaleElementReferenceException ex) {
                 return true;
             }
@@ -62,7 +59,7 @@ public class SshCredentialDialog extends PageAreaImpl {
 
         final Actions builder = new Actions(driver);
 
-        new Scroller().scrollIntoView(addSubmitButton, driver);
+        new Scroller(driver).scrollIntoView(addSubmitButton);
         addSubmitButton.click();
         builder.perform();
     }

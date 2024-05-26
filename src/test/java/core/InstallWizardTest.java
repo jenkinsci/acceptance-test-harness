@@ -26,9 +26,9 @@ package core;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
 
-import java.io.IOException;
-
+import com.google.inject.Inject;
 import hudson.util.VersionNumber;
+import java.io.IOException;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
@@ -38,8 +38,6 @@ import org.jenkinsci.test.acceptance.po.WizardCreateAdminUser;
 import org.jenkinsci.test.acceptance.po.WizardCustomizeJenkins;
 import org.jenkinsci.test.acceptance.po.WizardLogin;
 import org.junit.Test;
-
-import com.google.inject.Inject;
 
 @WithInstallWizard
 public class InstallWizardTest extends AbstractJUnitTest {

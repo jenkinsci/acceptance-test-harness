@@ -58,7 +58,7 @@ public class ConfigFileProvider extends PageObject {
         String id = getElement(by.name("config.id")).getAttribute("value");
         // clicking the button leads to the load of a new page but it is not a navigation event from the listeners PoV
         // so we need to disable the sticky elmements again
-        new Scroller().disableStickyElements(driver);
+        new Scroller(driver).disableStickyElements();
         return newInstance(type, this, id);
     }
 }

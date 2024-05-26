@@ -23,12 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import com.google.inject.Injector;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -71,8 +70,7 @@ public class Folder extends TopLevelItem implements Container {
     @Override
     public void delete() {
         open();
-        clickLink("Delete Folder");
-        waitFor(by.button("Yes")).click();
+        runThenHandleDialog(() -> clickLink("Delete Folder"));
     }
 
     public void setEnvironmentalVariables(final Map<String, String> envVbles) {

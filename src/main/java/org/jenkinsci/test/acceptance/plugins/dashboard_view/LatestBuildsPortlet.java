@@ -42,9 +42,7 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      * @return latest builds table
      */
     public WebElement getTable() {
-        WebElement portlet = find(By.xpath("//div[contains(.,'" + PORTLET_NAME + "')]/following::table[1]"));
-
-        return portlet.findElement(By.id("statistics"));
+        return find(By.xpath("//div[contains(.,'" + PORTLET_NAME + "')]/following::table[1]"));
     }
 
     private WebElement getRow(int row) {
@@ -76,8 +74,9 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      * @return True, if this Portlet contains a job with the given name.
      */
     public boolean hasJob(String jobName) {
+        WebElement table = getTable();
         try {
-            return !getTable().findElements(By.linkText(jobName)).isEmpty();
+            return !table.findElements(By.linkText(jobName)).isEmpty();
         } catch (NoSuchElementException e) {
             return false;
         }
@@ -90,8 +89,9 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      * @return True, if this Portlet contains a build with the given number.
      */
     public boolean hasBuild(int buildNr) {
+        WebElement table = getTable();
         try {
-            return !getTable().findElements(By.linkText("#" + buildNr)).isEmpty();
+            return !table.findElements(By.linkText("#" + buildNr)).isEmpty();
         } catch (NoSuchElementException e) {
             return false;
         }

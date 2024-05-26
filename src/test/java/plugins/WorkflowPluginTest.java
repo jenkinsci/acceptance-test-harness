@@ -24,10 +24,15 @@
 
 package plugins;
 
-import javax.inject.Inject;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.junit.Assert.*;
+
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -62,12 +67,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
 
 @WithPlugins("command-launcher")
 public class WorkflowPluginTest extends AbstractJUnitTest {
@@ -120,13 +119,13 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "pipeline-input-step", "junit@1.18", "git@2.3"})
     @Test public void linearFlow() throws Exception {
-        MavenInstallation.installMaven(jenkins, "M3", "3.5.0");
+        MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
         slave.configure(() -> slave.labels.set("remote"));
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set(
             "node('remote') {\n" +
-            "  git 'https://github.com/jglick/simple-maven-project-with-tests.git'\n" +
+            "  git 'https://github.com/jenkinsci/hello-world-maven-builder.git'\n" +
             "  def v = version()\n" +
             "  if (v) {\n" +
             "    echo(/Building version $v/)\n" +
@@ -168,7 +167,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
             // TODO if resultIs were public and there were a disjunction combinator for Matcher we could use it here.
             build.shouldBeUnstable();
         }
-        new Artifact(build, "target/simple-maven-project-with-tests-1.0-SNAPSHOT.jar").assertThatExists(true);
+        new Artifact(build, "target/example-1.0-SNAPSHOT.jar").assertThatExists(true);
         build.open();
         clickLink("Test Result");
         assertThat(driver, hasContent("All Tests"));

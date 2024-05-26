@@ -1,24 +1,23 @@
 package org.jenkinsci.test.acceptance.po;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import java.net.URL;
+import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.Wait;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
-import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -69,7 +68,7 @@ public class Build extends ContainerPageObject {
 
     public Build waitUntilStarted(int timeout) {
         waitFor().withMessage("Next build of %s is started", job)
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(this::hasStarted);
         return this;
     }
@@ -101,7 +100,7 @@ public class Build extends ContainerPageObject {
         visit("console");
 
         waitFor().withMessage("Build %s is finished", this)
-                .withTimeout(timeout, TimeUnit.SECONDS)
+                .withTimeout(Duration.ofSeconds(timeout))
                 .until(new Wait.Predicate<Boolean>() {
                     @Override
                     public Boolean apply() throws Exception {
@@ -116,16 +115,21 @@ public class Build extends ContainerPageObject {
         return this;
     }
 
+    /** Checks if the build is in progress,  that is the build has started and not yet completed. */
     public boolean isInProgress() {
-        if (result != null) {
-            return false;
-        }
-        if (!hasStarted()) {
-            return false;
-        }
+        JsonNode d;
+        try {
+            d = getJson();
+            // see https://github.com/jenkinsci/jenkins/pull/6829
 
-        JsonNode d = getJson();
-        return d.get("building").booleanValue() || d.get("result") == null;
+            // for a pipeline you can often see when it has just started "building:true" but "inProgress: false"
+            // the former however is set to false whilst post build steps are still firing.
+            // so we check both
+            return d.get("inProgress").booleanValue() || d.get("building").booleanValue();
+        } catch (NoSuchElementException e) {
+            // Build has not started, so it is not in progress.
+            return false;
+        }
     }
 
     public int getNumber() {
@@ -297,7 +301,7 @@ public class Build extends ContainerPageObject {
     }
 
     public String getDisplayName() {
-        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]/h1"));
+        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]//h1"));
         return displayNameElement.getText();
     }
 
@@ -309,7 +313,7 @@ public class Build extends ContainerPageObject {
 
         if (isInProgress()) {
             WebElement stopButton = find(by.href("stop"));
-            runThenConfirmAlert(stopButton::click);
+            runThenHandleDialog(stopButton::click);
         }
     }
 

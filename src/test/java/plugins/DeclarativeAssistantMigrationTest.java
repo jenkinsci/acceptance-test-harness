@@ -23,16 +23,16 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.hasElement;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 import org.openqa.selenium.By;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.containsString;
-import static org.jenkinsci.test.acceptance.Matchers.hasElement;
 
 @WithPlugins({"declarative-pipeline-migration-assistant@1.0.3","declarative-pipeline-migration-assistant-api@1.0.3"})
 public class DeclarativeAssistantMigrationTest
@@ -53,7 +53,7 @@ public class DeclarativeAssistantMigrationTest
         assertThat(driver, hasElement( By.className( "rectangle-conversion-success")));
         assertThat(driver, hasElement(By.className("review-converted")));
         assertThat(driver, hasElement(By.id("jenkinsfile-content")));
-        String jenkinsFile =  driver.findElement(By.id("jenkinsfile-content")).getAttribute("value");
+        String jenkinsFile =  driver.findElement(By.id("jenkinsfile-content")).getText();
         assertThat(jenkinsFile, containsString( "echo 1" ));
     }
 }

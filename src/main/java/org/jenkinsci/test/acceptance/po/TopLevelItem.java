@@ -1,15 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckReturnValue;
+import hudson.util.VersionNumber;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import hudson.util.VersionNumber;
 import org.openqa.selenium.WebElement;
-
-import com.google.inject.Injector;
 
 /**
  * Super class for top level items. 
@@ -101,7 +99,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
     }
 
     public String getDisplayName() {
-        WebElement displayNameElement = find(by.xpath("//*[@id=\"main-panel\"]/h1"));
+        WebElement displayNameElement = find(by.css("#main-panel h1"));
         return displayNameElement.getText();
     }
 

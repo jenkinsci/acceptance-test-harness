@@ -23,15 +23,15 @@
  */
 package core;
 
+import static org.hamcrest.MatcherAssert.*;
+import static org.jenkinsci.test.acceptance.po.View.*;
+
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.po.View.*;
 
 public class ViewTest extends AbstractJUnitTest {
     @Test
@@ -60,5 +60,14 @@ public class ViewTest extends AbstractJUnitTest {
         fillIn("includeRegex", "my.*");
         view.save();
         assertThat(view, containsJob(job));
+    }
+
+    @Test
+    public void viewDescription() {
+        ListView view = jenkins.views.create(ListView.class, "a_view");
+        view.configure();
+        view.setDescription("This is a description");
+        view.save();
+        assertThat(view, hasDescription("This is a description"));
     }
 }

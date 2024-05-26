@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view.read;
 
+import java.util.Arrays;
+import java.util.List;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Provides a simple area for reading the breadcrumbs on the page.

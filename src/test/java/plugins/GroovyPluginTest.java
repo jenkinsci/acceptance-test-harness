@@ -25,7 +25,6 @@ package plugins;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Native;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -99,17 +98,17 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
     @Test
     public void use_custom_groovy_version() {
-        GroovyInstallation.installGroovy(jenkins, "groovy-2.2.1", "Groovy 2.2.1");
+        GroovyInstallation.installGroovy(jenkins, "groovy-4.0.12", "Groovy 4.0.12");
 
         configureJob();
 
         final GroovyStep step = job.addBuildStep(GroovyStep.class);
-        step.version.select("groovy-2.2.1");
+        step.version.select("groovy-4.0.12");
         step.script(
                 "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
         );
         job.save();
-        shouldReport("version: 2.2.1");
+        shouldReport("version: 4.0.12");
     }
 
     @Test @Native("groovy")

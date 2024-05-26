@@ -23,20 +23,19 @@
  */
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.junit.Assert.assertEquals;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
-import org.jenkinsci.test.acceptance.utils.IOUtil;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.regex.Pattern;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
-import static org.junit.Assert.assertEquals;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 
 @DockerFixture(id = "mailhog", ports = {1025, 8025})
 public class MailhogContainer extends DockerContainer {
@@ -62,7 +61,7 @@ public class MailhogContainer extends DockerContainer {
 
     private JsonNode fetchJsonMessages() {
         try {
-            URL url = new URL("http://" + ipBound(8025) + ":" + port(8025) + "/api/v1/messages");
+            URL url = new URL("http", ipBound(8025), port(8025), "/api/v1/messages");
             HttpURLConnection c = IOUtil.openConnection(url);
             try {
                 return new ObjectMapper().readTree(c.getInputStream());

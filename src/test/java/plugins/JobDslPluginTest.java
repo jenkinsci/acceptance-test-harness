@@ -1,9 +1,17 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.po.View.*;
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.authorize_project.ProjectDefaultBuildAccessControl;
@@ -28,19 +36,10 @@ import org.jenkinsci.test.acceptance.po.ListView;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.po.View;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.View.*;
-import static org.jenkinsci.test.acceptance.utils.IOUtil.multiline;
-import static org.junit.Assert.*;
 
 /**
  * Acceptance tests for the Job DSL plugin.
@@ -770,7 +769,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         String jobLabel = "!ubuntu";
         String linkUrl = "https://jenkins.io";
         String linkLabel = "jenkins.io";
-        String jobDslScript = String.format(multiline(
+        String jobDslScript = String.format(IOUtil.multiline(
                 "job('%s') {",
                 "    description('%s');",
                 "    displayName('%s');",

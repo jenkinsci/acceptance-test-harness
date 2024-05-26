@@ -30,16 +30,29 @@ RUN apt-get update && \
         unzip \
         tightvncserver \
         openjdk-11-jdk \
+        openjdk-17-jdk \
         xfonts-base \
         openssh-client \
+        jq \
         && \
     apt-get clean all && rm -rf /var/cache/apt
+
+# JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21%2B35/OpenJDK21U-jdk_aarch64_linux_hotspot_21_35.tar.gz
+ARG JDK21_VERSION=21+35
+RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(echo "$JDK21_VERSION" | jq "@uri" -jRr)/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION/+/_}.tar.gz" \
+  && mkdir "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" \
+  && tar -C "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" -xzf /tmp/jdk21.tar.gz --strip-components=1 \
+  && rm -fv /tmp/jdk21.tar.gz
+RUN update-alternatives --install /usr/bin/java java "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/java" 21 \
+  && update-alternatives --install /usr/bin/javac javac "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/javac" 21 \
+  && update-alternatives --set java "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/java" \
+  && update-alternatives --set javac "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/javac"
 
 # Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
 ARG FIREFOX_VERSION=108.0.2
 # hadolint: Do not pin packages as they are requirements only for firefox installation (and not ofr the rest of the ATH) and the effort required to track each version would be too huge
 # hadolint ignore=DL3008
-RUN apt-get -y --no-install-recommends install libgtk-3-0 libasound2 libdbus-glib-1-2 libx11-xcb-dev libpci-dev libgl1-mesa-glx wget bzip2 \
+RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 libasound2 libdbus-glib-1-2 libx11-xcb-dev libpci-dev libgl1-mesa-glx wget bzip2 \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
   && curl --silent https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 --output /tmp/firefox.tar.bz2 \
   && rm -rf /opt/firefox \
@@ -49,7 +62,7 @@ RUN apt-get -y --no-install-recommends install libgtk-3-0 libasound2 libdbus-gli
   && ln -fs /opt/firefox-${FIREFOX_VERSION}/firefox /usr/bin/firefox
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION 0.32.2
+ENV GECKODRIVER_VERSION=0.34.0
 # gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
@@ -62,9 +75,9 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   fi
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION 3.9.1
-RUN curl -ffSLO https://dlcdn.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-"$MAVEN_VERSION"-bin.tar.gz && \
-    tar -xvzf apache-maven-"$MAVEN_VERSION"-bin.tar.gz -C /opt/ && \
+ENV MAVEN_VERSION=3.9.6
+RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/"${MAVEN_VERSION}"/binaries/apache-maven-"${MAVEN_VERSION}"-bin.tar.gz && \
+    tar -xvzf apache-maven-"${MAVEN_VERSION}"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
 ENV PATH="$PATH:/opt/maven/bin"
 
@@ -77,7 +90,7 @@ RUN echo \
       $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
 
 # Ensure that version is fixed
-ARG DOCKER_VERSION=23.0.1
+ARG DOCKER_VERSION=25.0.4
 ARG DOCKER_BUILDX_VERSION=0.10.2
 RUN apt-get update --quiet \
   && apt-get install --yes --no-install-recommends \

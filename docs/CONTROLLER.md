@@ -12,13 +12,18 @@ section describes them.
 
 For more sophisticated customization, see [WIRING.md](WIRING.md).
 
+To reduce the overall startup time, you can also use a pool of JUT instances, see [PRELAUNCH.md](PRELAUNCH.md) for more details.
+
 ## Local family controllers
 All local controllers run both test harness and Jenkins under Test on the local machine. Common environment variables for local controllers:
 
 * `JENKINS_JAVA_HOME` the JVM home to use for running Jenkins. If not specified, the first of `JAVA_HOME`, or the JVM
    used to launch the tests will be used.
 * `JENKINS_JAVA_OPTS` Adds additional options to the java process like `-Xms=XXm -Xmx=XXXm`.
-* `INTERACTIVE` keep browser session opened after failed scenario for interactive investigation.
+* `INTERACTIVE` keep browser session opened after a failed scenario for interactive investigation.
+* `SKIP_UPDATES` skip Jenkins plugin updates before starting the tests. Dramatically reduces the startup time for tests.  
+   Using this option makes sense when you are running tests against a Jenkins instance that is already set up with the 
+   plugins you need (see environment variable `PLUGINS_DIR`).  
 
 You can disable the logging output of Jenkins by setting the system property `quiet` on 
 the command line.
@@ -69,42 +74,3 @@ The behaviour of this controller can be customized through the following environ
 
 This controller is useful when you want to debug Jenkins while you run a test. It can be also used during
 iterative test development to execute tests quickly.
-
-## Vagrant family of controllers
-There's a family of controllers which use Vagrant to launch a virtual machine and then launch jenkins.war inside.
-
-When run for the first time, this test harness will create a virtual machine.
-To make repeated tests fast, the VM won't get shut down automatically at the end of a run.
-
-To do shut it down, cd `vagrant/*` and run `vagrant halt`. You can run any other Vagrant commands
-in this manner, which is useful for debugging.
-
-You can also create `pre-configure.sh` and/or `post-configure.sh` in the current directory as needed
-to customize how the Vagrant VM is initialized. These scripts are copied into the VM and then executed:
-
-* `pre-configure.sh` runs before the controller attempts to install Jenkins
-* `post-configure.sh` runs after the controller finished installing Jenkins
-
-### Ubuntu controller (TYPE=ubuntu)
-This controller uses Vagrant to run Ubuntu, then deploy Jenkins from an APT repository as a debian package.
-(This controller is not yet capable of testing an individual `*.deb` file.)
-
-Variables:
-
-* `REPO_URL` The location of APT repository in the format used by `/etc/apt/sources.list`, such as `http://pkg.jenkins-ci.org/debian binary/`
-
-### CentOS controller (TYPE=centos)
-This controller uses Vagrant to run CentOS, then deploy Jenkins from an RPM repository.
-(This controller is not yet capable of testing an individual `*.rpm` file.)
-
-Variables:
-
-* `REPO_URL` The location of RPM repository, such as `http://pkg.jenkins-ci.org/opensuse/`
-
-### OpenSUSE controller (TYPE=opensuse)
-This controller uses Vagrant to run CentOS, then deploy Jenkins from an RPM repository.
-(This controller is not yet capable of testing an individual `*.rpm` file.)
-
-Variables:
-
-* `REPO_URL` The location of RPM repository, such as `http://pkg.jenkins-ci.org/opensuse/`

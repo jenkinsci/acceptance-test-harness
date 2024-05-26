@@ -1,39 +1,38 @@
 package org.jenkinsci.test.acceptance.controller;
 
-import java.util.logging.Level;
+import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Field;
+import java.lang.ProcessBuilder.Redirect;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
+import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.MultipleFailureException;
 import org.openqa.selenium.TimeoutException;
-
-import com.github.olivergondza.dumpling.factory.PidRuntimeFactory;
-import com.github.olivergondza.dumpling.model.ModelObject;
-import com.github.olivergondza.dumpling.model.dump.ThreadDumpRuntime;
-import com.google.inject.Injector;
-
-import static java.lang.System.*;
 
 /**
  * Abstract base class for those JenkinsController that runs the JVM locally on
@@ -47,6 +46,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
      */
     @Inject @Named("jenkins.war")
     protected /*final*/ File war;
+
+    @Inject
+    protected ElasticTime time;
 
     /**
      * JENKINS_HOME directory for jenkins.war to be launched.
@@ -100,7 +102,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
         File givenPluginDir = null;
         for (String d : Arrays.asList(
-                getenv("PLUGINS_DIR"),
+                System.getenv("PLUGINS_DIR"),
                 new File(war.getParentFile(), "plugins").getAbsolutePath(),
                 WORKSPACE + "/plugins",
                 "plugins")) {
@@ -174,12 +176,12 @@ public abstract class LocalController extends JenkinsController implements LogLi
     }
 
     public File getJavaHome() {
-        String javaHome = getenv("JENKINS_JAVA_HOME");
+        String javaHome = System.getenv("JENKINS_JAVA_HOME");
         File home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
         if (home != null && home.isDirectory()) {
             return home;
         }
-        javaHome = getenv("JAVA_HOME");
+        javaHome = System.getenv("JAVA_HOME");
         home = StringUtils.isBlank(javaHome) ? null : new File(javaHome);
         if (home != null && home.isDirectory()) {
             return home;
@@ -202,10 +204,9 @@ public abstract class LocalController extends JenkinsController implements LogLi
         logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile, getLogPrinter());
         logWatcher.start();
         try {
-            LOGGER.info("Waiting for Jenkins to become running in "+ this);
+            LOGGER.info("Waiting for Jenkins (" + getLogId() + ") to become running in "+ this);
             this.logWatcher.waitTillReady();
             onReady();
-            LOGGER.info("Jenkins is running in " + this);
         } catch (Exception e) {
             diagnoseFailedLoad(e);
         }
@@ -214,12 +215,22 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * Called when the Jenkins instance is ready to be used.
      */
-    protected void onReady() throws IOException {}
+    protected void onReady() throws IOException {
+        LOGGER.info("Jenkins (" + getLogId() + ") is running in " + this);
+    }
 
     @Override
-    public void stopNow() throws IOException{
+    public void stopNow() throws IOException {
+        LOGGER.info("Stopping Jenkins (" + getLogId() + ") in " + this);
         process.getProcess().destroy();
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
+        try {
+            if (!process.getProcess().waitFor(time.seconds(20), TimeUnit.MILLISECONDS)) {
+                throw new IOException("Jenkins (" + getLogId() + ") failed to stop within the allowed timeout");
+            }
+        } catch (InterruptedException e) {
+            throw new IOException("Jenkins (" + getLogId() + ") failed to terminate due to interruption", e);
+        }
     }
 
     @Override
@@ -233,18 +244,18 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
         }
 
-        if (getenv("INTERACTIVE") != null && getenv("INTERACTIVE").equals("true")) {
+        if (System.getenv("INTERACTIVE") != null && System.getenv("INTERACTIVE").equals("true")) {
             if (cause instanceof MultipleFailureException) {
                 System.out.println("Multiple exceptions occurred:");
                 for (Throwable c : ((MultipleFailureException) cause).getFailures()) {
-                    out.println();
-                    c.printStackTrace(out);
-                    out.println();
+                    System.out.println();
+                    c.printStackTrace(System.out);
+                    System.out.println();
                 }
             } else {
-                cause.printStackTrace(out);
+                cause.printStackTrace(System.out);
             }
-            out.println("Commencing interactive debugging. Browser session was kept open.");
+            System.out.println("Commencing interactive debugging. Browser session was kept open.");
             // Broken in current surefire
 //            out.println("Press return to proceed.");
 //            try {
@@ -331,38 +342,20 @@ public abstract class LocalController extends JenkinsController implements LogLi
         } catch (IllegalThreadStateException ignored) {
             // Process alive
         }
-
-        // Try to get stacktrace
-        Class<?> clazz;
-        Field pidField;
         try {
-            clazz = Class.forName("java.lang.UNIXProcess");
-            pidField = clazz.getDeclaredField("pid");
-            pidField.setAccessible(true);
-        } catch (Exception e) {
-            return null; // Unable to inspect
-        }
-
-        if (clazz.isAssignableFrom(proc.getClass())) {
-            int pid;
-            try {
-                pid = (int) pidField.get(proc);
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                throw new AssertionError(e);
+            long pid = proc.pid();
+            ProcessBuilder pb = new ProcessBuilder("jstack", "-l", Long.toString(pid));
+            pb.redirectErrorStream(true);
+            Process jstackProc = pb.start();
+            jstackProc.getOutputStream().close();
+            try (InputStream is = jstackProc.getInputStream()) {
+                return new String(is.readAllBytes(), StandardCharsets.UTF_8);
             }
-
-            try {
-                ThreadDumpRuntime runtime = new PidRuntimeFactory().fromProcess(pid);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                PrintStream printStream = new PrintStream(baos);
-                runtime.toString(printStream, ModelObject.Mode.MACHINE);
-                printStream.close();
-                return baos.toString();
-            } catch (IOException | InterruptedException e) {
-                throw new AssertionError(e);
-            }
+        } catch (UnsupportedOperationException ignored) {
+            // ignored
+        } catch (IOException e) {
+            throw new AssertionError(e);
         }
-
         return null;
     }
 

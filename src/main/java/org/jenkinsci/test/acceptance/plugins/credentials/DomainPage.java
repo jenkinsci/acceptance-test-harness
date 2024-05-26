@@ -1,14 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.credentials;
 
-import java.net.URL;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
+import java.net.URL;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.openqa.selenium.NoSuchElementException;
-
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 
 public class DomainPage extends ConfigurablePageObject {

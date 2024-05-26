@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
 
+import org.openqa.selenium.By;
+
 /**
  * Page object for the system configuration page.
  *
@@ -49,5 +51,12 @@ public class JenkinsConfig extends ConfigurablePageObject {
 
     public void setDescription(String desc) {
         control("/system_message").set(desc);
+    }
+
+    public String getHomeDirectory() {
+        ensureConfigPage();
+
+        return driver.findElement(By.xpath("//div[contains(text(), 'Home directory')]//..//*[@class='setting-main']"))
+                .getText();
     }
 }

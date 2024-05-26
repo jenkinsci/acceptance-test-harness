@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.log;
 
 import hudson.remoting.Asynchronous;
-
 import java.io.IOException;
 
 /**

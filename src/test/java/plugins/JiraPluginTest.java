@@ -1,9 +1,9 @@
 package plugins;
 
+import static org.junit.Assert.fail;
+
 import com.google.inject.Inject;
-
 import hudson.plugins.jira.soap.RemoteComment;
-
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JiraContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -22,8 +22,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import static org.junit.Assert.fail;
 
 @WithPlugins({"jira", "git"})
 @Category(DockerTest.class)

@@ -1,9 +1,14 @@
 {"list": [
     {
-    "id": "3.0.8",
-    "name": "Groovy 3.0.8",
-    "url": "https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-3.0.8.zip"
+    "id": "4.0.12",
+    "name": "Groovy 4.0.12",
+    "url": "https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-4.0.12.zip"
   },
+  {
+      "id": "3.0.8",
+      "name": "Groovy 3.0.8",
+      "url": "https://groovy.jfrog.io/artifactory/dist-release-local/groovy-zips/apache-groovy-binary-3.0.8.zip"
+    },
     {
     "id": "3.0.7",
     "name": "Groovy 3.0.7",

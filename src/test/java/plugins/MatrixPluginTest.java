@@ -1,25 +1,64 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
+
 import com.google.inject.Inject;
 import hudson.util.VersionNumber;
+import java.util.Collections;
+import java.util.List;
+import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
-import org.jvnet.hudson.test.Issue;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.matrix_reloaded.MatrixReloadedAction;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Test;
+import org.jvnet.hudson.test.Issue;
 
-import java.util.List;
-
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-
-@WithPlugins("matrix-project")
+@WithPlugins({"matrix-project"})
 public class MatrixPluginTest extends AbstractJUnitTest {
+
+    /* Groovy script to select which builds of the matrix will be generated.
+     * For this test: Only when multiplying the value of the axis is an odd number would execute the build:
+     *   [1,1]: Built
+     *   [1,2]: Not built
+     *   [1,3]: Built
+     *   [2,1]: Not built
+     *   [2,2]: Not built
+     *   [2,3]: Not built
+     *   [3,1]: Built
+     *   [3,2]: Not built
+     *   [3,3]: Built
+     */
+    private static final String GROOVY_SELECTOR_SCRIPT = "combinations.each{\n" +
+            "   def x = it.axis_x as Integer\n" +
+            "   def y = it.axis_y as Integer\n" +
+            "   def i = (x * y) % 2\n" +
+            "   if(i == 0) {\n" +
+            "      return \n" +
+            "   }\n" +
+            "   result[it.axis_y] = result[it.axis_y] ?: []\n" +
+            "   result[it.axis_y] << it\n" +
+            "}\n" +
+            " \n" +
+            "[result, true]";
+    private static final String STRATEGY = "Groovy Script Matrix Executor Strategy";
+    private static final int AXIS_MAX_VALUE = 3;
+    private static final int AXIS_X_TEST_NOT_BUILT = 1;
+    private static final int AXIS_Y_TEST_NOT_BUILT = 2;
+    private static final int AXIS_X_TEST_BUILT = 1;
+    private static final int AXIS_Y_TEST_BUILT = 1;
+    private static final int AXIS_INITIAL_VALUE = 1;
+    private static final String AXIS_X = "axis_x";
+    private static final String AXIS_Y = "axis_y";
+    private static final String AXIS_X_VALUES = "1 2 3";
+    private static final String AXIS_Y_VALUES = "1 2 3";
+
     MatrixProject job;
 
     @Inject
@@ -40,6 +79,22 @@ public class MatrixPluginTest extends AbstractJUnitTest {
 
         MatrixBuild b = job.startBuild().waitUntilStarted().as(MatrixBuild.class);
         assertThatBuildHasRunSequentially(b);
+    }
+
+    private void assertThatBuildHasRunSequentially(MatrixBuild b) {
+        List<MatrixRun> builds = b.getConfigurations();
+
+        while (b.isInProgress()) {
+            int running = 0;
+            for (MatrixRun r : builds) {
+                if (r.isInProgress()) {
+                    running++;
+                }
+            }
+
+            assertThat("Too many configurations running at once", running, is(lessThan(2)));
+            sleep(100);
+        }
     }
 
     @Test
@@ -93,12 +148,12 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("condition");
         job.save();
 
-        MatrixBuild b = job.startBuild(singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild(Collections.singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldNotExist();
         b.getConfiguration("run=no").shouldNotExist();
 
-        b = job.startBuild(singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
+        b = job.startBuild(Collections.singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldExist();
         b.getConfiguration("run=no").shouldNotExist();
@@ -131,19 +186,84 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         b.getConfiguration("label=label1").shouldContainsConsoleOutput("(Building|Building remotely) on " + s.getName());
     }
 
-    private void assertThatBuildHasRunSequentially(MatrixBuild b) {
-        List<MatrixRun> builds = b.getConfigurations();
+    @Test
+    @WithPlugins({"matrix-reloaded", "matrix-groovy-execution-strategy"})
+    public void run_extended_test() {
+        job.configure();
+        // Create a [3,3] matrix
+        job.addUserAxis(AXIS_X, AXIS_X_VALUES);
+        job.addUserAxis(AXIS_Y, AXIS_Y_VALUES);
 
-        while (b.isInProgress()) {
-            int running = 0;
-            for (MatrixRun r : builds) {
-                if (r.isInProgress()) {
-                    running++;
+        job.control(by.xpath("//div[normalize-space(text())='%s']/..//select", "Execution Strategy")).select(STRATEGY);
+        job.control(by.xpath("//div[normalize-space(text())='%s']/..//textarea", "Groovy Script")).set(GROOVY_SELECTOR_SCRIPT);
+
+        job.save();
+        job.startBuild();
+
+        // Default execution: Only valid combinations are built. Other combinations are not created
+        MatrixBuild build = waitForSuccessBuild(job);
+        assertExist(build);
+
+        // Rebuild a non-allowed combination: Valid combinations exist but aren't built. Invalid combinations don't exist.
+        rebuildCombination(job, AXIS_X + "=" + AXIS_X_TEST_NOT_BUILT + "," + AXIS_Y + "=" + AXIS_Y_TEST_NOT_BUILT);
+        build = waitForSuccessBuild(job);
+        assertExist(build);
+        assertBuilt(build, AXIS_X_TEST_NOT_BUILT, AXIS_Y_TEST_NOT_BUILT);
+
+        // Rebuild only one valid combination ([1,1]): This combination exists and is built. The rest of valid combinations exist but aren't built. Invalid combinations don't exist.
+        rebuildCombination(job, AXIS_X + "=" + AXIS_X_TEST_BUILT + "," + AXIS_Y + "=" + AXIS_Y_TEST_BUILT);
+        build = waitForSuccessBuild(job);
+        assertExist(build);
+        assertBuilt(build, AXIS_X_TEST_BUILT, AXIS_Y_TEST_BUILT);
+    }
+
+    private void assertBuilt(MatrixBuild build, int axisX, int axisY) {
+        for (int x = AXIS_INITIAL_VALUE; x <= AXIS_MAX_VALUE; x++) {
+            for (int y = AXIS_INITIAL_VALUE; y <= AXIS_MAX_VALUE; y++) {
+                // Only (x*y) odd combinations are valid
+                if (isOdd(x * y)) {
+                    if (x == axisX && y == axisY) {
+                        assertThat(build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y), built());
+                    } else {
+                        assertThat(build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y), not(built()));
+                    }
                 }
             }
-
-            assertThat("Too many configurations running at once", running, is(lessThan(2)));
-            sleep(100);
         }
+    }
+
+    private void assertExist(MatrixBuild build) {
+        for (int x = AXIS_INITIAL_VALUE; x <= AXIS_MAX_VALUE; x++) {
+            for (int y = AXIS_INITIAL_VALUE; y <= AXIS_MAX_VALUE; y++) {
+                if (isOdd(x * y)) {
+                    build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y).shouldExist();
+                } else {
+                    build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y).shouldNotExist();
+                }
+            }
+        }
+    }
+
+    private MatrixBuild waitForSuccessBuild(MatrixProject job) {
+        return (MatrixBuild) job.getLastBuild().waitUntilFinished().shouldSucceed();
+    }
+
+    private void rebuildCombination(MatrixProject job, String... combinations) {
+        MatrixReloadedAction action = job.getLastBuild().action(MatrixReloadedAction.class);
+        action.open();
+        action.rebuild(combinations);
+    }
+
+    private Matcher<? super MatrixRun> built() {
+        return new Matcher<MatrixRun>("Matrix run exists") {
+            @Override
+            public boolean matchesSafely(MatrixRun item) {
+                return item.exists();
+            }
+        };
+    }
+
+    private boolean isOdd(int i) {
+        return (i % 2 != 0);
     }
 }

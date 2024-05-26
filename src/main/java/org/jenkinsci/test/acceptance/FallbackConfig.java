@@ -1,7 +1,13 @@
 package org.jenkinsci.test.acceptance;
 
+import com.browserup.bup.BrowserUpProxy;
+import com.browserup.bup.client.ClientUtil;
+import com.cloudbees.sdk.extensibility.ExtensionList;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -11,15 +17,12 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.client.ClientUtil;
 import org.apache.commons.exec.OS;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.RepositorySystem;
@@ -62,22 +65,12 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.remote.CapabilityType;
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
-import org.openqa.selenium.support.events.EventFiringWebDriver;
-import org.openqa.selenium.support.events.WebDriverListener;
-import com.cloudbees.sdk.extensibility.ExtensionList;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
+import org.openqa.selenium.support.events.EventFiringDecorator;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import static org.jenkinsci.test.acceptance.recorder.HarRecorder.isCaptureHarEnabled;
 
 /**
  * The default configuration for running tests.
@@ -92,11 +85,6 @@ public class FallbackConfig extends AbstractModule {
 
     /** Browser property to set the default locale. */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
-
-    /**
-     * PhantomJS browser property to set the default locale.
-     */
-    private static final String LANGUAGE_SELECTOR_PHANTOMJS = "phantomjs.page.customHeaders.Accept-Language";
 
     public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
     public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
@@ -124,21 +112,15 @@ public class FallbackConfig extends AbstractModule {
             GeckoDriverService service = builder.build();
             return new FirefoxDriver(service, buildFirefoxOptions(testName));
         case "firefox-container":
-            // TODO needs to be kept in sync with the selenium dependency
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.6.0", buildFirefoxOptions(testName));
+            return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.20.0", buildFirefoxOptions(testName));
         case "chrome-container":
-            // TODO needs to be kept in sync with the selenium dependency
-            return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.6.0", new ChromeOptions());
-        case "ie":
-        case "iexplore":
-        case "iexplorer":
-            return new InternetExplorerDriver();
+            return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.20.0", new ChromeOptions());
         case "chrome":
             Map<String, String> prefs = new HashMap<String, String>();
             prefs.put(LANGUAGE_SELECTOR, "en");
             ChromeOptions options = new ChromeOptions();
             options.setExperimentalOption("prefs", prefs);
-            if (isCaptureHarEnabled()) {
+            if (HarRecorder.isCaptureHarEnabled()) {
                 options.setAcceptInsecureCerts(true);
                 options.setProxy(createSeleniumProxy(testName.get()));
             }
@@ -147,15 +129,13 @@ public class FallbackConfig extends AbstractModule {
             return new ChromeDriver(options);
         case "safari":
             return new SafariDriver();
-        case "htmlunit":
-            return new HtmlUnitDriver(true);
         case "saucelabs":
         case "saucelabs-firefox":
             FirefoxOptions caps = new FirefoxOptions();
             caps.setCapability("version", "29");
             caps.setCapability("platform", "Windows 7");
             caps.setCapability("name", testName.get());
-            if (isCaptureHarEnabled()) {
+            if (HarRecorder.isCaptureHarEnabled()) {
                 caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
             }
 
@@ -201,7 +181,7 @@ public class FallbackConfig extends AbstractModule {
         firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
         firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
         firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false);
-        if (isCaptureHarEnabled()) {
+        if (HarRecorder.isCaptureHarEnabled()) {
             firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
         }
         if (System.getenv("FIREFOX_BIN") != null) {
@@ -212,7 +192,7 @@ public class FallbackConfig extends AbstractModule {
 
     private ChromeOptions buildChromeOptions(TestName testName) throws IOException {
         ChromeOptions chromeOptions = new ChromeOptions();
-        if (isCaptureHarEnabled()) {
+        if (HarRecorder.isCaptureHarEnabled()) {
             chromeOptions.setProxy(createSeleniumProxy(testName.get()));
         }
         return chromeOptions;
@@ -225,7 +205,7 @@ public class FallbackConfig extends AbstractModule {
             final int displayNumber = vncPort - 5900;
 
             Path log = Files.createTempFile("ath-docker-browser", "log");
-            LOGGER.info("Starting selenium container. Logs in " + log);
+            LOGGER.info("Starting selenium container '" + image + "'. Logs in " + log);
 
             Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
             // While this only needs to expose two ports (controlPort, vncPort), it needs to be able to talk to Jenkins running
@@ -233,7 +213,9 @@ public class FallbackConfig extends AbstractModule {
             String[] args = {
                     "run", "-d", "--shm-size=2g", "--network=host",
                     "-e", "SE_OPTS=--port " + controlPort,
-                    "-e", "DISPLAY=:" + displayNumber,
+                    "-e", "DISPLAY=:" + displayNumber + ".0",
+                    "-e", "DISPLAY_NUM=" + displayNumber,
+                    "-e", "SE_VNC_PORT=" + vncPort,
                     image
             };
             ProcessInputStream popen = Docker.cmd(args).popen();
@@ -285,8 +267,7 @@ public class FallbackConfig extends AbstractModule {
             // bind to the loopback to prevent exposing the proxy to the world.
             proxyAddr = InetAddress.getLoopbackAddress();
         }
-        BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr);
-        proxy.newHar(testName);
+        BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr, testName);
         return ClientUtil.createSeleniumProxy(proxy, proxyAddr);
     }
 
@@ -339,13 +320,13 @@ public class FallbackConfig extends AbstractModule {
         if (oldSize.height < 1050 || oldSize.width < 1680) {
             base.manage().window().setSize(new Dimension(1680, 1050));
         }
-
-        final EventFiringWebDriver d = new EventFiringWebDriver(base);
-        d.register(new Scroller());
+        Scroller scroller = new Scroller(base);
+        final EventFiringDecorator<WebDriver> decorator = new EventFiringDecorator<>(scroller);
+        WebDriver d = decorator.decorate(base);
 
         try {
-            d.manage().timeouts().pageLoadTimeout(time.seconds(PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
-            d.manage().timeouts().implicitlyWait(time.seconds(IMPLICIT_WAIT_TIMEOUT), TimeUnit.MILLISECONDS);
+            d.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(PAGE_LOAD_TIMEOUT)));
+            d.manage().timeouts().implicitlyWait(Duration.ofMillis(time.seconds(IMPLICIT_WAIT_TIMEOUT)));
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
             LOGGER.info(base + " doesn't support page load timeout");
@@ -485,7 +466,7 @@ public class FallbackConfig extends AbstractModule {
             throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.", ex);
         }
     }
-    
+
     /**
      *  Provides a mechanism to create a report on which plugins were used
      *  during the test execution

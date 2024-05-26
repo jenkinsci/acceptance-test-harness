@@ -26,8 +26,8 @@ package plugins;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.html_publisher.HtmlPublisher;
-import org.jenkinsci.test.acceptance.plugins.html_publisher.HtmlReport;
 import org.jenkinsci.test.acceptance.plugins.html_publisher.HtmlPublisher.Report;
+import org.jenkinsci.test.acceptance.plugins.html_publisher.HtmlReport;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 

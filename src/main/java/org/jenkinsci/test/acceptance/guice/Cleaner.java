@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.guice;
 
-import org.junit.runners.model.Statement;
-
 import java.io.Closeable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.junit.runners.model.Statement;
 
 /**
  * Performs clean-up tasks at the end of scope.

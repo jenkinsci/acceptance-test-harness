@@ -1,5 +1,15 @@
 package org.jenkinsci.test.acceptance.recorder;
 
+import jakarta.inject.Inject;
+import java.awt.AWTException;
+import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.HeadlessException;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.junit.GlobalRule;
 import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
@@ -10,18 +20,6 @@ import org.monte.media.FormatKeys;
 import org.monte.media.VideoFormatKeys;
 import org.monte.media.math.Rational;
 import org.monte.screenrecorder.ScreenRecorder;
-
-import java.awt.GraphicsEnvironment;
-import java.awt.GraphicsConfiguration;
-import java.awt.Dimension;
-import java.awt.AWTException;
-import java.awt.HeadlessException;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.inject.Inject;
 
 /**
  * JUnit Rule that before executing a test it starts a recording current screen

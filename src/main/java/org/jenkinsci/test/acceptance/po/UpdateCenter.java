@@ -1,15 +1,15 @@
 package org.jenkinsci.test.acceptance.po;
 
+import static org.hamcrest.Matchers.not;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterables;
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
-
-import static java.util.Arrays.*;
-import static org.hamcrest.Matchers.not;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -57,7 +57,7 @@ public class UpdateCenter extends ContainerPageObject {
             }
         }
 
-        throw new AssertionError("No record of installation being attempted for "+pluginShortName+"\n"+ asList(jobs));
+        throw new AssertionError("No record of installation being attempted for " + pluginShortName + "\n" + Arrays.asList(jobs));
     }
 
     /**
@@ -75,7 +75,7 @@ public class UpdateCenter extends ContainerPageObject {
         AtomicInteger i = new AtomicInteger();
         waitFor()
                 .withMessage("All plugins should be installed")
-                .withTimeout(5, TimeUnit.MINUTES)
+                .withTimeout(Duration.ofMinutes(5))
                 .until(() -> {
                     if (i.incrementAndGet() % 30 == 0) { // refresh the page every 15 seconds
                         driver.navigate().refresh();

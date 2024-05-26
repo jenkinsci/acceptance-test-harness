@@ -1,17 +1,17 @@
 package plugins;
 
+import static org.junit.Assert.assertFalse;
+
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.mock_security_realm.MockSecurityRealm;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-
-@WithPlugins({"favorite", "mock-security-realm"})
+@WithPlugins({"favorite"})
 public class FavoriteTest extends AbstractJUnitTest {
     public static final String USER = "dev";
 
@@ -21,26 +21,22 @@ public class FavoriteTest extends AbstractJUnitTest {
 
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
-        MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
-        realm.configure(USER);
+        JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
+        realm.allowUsersToSignUp(true);
         security.save();
 
+        realm.signup(USER);
         jenkins.login().doLogin(USER);
 
-        waitFor(by.id("fav_my-project")).click();
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']")).click();
         // ensure the project is now a favourite
-        waitFor(by.css(".icon-fav-active"));
+        waitFor(by.css(".icon-fav-active:not(.jenkins-hidden)"));
 
         final User user = new User(jenkins, USER);
-        jenkins.visit(user.getConfigUrl().toString());
-        // will fail if the project has not been favourited
-        waitFor(by.id("favorites"));
-        waitFor(by.id("fav_my-project")).click();
+        jenkins.visit(user.url("favorites").toString());
+        // will fail if the project has not been favorited
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='true']")).click();
         // ensure the project is no longer a favourite
-        waitFor(by.css(".icon-fav-inactive"));
-
-        jenkins.visit(user.getConfigUrl().toString());
-        waitFor(driver).until(Matchers.hasContent("Favorites"));
-        assertFalse(findIfNotVisible(by.id("favorites")).isDisplayed());
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']"));
     }
 }

@@ -1,8 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.jacoco;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Page object for the jacoco result page.

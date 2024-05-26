@@ -24,12 +24,13 @@
 
 package plugins;
 
+import static org.junit.Assert.*;
+
 import java.util.Collections;
 import java.util.logging.Level;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
-import static org.junit.Assert.*;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 

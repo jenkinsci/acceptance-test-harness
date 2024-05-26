@@ -1,8 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
-import javax.inject.Named;
+import com.google.inject.Inject;
+import hudson.util.VersionNumber;
+import jakarta.inject.Named;
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,27 +16,21 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadata.UnableToResolveDependencies;
 import org.jenkinsci.test.acceptance.update_center.UpdateCenterMetadataProvider;
 import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-
-import com.google.inject.Inject;
-
-import hudson.util.VersionNumber;
-
-import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 
 
 /**
@@ -44,11 +41,6 @@ import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 public class PluginManager extends ContainerPageObject {
 
     private static final Logger LOGGER = Logger.getLogger(PluginManager.class.getName());
-
-    /**
-     * Did we fetch the update center metadata?
-     */
-    private boolean updated;
 
     public final Jenkins jenkins;
 
@@ -76,19 +68,19 @@ public class PluginManager extends ContainerPageObject {
     public PluginManager(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
+        mockUpdateCenter.ensureRunning(jenkins);
     }
 
     /**
      * Force update the plugin update center metadata.
      */
     public void checkForUpdates() {
-        mockUpdateCenter.ensureRunning(jenkins);
         visit("index");
         final String current = getCurrentUrl();
         // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
         // And we check for the presence of the button again
-        WebElement checkButton = find(by.link("Check now"));
+        WebElement checkButton = find(by.css("#button-refresh, .jenkins-button[href='checkUpdatesServer']"));
         checkButton.click();
         // The wait criteria is: we have left the current page and returned to the same one
         waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
@@ -106,7 +98,6 @@ public class PluginManager extends ContainerPageObject {
             }
             return false;
         });
-        updated = true;
     }
 
     public enum InstallationStatus {NOT_INSTALLED, OUTDATED, UP_TO_DATE}
@@ -176,10 +167,6 @@ public class PluginManager extends ContainerPageObject {
     public boolean installPlugins(final PluginSpec... specs) throws UnableToResolveDependencies, IOException {
         final Map<String, String> candidates = getMapShortNamesVersion(specs);
 
-        if (!updated) {
-            checkForUpdates();
-        }
-
         if (uploadPlugins) {
             LOGGER.warning("Installing plugins by direct upload. Better to use the default MockUpdateCenter.");
             // First check to see whether we need to do anything.
@@ -233,10 +220,13 @@ public class PluginManager extends ContainerPageObject {
             // End JENKINS-50790
 
             final ArrayList<PluginSpec> update = new ArrayList<>();
+
+            boolean somePluginsInstalled = false; // track if we have nothing to install.
             for (final PluginSpec n : specs) {
                 switch (installationStatus(n)) {
                     case NOT_INSTALLED:
                         tickPluginToInstall(n);
+                        somePluginsInstalled = true;
                     break;
                     case OUTDATED:
                         update.add(n);
@@ -247,8 +237,10 @@ public class PluginManager extends ContainerPageObject {
                     default: assert false: "Unreachable";
                 }
             }
-
-            clickButton("Install");
+            if (somePluginsInstalled) {
+                // don't attempt to click install if there is nothing to install (e.g. we are updating)
+                control(by.button("Install")).clickAndWaitToBecomeStale();
+            }
 
             // Plugins that are already installed in older version will be updated
             System.out.println("Plugins to be updated: " + update);
@@ -257,13 +249,19 @@ public class PluginManager extends ContainerPageObject {
                 for (PluginSpec n : update) {
                     tickPluginToInstall(n);
                 }
-                clickButton("Download now and install after restart");
+
+                // Temporary until https://github.com/jenkinsci/jenkins/pull/8025 is in LTS
+                if (find(by.button("Download now and install after restart")) != null) {
+                    control(by.button("Download now and install after restart")).clickAndWaitToBecomeStale();
+                } else {
+                    control(by.button("Update")).clickAndWaitToBecomeStale();
+                }
             }
         }
 
         // Jenkins will be restarted if necessary
         boolean hasBeenRestarted = new UpdateCenter(jenkins).waitForInstallationToComplete(specs);
-        if (!hasBeenRestarted && specs.length > 0 && jenkins.getVersion().isNewerThan(new VersionNumber("2.188"))) {
+        if (!hasBeenRestarted && specs.length > 0) {
             jenkins.getLogger("all").waitForLogged(Pattern.compile("Completed installation of .*"), 1000);
         }
 
@@ -279,7 +277,7 @@ public class PluginManager extends ContainerPageObject {
         // the target plugin web element becomes stale due to the dynamic behaviour of the plugin
         // manager UI which ends up with StaleElementReferenceException.
         // This is re-trying until the element can be properly checked.
-        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
             try {
                 check(find(by.xpath("//input[starts-with(@name,'plugin.%s.')]", name)));
             } catch (NoSuchElementException | StaleElementReferenceException e) {
@@ -313,7 +311,7 @@ public class PluginManager extends ContainerPageObject {
         // DEV MEMO: To avoid flakiness issues, wait for the text to be entirely written in the search box, and
         // wait for the list below to be properly refreshed and for the element we are searching for to be displayed.
         // If not, the list might not be properly refreshed and the element would never be found.
-        waitFor().withTimeout(10, TimeUnit.SECONDS).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(10)).until(() -> {
             try {
                 check(find(by.xpath(xpathToPluginLine, pluginName)));
             } catch (NoSuchElementException | StaleElementReferenceException e) {
@@ -364,7 +362,7 @@ public class PluginManager extends ContainerPageObject {
         // Then wait until the plugin is loaded
         waitFor()
                 .withMessage("All plugins should be installed")
-                .withTimeout(5, TimeUnit.MINUTES)
+                .withTimeout(Duration.ofMinutes(5))
                 .until(() -> {
                     List<WebElement> elements = pluginRow.findElements(by.xpath("descendant::*[contains(.,'Pending') or contains(.,'Installing')]"));
                     return elements.isEmpty();

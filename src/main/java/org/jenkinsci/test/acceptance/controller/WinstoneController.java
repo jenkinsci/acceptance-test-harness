@@ -1,27 +1,25 @@
 package org.jenkinsci.test.acceptance.controller;
 
+import com.cloudbees.sdk.extensibility.Extension;
+import com.google.inject.Injector;
 import hudson.util.VersionNumber;
-import java.nio.charset.StandardCharsets;
-import java.util.jar.JarFile;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
-
-import com.cloudbees.sdk.extensibility.Extension;
-import com.google.inject.Injector;
 
 /**
  * Launches Jenkins via "java -jar jenkins.war" on the local machine.
@@ -82,6 +80,7 @@ public class WinstoneController extends LocalController {
                 throw new IOException("Unable to parse port from " + s + ". Jenkins did not start.");
             }
         }
+        super.onReady();
     }
 
     @Override
@@ -109,10 +108,11 @@ public class WinstoneController extends LocalController {
     }
 
     private boolean supportsPortFileName() throws IOException {
-        JarFile warFile = new JarFile(war);
-        String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
-        VersionNumber version = new VersionNumber(jenkinsVersion);
-        return version.compareTo(v2339) >= 0;
+        try (JarFile warFile = new JarFile(war)) {
+            String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
+            VersionNumber version = new VersionNumber(jenkinsVersion);
+            return version.compareTo(v2339) >= 0;
+        }
     }
 
     @Override
@@ -122,6 +122,13 @@ public class WinstoneController extends LocalController {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getLogId() {
+        // as we will generally start with using a port of `0` we can not use the base classes implementation
+        // as the logging id will change through the lifecycle and not be initialized from the outset
+        return String.format("master%08d",  System.identityHashCode(this));
     }
 
     @Override

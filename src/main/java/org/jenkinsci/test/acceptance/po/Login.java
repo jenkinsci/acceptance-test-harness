@@ -1,13 +1,12 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.openqa.selenium.support.ui.ExpectedConditions;
-
-import java.util.concurrent.TimeUnit;
-
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasInvalidLoginInformation;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
+
+import java.time.Duration;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * Page object for login page.
@@ -58,7 +57,7 @@ public class Login extends PageObject {
 
     public Login doSuccessfulLogin(String user, String password) {
         this.doLogin(user, password);
-        waitFor().withTimeout(30, TimeUnit.SECONDS).until(() -> {
+        waitFor().withTimeout(Duration.ofSeconds(30)).until(() -> {
             assertThat(this, not(hasInvalidLoginInformation())); // login hasn't failed
             return ExpectedConditions.visibilityOfElementLocated(by.id("jenkins")); // redirect has happened
         });

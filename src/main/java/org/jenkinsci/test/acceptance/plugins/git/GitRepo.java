@@ -1,5 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.git;
 
+import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
@@ -9,33 +15,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.commons.io.FileUtils;
-import org.zeroturnaround.zip.ZipUtil;
-
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.ChannelSftp;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.Session;
-import com.jcraft.jsch.SftpException;
-
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-
-import static java.lang.ProcessBuilder.Redirect.*;
-import static java.nio.file.attribute.PosixFilePermission.*;
-import static java.util.Collections.*;
-import static org.jenkinsci.test.acceptance.docker.fixtures.GitContainer.*;
+import org.zeroturnaround.zip.ZipUtil;
 
 /**
  * Manipulates git repository locally.
@@ -94,16 +88,22 @@ public class GitRepo implements Closeable {
     private File initDir() {
         try {
             // FIXME: perhaps this logic that makes it use a separate key should be moved elsewhere?
-            privateKey = File.createTempFile("ssh", "key");
+            privateKey = Files.createTempFile("ssh", "key").toFile();
+
             FileUtils.copyURLToFile(GitContainer.class.getResource("GitContainer/unsafe"), privateKey);
-            Files.setPosixFilePermissions(privateKey.toPath(), singleton(OWNER_READ));
 
-            ssh = File.createTempFile("jenkins", "ssh");
-            FileUtils.writeStringToFile(ssh,
-                    "#!/bin/sh\n" +
-                            "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " \"$@\"" , StandardCharsets.UTF_8);
-            Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(OWNER_READ, OWNER_EXECUTE)));
-
+            if (SystemUtils.IS_OS_WINDOWS) {
+                ssh = Files.createTempFile("jenkins", "ssh.cmd").toFile();
+                // this works if ssh is on the path, for example
+                // https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse
+                Files.writeString(ssh.toPath(), "ssh.exe -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " %*", Charset.defaultCharset());
+            } else {
+                ssh = Files.createTempFile("jenkins", "ssh").toFile();
+                FileUtils.writeStringToFile(ssh,
+                        "#!/bin/sh\n" +
+                                "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " \"$@\"", Charset.defaultCharset());
+                Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
+            }
             return createTempDir("git");
         } catch (IOException e) {
             throw new AssertionError("Can't initialize git directory", e);
@@ -131,8 +131,8 @@ public class GitRepo implements Closeable {
         String errorMessage = cmds + " failed";
         try {
             Process p = pb.directory(dir)
-                    .redirectInput(INHERIT)
-                    .redirectError(INHERIT)
+                    .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                    .redirectError(ProcessBuilder.Redirect.INHERIT)
                     .start();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -198,7 +198,7 @@ public class GitRepo implements Closeable {
 
     public void touch(final String fileName) {
         try {
-            FileUtils.writeStringToFile(file(fileName), "", StandardCharsets.UTF_8);
+            FileUtils.writeStringToFile(file(fileName), "", Charset.defaultCharset());
         } catch (IOException e) {
             throw new AssertionError("Can't change file " + fileName, e);
         }
@@ -284,25 +284,28 @@ public class GitRepo implements Closeable {
             JSch jSch = new JSch();
             jSch.addIdentity(privateKey.getAbsolutePath());
 
-            Session session = jSch.getSession("git", host, port);
+            Session session = jSch.getSession("git", GitContainer.addBracketsIfNeeded(host), port);
             session.setConfig(props);
             session.connect();
 
             ChannelSftp channel = (ChannelSftp) session.openChannel("sftp");
             channel.connect();
             channel.cd("/home/git");
-            channel.put(Files.newInputStream(zippedRepo.toPath()), zippedFilename);
+            try (InputStream fis = Files.newInputStream(zippedRepo.toPath())) {
+                channel.put(fis, zippedFilename);
+            }
 
             ChannelExec channelExec = (ChannelExec) session.openChannel("exec");
             InputStream in = channelExec.getInputStream();
-            channelExec.setCommand("unzip " + zippedFilename + " -d " + REPO_NAME);
+            channelExec.setCommand("unzip " + zippedFilename + " -d " + GitContainer.REPO_NAME);
             channelExec.connect();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            String line;
-            int index = 0;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(++index + " : " + line);
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                String line;
+                int index = 0;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(++index + " : " + line);
+                }
             }
 
             channelExec.disconnect();

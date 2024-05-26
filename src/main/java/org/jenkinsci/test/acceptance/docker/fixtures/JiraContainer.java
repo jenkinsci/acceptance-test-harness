@@ -1,28 +1,25 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
+import static org.jenkinsci.test.acceptance.po.PageObject.*;
+
 import hudson.plugins.jira.soap.JiraSoapService;
 import hudson.plugins.jira.soap.RemoteComment;
 import hudson.plugins.jira.soap.RemoteIssue;
-
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.jira.JIRA;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
-
-import javax.xml.rpc.ServiceException;
-
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import javax.xml.rpc.ServiceException;
+import org.apache.commons.io.IOUtils;
+import org.jenkinsci.jira.JIRA;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -42,7 +39,7 @@ public class JiraContainer extends DockerContainer {
      */
     public void waitForReady(CapybaraPortingLayer p) {
         p.waitFor().withMessage("Waiting for jira to come up")
-                .withTimeout(2000, TimeUnit.SECONDS) // [INFO] jira started successfully in 1064s
+                .withTimeout(Duration.ofSeconds(2000)) // [INFO] jira started successfully in 1064s
                 .until( () ->  {
                         try {
                             URLConnection connection = getURL().openConnection();

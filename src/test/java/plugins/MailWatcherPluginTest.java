@@ -24,6 +24,8 @@
 package plugins;
 
 import com.google.inject.Inject;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.docker.fixtures.MailhogContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
@@ -39,9 +41,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-
-import java.util.concurrent.Future;
-import java.util.regex.Pattern;
 
 @WithPlugins("mail-watcher-plugin")
 @Category(DockerTest.class)

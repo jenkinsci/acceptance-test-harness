@@ -1,18 +1,17 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.net.URL;
-
-import org.hamcrest.Description;
-import org.jenkinsci.test.acceptance.Matcher;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.jenkinsci.test.acceptance.Matchers.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import java.net.URL;
+import org.hamcrest.Description;
+import org.jenkinsci.test.acceptance.Matcher;
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
 /**
  * Page object for view, which is a collection of jobs rendered in the UI.
@@ -24,6 +23,8 @@ import static org.jenkinsci.test.acceptance.Matchers.*;
 public abstract class View extends ContainerPageObject {
     private final Control recurseIntoFolder = control("/recurse");
     public final Control includeRegex = control("/useincluderegex/includeRegex");
+
+    public final Control description = control("/description");
 
     public final JobsMixIn jobs;
 
@@ -56,9 +57,13 @@ public abstract class View extends ContainerPageObject {
      */
     public void delete() {
         configure();
-        clickLink("Delete View");
-        waitFor(by.button("Yes"));
-        clickButton("Yes");
+        try {
+            runThenHandleDialog(() -> clickLink("Delete View"));
+        } catch (TimeoutException te) {
+            visit("delete");
+            waitFor(by.button("Yes"));
+            clickButton("Yes");
+        }
     }
 
     @Override
@@ -103,7 +108,7 @@ public abstract class View extends ContainerPageObject {
      * @param description The description of the view.
      */
     public void setDescription(final String description) {
-        WebElement descrElem = find(by.name("description"));
+        WebElement descrElem = this.description.resolve();
         descrElem.clear();
         descrElem.sendKeys(description);
     }
@@ -114,6 +119,16 @@ public abstract class View extends ContainerPageObject {
 
     public String getSubmitButtonText(){
         return "OK";
+    }
+
+    public static Matcher<View> hasDescription(String description) {
+        return new Matcher<>("Has description " + description) {
+            @Override
+            public boolean matchesSafely(View item) {
+                WebElement webElement = item.getElement(By.xpath(String.format("//div[@id='description']/div[text()='%s']", description)));
+                return webElement != null;
+            }
+        };
     }
 
     public static Matcher<View> containsColumnHeaderTooltip(String tooltip) {

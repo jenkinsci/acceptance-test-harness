@@ -1,10 +1,9 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
-
 import java.io.IOException;
 import java.net.URL;
+import org.jenkinsci.test.acceptance.docker.DockerContainer;
+import org.jenkinsci.test.acceptance.docker.DockerFixture;
 
 /**
  * Runs stock Tomcat 7 container.

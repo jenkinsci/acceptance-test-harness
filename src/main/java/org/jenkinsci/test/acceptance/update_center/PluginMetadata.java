@@ -1,35 +1,31 @@
 package org.jenkinsci.test.acceptance.update_center;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.inject.Injector;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.util.VersionNumber;
-
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
-
-import edu.umd.cs.findbugs.annotations.NonNull;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.output.NullOutputStream;
 import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.jenkinsci.test.acceptance.utils.aether.ArtifactResolverUtil;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.inject.Injector;
 
 /**
  * Databinding for installable plugin in UC.
@@ -214,10 +210,10 @@ public class PluginMetadata {
         public final String getSha512Checksum(Injector injector) throws NoSuchAlgorithmException, IOException {
             MessageDigest sha512 = MessageDigest.getInstance("SHA-512");
             Path overrideFile = resolve(injector, getVersion()).toPath();
-            try (DigestOutputStream dos512 = new DigestOutputStream(new NullOutputStream(), sha512)) {
+            try (DigestOutputStream dos512 = new DigestOutputStream(OutputStream.nullOutputStream(), sha512)) {
                 Files.copy(overrideFile, dos512);
             }
-            return Base64.encodeBase64String(sha512.digest());
+            return Base64.getEncoder().encodeToString(sha512.digest());
         }
     }
 }

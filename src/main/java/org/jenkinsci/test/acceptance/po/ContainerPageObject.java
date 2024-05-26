@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.inject.Injector;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -7,15 +9,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Injector;
 
 /**
  * {@link PageObject} that represents a model that has multiple views underneath.

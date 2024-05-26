@@ -23,6 +23,16 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+
+import jakarta.inject.Inject;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
@@ -38,15 +48,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.By;
-
-import javax.inject.Inject;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
 
 @WithDocker
 @Category(DockerTest.class)
@@ -67,7 +68,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     private int port;
 
     @Before
-    public void init() {
+    public void init() throws MalformedURLException {
         container = gitServer.get();
         repoUrl = container.getRepoUrl();
         host = container.host();
@@ -128,9 +129,8 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.addShellStep("test -f foo && git remote -v");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + repoUrl);
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + Pattern.quote(repoUrl)); 
     }
-
 
     @Test
     public void checkout_local_branch() {
@@ -163,7 +163,7 @@ public class GitPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void poll_for_changes() {
+    public void poll_for_changes() throws MalformedURLException {
         buildGitRepo()
                 .transferToDockerContainer(host, port);
 

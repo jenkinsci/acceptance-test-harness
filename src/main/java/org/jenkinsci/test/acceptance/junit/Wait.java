@@ -23,20 +23,17 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
+import com.google.common.base.Function;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.openqa.selenium.support.ui.Sleeper;
-
-import com.google.common.base.Function;
 
 /**
  * ATH specific wait object.
@@ -205,14 +202,6 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     // Return subclass
 
-    /**
-     * @deprecated Use withTimeout(Duration) instead.
-     */
-    @Deprecated
-    public Wait<Subject> withTimeout(long duration, TimeUnit unit) {
-        return (Wait<Subject>) super.withTimeout(Duration.of(duration, unit.toChronoUnit()));
-    }
-
     @Override
     public Wait<Subject> withTimeout(Duration timeout) {
         return (Wait<Subject>) super.withTimeout(timeout);
@@ -223,12 +212,9 @@ public class Wait<Subject> extends FluentWait<Subject> {
         return (Wait<Subject>) super.withMessage(message);
     }
 
-    /**
-     * @deprecated Use pollingEvery(Duration) instead.
-     */
-    @Deprecated
-    public Wait<Subject> pollingEvery(long duration, TimeUnit unit) {
-        return (Wait<Subject>) super.pollingEvery(Duration.of(duration, unit.toChronoUnit()));
+    @Override
+    public Wait<Subject> pollingEvery(Duration timeout) {
+        return (Wait<Subject>) super.pollingEvery(timeout);
     }
 
     @Override

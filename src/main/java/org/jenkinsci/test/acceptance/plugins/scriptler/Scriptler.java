@@ -24,7 +24,6 @@
 package org.jenkinsci.test.acceptance.plugins.scriptler;
 
 import java.util.Map;
-
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
@@ -54,7 +53,7 @@ public class Scriptler extends Action {
         control("/id").set(name);
         control("/name").set(name);
         new CodeMirror(this, "/script").set(text);
-        clickButton("Submit");
+        clickButton("Save");
 
         Script script = new Script(this, name);
 

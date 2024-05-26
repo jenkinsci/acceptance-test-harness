@@ -24,9 +24,17 @@
 
 package org.jenkinsci.test.acceptance.update_center;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
+import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.ExceptionLogger;
@@ -46,24 +54,18 @@ import org.apache.http.protocol.RequestConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseServer;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
-import org.jenkinsci.test.acceptance.guice.AutoCleaned;
-import org.jenkinsci.test.acceptance.guice.TestScope;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.UpdateCenter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
+import org.jenkinsci.test.acceptance.guice.AutoCleaned;
+import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.UpdateCenter;
 
 /**
  * Serves a fake update center locally.
@@ -72,6 +74,7 @@ import java.util.stream.Collectors;
 public class MockUpdateCenter implements AutoCleaned {
 
     private static final Logger LOGGER = Logger.getLogger(MockUpdateCenter.class.getName());
+    private static final String MINUS_ONE_STRING = "-1";
 
     @Inject
     public Injector injector;
@@ -85,6 +88,10 @@ public class MockUpdateCenter implements AutoCleaned {
     private HttpServer server;
 
     public void ensureRunning(Jenkins jenkins) {
+        if (System.getenv("SKIP_UPDATES") != null) {
+            LOGGER.info("skipping time-consuming initialization of mock update center - make sure that all required plugins are already installed in PLUGINS_DIR");
+            return;
+        }
         if (original != null) {
             return;
         }
@@ -123,7 +130,7 @@ public class MockUpdateCenter implements AutoCleaned {
                 plugin.put("url", name + ".hpi");
                 updating(plugin, "version", version);
                 // "Avoid IOException: Inconsistent file length" from hudson.model.UpdateCenter
-                updating(plugin, "size", "-1");
+                updating(plugin, "size", MINUS_ONE_STRING);
                 updating(plugin, "gav", meta.gav);
                 updating(plugin, "requiredCore", meta.requiredCore().toString());
                 updating(plugin, "dependencies", new JSONArray(meta.getDependencies().stream().map(d -> {
@@ -205,6 +212,8 @@ public class MockUpdateCenter implements AutoCleaned {
         String override = "http://" + server.getInetAddress().getHostAddress() + ":" + server.getLocalPort() + "/update-center.json";
         LOGGER.log(Level.INFO, "replacing update site {0} with {1}", new Object[] {original, override});
         jenkins.runScript("DownloadService.signatureCheck = false; Jenkins.instance.updateCenter.sites.replaceBy([new UpdateSite(UpdateCenter.ID_DEFAULT, '%s')])", override);
+        // cause Jenkins to synchronously refresh its update site data.
+        jenkins.getPluginManager().checkForUpdates();
     }
 
     private ExceptionLogger serverExceptionHandler() {
@@ -219,7 +228,13 @@ public class MockUpdateCenter implements AutoCleaned {
         Object old = plugin.opt(key);
         plugin.put(key, val);
         if (!String.valueOf(val).equals(String.valueOf(old))) {
-            LOGGER.log(Level.INFO, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
+            // "-1" and "size" are both string literals in the caller,
+            // so only check their identity to prevent a fallback to checking characters which is unneeded.
+            if (MINUS_ONE_STRING == val && "size" == key) {
+                LOGGER.log(Level.FINE, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
+            } else {
+                LOGGER.log(Level.INFO, "for {0} updating {1} from {2} to {3}", new Object[] {plugin.getString("name"), key, old, val});
+            }
         }
     }
 
