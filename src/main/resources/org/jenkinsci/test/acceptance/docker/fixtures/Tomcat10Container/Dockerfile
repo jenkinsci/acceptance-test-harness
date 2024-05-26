@@ -1,16 +1,11 @@
 #
-# Runs Tomcat7 on Ubuntu at port 8080, with the admin app
+# Runs Tomcat10 on Ubuntu at port 8080, with the admin app
 #
 # The admin user has username 'admin' and password 'tomcat'
 #
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
-RUN apt-get update && apt-get install -y gnupg
-
-# Tomcat7 is from Universe
-RUN echo "deb http://archive.ubuntu.com/ubuntu lunar universe" >> /etc/apt/sources.list
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 40976EAF437D05B5
 RUN apt-get update && apt-get install -y tomcat10 tomcat10-admin
 
 # configure the admin user
