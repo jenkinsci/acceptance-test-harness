@@ -24,6 +24,8 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import hudson.util.VersionNumber;
+import java.net.URL;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 
@@ -89,6 +91,11 @@ public class User extends ContainerPageObject {
     public User fullName(String fullName) {
         control("/fullName").set(fullName);
         return this;
+    }
+
+    @Override
+    public URL getConfigUrl() {
+        return getJenkins().getVersion().isNewerThan(new VersionNumber("2.461")) ? url("account/") : url("configure");
     }
 
     public void delete() {
