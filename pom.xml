@@ -770,7 +770,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.452.2</jenkins.version>
+        <jenkins.version>2.452.3-rc34813.1eea_5c5b_9c34</jenkins.version>
       </properties>
     </profile>
   </profiles>
