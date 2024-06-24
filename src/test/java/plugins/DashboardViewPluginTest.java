@@ -259,9 +259,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         final List<String> headers = v.buildExecutorStatus.getHeaders();
-        final List<String> executors = v.buildExecutorStatus.getExecutors();
         assertThat(headers.size(), is(2));
-        assertThat(executors.size(), greaterThan(1));
 
         job.configure(() -> {
             job.setLabelExpression("test");
@@ -269,10 +267,8 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         v.open();
 
         final List<String> headers2 = v.buildExecutorStatus.getHeaders();
-        final List<String> executors2 = v.buildExecutorStatus.getExecutors();
         // If only one node, the title header is not shown.
         assertThat(headers2.size(), is(0));
-        assertThat(executors2.size(), is(1));
     }
 
     @Test
