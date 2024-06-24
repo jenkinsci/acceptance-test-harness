@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view.read;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
@@ -19,29 +18,21 @@ public class BuildExecutorStatus extends PageAreaImpl {
      */
     private final By executors = By.xpath("//div[@id=\"side-panel\"]/div[@id=\"executors\"]");
     /**
-     * Main table of nodes and executors.
-     */
-    private final By table = By.xpath("//table/tbody");
-    /**
      * Header in the table for the name of the node. If only one node, the header is not shown.
      */
-    private final By header = By.xpath("//th");
-    /**
-     * All Executors. (not split by header)
-     */
-    private final By executor = By.xpath("//tr/td[2]");
+    private final By header = By.xpath("//div[@class=\"computer-caption\"] | //table//th");
 
     public BuildExecutorStatus(PageObject context, String path) {
         super(context, path);
     }
 
     /**
-     * Get the main table containing the nodes and executors.
+     * Get the div containing the nodes and executors.
      *
-     * @return the WebElement for the table.
+     * @return the WebElement for the div.
      */
-    public WebElement getTable() {
-        return find(executors).findElement(table);
+    public WebElement getExecutorsDiv() {
+        return find(executors);
     }
 
     /**
@@ -51,22 +42,7 @@ public class BuildExecutorStatus extends PageAreaImpl {
      *
      * @return the names of all displayed nodes/agents.
      */
-    public List<String> getHeaders() {
-        return getTable().findElements(header).stream()
-                .map(WebElement::getText)
-                .map(String::trim)
-                .collect(Collectors.toList());
+    public List<WebElement> getHeaders() {
+        return getExecutorsDiv().findElements(header);
     }
-
-    /**
-     * Get all the executors displayed in the table.
-     * @return the list of executor names.
-     */
-    public List<String> getExecutors() {
-        return getTable().findElements(executor).stream()
-                .map(WebElement::getText)
-                .map(String::trim)
-                .collect(Collectors.toList());
-    }
-
 }
