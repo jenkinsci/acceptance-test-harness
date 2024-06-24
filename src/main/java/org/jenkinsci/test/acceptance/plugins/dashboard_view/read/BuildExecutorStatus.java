@@ -21,7 +21,7 @@ public class BuildExecutorStatus extends PageAreaImpl {
     /**
      * Header in the table for the name of the node. If only one node, the header is not shown.
      */
-    private final By header = By.xpath("//div[@class=\"computer-caption\"]/span");
+    private final By header = By.xpath("//div[@class=\"computer-caption\"]//span | //table//th");
 
     public BuildExecutorStatus(PageObject context, String path) {
         super(context, path);
