@@ -24,6 +24,7 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 
 @WithPlugins("dashboard-view")
 public class DashboardViewPluginTest extends AbstractJobRelatedTest {
@@ -258,7 +259,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         });
         v.open();
 
-        final List<String> headers = v.buildExecutorStatus.getHeaders();
+        final List<WebElement> headers = v.buildExecutorStatus.getHeaders();
         assertThat(headers.size(), is(2));
 
         job.configure(() -> {
@@ -266,7 +267,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         });
         v.open();
 
-        final List<String> headers2 = v.buildExecutorStatus.getHeaders();
+        final List<WebElement> headers2 = v.buildExecutorStatus.getHeaders();
         // If only one node, the title header is not shown.
         assertThat(headers2.size(), is(0));
     }
