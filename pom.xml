@@ -30,7 +30,8 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.463</jenkins.version>
+    <!-- TODO https://ci.jenkins.io/job/Core/job/jenkins/job/jakarta/ -->
+    <jenkins.version>2.465-rc35091.e1058402b_0c2</jenkins.version>
     <selenium.version>4.22.0</selenium.version>
     <guava.version>33.2.1-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
