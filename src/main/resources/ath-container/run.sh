@@ -80,4 +80,4 @@ fi
 
 set -x
 
-BROWSER=$browser JENKINS_WAR=$war $MVN $extra_args "$@"
+BROWSER=$browser JENKINS_LOCAL_HOSTNAME=jenkins.127.0.0.1.sslip.io JENKINS_WAR=$war $MVN $extra_args "$@"
