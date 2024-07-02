@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.GroupApi;
 import org.gitlab4j.api.ProjectApi;
 import org.gitlab4j.api.models.*;
 import org.jenkinsci.test.acceptance.docker.Docker;
@@ -64,17 +63,11 @@ public class GitLabContainer extends DockerContainer {
 
     public void waitForReady(CapybaraPortingLayer p) {
         p.waitFor().withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes add some headway
+                .withTimeout(Duration.ofSeconds(600)) // GitLab starts in about 2 minutes add some headway
                 .pollingEvery(Duration.ofSeconds(2))
                 .until( () ->  {
                     try {
-                        HttpRequest request = HttpRequest.newBuilder()
-                                .uri(getHttpUrl().toURI())
-                                .GET()
-                                .timeout(Duration.ofSeconds(1))
-                                .build();
-                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                        return response.body().contains("GitLab Community Edition");
+                        return checkReadiness();
                     } catch (IOException ignored) {
                         // we can not use .ignoring as this is a checked exception (even though a callable can throw this!)
                         return Boolean.FALSE;
@@ -84,7 +77,7 @@ public class GitLabContainer extends DockerContainer {
     }
 
     public HttpResponse<String> createRepo(String repoName, String token) throws RuntimeException {
-        try{
+        try {
             HttpRequest request = HttpRequest.newBuilder()
                                              .uri(new URI(getHttpUrl() + "/api/v4/projects"))
                                              .header("Content-Type", "application/json")
@@ -111,5 +104,11 @@ public class GitLabContainer extends DockerContainer {
         return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "gitlab-rails runner -e production /usr/bin/create_user.rb" + " " + userName + " " + password + " " + email + " " + isAdmin)
                 .popen()
                 .verifyOrDieWith("Unable to create user").trim();
+    }
+
+    public boolean checkReadiness() throws IOException, InterruptedException {
+        return Docker.cmd("exec", getCid()).add("/bin/bash",  "-c", "curl http://127.0.0.1/-/readiness")
+                .popen()
+                .asText().trim().contains("\"status\":\"ok\"");
     }
 }
