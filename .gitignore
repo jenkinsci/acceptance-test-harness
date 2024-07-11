@@ -25,3 +25,4 @@ jenkins-plugins/
 .jenkins_test/
 !src/test/resources/jacoco/test/target
 .history
+.vscode
