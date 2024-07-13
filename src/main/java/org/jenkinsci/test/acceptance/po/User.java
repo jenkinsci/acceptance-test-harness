@@ -95,7 +95,7 @@ public class User extends ContainerPageObject {
 
     @Override
     public URL getConfigUrl() {
-        return getJenkins().getVersion().isNewerThan(new VersionNumber("2.461")) ? url("account/") : url("configure");
+        return getJenkins().getVersion().isNewerThan(new VersionNumber("2.467")) ? url("account/") : url("configure");
     }
 
     public void delete() {
