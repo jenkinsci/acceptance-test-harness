@@ -31,7 +31,7 @@ public class SnippetGenerator extends PageObject {
      * @return the generated script
      */
     public String generateScript() {
-        WebElement generateButton = find(By.id("generatePipelineScript-button"));
+        WebElement generateButton = find(By.id("generatePipelineScript"));
         generateButton.click();
 
         WebElement snippet = find(By.id("prototypeText"));
