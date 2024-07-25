@@ -55,7 +55,10 @@ stage('Record builds and sessions') {
       }
       axes['jenkinsVersions'].each { jenkinsVersion ->
         infra.withArtifactCachingProxy {
-          sh "rm -rf target && DISPLAY=:0 ./run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
+          // Need to authenticate on DockerHub with a read-only account to avoid rate limit
+          infra.withDockerCredentials {
+            sh "rm -rf target && DISPLAY=:0 ./run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
+          }
         }
         def coreCommit = sh(script: './core-commit.sh', returnStdout: true).trim()
         /*
