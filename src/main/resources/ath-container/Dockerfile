@@ -2,7 +2,7 @@
 #
 # see docs/DOCKER.md for usage
 
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
@@ -29,30 +29,19 @@ RUN apt-get update && \
         iptables \
         unzip \
         tightvncserver \
-        openjdk-11-jdk \
         openjdk-17-jdk \
+        openjdk-21-jdk \
         xfonts-base \
         openssh-client \
         jq \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
-# JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21%2B35/OpenJDK21U-jdk_aarch64_linux_hotspot_21_35.tar.gz
-ARG JDK21_VERSION=21+35
-RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(echo "$JDK21_VERSION" | jq "@uri" -jRr)/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION/+/_}.tar.gz" \
-  && mkdir "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" \
-  && tar -C "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" -xzf /tmp/jdk21.tar.gz --strip-components=1 \
-  && rm -fv /tmp/jdk21.tar.gz
-RUN update-alternatives --install /usr/bin/java java "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/java" 21 \
-  && update-alternatives --install /usr/bin/javac javac "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/javac" 21 \
-  && update-alternatives --set java "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/java" \
-  && update-alternatives --set javac "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/javac"
-
 # Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
 ARG FIREFOX_VERSION=108.0.2
 # hadolint: Do not pin packages as they are requirements only for firefox installation (and not ofr the rest of the ATH) and the effort required to track each version would be too huge
 # hadolint ignore=DL3008
-RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 libasound2 libdbus-glib-1-2 libx11-xcb-dev libpci-dev libgl1-mesa-glx wget bzip2 \
+RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 libasound2t64 libdbus-glib-1-2 libegl1 libpci3 libx11-xcb1 wget bzip2 \
   && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
   && curl --silent https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 --output /tmp/firefox.tar.bz2 \
   && rm -rf /opt/firefox \
@@ -91,7 +80,7 @@ RUN echo \
 
 # Ensure that version is fixed
 ARG DOCKER_VERSION=27.0.3
-ARG DOCKER_BUILDX_VERSION=0.10.2
+ARG DOCKER_BUILDX_VERSION=0.16.1
 RUN apt-get update --quiet \
   && apt-get install --yes --no-install-recommends \
     docker-ce="5:${DOCKER_VERSION}*" \
@@ -110,7 +99,8 @@ ENV gid $gid
 
 EXPOSE 5942
 
-RUN groupadd ath-user -g $gid && \
+RUN deluser ubuntu && \
+    groupadd ath-user -g $gid && \
     useradd ath-user -l -u $uid -g $gid -m -d /home/ath-user && \
     # Give permission to modify the alternatives links to change the java version in use
     chown ath-user:ath-user /etc/alternatives

@@ -4,9 +4,7 @@ set -uo pipefail
 trap 's=$?; echo >&2 "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 # The selection used by update-alternatives for each java version
-if [[ $1 == '11' ]]; then
-	selection='11-openjdk'
-elif [[ $1 == '17' ]]; then
+if [[ $1 == '17' ]]; then
 	selection='17-openjdk'
 elif [[ $1 == '21' ]]; then
 	selection='21-openjdk'
