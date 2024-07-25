@@ -52,11 +52,10 @@ RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 liba
 
 # Selenium needs a geckodriver in order to work properly
 ENV GECKODRIVER_VERSION=0.34.0
-# gross due to https://github.com/mozilla/geckodriver/issues/1956
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
   then \
-    curl -fsSLO https://github.com/jamesmortensen/geckodriver-arm-binaries/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz && \
+    curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz && \
     tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz -C /usr/local/bin; \
   else \
     curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz && \
