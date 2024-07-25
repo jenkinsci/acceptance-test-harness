@@ -38,7 +38,7 @@ RUN apt-get update && \
     apt-get clean all && rm -rf /var/cache/apt
 
 # Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
-ARG FIREFOX_VERSION=108.0.2
+ARG FIREFOX_VERSION=123.0.1
 # hadolint: Do not pin packages as they are requirements only for firefox installation (and not ofr the rest of the ATH) and the effort required to track each version would be too huge
 # hadolint ignore=DL3008
 RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 libasound2t64 libdbus-glib-1-2 libegl1 libpci3 libx11-xcb1 wget bzip2 \
