@@ -37,18 +37,16 @@ RUN apt-get update && \
         && \
     apt-get clean all && rm -rf /var/cache/apt
 
-# Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
+# Install a fixed firefox version that is known to work with the current selenium version, copied from https://support.mozilla.org/en-US/kb/install-firefox-linux
 ARG FIREFOX_VERSION=123.0.1
-# hadolint: Do not pin packages as they are requirements only for firefox installation (and not ofr the rest of the ATH) and the effort required to track each version would be too huge
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 libasound2t64 libdbus-glib-1-2 libegl1 libpci3 libx11-xcb1 wget bzip2 \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
-  && curl --silent https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 --output /tmp/firefox.tar.bz2 \
-  && rm -rf /opt/firefox \
-  && tar -C /opt -xjf /tmp/firefox.tar.bz2 \
-  && rm /tmp/firefox.tar.bz2 \
-  && mv /opt/firefox /opt/firefox-${FIREFOX_VERSION} \
-  && ln -fs /opt/firefox-${FIREFOX_VERSION}/firefox /usr/bin/firefox
+RUN install -d -m 0755 /etc/apt/keyrings \
+  && curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc \
+  && printf 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main\n' > /etc/apt/sources.list.d/mozilla.list \
+  && printf 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n' > /etc/apt/preferences.d/mozilla \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends "firefox=${FIREFOX_VERSION}~build*" \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Selenium needs a geckodriver in order to work properly
 ENV GECKODRIVER_VERSION=0.34.0
