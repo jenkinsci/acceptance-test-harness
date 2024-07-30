@@ -4,52 +4,54 @@
 
 FROM ubuntu:24.04
 
-# hadolint ignore=DL3008
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
-    gpg-agent \
-    software-properties-common \
-    && \
-  apt-get clean all && rm -rf /var/cache/apt
-
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3008
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive \
-    TZ=Etc/UTC \
-    apt-get install -y --no-install-recommends \
-        # docker dep
-        ca-certificates \
-        gnupg \
-        lsb-release \
-        curl \
-        git \
-        imagemagick \
-        iptables \
-        unzip \
-        tightvncserver \
-        openjdk-17-jdk \
-        openjdk-21-jdk \
-        xfonts-base \
-        openssh-client \
-        jq \
-        && \
-    apt-get clean all && rm -rf /var/cache/apt
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
+    ca-certificates \
+    curl \
+    git \
+    imagemagick \
+    jq \
+    lsb-release \
+    openjdk-17-jdk \
+    openjdk-21-jdk \
+    openssh-client \
+    tightvncserver \
+    unzip \
+    xfonts-base \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Install a fixed firefox version that is known to work with the current selenium version, copied from https://support.mozilla.org/en-US/kb/install-firefox-linux
 ARG FIREFOX_VERSION=123.0.1
-RUN install -d -m 0755 /etc/apt/keyrings \
+RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc \
   && printf 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main\n' > /etc/apt/sources.list.d/mozilla.list \
   && printf 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n' > /etc/apt/preferences.d/mozilla \
   && apt-get update \
-  && apt-get install -y --no-install-recommends "firefox=${FIREFOX_VERSION}~build*" \
+  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
+    firefox="${FIREFOX_VERSION}*" \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+# Docker installation according to https://docs.docker.com/engine/install/ubuntu/
+ARG DOCKER_BUILDX_VERSION=0.16.1
+ARG DOCKER_VERSION=27.1.1
+RUN install -m 0755 -d /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+  && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
+  && apt-get update \
+  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
+    docker-buildx-plugin="${DOCKER_BUILDX_VERSION}*" \
+    docker-ce="5:${DOCKER_VERSION}*" \
+    docker-ce-cli="5:${DOCKER_VERSION}*" \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION=0.34.0
+ARG GECKODRIVER_VERSION=0.34.0
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
   then \
@@ -61,30 +63,11 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   fi
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION=3.9.8
+ARG MAVEN_VERSION=3.9.8
 RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/"${MAVEN_VERSION}"/binaries/apache-maven-"${MAVEN_VERSION}"-bin.tar.gz && \
     tar -xvzf apache-maven-"${MAVEN_VERSION}"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
 ENV PATH="$PATH:/opt/maven/bin"
-
-# Docker installation according to https://docs.docker.com/engine/install/ubuntu/
-RUN mkdir -p /etc/apt/keyrings && chmod 0755 /etc/apt/keyrings /etc/apt/ /etc
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-RUN echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-
-# Ensure that version is fixed
-ARG DOCKER_VERSION=27.1.1
-ARG DOCKER_BUILDX_VERSION=0.16.1
-RUN apt-get update --quiet \
-  && apt-get install --yes --no-install-recommends \
-    docker-ce="5:${DOCKER_VERSION}*" \
-    docker-ce-cli="5:${DOCKER_VERSION}*" \
-    docker-buildx-plugin="${DOCKER_BUILDX_VERSION}*" \
-  && apt-get clean \
-  && rm -rf /var/cache/apt
 
 ENV SHARED_DOCKER_SERVICE true
 
