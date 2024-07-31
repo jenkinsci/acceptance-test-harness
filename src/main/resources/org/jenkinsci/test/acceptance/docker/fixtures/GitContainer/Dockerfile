@@ -3,7 +3,7 @@
 # and prepares for execution of gitplugin tests.
 #
 
-FROM ubuntu:24.04
+FROM ubuntu:noble
 
 RUN mkdir -p /var/run/sshd
 
