@@ -97,7 +97,7 @@ branches['CI'] = {
   }
 }
 
-def buildImage = env.CHANGE_ID && pullRequest.labels.contains('build-image')
+def skipImageBuild = env.CHANGE_ID && !pullRequest.labels.contains('build-image')
 
 for (int i = 0; i < splits.size(); i++) {
   int index = i
@@ -124,7 +124,7 @@ for (int i = 0; i < splits.size(); i++) {
             checkout scm
             // Need to authenticate on DockerHub with a read-only account to avoid rate limit
             infra.withDockerCredentials {
-              def image = buildImage ? docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/') : docker.image('jenkins/ath')
+              def image = skipImageBuild ? docker.image('jenkins/ath') : docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
               sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
               def cwd = pwd()
               image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
