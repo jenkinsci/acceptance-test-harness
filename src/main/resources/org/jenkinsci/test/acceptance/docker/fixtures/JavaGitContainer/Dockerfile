@@ -3,7 +3,7 @@
 # and prepares for execution of Java compile jobs on slaves.
 #
 
-FROM ubuntu:22.04
+FROM ubuntu:noble
 
 RUN mkdir -p /var/run/sshd
 
@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     openssh-server \
     git \
     zip \
-    openjdk-11-jdk \
     openjdk-17-jdk \
+    openjdk-21-jdk \
     && rm -rf /var/lib/apt/lists/*
 
 # create a git user and create .ssh dir

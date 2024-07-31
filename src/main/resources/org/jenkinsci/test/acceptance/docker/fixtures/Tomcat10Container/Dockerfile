@@ -4,7 +4,7 @@
 # The admin user has username 'admin' and password 'tomcat'
 #
 
-FROM ubuntu:24.04
+FROM ubuntu:noble
 
 RUN apt-get update && apt-get install -y tomcat10 tomcat10-admin
 
