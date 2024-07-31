@@ -2,72 +2,60 @@
 #
 # see docs/DOCKER.md for usage
 
-FROM ubuntu:22.04
-
-# hadolint ignore=DL3008
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
-    gpg-agent \
-    software-properties-common \
-    && \
-  apt-get clean all && rm -rf /var/cache/apt
+FROM ubuntu:24.04
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3008
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive \
-    TZ=Etc/UTC \
-    apt-get install -y --no-install-recommends \
-        # docker dep
-        ca-certificates \
-        gnupg \
-        lsb-release \
-        curl \
-        git \
-        imagemagick \
-        iptables \
-        unzip \
-        tightvncserver \
-        openjdk-11-jdk \
-        openjdk-17-jdk \
-        xfonts-base \
-        openssh-client \
-        jq \
-        && \
-    apt-get clean all && rm -rf /var/cache/apt
+RUN apt-get update \
+  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
+    ca-certificates \
+    curl \
+    git \
+    imagemagick \
+    jq \
+    lsb-release \
+    openjdk-17-jdk \
+    openjdk-21-jdk \
+    openssh-client \
+    tightvncserver \
+    unzip \
+    xfonts-base \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
-# JDK21 https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21%2B35/OpenJDK21U-jdk_aarch64_linux_hotspot_21_35.tar.gz
-ARG JDK21_VERSION=21+35
-RUN curl -sSLo /tmp/jdk21.tar.gz "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$(echo "$JDK21_VERSION" | jq "@uri" -jRr)/OpenJDK21U-jdk_$(arch | sed -e 's/x86_64/x64/')_linux_hotspot_${JDK21_VERSION/+/_}.tar.gz" \
-  && mkdir "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" \
-  && tar -C "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)" -xzf /tmp/jdk21.tar.gz --strip-components=1 \
-  && rm -fv /tmp/jdk21.tar.gz
-RUN update-alternatives --install /usr/bin/java java "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/java" 21 \
-  && update-alternatives --install /usr/bin/javac javac "/usr/lib/jvm/java-21-openjdk-$(dpkg --print-architecture)/bin/javac" 21 \
-  && update-alternatives --set java "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/java" \
-  && update-alternatives --set javac "/usr/lib/jvm/java-17-openjdk-$(dpkg --print-architecture)/bin/javac"
+# Install a fixed firefox version that is known to work with the current selenium version, copied from https://support.mozilla.org/en-US/kb/install-firefox-linux
+ARG FIREFOX_VERSION=123.0.1
+RUN install -m 0755 -d /etc/apt/keyrings \
+  && curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc \
+  && printf 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main\n' > /etc/apt/sources.list.d/mozilla.list \
+  && printf 'Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n' > /etc/apt/preferences.d/mozilla \
+  && apt-get update \
+  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
+    firefox="${FIREFOX_VERSION}*" \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install a fixed firefox version that is known to work with the current selenium version, copied from https://hub.docker.com/r/selenium/node-firefox/dockerfile
-ARG FIREFOX_VERSION=108.0.2
-# hadolint: Do not pin packages as they are requirements only for firefox installation (and not ofr the rest of the ATH) and the effort required to track each version would be too huge
-# hadolint ignore=DL3008
-RUN apt-get update && apt-get -y --no-install-recommends install libgtk-3-0 libasound2 libdbus-glib-1-2 libx11-xcb-dev libpci-dev libgl1-mesa-glx wget bzip2 \
-  && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
-  && curl --silent https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 --output /tmp/firefox.tar.bz2 \
-  && rm -rf /opt/firefox \
-  && tar -C /opt -xjf /tmp/firefox.tar.bz2 \
-  && rm /tmp/firefox.tar.bz2 \
-  && mv /opt/firefox /opt/firefox-${FIREFOX_VERSION} \
-  && ln -fs /opt/firefox-${FIREFOX_VERSION}/firefox /usr/bin/firefox
+# Docker installation according to https://docs.docker.com/engine/install/ubuntu/
+ARG DOCKER_BUILDX_VERSION=0.16.1
+ARG DOCKER_VERSION=27.1.1
+RUN install -m 0755 -d /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
+  && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
+  && apt-get update \
+  && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
+    docker-buildx-plugin="${DOCKER_BUILDX_VERSION}*" \
+    docker-ce="5:${DOCKER_VERSION}*" \
+    docker-ce-cli="5:${DOCKER_VERSION}*" \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 # Selenium needs a geckodriver in order to work properly
-ENV GECKODRIVER_VERSION=0.34.0
-# gross due to https://github.com/mozilla/geckodriver/issues/1956
+ARG GECKODRIVER_VERSION=0.34.0
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
   then \
-    curl -fsSLO https://github.com/jamesmortensen/geckodriver-arm-binaries/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz && \
+    curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz && \
     tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz -C /usr/local/bin; \
   else \
     curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz && \
@@ -75,30 +63,11 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   fi
 
 # Maven in repo is not new enough for ATH
-ENV MAVEN_VERSION=3.9.8
+ARG MAVEN_VERSION=3.9.8
 RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/"${MAVEN_VERSION}"/binaries/apache-maven-"${MAVEN_VERSION}"-bin.tar.gz && \
     tar -xvzf apache-maven-"${MAVEN_VERSION}"-bin.tar.gz -C /opt/ && \
     mv /opt/apache-maven-* /opt/maven
 ENV PATH="$PATH:/opt/maven/bin"
-
-# Docker installation according to https://docs.docker.com/engine/install/ubuntu/
-RUN mkdir -p /etc/apt/keyrings && chmod 0755 /etc/apt/keyrings /etc/apt/ /etc
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-RUN echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-
-# Ensure that version is fixed
-ARG DOCKER_VERSION=27.0.3
-ARG DOCKER_BUILDX_VERSION=0.10.2
-RUN apt-get update --quiet \
-  && apt-get install --yes --no-install-recommends \
-    docker-ce="5:${DOCKER_VERSION}*" \
-    docker-ce-cli="5:${DOCKER_VERSION}*" \
-    docker-buildx-plugin="${DOCKER_BUILDX_VERSION}*" \
-  && apt-get clean \
-  && rm -rf /var/cache/apt
 
 ENV SHARED_DOCKER_SERVICE true
 
@@ -110,7 +79,8 @@ ENV gid $gid
 
 EXPOSE 5942
 
-RUN groupadd ath-user -g $gid && \
+RUN deluser ubuntu && \
+    groupadd ath-user -g $gid && \
     useradd ath-user -l -u $uid -g $gid -m -d /home/ath-user && \
     # Give permission to modify the alternatives links to change the java version in use
     chown ath-user:ath-user /etc/alternatives
