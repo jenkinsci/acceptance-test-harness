@@ -5,9 +5,6 @@
     ":semanticCommitsDisabled",
     "schedule:earlyMondays"
   ],
-  "ignorePaths": [
-    "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/ArtifactoryContainer/Dockerfile"
-  ],
   "ignoreDeps": [
     "org.apache.maven:maven-resolver-provider",
     "org.apache.maven:maven-settings-builder",
