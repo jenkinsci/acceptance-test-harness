@@ -306,24 +306,6 @@
       <artifactId>zt-zip</artifactId>
       <version>1.17</version>
     </dependency>
-    <!--
-      This is just for dependency updates.
-
-      TODO: Delete this dependency and figure out how to automatically update
-      this dependency some other way.
-    -->
-    <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>jenkins-core</artifactId>
-      <version>${jenkins.version}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>*</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
