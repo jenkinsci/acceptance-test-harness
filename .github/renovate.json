@@ -53,6 +53,7 @@
     {
       "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
       "matchStrings": ["ARG FIREFOX_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "firefox",
       "versioningTemplate": "semver-coerced",
       "datasourceTemplate": "custom.firefox"
     },
