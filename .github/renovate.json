@@ -6,7 +6,7 @@
     "schedule:earlyMondays"
   ],
   "ignorePaths": [
-    "src/main/resources/org/**/Dockerfile"
+    "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/ArtifactoryContainer/Dockerfile"
   ],
   "ignoreDeps": [
     "org.apache.maven:maven-resolver-provider",
@@ -24,6 +24,18 @@
     {
       "matchPackagePatterns": ["selenium"],
       "groupName": "Selenium"
+    },
+    {
+      "matchDepNames": [
+        "docker",
+        "docker/buildx",
+        "mozilla/geckodriver",
+        "org.apache.maven:maven-core"
+      ],
+      "labels": [
+        "dependencies",
+        "build-image"
+      ]
     }
   ],
   "labels": [
@@ -47,6 +59,12 @@
       "matchStrings": ["ARG MAVEN_VERSION=(?<currentValue>.*?)\n"],
       "depNameTemplate": "org.apache.maven:maven-core",
       "datasourceTemplate": "maven"
+    },
+    {
+      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
+      "matchStrings": ["ARG DOCKER_BUILDX_VERSION=(?<currentValue>.*?)\n"],
+      "depNameTemplate": "docker/buildx",
+      "datasourceTemplate": "github-releases"
     },
     {
       "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
