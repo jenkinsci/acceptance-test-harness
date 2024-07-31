@@ -86,7 +86,7 @@
     "firefox": {
       "defaultRegistryUrlTemplate": "https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json",
       "transformTemplates": [
-        "{\"releases\":$map($keys($),function($v){{\"version\":$v}})}"
+        "{\"releases\": $map($keys($), function($v) { {\"version\": $v} })}"
       ]
     }
   },
