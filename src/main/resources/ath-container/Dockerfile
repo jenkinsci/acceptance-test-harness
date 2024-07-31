@@ -77,8 +77,8 @@ COPY set-java.sh /usr/bin
 COPY vnc.sh /usr/bin
 
 # Allow injecting uid and git to match directory ownership
-ARG uid=1000
-ARG gid=1000
+ARG uid=1001
+ARG gid=1001
 
 EXPOSE 5942
 
