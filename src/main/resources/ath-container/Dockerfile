@@ -84,18 +84,18 @@ EXPOSE 5942
 
 RUN deluser --remove-home ubuntu \
   && groupadd ath-user -g $gid \
-  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -G docker -m -d /home/ath-user -s /bin/bash
+  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -m -d /home/ath-user -s /bin/bash
+
+# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. Alternative
+# approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
+# have in ENTRYPOINT as the container is started as ath-user.
+RUN chmod ug+s /usr/bin/docker*
 
 # Give permission to modify the alternatives links to change the java version in use
 RUN chmod u+s "$(which update-alternatives)"
 
 # TODO seems this can be picked up from the host, which is unwanted:
 ENV XAUTHORITY /home/ath-user/.Xauthority
-
-# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. Alternative
-# approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
-# have in ENTRYPOINT as the container is started as ath-user.
-RUN chmod ug+s /usr/bin/docker*
 
 USER ath-user
 ENV USER ath-user
