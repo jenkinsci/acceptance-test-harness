@@ -13,11 +13,11 @@ java_version="${java_version:-17}"
 # high chance of uid / group already existing in the container
 # known to happen on macOS
 if ((uid < 1000)); then
-	uid=1001
+	uid=1000
 fi
 
 if ((gid < 1000)); then
-	gid=1001
+	gid=1000
 fi
 
 docker build \

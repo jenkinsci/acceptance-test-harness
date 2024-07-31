@@ -4,6 +4,7 @@
 
 FROM ubuntu:24.04
 
+ENV LANG C.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3008
@@ -55,40 +56,51 @@ ARG GECKODRIVER_VERSION=0.34.0
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
   then \
-    curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz && \
-    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz -C /usr/local/bin; \
+    curl -fsSLO "https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz" && \
+    tar -xvzf "geckodriver-v${GECKODRIVER_VERSION}-linux-aarch64.tar.gz" -C /usr/local/bin; \
   else \
-    curl -fsSLO https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz && \
-    tar -xvzf geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz -C /usr/local/bin ; \
+    curl -fsSLO "https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz" && \
+    tar -xvzf "geckodriver-v${GECKODRIVER_VERSION}-linux64.tar.gz" -C /usr/local/bin ; \
   fi
 
 # Maven in repo is not new enough for ATH
 ARG MAVEN_VERSION=3.9.8
-RUN curl -ffSLO https://archive.apache.org/dist/maven/maven-3/"${MAVEN_VERSION}"/binaries/apache-maven-"${MAVEN_VERSION}"-bin.tar.gz && \
-    tar -xvzf apache-maven-"${MAVEN_VERSION}"-bin.tar.gz -C /opt/ && \
-    mv /opt/apache-maven-* /opt/maven
-ENV PATH="$PATH:/opt/maven/bin"
+RUN curl -fsSLO "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+    tar -xvzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz" -C /opt/ && \
+    mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven
+ENV PATH "$PATH:/opt/maven/bin"
 
 ENV SHARED_DOCKER_SERVICE true
 
+COPY run.sh /usr/bin
+COPY set-java.sh /usr/bin
+COPY vnc.sh /usr/bin
+
 # Allow injecting uid and git to match directory ownership
-ARG uid=1001
-ENV uid $uid
-ARG gid=1001
-ENV gid $gid
+ARG uid=1000
+ARG gid=1000
 
 EXPOSE 5942
 
-RUN deluser ubuntu && \
-    groupadd ath-user -g $gid && \
-    useradd ath-user -l -u $uid -g $gid -m -d /home/ath-user && \
-    # Give permission to modify the alternatives links to change the java version in use
-    chown ath-user:ath-user /etc/alternatives
+RUN deluser --remove-home ubuntu \
+  && groupadd ath-user -g $gid \
+  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -m -d /home/ath-user -s /bin/bash
+
+# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. Alternative
+# approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
+# have in ENTRYPOINT as the container is started as ath-user.
+RUN chmod ug+s /usr/bin/docker*
+
+# Give permission to modify the alternatives links to change the java version in use
+RUN chmod u+s "$(which update-alternatives)"
 
 # TODO seems this can be picked up from the host, which is unwanted:
 ENV XAUTHORITY /home/ath-user/.Xauthority
 
 USER ath-user
+ENV USER ath-user
+WORKDIR /home/ath-user
+
 # 'n' for "Would you like to enter a view-only password (y/n)?"
 RUN mkdir /home/ath-user/.vnc && (echo ath-user; echo ath-user; echo "n") | vncpasswd /home/ath-user/.vnc/passwd
 # Default content includes x-window-manager, which is not installed, plus other stuff we do not need (vncconfig, x-terminal-emulator, etc.):
@@ -97,20 +109,3 @@ RUN echo "exec /etc/X11/Xsession" > /home/ath-user/.Xsession && chmod +x /home/a
 
 # Prevent xauth to complain in a confusing way
 RUN touch /home/ath-user/.Xauthority
-
-# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. Alternative
-# approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
-# have in ENTRYPOINT as the container is started as ath-user.
-USER root
-RUN chmod ug+s /usr/bin/docker*
-
-COPY vnc.sh /usr/bin/
-COPY set-java.sh /usr/bin/
-COPY run.sh /usr/bin/
-
-RUN chmod u+s "$(which update-alternatives)"
-RUN dbus-uuidgen > /etc/machine-id
-
-USER ath-user
-
-ENV USER ath-user
