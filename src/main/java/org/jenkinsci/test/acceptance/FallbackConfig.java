@@ -180,7 +180,8 @@ public class FallbackConfig extends AbstractModule {
         // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
         firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
         firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-        firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false);
+        firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false); // TODO remove when we require Firefox 129 or newer
+        firefoxOptions.enableBiDi();
         if (HarRecorder.isCaptureHarEnabled()) {
             firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
         }

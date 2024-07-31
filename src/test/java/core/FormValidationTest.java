@@ -32,6 +32,7 @@ import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 public class FormValidationTest extends AbstractJUnitTest {
@@ -72,7 +73,7 @@ public class FormValidationTest extends AbstractJUnitTest {
     }
 
     private void navigateAway() {
-        jenkins.runThenConfirmAlert(() -> jenkins.open());
+        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a")).click());
         sleep(1000); // Needed for some reason
     }
 }
