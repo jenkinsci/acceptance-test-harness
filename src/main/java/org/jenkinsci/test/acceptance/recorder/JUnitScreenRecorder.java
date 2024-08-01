@@ -6,9 +6,9 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
-import org.monte.media.Format;
-import org.monte.media.Registry;
-import org.monte.screenrecorder.ScreenRecorder;
+import org.monte.media.av.Format;
+import org.monte.media.av.Registry;
+import org.monte.media.screenrecorder.ScreenRecorder;
 
 /**
  * Custom Screen Recorder that allow to rename video output file.
