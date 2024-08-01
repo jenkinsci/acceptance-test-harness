@@ -15,11 +15,11 @@ import org.jenkinsci.test.acceptance.junit.GlobalRule;
 import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
-import org.monte.media.Format;
-import org.monte.media.FormatKeys;
-import org.monte.media.VideoFormatKeys;
+import org.monte.media.av.Format;
+import org.monte.media.av.FormatKeys;
+import org.monte.media.av.codec.video.VideoFormatKeys;
 import org.monte.media.math.Rational;
-import org.monte.screenrecorder.ScreenRecorder;
+import org.monte.media.screenrecorder.ScreenRecorder;
 
 /**
  * JUnit Rule that before executing a test it starts a recording current screen
