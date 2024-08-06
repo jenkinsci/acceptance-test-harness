@@ -122,34 +122,31 @@ for (int i = 0; i < splits.size(); i++) {
           retryCounts = retryCounts + 1 // increment the retry count before allocating a node in case it fails
           node(nodeLabel) {
             checkout scm
-            // Need to authenticate on DockerHub with a read-only account to avoid rate limit
-            infra.withDockerCredentials {
-              def image = skipImageBuild ? docker.image('jenkins/ath') : docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
-              sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
-              def cwd = pwd()
-              image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
-                def exclusions = splits.get(index).join('\n')
-                writeFile file: 'excludes.txt', text: exclusions
-                infra.withArtifactCachingProxy {
-                  realtimeJUnit(
-                      testResults: 'target/surefire-reports/TEST-*.xml',
-                      testDataPublishers: [[$class: 'AttachmentPublisher']],
-                      // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
-                      // The build failure prevents parallel tests executor to realize the tests are gone so same
-                      // split is run to execute and report zero tests - which fails the build. Permit the test
-                      // results to be empty to break the circle: build after removal executes one empty split
-                      // but not letting the build to fail will cause next build not to try those tests again.
-                      allowEmptyResults: true
-                      ) {
-                        sh """
-                            set-java.sh ${jdk}
-                            eval \$(vnc.sh)
-                            java -version
-                            run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
-                            cp --verbose target/surefire-reports/TEST-*.xml /reports
-                            """
-                      }
-                }
+            def image = skipImageBuild ? docker.image('jenkins/ath') : docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
+            sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
+            def cwd = pwd()
+            image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
+              def exclusions = splits.get(index).join('\n')
+              writeFile file: 'excludes.txt', text: exclusions
+              infra.withArtifactCachingProxy {
+                realtimeJUnit(
+                    testResults: 'target/surefire-reports/TEST-*.xml',
+                    testDataPublishers: [[$class: 'AttachmentPublisher']],
+                    // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
+                    // The build failure prevents parallel tests executor to realize the tests are gone so same
+                    // split is run to execute and report zero tests - which fails the build. Permit the test
+                    // results to be empty to break the circle: build after removal executes one empty split
+                    // but not letting the build to fail will cause next build not to try those tests again.
+                    allowEmptyResults: true
+                    ) {
+                      sh """
+                          set-java.sh ${jdk}
+                          eval \$(vnc.sh)
+                          java -version
+                          run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -DforkCount=1 -B
+                          cp --verbose target/surefire-reports/TEST-*.xml /reports
+                          """
+                    }
               }
             }
             withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
