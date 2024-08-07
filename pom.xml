@@ -30,7 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.470</jenkins.version>
+    <jenkins.version>2.471</jenkins.version>
     <selenium.version>4.23.0</selenium.version>
     <guava.version>33.2.1-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
@@ -751,7 +751,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.452.3</jenkins.version>
+        <jenkins.version>2.462.1</jenkins.version>
       </properties>
     </profile>
   </profiles>
