@@ -32,7 +32,7 @@
     <spotbugs.skip>true</spotbugs.skip>
     <jenkins.version>2.472</jenkins.version>
     <selenium.version>4.23.1</selenium.version>
-    <guava.version>33.2.1-jre</guava.version> <!-- aligned with selenium -->
+    <guava.version>33.3.0-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
     <maven-resolver.version>1.6.2</maven-resolver.version>
     <groovy.version>3.0.22</groovy.version>
