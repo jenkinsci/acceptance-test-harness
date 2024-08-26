@@ -17,7 +17,7 @@ import org.junit.Test;
 /**
  * @author Kohsuke Kawaguchi
  */
-@WithPlugins({"matrix-auth@2.3"})
+@WithPlugins({"matrix-auth"})
 public class MatrixAuthPluginTest extends AbstractJUnitTest {
     /**
      * Test scenario:

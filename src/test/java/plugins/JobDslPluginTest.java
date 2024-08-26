@@ -61,7 +61,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies that all configurations, done on the job configuration page,
      * are saved correctly.
      */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm"})
+    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_save_configurations() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
@@ -518,7 +518,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * wont be executed, because they are not approved.
      * If script security for Job DSL scripts is disabled, the script can be executed.
      */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm"})
+    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_use_script_security() {
         GlobalSecurityConfig sc = setUpSecurity();
 
@@ -554,7 +554,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * security is enabled, it is not possible to import Groovy classes from the
      * workspace.
      */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm"})
+    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_disallow_importing_groovy_classes_when_script_security_enabled() {
         GlobalSecurityConfig sc = setUpSecurity();
 
@@ -585,7 +585,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Administrators can approve scripts in the 'Script Approval' of the
      * 'Manage Jenkins' area. Approved scripts can be executed.
      */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm"})
+    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
     public void should_use_script_approval() {
         setUpSecurity();
 
@@ -623,7 +623,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * scripts saved by non administrators can run in a Groovy sandbox
      * without approval. All Job DSL methods are whitelisted by default.
      */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm","authorize-project"})
+    @Test @WithPlugins({"matrix-auth","mock-security-realm","authorize-project"})
     public void should_use_grooy_sandbox_whitelisted_content() {
         GlobalSecurityConfig sc = setUpSecurity();
         runBuildAsUserWhoTriggered(sc);
@@ -653,7 +653,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Administrators can approve this content in the 'Script Approval' of the
      * 'Manage Jenkins' area. Approved scripts can be executed.
      */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm","authorize-project"})
+    @Test @WithPlugins({"matrix-auth","mock-security-realm","authorize-project"})
     public void should_use_grooy_sandbox_no_whitelisted_content() {
         GlobalSecurityConfig sc = setUpSecurity();
         runBuildAsUserWhoTriggered(sc);
@@ -692,7 +692,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies that Groovy sandbox can only used if 'Access Control for Builds'
      * is configured. The DSL job needs to run as a particular user.
      */
-    @Test @WithPlugins({"matrix-auth@2.3","mock-security-realm","authorize-project"})
+    @Test @WithPlugins({"matrix-auth","mock-security-realm","authorize-project"})
     public void should_run_grooy_sandbox_as_particular_user() {
         GlobalSecurityConfig sc = setUpSecurity();
 

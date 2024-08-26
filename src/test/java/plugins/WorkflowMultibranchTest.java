@@ -25,7 +25,7 @@ import org.junit.Test;
 /**
  * Tests a multibranch pipeline flow
  */
-@WithPlugins({"git", "javadoc@1.4", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source@2.5.5"})
+@WithPlugins({"git", "javadoc", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
 public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     @Before

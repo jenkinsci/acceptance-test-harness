@@ -50,7 +50,7 @@ import org.junit.Test;
 /**
  * Tests the plain-credentials and credentials-binding plugins together.
  */
-@WithPlugins({"plain-credentials", "credentials-binding", "credentials@2.0"})
+@WithPlugins({"plain-credentials", "credentials-binding", "credentials"})
 public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
 
     private static final String BINDING_VARIABLE = "BINDING_VARIABLE";

@@ -27,7 +27,7 @@ import org.junit.experimental.categories.Category;
 /**
  * @author Matthias Karl
  */
-@WithPlugins("subversion@2.3")
+@WithPlugins("subversion")
 @Category(DockerTest.class)
 @WithDocker
 public class SubversionPluginTest extends AbstractJUnitTest {

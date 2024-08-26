@@ -60,7 +60,7 @@ import org.openqa.selenium.WebElement;
  *
  * @author Marco.Miller@ericsson.com
  */
-@WithPlugins("active-directory@1.38")
+@WithPlugins("active-directory")
 public class ActiveDirectoryTest extends AbstractJUnitTest {
     // This should ideally use @TestActivation but it requires nonstandard properties so failing assumption in instance initialization instead.
     private final ActiveDirectoryEnv ENV = ActiveDirectoryEnv.get();
