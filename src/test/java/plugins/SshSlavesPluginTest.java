@@ -53,7 +53,7 @@ import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.NoSuchElementException;
 
-@WithPlugins({"ssh-slaves@1.11", "credentials@2.1.10", "ssh-credentials@1.12"})
+@WithPlugins({"ssh-slaves", "credentials", "ssh-credentials"})
 @Category(DockerTest.class)
 @WithDocker
 public class SshSlavesPluginTest extends AbstractJUnitTest {

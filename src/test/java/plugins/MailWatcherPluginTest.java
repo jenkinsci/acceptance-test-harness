@@ -78,7 +78,7 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
         mailhog.assertMail(regex("Computer %s marked online", slave.getName()), "on@online.com");
     }
 
-    @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin@1.7")
+    @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin")
     @Ignore("Flaky test, passes sometimes on CI")
     public void notify_master_on_jenkins_restart() throws Exception {
         jenkins.configure();

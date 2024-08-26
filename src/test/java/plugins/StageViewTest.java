@@ -46,7 +46,7 @@ public class StageViewTest extends AbstractJUnitTest {
      * aka Pagination
      */
     @Test
-    @WithPlugins("pipeline-stage-view@2.18")
+    @WithPlugins("pipeline-stage-view")
     public void multiBuildJobShouldContainCorrectNumberOfJobsBuilt() {
         WorkflowJob job = this.createPipelineFromFile(SINGLE_JOB);
         Build build = null;
@@ -73,7 +73,7 @@ public class StageViewTest extends AbstractJUnitTest {
      * to new stages with future builds.
      */
     @Test
-    @WithPlugins("pipeline-stage-view@2.18")
+    @WithPlugins("pipeline-stage-view")
     public void multiBuildJobShouldContainCorrectNumberOfJobsHeadline() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String pre = "node {\n";

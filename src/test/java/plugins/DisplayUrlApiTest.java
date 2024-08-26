@@ -53,7 +53,7 @@ import org.junit.experimental.categories.Category;
  */
 @WithDocker
 @Category(DockerTest.class)
-@WithPlugins({"mailer@1.18", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
+@WithPlugins({"mailer", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
 public class DisplayUrlApiTest extends AbstractPipelineTest {
 
     @Inject

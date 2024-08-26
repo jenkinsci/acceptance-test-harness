@@ -71,7 +71,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         assertThat(build, XvncJobConfig.usedDisplayNumber(42));
     }
 
-    @WithPlugins({"xvnc@1.22", "workflow-aggregator@1.8"})
+    @WithPlugins({"xvnc", "workflow-aggregator"})
     @Issue("JENKINS-26477")
     @Test public void workflow() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);

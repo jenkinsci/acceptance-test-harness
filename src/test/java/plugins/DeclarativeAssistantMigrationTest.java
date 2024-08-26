@@ -34,7 +34,7 @@ import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-@WithPlugins({"declarative-pipeline-migration-assistant@1.0.3","declarative-pipeline-migration-assistant-api@1.0.3"})
+@WithPlugins({"declarative-pipeline-migration-assistant","declarative-pipeline-migration-assistant-api"})
 public class DeclarativeAssistantMigrationTest
     extends AbstractJUnitTest
 {

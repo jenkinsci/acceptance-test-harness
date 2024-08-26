@@ -40,7 +40,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-@WithPlugins({"ssh-credentials", "credentials@2.1.5"})
+@WithPlugins({"ssh-credentials", "credentials"})
 public class SSHCredentialsTest extends AbstractCredentialsTest {
 
     private static final String CHECK_PERSONAL_CREDENTIAL_STRING = "println(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey.class, Jenkins.instance, hudson.model.User.current().impersonate(), null).find {it.id == \"%s\" }.privateKey);";

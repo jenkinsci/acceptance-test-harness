@@ -23,7 +23,7 @@ import org.openqa.selenium.By;
 /**
  * @author Vivek Pandey
  */
-@WithPlugins("credentials@2.0.7")
+@WithPlugins("credentials")
 public class CredentialsTest extends AbstractJUnitTest {
     private static final String GLOBAL_SCOPE = "GLOBAL";
     private static final String SYSTEM_SCOPE = "SYSTEM";

@@ -106,7 +106,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         }
     }
 
-    @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "pipeline-input-step", "junit@1.18", "git@2.3"})
+    @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "pipeline-input-step", "junit", "git"})
     @Test public void linearFlow() throws Exception {
         MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
@@ -162,7 +162,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"workflow-job", "workflow-cps@2.10", "workflow-basic-steps@2.1", "workflow-durable-task-step", "parallel-test-executor@1.11", "junit@1.18", "git@2.3"})
+    @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "parallel-test-executor", "junit", "git"})
     @Native("mvn")
     @Test public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
@@ -214,7 +214,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     /** Pipeline analogue of {@link SubversionPluginTest#build_has_changes}. */
     @Category(DockerTest.class)
     @WithDocker
-    @WithPlugins({"workflow-cps@2.12", "workflow-job@2.5", "workflow-durable-task-step@2.4", "subversion@2.6"})
+    @WithPlugins({"workflow-cps", "workflow-job", "workflow-durable-task-step", "subversion"})
     @Test public void subversion() throws Exception {
         final SvnContainer svnContainer = svn.get();
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
@@ -228,7 +228,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertTrue(b2.getChanges().hasChanges());
     }
 
-    @WithPlugins({"git@3.0.1", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source@2.5.5", "pipeline-groovy-lib"})
+    @WithPlugins({"git", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source", "pipeline-groovy-lib"})
     @Test
     public void testSharedLibraryFromGithub() {
         this.configureSharedLibrary();

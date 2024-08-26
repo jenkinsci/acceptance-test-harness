@@ -32,7 +32,7 @@ import org.jvnet.hudson.test.Issue;
  */
 @Category(DockerTest.class)
 @WithDocker
-@WithPlugins("ldap@1.10")
+@WithPlugins("ldap")
 public class LdapPluginTest extends AbstractJUnitTest {
 
     @Inject
