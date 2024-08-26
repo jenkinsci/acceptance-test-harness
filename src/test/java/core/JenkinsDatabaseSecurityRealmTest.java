@@ -30,12 +30,14 @@ import static org.junit.Assert.assertNull;
 
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.SmokeTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.JenkinsDatabaseSecurityRealm;
 import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 @WithPlugins("mailer")
 public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
@@ -57,8 +59,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     }
 
     @Test
-    //TODO Re enable category once JENKINS-49524 is done
-    //@Category(SmokeTest.class)
+    @Category(SmokeTest.class)
     public void login_and_logout() {
 
         User user = realm.signup().fullname(FULL_NAME).email(EMAIL).password(PWD).signup(NAME);
