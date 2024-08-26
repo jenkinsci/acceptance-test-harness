@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckReturnValue;
-import hudson.util.VersionNumber;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -43,19 +42,11 @@ public abstract class TopLevelItem extends ContainerPageObject {
     @CheckReturnValue
     public <T extends TopLevelItem> T renameTo(final String newName) {
         String oldName = name;
-        // Change in behaviour of the rename is in versions > 2.110 see JENKINS-22936
-        if (getJenkins().getVersion().isOlderThan(new VersionNumber("2.110"))) {
-            configure();
-            control("/name").set(newName);
-            save();
-            waitFor(by.button("Yes")).click();
-        } else {
-            open();
-            control(by.href(url.getPath() + "confirm-rename")).click();
-            WebElement renameButton = waitFor(by.button("Rename"), 5);
-            control(by.name("newName")).set(newName);
-            renameButton.click();
-        }
+        open();
+        control(by.href(url.getPath() + "confirm-rename")).click();
+        WebElement renameButton = waitFor(by.button("Rename"), 5);
+        control(by.name("newName")).set(newName);
+        renameButton.click();
         try {
             return (T) newInstance(getClass(),
                     injector, new URL(url.toExternalForm().replace(oldName, newName)), newName);

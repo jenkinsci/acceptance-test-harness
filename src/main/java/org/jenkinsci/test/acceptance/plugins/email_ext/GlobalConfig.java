@@ -25,7 +25,6 @@ package org.jenkinsci.test.acceptance.plugins.email_ext;
 
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.openqa.selenium.NoSuchElementException;
 
 public class GlobalConfig extends PageAreaImpl {
 
@@ -54,9 +53,6 @@ public class GlobalConfig extends PageAreaImpl {
     }
 
     private void ensureAdvanced() {
-        try {
-            control("advanced-button").click();
-        } catch(NoSuchElementException ignored) {
-        }
+        control("advanced-button").click();
     }
 }

@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -24,11 +23,7 @@ public class JenkinsLogger extends PageObject {
     public static JenkinsLogger create(Jenkins j, String name, Map<String, Level> levels) {
         j.visit("log/new");
         j.find(by.path("/name")).sendKeys(name);
-        try {
-            j.clickButton("Create");
-        } catch (NoSuchElementException e) {
-            j.clickButton("OK");
-        }
+        j.clickButton("Create");
 
         for (Entry<String, Level> e : levels.entrySet()) {
             j.clickButton("Add");

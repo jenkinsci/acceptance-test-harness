@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.plugins.dashboard_view.read;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
@@ -54,8 +53,6 @@ public class ProjectStatusStdJobList extends PageAreaImpl {
     public List<String> getJobIDs() {
         return find(projectStatusTable).findElements(By.xpath(".//tr"))
                 .stream()
-                // ignore the header row from <2.321
-                .filter(tr -> !StringUtils.contains(tr.getAttribute("class"), "header"))
                 .map(el -> el.getAttribute("id"))
                 .map(s -> s.replaceFirst(JOB_ID_PREFIX, ""))
                 .collect(Collectors.toList());

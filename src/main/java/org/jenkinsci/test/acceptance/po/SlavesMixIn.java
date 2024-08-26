@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.io.File;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
-import org.openqa.selenium.NoSuchElementException;
 
 /**
  * Mix-in for slaves.
@@ -33,11 +32,7 @@ public class SlavesMixIn extends MixIn {
 
         find(by.input("name")).sendKeys(name);
         find(by.radioButton("Permanent Agent")).click();
-        try {
-            clickButton("Create");
-        } catch (NoSuchElementException e) {
-            clickButton("OK");
-        }
+        clickButton("Create");
         // This form submission will drop us on the configure page
 
         S s = newInstance(type, jenkins, name);

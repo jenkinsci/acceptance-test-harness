@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import hudson.util.VersionNumber;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -126,9 +125,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
     }
 
     protected static ConfigurablePageObject getPageObject(Jenkins jenkins) {
-       return jenkins.getVersion().isOlderThan(new VersionNumber("2"))
-                ? new JenkinsConfig(jenkins)
-                : new GlobalToolConfig(jenkins);
+       return new GlobalToolConfig(jenkins);
     }
 
     @Override

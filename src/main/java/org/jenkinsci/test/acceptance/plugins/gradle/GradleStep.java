@@ -54,12 +54,7 @@ public class GradleStep extends AbstractStep implements BuildStep {
     }
 
     public void setVersion(String version) {
-        String path = parent.getJenkins().getPlugin("gradle").isOlderThan("1.24")
-            ? "useWrapper[false]/gradleName"
-            : "gradleName"
-            ;
-
-        control(path).select(version);
+        control("gradleName").select(version);
     }
 
     public void setFile(final String file) {

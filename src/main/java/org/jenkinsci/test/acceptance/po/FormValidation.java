@@ -33,7 +33,6 @@ import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -84,29 +83,13 @@ public class FormValidation {
             element.sendKeys(Keys.TAB);
 
             // Wait for validation area to stop being <div></div>
-            try {
-                validationArea = control.waitFor().until(() -> {
-                    // path to validation area is the parents sibling with class `validation-error-area`
-                    String xpath = silent ? "../../div[contains(@class,'validation-error-area')]" :
-                            "../../div[contains(@class,'validation-error-area--visible')]";
+            validationArea = control.waitFor().until(() -> {
+                // path to validation area is the parents sibling with class `validation-error-area`
+                String xpath = silent ? "../../div[contains(@class,'validation-error-area')]" :
+                        "../../div[contains(@class,'validation-error-area--visible')]";
 
-                    return element.findElement(by.xpath(xpath));
-                });
-            } catch (NoSuchElementException e) {
-                // TODO old form validation, remove once not in current LTS line
-                validationArea = control.waitFor().until(() -> {
-                    // path to validation area is the parents sibling with class `validation-error-area`
-                    WebElement va = element.findElement(by.xpath("../../div[contains(@class,'validation-error-area')]"));
-                    try {
-                        va.findElement(by.xpath("./div[2]"));
-                        return va;
-                    } catch (NoSuchElementException noDiv) {
-                        // https://issues.jenkins-ci.org/browse/JENKINS-59605?focusedCommentId=377474&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-377474
-                        // There are known false-negatives in ATH so let's presume this is done and successful until the core is fixed.
-                        return va;
-                    }
-                });
-            }
+                return element.findElement(by.xpath(xpath));
+            });
         }
 
         return new FormValidation(validationArea);
@@ -114,8 +97,7 @@ public class FormValidation {
 
     public FormValidation(WebElement element) {
         List<WebElement> divs = element.findElements(by.xpath("div"));
-        // TODO the divs.get(1) part is old form validation, remove once not in current LTS line
-        WebElement outcome = divs.size() == 1 ? divs.get(0) : divs.get(1).findElement(by.xpath("div"));
+        WebElement outcome = divs.get(0);
         this.kind = extractKind(outcome);
         this.message = outcome.getText();
     }

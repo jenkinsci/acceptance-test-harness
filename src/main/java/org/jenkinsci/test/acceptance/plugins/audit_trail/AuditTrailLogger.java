@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
-import org.openqa.selenium.WebElement;
 
 abstract public class AuditTrailLogger extends JenkinsLogger {
 
@@ -43,49 +42,13 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
     }
 
     public static AuditTrailLogger create(Jenkins jenkins) {
-        if (jenkins.getPlugin("audit-trail").isNewerThan("2.0")) {
-            return new ExposedFile(jenkins);
-        }
-
-        final SystemLogger logger = new SystemLogger(jenkins);
-
-        logger.waitFor().until(() -> {
-            logger.open();
-            return logger.getElement(by.xpath("//h1[text()='%s']", logger.name));
-        });
-        return logger;
+        return new ExposedFile(jenkins);
     }
 
     public abstract List<String> getEvents();
 
     /**
-     * Audit Trail pre 2.0 uses system logger.
-     */
-    private static class SystemLogger extends AuditTrailLogger {
-
-        public SystemLogger(Jenkins jenkins) {
-            super(jenkins, "Audit Trail");
-        }
-
-        @Override
-        public List<String> getEvents() {
-            open();
-            List<String> events = new ArrayList<>();
-            for (WebElement e : all(by.css("#main-panel pre"))) {
-                Matcher m = LOG_PATTERN.matcher(e.getText());
-                if (!m.matches()) {
-                    continue; // Earlier versions used one element per log entry newer use two
-                }
-                events.add(m.group(1));
-            }
-            return events;
-        }
-    }
-
-    /**
      * Expose file through /userContent/ and wrap in Logger.
-     * <p>
-     * Traditional logger in no longer created after Audit Trail 2.0
      */
     private static class ExposedFile extends AuditTrailLogger {
 

@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.controller;
 
 import com.cloudbees.sdk.extensibility.Extension;
 import com.google.inject.Injector;
-import hudson.util.VersionNumber;
 import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -13,11 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 
@@ -32,8 +29,6 @@ public class WinstoneController extends LocalController {
     private static final List<String> JENKINS_OPTS = envVarOpts("JENKINS_OPTS");
     // options to the JVM that can be added on a testcase basis in code
     private final List<String> JAVA_OPTS = new ArrayList<>();
-
-    private static final VersionNumber v2339 = new VersionNumber("2.339");
 
     private File portFile;
 
@@ -62,14 +57,6 @@ public class WinstoneController extends LocalController {
     }
 
     @Override
-    public void startNow() throws IOException {
-        if (httpPort == 0 && !supportsPortFileName()) {
-            httpPort = IOUtil.randomTcpPort();
-        }
-        super.startNow();
-    }
-
-    @Override
     protected void onReady() throws IOException {
         if (this.httpPort == 0 && portFile != null) {
             String s = FileUtils.readFileToString(portFile, StandardCharsets.UTF_8);
@@ -92,11 +79,9 @@ public class WinstoneController extends LocalController {
         cb.addAll(JAVA_OPTS);
         cb.add("-Duser.language=en",
                 "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
-        if (supportsPortFileName()) {
-            portFile = File.createTempFile("jenkins-port", ".txt");
-            portFile.deleteOnExit();
-            cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
-        }
+        portFile = File.createTempFile("jenkins-port", ".txt");
+        portFile.deleteOnExit();
+        cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
         cb.add("-jar", war,
                 "--httpPort=" + httpPort
         );
@@ -105,14 +90,6 @@ public class WinstoneController extends LocalController {
         cb.env.putAll(commonLaunchEnv());
         LOGGER.info("Starting Jenkins: " + cb);
         return cb.popen();
-    }
-
-    private boolean supportsPortFileName() throws IOException {
-        try (JarFile warFile = new JarFile(war)) {
-            String jenkinsVersion = warFile.getManifest().getMainAttributes().getValue("Jenkins-Version");
-            VersionNumber version = new VersionNumber(jenkinsVersion);
-            return version.compareTo(v2339) >= 0;
-        }
     }
 
     @Override

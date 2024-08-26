@@ -7,8 +7,6 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.openqa.selenium.NoSuchElementException;
-
 
 public class DomainPage extends ConfigurablePageObject {
 
@@ -43,12 +41,7 @@ public class DomainPage extends ConfigurablePageObject {
         if (this.onDomainConfigurationPage()) {
             clickButton("Save");
         } else {
-            try {
-                clickButton("Create");
-            } catch (NoSuchElementException e) {
-                // prior to credentials:1105.vb_4e24a_c78b_81 once it makes it to LTS remove fallback
-                clickButton("OK");
-            }
+            clickButton("Create");
         }
 
         assertThat(driver, not(hasContent("This page expects a form submission")));

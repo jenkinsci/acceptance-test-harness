@@ -5,12 +5,9 @@ import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.lang.ProcessBuilder.Redirect;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -21,8 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Expand;
 import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
@@ -136,15 +131,6 @@ public abstract class LocalController extends JenkinsController implements LogLi
     public void removeLogListener(LogListener l) {
         logWatcher.removeLogListener(l);
     }
-
-    /**
-     * @deprecated Will not work correctly in Jenkins 2.33 and later. Apparently unused anyway.
-     */
-    @Deprecated
-    public File getSlaveJarPath() {
-        return new File(getJenkinsHome(),"war/WEB-INF/slave.jar"); // TODO look for war/WEB-INF/lib/remoting-*.jar instead
-    }
-
 
     public File getJenkinsHome() {
         return jenkinsHome;

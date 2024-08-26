@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import hudson.util.VersionNumber;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -229,11 +228,8 @@ public class Matchers {
         return new Matcher<Login>("has invalid login information message") {
             @Override
             public boolean matchesSafely(final Login login) {
-                String invalidLoginMessage = login.getJenkins().getVersion().isOlderThan(new VersionNumber("2.128"))
-                                             ? "Invalid login information. Please try again."
-                                             : "Invalid username or password";
                 try {
-                    login.find(by.xpath("//div[contains(text(), '%s')]", invalidLoginMessage));
+                    login.find(by.xpath("//div[contains(text(), '%s')]", "Invalid username or password"));
                     return true;
                 } catch (NoSuchElementException e) {
                     return false;

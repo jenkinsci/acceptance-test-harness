@@ -25,7 +25,6 @@ package org.jenkinsci.test.acceptance.plugins.git;
 
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.Select;
 
 @Describable("Git")
@@ -63,24 +62,12 @@ public class GitScm extends Scm {
     }
 
     public GitScm localBranch(String branch) {
-        try {
-            advanced();
-            control("localBranch").set(branch);
-        }
-        catch (NoSuchElementException ex) { // Git 2.0
-            addBehaviour(CheckoutToLocalBranch.class).name.set(branch);
-        }
+        addBehaviour(CheckoutToLocalBranch.class).name.set(branch);
         return this;
     }
 
     public GitScm localDir(String dir) {
-        try {
-            advanced();
-            control("relativeTargetDir").set(dir);
-        }
-        catch (NoSuchElementException ex) { // Git 2.0
-            addBehaviour(CheckoutToLocalDir.class).name.set(dir);
-        }
+        addBehaviour(CheckoutToLocalDir.class).name.set(dir);
         return this;
     }
 

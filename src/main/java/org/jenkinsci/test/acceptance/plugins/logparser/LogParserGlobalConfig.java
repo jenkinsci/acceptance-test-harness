@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.logparser;
 
-import hudson.util.VersionNumber;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -20,13 +19,7 @@ public class LogParserGlobalConfig extends PageAreaImpl {
     private final String rulePrefix;
 
     public static LogParserGlobalConfig getInstance(JenkinsConfig context) {
-        boolean old = context.jenkins.getPlugin("log-parser").getVersion().isOlderThan(new VersionNumber("2.1"));
-        String path = old
-                ? "/hudson-plugins-logparser-LogParserPublisher/log-parser"
-                : "/hudson-plugins-logparser-LogParserPublisher"
-        ;
-        String rulePrefix = old ? "rule" : "parsingRulesGlobal";
-        return new LogParserGlobalConfig(context, path, rulePrefix);
+        return new LogParserGlobalConfig(context, "/hudson-plugins-logparser-LogParserPublisher", "parsingRulesGlobal");
     }
 
     private LogParserGlobalConfig(JenkinsConfig context, String path, String rulePrefix) {

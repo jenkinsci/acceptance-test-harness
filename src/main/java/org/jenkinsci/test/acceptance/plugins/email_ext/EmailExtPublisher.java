@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.email_ext;
 
 import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.NoSuchElementException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -22,14 +21,7 @@ public class EmailExtPublisher extends AbstractStep implements PostBuildStep {
         recipient.set(r);
 
         ensureAdvancedOpened();
-        // since 2.38 refactored to hetero-list, recepients ware preselected
-        try {
-            control("project_triggers/sendToList").check();
-        } catch (NoSuchElementException ex) {
-            // some later releases do not preselect recipients
-            control("project_triggers/hetero-list-add[recipientProviders]").selectDropdownMenu("Recipient List");
-
-        }
+        control("project_triggers/hetero-list-add[recipientProviders]").selectDropdownMenu("Recipient List");
     }
 
     public void ensureAdvancedOpened() {

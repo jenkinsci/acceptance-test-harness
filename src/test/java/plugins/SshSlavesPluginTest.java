@@ -30,7 +30,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.google.inject.Inject;
-import hudson.util.VersionNumber;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
@@ -132,11 +131,12 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         c.setConfigUrl(href);
         verifyValueForCredential(c, sc.username, username);
 
-        // See https://jenkins.io/doc/developer/security/secrets/#secrets-and-configuration-forms, available from Jenkins 2.171
-        if (jenkins.getVersion().isNewerThan(new VersionNumber("2.170"))) {
-            verifyUnexpectedValueForCredential("Credentials in plain text should not be accessible from Web UI",
-                    c, sc.selectEnterDirectly().privateKey, privateKey);
-        }
+        // See https://jenkins.io/doc/developer/security/secrets/#secrets-and-configuration-forms
+        verifyUnexpectedValueForCredential(
+                "Credentials in plain text should not be accessible from Web UI",
+                c,
+                sc.selectEnterDirectly().privateKey,
+                privateKey);
 
         // Just to make sure the dumb slave is set up properly, we should seed it
         // with a FS root and executors

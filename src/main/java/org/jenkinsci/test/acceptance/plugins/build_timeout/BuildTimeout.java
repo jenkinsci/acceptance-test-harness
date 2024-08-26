@@ -40,12 +40,7 @@ public class BuildTimeout extends PageAreaImpl {
     }
 
     private void chooseStrategy(String name) {
-        // JENKINS-20164
-        if (job.getJenkins().getPlugin("build-timeout").isNewerThan("1.14")) {
-            control("/").select(name);
-        } else {
-            choose(name);
-        }
+        control("/").select(name);
     }
 
     public void abortBuild() {

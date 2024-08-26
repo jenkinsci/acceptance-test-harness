@@ -389,12 +389,7 @@ public class Job extends TopLevelItem {
     }
 
     public void disable() {
-        try {
-            // Newer versions of Jenkins use a toggle switch with the active state as its label
-            check(find(by.id("toggle-switch-enable-disable-project")));
-        } catch (org.openqa.selenium.NoSuchElementException exception) {
-            check("Disable this project");
-        }
+        check(find(by.id("toggle-switch-enable-disable-project")));
     }
 
     public int getNextBuildNumber() {

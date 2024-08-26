@@ -1,7 +1,6 @@
 package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasAction;
@@ -62,7 +61,7 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
     }
 
     private void assertBranchIndexing(final WorkflowMultiBranchJob job) {
-        assertThat(job, anyOf(/* 1.x */hasAction("Branch Indexing"), /* 2.x */hasAction("Scan Repository"), /* 2.1.0 */hasAction("Scan Repository Now")));
+        assertThat(job, hasAction("Scan Repository Now"));
 
         final String branchIndexingLog = job.getBranchIndexingLog();
 

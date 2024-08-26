@@ -12,7 +12,6 @@ import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 import static org.junit.Assert.assertTrue;
 
-import hudson.util.VersionNumber;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -41,7 +40,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 public class FreestyleJobTest extends AbstractJUnitTest {
@@ -169,11 +167,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
 
         j.configure();
-        try {
-            check("Discard old builds");
-        } catch (NoSuchElementException x) { // 1.636-
-            check("Discard Old Builds");
-        }
+        check("Discard old builds");
         j.control(by.name("_.numToKeepStr")).set(1);
         j.save();
 
@@ -205,11 +199,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
 
         j.configure();
-        try {
-            check("Discard old builds");
-        } catch (NoSuchElementException x) { // 1.636-
-            check("Discard Old Builds");
-        }
+        check("Discard old builds");
         j.control(by.name("_.numToKeepStr")).set(1);
         ShellBuildStep shellBuildStep = j.addShellStep("exit 0");
         j.save();
@@ -304,8 +294,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         trigger.spec.set("not_a_time");
         clickButton("Apply");
 
-        String errorElementCSS = jenkins.getVersion().isOlderThan(new VersionNumber("2.235")) ? "#error-description pre" : ".validation-error-area .error";
-        By error = by.css(errorElementCSS);
+        By error = by.css(".validation-error-area .error");
         
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time\""));
         closeDialog();
@@ -320,12 +309,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     private void closeDialog() {
-        try {
-            clickButton("Close");
-        } catch (NoSuchElementException x) {
-            // before https://github.com/jenkinsci/jenkins/pull/8394
-            clickLink("Close");
-        }
+        clickButton("Close");
     }
 
     @Test
