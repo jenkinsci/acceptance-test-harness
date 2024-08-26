@@ -21,25 +21,12 @@ import org.jenkinsci.test.acceptance.plugins.jabber.JabberGlobalConfig.MUCConfig
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberPublisher;
 import org.jenkinsci.test.acceptance.plugins.jabber.JabberPublisher.Publishers;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-/**
- * This test case is set to @Ignore because the Jabber Plugin is not able to connect to conference.localhost
- * because DNS resolution issues. These issues arise because of the used Smack API
- *      (<a href="https://www.igniterealtime.org/projects/smack/index.jsp">Smack Documentation</a>)
- * that does rely on successful DNS resolution, which is totally valid in terms on conformity with the XMPP Standard.
- * <p>
- * This test is broken until a new version of the jabber plugin with a new Smack Library is provided that falls back to
- * using the hostname if the FQDN could not be resolved, *
- *
- * @author jenky-hm
- */
 @WithPlugins("jabber")
 @Category(DockerTest.class)
 @WithDocker
-@Ignore("TODO: Bring this back to life or remove from testsuite")
 public class JabberPluginTest extends AbstractJUnitTest {
     @Inject
     private DockerContainerHolder<JabberContainer> docker;

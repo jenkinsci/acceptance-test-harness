@@ -37,7 +37,6 @@ import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -79,7 +78,6 @@ public class MailWatcherPluginTest extends AbstractJUnitTest {
     }
 
     @Test @Issue("JENKINS-20538") @Since("1.571") @WithPlugins("mail-watcher-plugin")
-    @Ignore("Flaky test, passes sometimes on CI")
     public void notify_master_on_jenkins_restart() throws Exception {
         jenkins.configure();
         {

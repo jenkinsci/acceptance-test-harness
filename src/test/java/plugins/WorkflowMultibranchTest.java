@@ -19,7 +19,6 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -33,7 +32,6 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
     }
 
-    @Ignore("cannot run quickly as anonymous due to github rate limiting")
     @Test
     public void testMultibranchPipeline() {
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);

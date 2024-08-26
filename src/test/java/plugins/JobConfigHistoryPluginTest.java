@@ -37,12 +37,10 @@ import org.jenkinsci.test.acceptance.plugins.maven.MavenModuleSet;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("jobConfigHistory")
-@Ignore("Flaky see issue 1052") //https://github.com/jenkinsci/acceptance-test-harness/issues/1052
 public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
 
     private static final String LS_COMMAND = "ls";

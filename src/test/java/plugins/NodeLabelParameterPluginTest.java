@@ -19,7 +19,6 @@ import org.jenkinsci.test.acceptance.plugins.nodelabelparameter.NodeParameter;
 import org.jenkinsci.test.acceptance.plugins.textfinder.TextFinderPublisher;
 import org.jenkinsci.test.acceptance.po.*;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.WebElement;
@@ -344,7 +343,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     @Test
     @WithPlugins("text-finder")
     @Issue("JENKINS-23129")
-    @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_failed_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
@@ -398,7 +396,6 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
      */
     @Test
     @Issue("JENKINS-23129")
-    @Ignore("Until JENKINS-23129 is fixed")
     public void trigger_if_succeeds_with_unstable_post_build_step() throws Exception {
         FreeStyleJob j = jenkins.jobs.create();
 
