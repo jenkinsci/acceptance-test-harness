@@ -31,7 +31,6 @@ import java.time.Duration;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -51,12 +50,7 @@ public class WorkflowJob extends Job {
                 // As of JENKINS-28769, the textarea is set display: none due to the ACE editor, so CapybaraPortingLayerImpl.find, called by super.resolve, calls isDisplayed and fails.
                 // Anyway we cannot use the web driver to interact with the hidden textarea.
                 // Some code cannibalized from #45:
-                String cssSelector;
-                try {
-                    cssSelector = waitFor("#workflow-editor-1");
-                } catch (TimeoutException e) {
-                    cssSelector = waitFor("#workflow-editor");
-                }
+                String cssSelector = waitFor("#workflow-editor-1");
                 executeScript(
                         "var targets = document.getElementsBySelector(arguments[0]);" +
                                 "if (!targets || targets.length === 0) {" +

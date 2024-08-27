@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import hudson.util.VersionNumber;
 import java.net.URL;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 
 public class User extends ContainerPageObject {
 
@@ -99,12 +98,7 @@ public class User extends ContainerPageObject {
     }
 
     public void delete() {
-        try {
-            runThenHandleDialog(() -> clickLink("Delete"));
-        } catch (TimeoutException te) {
-            visit("delete");
-            clickButton("Yes");
-        }
+        runThenHandleDialog(() -> clickLink("Delete"));
     }
 
     @Override
