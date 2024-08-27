@@ -250,12 +250,7 @@ public class PluginManager extends ContainerPageObject {
                     tickPluginToInstall(n);
                 }
 
-                // Temporary until https://github.com/jenkinsci/jenkins/pull/8025 is in LTS
-                if (find(by.button("Download now and install after restart")) != null) {
-                    control(by.button("Download now and install after restart")).clickAndWaitToBecomeStale();
-                } else {
-                    control(by.button("Update")).clickAndWaitToBecomeStale();
-                }
+                control(by.button("Update")).clickAndWaitToBecomeStale();
             }
         }
 

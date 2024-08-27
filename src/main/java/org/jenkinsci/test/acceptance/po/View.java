@@ -10,7 +10,6 @@ import java.net.URL;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -57,13 +56,7 @@ public abstract class View extends ContainerPageObject {
      */
     public void delete() {
         configure();
-        try {
-            runThenHandleDialog(() -> clickLink("Delete View"));
-        } catch (TimeoutException te) {
-            visit("delete");
-            waitFor(by.button("Yes"));
-            clickButton("Yes");
-        }
+        runThenHandleDialog(() -> clickLink("Delete View"));
     }
 
     @Override
