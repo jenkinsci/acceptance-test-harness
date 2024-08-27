@@ -71,7 +71,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         m.targets.set("javadoc:javadoc -f my-app/pom.xml");
 
         JavadocPublisher jd = job.addPublisher(JavadocPublisher.class);
-        jd.javadocDir.set("my-app/target/site/apidocs/");
+        jd.javadocDir.set("my-app/target/reports/apidocs/");
         job.save();
     }
 
