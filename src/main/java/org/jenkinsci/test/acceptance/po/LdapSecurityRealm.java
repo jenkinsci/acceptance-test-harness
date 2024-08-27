@@ -4,14 +4,12 @@ import java.util.Objects;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapGroupMembershipStrategy;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
  * SecurityRealm for ldap plugin.
  *
  * @author Michael Prankl
- * @see org.jenkinsci.test.acceptance.po.LdapSecurityRealm_Pre1_10 if you want to test versions of the plugin older than 1.10
  */
 @Describable("LDAP")
 public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends SecurityRealm {
@@ -43,26 +41,11 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
      */
     private final Control mailAddressAttributeName = control("configurations/mailAddressAttributeName" /* >= 1.16 */, "mailAddressAttributeName");
 
-    /**
-     * For changes in GUI in version 1.16
-     */
-    private final boolean sinceVersion116 = isVersionEqualsOrGreater116();
     protected final Control advanced = control("advanced-button" /* >= 1.16 only */);
 
     public LdapSecurityRealm(GlobalSecurityConfig context, String path) {
         super(context, path);
         this.context = context;
-    }
-
-    private boolean isVersionEqualsOrGreater116() {
-        boolean isVersion116 = true;
-        try {
-            control("configurations/server").resolve();
-        } catch (NoSuchElementException e) {
-            isVersion116 = false;
-        }
-
-        return isVersion116;
     }
 
     private T useGroupMembershipStrategy(Class<T> type) {
@@ -90,9 +73,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
         groupSearchBase.set(ldapDetails.getGroupSearchBase());
         groupSearchFilter.set(ldapDetails.getGroupSearchFilter());
         configureGroupMembership(ldapDetails);
-        if (this.sinceVersion116) {
-            advanced.click();
-        }
+        advanced.click();
         disableLdapEmailResolver.check(ldapDetails.isDisableLdapEmailResolver());
         if (ldapDetails.isEnableCache()) {
             enableCache.check(true);

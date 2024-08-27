@@ -99,26 +99,13 @@ public class JobsMixIn extends MixIn {
     public void copy(String from, String to) {
         visit("newJob");
         fillIn("from", from);
-        if (getJenkins().isJenkins1X()) { 
-            // no radio buttons on Jenkins 2.X
-            choose("copy");
-        }
         // There is a javascript magic bound to loss of focus on 'from' field that is a pain to duplicate through selenium
         // explicitly. Here, it is done so by setting 'to' afterwards.
         fillIn("name", to);
         clickButton("OK");
     }
     
-    // Jenkins 1.x item type selection was by radio button.
-    final Finder<WebElement> finder1X = new Finder<WebElement>() {
-        @Override protected WebElement find(String caption) {
-            return outer.find(by.radioButton(caption));
-        }
-    };
-    
-    // Jenkins 2.0 introduced a new "new item" page, which listed
-    // the item types differently and did away with the radio buttons.
-    final Finder<WebElement> finder2X = new Finder<WebElement>() {
+    private final Finder<WebElement> finder = new Finder<>() {
         @Override protected WebElement find(String caption) {
             String normalizedCaption = caption.replace('.', '_');
             return outer.find(by.css("li." + normalizedCaption));
@@ -126,6 +113,6 @@ public class JobsMixIn extends MixIn {
     };
     
     private Finder<WebElement> getFinder() {
-        return getJenkins().isJenkins1X() ? finder1X : finder2X;
+        return finder;
     }
 }

@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.time.Duration;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -38,11 +37,7 @@ public class ViewsMixIn extends MixIn {
 
         fillIn("name", name);
 
-        try {
-            clickButton("Create");
-        } catch (NoSuchElementException e) {
-            clickButton("OK");
-        }
+        clickButton("Create");
 
         return newInstance(type, injector, url("view/%s/", name));
     }

@@ -1,10 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.subversion;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import org.jenkinsci.test.acceptance.po.*;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
 
 /**
  * Encapsulates the PageArea of the Subversion SCM
@@ -32,36 +28,6 @@ public class SubversionScm extends Scm {
             "//div[contains(@class, 'jenkins-form-label') and normalize-space(text())='%s']/../div[@class='jenkins-select']/select",
 
             REPOSITORY_BROWSER, REPOSITORY_BROWSER, REPOSITORY_BROWSER));
-
-    /**
-     * Opens the SVNPlugin credential page for protected repositories.
-     * Only for plugin version 1.54 and older.
-     *
-     * @param type child of SubversionCredential.class
-     * @param <T>  child of SubversionCredential.class
-     * @return PageObject of the CredentialPage
-     * @throws SubversionPluginTestException if Url to credential page is not found or malformed.
-     */
-    @Deprecated
-    public <T extends PageObject> T getCredentialPage(Class<T> type) throws SubversionPluginTestException {
-        //click into a different field to trigger the Url-Check
-        this.local.click();
-        URL urlOfCredentialPage = null;
-        WebElement linkToCredentialPage;
-        String urlString = null;
-        try {
-            elasticSleep(1000);
-            linkToCredentialPage = this.find(by.link("enter credential"));
-            urlString = linkToCredentialPage.getAttribute("href");
-            urlOfCredentialPage = new URL(urlString);
-            linkToCredentialPage.click();
-        } catch (NoSuchElementException e) {
-            SubversionPluginTestException.throwRepoMayNotBeProtected(e);
-        } catch (MalformedURLException e) {
-            SubversionPluginTestException.throwMalformedURL(e, urlString);
-        }
-        return this.newInstance(type, this.injector, urlOfCredentialPage, driver.getWindowHandle());
-    }
 
     public <T extends SvnRepositoryBrowser> T useRepositoryBrowser(final Class<T> type) {
         repositoryBrowser.selectDropdownMenuAlt(type);

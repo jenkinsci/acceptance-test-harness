@@ -15,8 +15,6 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
 import org.jenkinsci.test.acceptance.po.MatrixProject;
 import org.junit.Test;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.NoSuchFrameException;
 
 @WithPlugins("javadoc")
 public class JavadocPluginTest extends AbstractJUnitTest {
@@ -88,31 +86,9 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         job.open();
         find(by.link(JAVADOC_ACTION)).click();
 
-        /*
-        Why do we check in such way?
+        find(by.href("index-all.html")).click();
+        find(by.href("com/mycompany/app/package-summary.html")).click();
 
-        The java version of the Jenkins under test could be different that the one in use by this code, the ATH code.
-        See: https://github.com/jenkinsci/acceptance-test-harness/blob/39cbea43b73d32a0912d613a41e08ba9b54aad1d/src/main/java/org/jenkinsci/test/acceptance/controller/LocalController.java#L190
-
-        In addition, the way javadoc is generated depends on the java version and the number of packages generated, one
-        or more packages.
-        See: https://issues.jenkins-ci.org/browse/JENKINS-32619?focusedCommentId=311819&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-311819
-
-        So even though it's not the most refined way to check the right generation of the javadoc, this way doesn't
-        need to call a groovy script for checking the java version neither checking the number of packages generated.
-        */
-
-         try {
-             // Former behavior, javadoc generating frames and plugin without redirection
-             driver.switchTo().frame("classFrame");
-         } catch (NoSuchFrameException e) {
-             try {
-                 // With Java11 a link to the package-summary is shown, no frames
-                 find(by.partialLinkText("package-summary.html")).click();
-             } catch (NoSuchElementException ignored) {
-             }
-         }
-
-         assertThat(driver, hasContent("com.mycompany.app"));
+        assertThat(driver, hasContent("com.mycompany.app"));
     }
 }

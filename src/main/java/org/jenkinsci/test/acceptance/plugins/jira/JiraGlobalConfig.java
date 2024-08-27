@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.jira;
 
-import hudson.util.VersionNumber;
 import jakarta.inject.Inject;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.Jenkins;
@@ -13,15 +12,7 @@ public class JiraGlobalConfig extends PageAreaImpl {
 
     @Inject
     public JiraGlobalConfig(Jenkins jenkins) {
-        super(jenkins, _getPath(jenkins));
-    }
-
-    private static String _getPath(Jenkins jenkins) {
-        boolean useNew = jenkins.getPlugin("jira").getVersion().isNewerThan(new VersionNumber("3.0.6"));
-        return useNew
-                ? "/hudson-plugins-jira-JiraGlobalConfiguration"
-                : "/hudson-plugins-jira-JiraProjectProperty"
-        ;
+        super(jenkins, "/hudson-plugins-jira-JiraGlobalConfiguration");
     }
 
     // TODO: make this work properly when the site exists already

@@ -28,7 +28,6 @@ import static org.junit.Assert.assertThrows;
 import java.util.concurrent.ExecutionException;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.PluginManager;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
@@ -48,16 +47,9 @@ public class PluginManagerTest extends AbstractJUnitTest {
     @WithPlugins("matrix-auth")
     public void uninstall_plugin() throws InterruptedException, ExecutionException {
         jenkins.getPluginManager().visit("installed");
-        try {
-            WebElement uninstallButton = find(by.xpath(".//button[./@data-href = 'plugin/matrix-auth/doUninstall']"));
-            uninstallButton.click();
-            waitFor(by.button("Yes"));
-        } catch (NoSuchElementException te) {
-            // TODO remove this handling when Jenkins 2.415 is the lowest we support
-            WebElement form = find(by.action("plugin/matrix-auth/uninstall"));
-            form.submit();
-            waitFor(form).until(CapybaraPortingLayerImpl::isStale);
-        }
+        WebElement uninstallButton = find(by.xpath(".//button[./@data-href = 'plugin/matrix-auth/doUninstall']"));
+        uninstallButton.click();
+        waitFor(by.button("Yes"));
         clickButton("Yes");
         jenkins.restart();
         jenkins.getPluginManager().visit("installed");

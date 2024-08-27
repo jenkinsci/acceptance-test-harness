@@ -6,7 +6,6 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 
 import com.google.inject.Inject;
-import hudson.util.VersionNumber;
 import java.util.Collections;
 import java.util.List;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -168,15 +167,8 @@ public class MatrixPluginTest extends AbstractJUnitTest {
 
         job.configure();
         LabelAxis a = job.addAxis(LabelAxis.class);
-        String builtInNodeName;
-        String builtInNodeDescription;
-        if (jenkins.getVersion().isOlderThan(new VersionNumber("2.307"))) {
-            builtInNodeName = "master";
-            builtInNodeDescription = "master";
-        } else {
-            builtInNodeName = "built-in";
-            builtInNodeDescription = "the built-in node";
-        }
+        String builtInNodeName = "built-in";
+        String builtInNodeDescription = "the built-in node";
         a.select(builtInNodeName);
         a.select("label1");
         job.save();

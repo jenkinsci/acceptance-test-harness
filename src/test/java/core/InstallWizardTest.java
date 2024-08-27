@@ -27,7 +27,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.loggedInAs;
 
 import com.google.inject.Inject;
-import hudson.util.VersionNumber;
 import java.io.IOException;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -70,9 +69,7 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
         createAdmin.shouldCreateTheUserSuccessfully();
-        if(jenkins.getVersion().isNewerThan(new VersionNumber("2.118"))) {
-            createAdmin.confirmURLSettings();
-        }
+        createAdmin.confirmURLSettings();
         createAdmin.wizardShouldFinishSuccessfully();
 
         // Check that the new user is logged in
@@ -105,9 +102,7 @@ public class InstallWizardTest extends AbstractJUnitTest {
 
         createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
         createAdmin.shouldCreateTheUserSuccessfully();
-        if(jenkins.getVersion().isNewerThan(new VersionNumber("2.118"))) {
-            createAdmin.confirmURLSettings();
-        }
+        createAdmin.confirmURLSettings();
         createAdmin.wizardShouldFinishSuccessfully();
 
         // Check that the new user is logged in

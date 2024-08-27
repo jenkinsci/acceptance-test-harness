@@ -25,7 +25,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
-import java.util.Objects;
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
 import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.SshHostKeyVerificationStrategy;
 import org.openqa.selenium.NoSuchElementException;
@@ -97,15 +96,9 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     }
 
     private <T> T selectFromDropdownOrRadioGroup(Class<T> type, String field) {
-        try {
-            WebElement option = findCaption(type, caption -> getElement(by.option(caption)));
-            option.click();
-            return newInstance(type, this, "/" + field);
-        } catch (NoSuchElementException x) { // prior to https://github.com/jenkinsci/jenkins/pull/5417
-            WebElement radio = findCaption(type, caption -> getElement(by.radioButton(caption)));
-            radio.click();
-            return newInstance(type, this, Objects.requireNonNull(getPath(radio)));
-        }
+        WebElement option = findCaption(type, caption -> getElement(by.option(caption)));
+        option.click();
+        return newInstance(type, this, "/" + field);
     }
 
     /**
