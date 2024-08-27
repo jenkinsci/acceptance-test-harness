@@ -75,7 +75,7 @@ public class PipelineTest extends AbstractPipelineTest {
                     "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n" +
                     "      \n" +
                     "      sh \"mvn javadoc:javadoc -f pom.xml\"\n" +
-                    "      step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])\n" +
+                    "      step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])\n" +
                     "  }" +
                     "}";
         } else {
@@ -90,7 +90,7 @@ public class PipelineTest extends AbstractPipelineTest {
                     "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n" +
                     "      \n" +
                     "      bat \"mvn javadoc:javadoc -f pom.xml\"\n" +
-                    "      step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])\n" +
+                    "      step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])\n" +
                     "  }" +
                     "}";
         }
