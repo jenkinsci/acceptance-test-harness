@@ -349,7 +349,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.15.0</version>
+        <version>1.15.1</version>
       </dependency>
       <!-- RequireUpperBoundDeps between jersey (via GitLab API) and browserup -->
       <dependency>
