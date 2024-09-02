@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 /**
  * Security Realm provided by oic-auth plugin
  */
-@Describable({"Login with Openid Connect", "Login with Openid Connect"})
+@Describable("Login with Openid Connect")
 public class OicAuthSecurityRealm extends SecurityRealm {
 
     public OicAuthSecurityRealm(GlobalSecurityConfig context, String path) {
