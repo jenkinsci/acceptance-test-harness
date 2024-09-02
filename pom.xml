@@ -31,7 +31,7 @@
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
     <jenkins.version>2.474</jenkins.version>
-    <selenium.version>4.23.1</selenium.version>
+    <selenium.version>4.24.0</selenium.version>
     <guava.version>33.3.0-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
     <maven-resolver.version>1.6.2</maven-resolver.version>
@@ -168,7 +168,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.16.0</version>
+      <version>3.17.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -371,7 +371,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.15.0</version>
+        <version>1.15.1</version>
       </dependency>
       <!-- RequireUpperBoundDeps between jersey (via GitLab API) and browserup -->
       <dependency>
