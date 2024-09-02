@@ -4,8 +4,10 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -22,6 +24,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.RealmRepresentation;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.openqa.selenium.NoSuchElementException;
 import dasniko.testcontainers.keycloak.KeycloakContainer;
@@ -29,6 +32,7 @@ import jakarta.inject.Inject;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
@@ -49,13 +53,14 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
     private String userJohnKeycloakId;
 
     @Before
-    public void setUpKeycloak() {
+    public void setUpKeycloak() throws Exception {
         configureOIDCProvider();
         configureRealm();
     }
 
-    private void configureOIDCProvider() {
+    private void configureOIDCProvider() throws Exception {
         try (Keycloak keycloakAdmin = keycloak.getKeycloakAdminClient()) {
+            // Create Realm
             RealmRepresentation testRealm = new RealmRepresentation();
             testRealm.setRealm(REALM);
             testRealm.setId(REALM);
@@ -63,6 +68,12 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
             testRealm.setEnabled(true);
 
             keycloakAdmin.realms().create(testRealm);
+            RoleRepresentation jenkinsRead = new RoleRepresentation();
+            jenkinsRead.setName("jenkinsRead");
+            keycloakAdmin.realm(REALM).roles().create(jenkinsRead);
+            RoleRepresentation jenkinsAdmin = new RoleRepresentation();
+            jenkinsAdmin.setName("jenkinsAdmin");
+            keycloakAdmin.realm(REALM).roles().create(jenkinsAdmin);
 
             // Add groups and subgroups
             GroupRepresentation employees = new GroupRepresentation();
@@ -82,6 +93,12 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
             sales.setName("sales");
             group = theRealm.groups().group(groupId);
             group.subGroup(sales);
+
+            List<GroupRepresentation> subGroups = theRealm.groups().group(groupId).getSubGroups(0, 2, true);
+            String devsId = subGroups.stream().filter(g -> g.getName().equals("devs")).findFirst().orElseThrow(() -> new Exception("Something went wrong initialization keycloak")).getId();
+            String salesId = subGroups.stream().filter(g -> g.getName().equals("sales")).findFirst().orElseThrow(() -> new Exception("Something went wrong initialization keycloak")).getId();
+            theRealm.groups().group(devsId).roles().realmLevel().add(List.of(theRealm.roles().get("jenkinsAdmin").toRepresentation()));
+            theRealm.groups().group(salesId).roles().realmLevel().add(List.of(theRealm.roles().get("jenkinsRead").toRepresentation()));
 
             // Users
             UserRepresentation bob = new UserRepresentation();
@@ -156,6 +173,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         securityRealm.setAutomaticConfiguration(String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
         securityRealm.logoutFromOpenidProvider(true);
         securityRealm.setPostLogoutUrl(jenkins.url("OicLogout").toExternalForm());
+        securityRealm.setUserFields(null, null, null, "groups");
         sc.useAuthorizationStrategy(LoggedInAuthorizationStrategy.class);
         sc.save();
     }
@@ -168,7 +186,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
 
         jenkins.clickLink("log in");
         keycloakUtils.login(bob.getUserName());
-        assertLoggedUser(bob);
+        assertLoggedUser(bob, "jenkinsAdmin");
 
         jenkins.logout();
         jenkins.open();
@@ -179,7 +197,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
 
         clickLink("log in");
         keycloakUtils.login(john.getUserName());
-        assertLoggedUser(john);
+        assertLoggedUser(john, "jenkinsRead");
     }
 
     @Test
@@ -193,7 +211,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         jenkins.open();
         jenkins.clickLink("log in"); // won't request a login, but log in directly with user from
 
-        assertLoggedUser(bob);
+        assertLoggedUser(bob, "jenkinsAdmin");
 
         keycloakUtils.logout(bob);
         jenkins.open();
@@ -204,7 +222,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         jenkins.open();
         jenkins.clickLink("log in");
         keycloakUtils.login(john.getUserName());
-        assertLoggedUser(john);
+        assertLoggedUser(john, "jenkinsRead");
     }
 
     private void assertLoggedOut() {
@@ -214,8 +232,17 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
                      () -> keycloakUtils.getUser(keycloak.getAuthServerUrl(), REALM));
     }
 
-    private void assertLoggedUser(KeycloakUtils.User expectedUser) {
+    private void assertLoggedUser(KeycloakUtils.User expectedUser, String roleToCheck) {
         assertThat("User has logged in Jenkins", jenkins.getCurrentUser().id(), is(expectedUser.getId()));
+        jenkins.visit("whoAmI");
+
+        // TODO if needed for more tests, consider to create a proper WhoAmI PageObject
+        // for this test we just need the authorities, which are displayed in UI as <li>"role_name"</li>, we can get
+        // all of "li" tags and check our roles are there
+        // Note the quotes surrounding the role name
+        Set<String> allLiTagsInPage = this.driver.findElements(by.tagName("li")).stream().map(webElement -> StringUtils.defaultString(webElement.getText())
+                .replace("\"", "")).collect(Collectors.toSet());
+        assertThat("User has the expected roles inherited from keycloak", roleToCheck, is(in(allLiTagsInPage)));
 
         KeycloakUtils.User fromKeyCloak = keycloakUtils.getUser(keycloak.getAuthServerUrl(), REALM);
         assertThat("User has logged in keycloack", fromKeyCloak.getUserName(), is(expectedUser.getUserName()));

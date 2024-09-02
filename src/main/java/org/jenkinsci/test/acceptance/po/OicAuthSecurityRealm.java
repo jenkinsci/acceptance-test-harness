@@ -32,4 +32,13 @@ public class OicAuthSecurityRealm extends SecurityRealm {
     public void setPostLogoutUrl(String postLogoutUrl) {
         control("postLogoutRedirectUrl").set(postLogoutUrl);
     }
+
+    public void setUserFields(String userNameFieldName, String emailFieldName, String fullNameFieldName, String groupsFieldName) {
+        clickButton("User fields");
+        waitFor(by.path("/securityRealm/groupsFieldName"));
+        control("userNameField").set(userNameFieldName);
+        control("emailFieldName").set(emailFieldName);
+        control("fullNameFieldName").set(fullNameFieldName);
+        control("groupsFieldName").set(groupsFieldName);
+    }
 }
