@@ -5,7 +5,6 @@ import java.net.URL;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import jakarta.inject.Inject;
 
 public class KeycloakUtils extends CapybaraPortingLayerImpl {
@@ -35,7 +34,7 @@ public class KeycloakUtils extends CapybaraPortingLayerImpl {
     }
 
 
-    public User getUser(String keycloakUrl, String realm) {
+    public User getCurrentUser(String keycloakUrl, String realm) {
         driver.get(String.format("%s/realms/%s/account", keycloakUrl, realm));
 
         waitFor(by.id("username"), 5);

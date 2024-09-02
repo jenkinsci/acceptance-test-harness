@@ -102,7 +102,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
 
             // Users
             UserRepresentation bob = new UserRepresentation();
-            bob.setEmail("bob@acme.org");
+            bob.setEmail("bob@jenkins-ath.test");
             bob.setUsername("bob");
             bob.setFirstName("Bob");
             bob.setLastName("Smith");
@@ -117,7 +117,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
             theRealm.users().create(bob);
 
             UserRepresentation john = new UserRepresentation();
-            john.setEmail("john@acme.org");
+            john.setEmail("john@jenkins-ath.test");
             john.setUsername("john");
             john.setFirstName("John");
             john.setLastName("Smith");
@@ -171,17 +171,24 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         OicAuthSecurityRealm securityRealm = sc.useRealm(OicAuthSecurityRealm.class);
         securityRealm.configureClient(CLIENT, CLIENT);
         securityRealm.setAutomaticConfiguration(String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
-        securityRealm.logoutFromOpenidProvider(true);
+        securityRealm.setLogoutFromOpenidProvider(true);
         securityRealm.setPostLogoutUrl(jenkins.url("OicLogout").toExternalForm());
         securityRealm.setUserFields(null, null, null, "groups");
         sc.useAuthorizationStrategy(LoggedInAuthorizationStrategy.class);
         sc.save();
     }
 
+    /**
+     * Test the login and logout in Jenkins and how it is propagated to the OIDC Provider
+     * - A login in Jenkins will redirect to the provider login page, so the user will be logged in as well in keycloak
+     * - A logout in Jenkins will apply only to Jenkins or will be propagated to the provider (keycloak here) depending
+     *   on the value of the property Lout from openid provider in the Security Realm configuration. For this test,
+     *   it'll be propagated
+     */
     @Test
-    public void fromJenkinsToKeycloak() {
-        final KeycloakUtils.User bob = new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@acme.org", "Bob", "Smith");
-        final KeycloakUtils.User john = new KeycloakUtils.User(userJohnKeycloakId, "john", "john@acme.org", "John", "Smith");
+    public void loginAndLogoutInJenkinsIsReflectedInKeycloak() {
+        final KeycloakUtils.User bob = new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@jenkins-ath.test", "Bob", "Smith");
+        final KeycloakUtils.User john = new KeycloakUtils.User(userJohnKeycloakId, "john", "john@jenkins-ath.test", "John", "Smith");
         jenkins.open();
 
         jenkins.clickLink("log in");
@@ -192,7 +199,8 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         jenkins.open();
         assertLoggedOut();
 
-        // logout from Jenkins does mean logout from keycloak
+        // As the option Logout from Openid Provider is set to true, a logout from Jenkins means a logout from Keycloak
+        // so the login page will appear again
         jenkins.open();
 
         clickLink("log in");
@@ -200,10 +208,16 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         assertLoggedUser(john, "jenkinsRead");
     }
 
+    /**
+     * Test the login and logout in the OIDC provider and how it is propagated to Jenkins
+     * - A login in the provider will be detected by the plugin so Jenkins won't prompt the login form
+     * - A logout in the provider will redirect to the Jenkins logout action (configured in keycloak) so the user
+     *   will log out from Jenkins as well
+     */
     @Test
-    public void fromKeycloakToJenkins() throws Exception {
-        final KeycloakUtils.User bob = new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@acme.org", "Bob", "Smith");
-        final KeycloakUtils.User john = new KeycloakUtils.User(userJohnKeycloakId, "john", "john@acme.org", "John", "Smith");
+    public void loginAndLogoutInKeycloakIsReflectedInJenkins() throws Exception {
+        final KeycloakUtils.User bob = new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@jenkins-ath.test", "Bob", "Smith");
+        final KeycloakUtils.User john = new KeycloakUtils.User(userJohnKeycloakId, "john", "john@jenkins-ath.test", "John", "Smith");
         final String loginUrl = String.format("%s/realms/%s/account", keycloak.getAuthServerUrl(), REALM);
         keycloakUtils.open(new URL(loginUrl));
 
@@ -229,7 +243,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         assertNull("User has logged out from Jenkins", jenkins.getCurrentUser().id());
 
         assertThrows("User has logged out from keycloak", NoSuchElementException.class,
-                     () -> keycloakUtils.getUser(keycloak.getAuthServerUrl(), REALM));
+                     () -> keycloakUtils.getCurrentUser(keycloak.getAuthServerUrl(), REALM));
     }
 
     private void assertLoggedUser(KeycloakUtils.User expectedUser, String roleToCheck) {
@@ -244,7 +258,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
                 .replace("\"", "")).collect(Collectors.toSet());
         assertThat("User has the expected roles inherited from keycloak", roleToCheck, is(in(allLiTagsInPage)));
 
-        KeycloakUtils.User fromKeyCloak = keycloakUtils.getUser(keycloak.getAuthServerUrl(), REALM);
+        KeycloakUtils.User fromKeyCloak = keycloakUtils.getCurrentUser(keycloak.getAuthServerUrl(), REALM);
         assertThat("User has logged in keycloack", fromKeyCloak.getUserName(), is(expectedUser.getUserName()));
         assertThat("User has logged in keycloack", fromKeyCloak.getEmail(), is(expectedUser.getEmail()));
         assertThat("User has logged in keycloack", fromKeyCloak.getFirstName(), is(expectedUser.getFirstName()));

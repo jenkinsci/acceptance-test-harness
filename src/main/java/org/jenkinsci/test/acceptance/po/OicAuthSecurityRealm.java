@@ -20,7 +20,7 @@ public class OicAuthSecurityRealm extends SecurityRealm {
         control("wellKnownOpenIDConfigurationUrl").set(wellKnownEndpoint);
     }
 
-    public void logoutFromOpenidProvider(boolean logout) {
+    public void setLogoutFromOpenidProvider(boolean logout) {
         Control check = control(by.checkbox("Logout from OpenID Provider"));
         if (logout) {
             check.check();
