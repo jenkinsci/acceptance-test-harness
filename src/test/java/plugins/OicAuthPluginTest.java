@@ -4,16 +4,16 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.LoggedInAuthorizationStrategy;
 import org.jenkinsci.test.acceptance.po.OicAuthSecurityRealm;
+import org.jenkinsci.test.acceptance.po.WhoAmI;
 import org.jenkinsci.test.acceptance.utils.keycloack.KeycloakUtils;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -248,15 +248,12 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
 
     private void assertLoggedUser(KeycloakUtils.User expectedUser, String roleToCheck) {
         assertThat("User has logged in Jenkins", jenkins.getCurrentUser().id(), is(expectedUser.getId()));
-        jenkins.visit("whoAmI");
 
-        // TODO if needed for more tests, consider to create a proper WhoAmI PageObject
-        // for this test we just need the authorities, which are displayed in UI as <li>"role_name"</li>, we can get
-        // all of "li" tags and check our roles are there
-        // Note the quotes surrounding the role name
-        Set<String> allLiTagsInPage = this.driver.findElements(by.tagName("li")).stream().map(webElement -> StringUtils.defaultString(webElement.getText())
-                .replace("\"", "")).collect(Collectors.toSet());
-        assertThat("User has the expected roles inherited from keycloak", roleToCheck, is(in(allLiTagsInPage)));
+        WhoAmI whoAmI = new WhoAmI(jenkins);
+        whoAmI.open();
+        JSONObject jsonData = new JSONObject(whoAmI.getJson().toString());
+        assertThat("User is the expected one", jsonData.getString("name"), is(expectedUser.getId()));
+        assertThat("User has the expected roles inherited from keycloak", roleToCheck, is(in(jsonData.getJSONArray("authorities").toList())));
 
         KeycloakUtils.User fromKeyCloak = keycloakUtils.getCurrentUser(keycloak.getAuthServerUrl(), REALM);
         assertThat("User has logged in keycloack", fromKeyCloak.getUserName(), is(expectedUser.getUserName()));
