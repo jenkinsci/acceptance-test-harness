@@ -37,6 +37,13 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
+# Despite the docker SUID hack below, test-containers accesses /var/run/docker.sock directly and so we can not rely on the SUID hack.
+# Rather take the docker user group as an arg and make the ath-user a member of that group
+# we retain the suid workaround as this method requires a local build of the container
+# we need to do this before we install docker so that any files have the correct permission
+ARG dockergid=1002
+RUN groupadd docker -g $dockergid
+
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
 ARG DOCKER_BUILDX_VERSION=0.16.2
 ARG DOCKER_VERSION=27.1.2
@@ -84,10 +91,11 @@ EXPOSE 5942
 
 RUN deluser --remove-home ubuntu \
   && groupadd ath-user -g $gid \
-  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -m -d /home/ath-user -s /bin/bash
+  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -G docker -m -d /home/ath-user -s /bin/bash
 
-# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. Alternative
-# approach used for this is adding ath-user to the group of /var/run/docker.sock but that require root permission we do not
+# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. This alternative
+# approach is used as adding ath-user to the group of /var/run/docker.sock is a build time option and any published container may
+# not match what is needed, and changing this at runtime would require root permission we do not
 # have in ENTRYPOINT as the container is started as ath-user.
 RUN chmod ug+s /usr/bin/docker*
 
