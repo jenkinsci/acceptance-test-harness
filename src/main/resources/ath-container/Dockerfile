@@ -7,6 +7,15 @@ FROM ubuntu:noble
 ENV LANG C.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
+# Despite the docker SUID hack below, test-containers accesses /var/run/docker.sock directly and so we can not rely on the SUID hack.
+# Rather take the docker user group as an arg and make the ath-user a member of that group
+# we retain the suid workaround as this method requires a local build of the container
+# we need to do this before we install docker so that any files have the correct permission
+# additionally we do this before installing any other packages so that the required groupid will not already be in use
+
+ARG dockergid=1002
+RUN groupadd docker -g $dockergid
+
 # hadolint ignore=DL3008
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
@@ -36,13 +45,6 @@ RUN install -m 0755 -d /etc/apt/keyrings \
     firefox="${FIREFOX_VERSION}*" \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
-
-# Despite the docker SUID hack below, test-containers accesses /var/run/docker.sock directly and so we can not rely on the SUID hack.
-# Rather take the docker user group as an arg and make the ath-user a member of that group
-# we retain the suid workaround as this method requires a local build of the container
-# we need to do this before we install docker so that any files have the correct permission
-ARG dockergid=1002
-RUN groupadd docker -g $dockergid
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
 ARG DOCKER_BUILDX_VERSION=0.16.2
