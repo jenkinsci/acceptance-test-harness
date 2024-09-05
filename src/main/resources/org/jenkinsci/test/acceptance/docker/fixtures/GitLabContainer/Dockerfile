@@ -2,6 +2,6 @@
 FROM gitlab/gitlab-ce:17.3.1-ce.0
 
 COPY create_user.rb /usr/bin/
-
+COPY gitlab.rb /etc/gitlab/
 # Expose the required ports
 EXPOSE 80 443 22
