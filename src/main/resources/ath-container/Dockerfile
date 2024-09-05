@@ -7,15 +7,6 @@ FROM ubuntu:noble
 ENV LANG C.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Despite the docker SUID hack below, test-containers accesses /var/run/docker.sock directly and so we can not rely on the SUID hack.
-# Rather take the docker user group as an arg and make the ath-user a member of that group
-# we retain the suid workaround as this method requires a local build of the container
-# we need to do this before we install docker so that any files have the correct permission
-# additionally we do this before installing any other packages so that the required groupid will not already be in use
-
-ARG dockergid=1002
-RUN groupadd docker -g $dockergid
-
 # hadolint ignore=DL3008
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install --no-install-recommends -y \
@@ -93,13 +84,7 @@ EXPOSE 5942
 
 RUN deluser --remove-home ubuntu \
   && groupadd ath-user -g $gid \
-  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -G docker -m -d /home/ath-user -s /bin/bash
-
-# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. This alternative
-# approach is used as adding ath-user to the group of /var/run/docker.sock is a build time option and any published container may
-# not match what is needed, and changing this at runtime would require root permission we do not
-# have in ENTRYPOINT as the container is started as ath-user.
-RUN chmod ug+s /usr/bin/docker*
+  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -m -d /home/ath-user -s /bin/bash
 
 # Give permission to modify the alternatives links to change the java version in use
 RUN chmod u+s "$(which update-alternatives)"

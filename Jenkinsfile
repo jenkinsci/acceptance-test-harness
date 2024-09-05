@@ -122,10 +122,11 @@ for (int i = 0; i < splits.size(); i++) {
           retryCounts = retryCounts + 1 // increment the retry count before allocating a node in case it fails
           node(nodeLabel) {
             checkout scm
-            def image = skipImageBuild ? docker.image('jenkins/ath') : docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" --build-arg dockergid="$(getent group docker | cut -d: -f3)" ./src/main/resources/ath-container/')
+            def image = skipImageBuild ? docker.image('jenkins/ath') : docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
             sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
             def cwd = pwd()
-            image.inside("-v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
+            def dockergid = sh label: 'get docker group', returnStdout: true, script: 'getent group docker | cut -d: -f3' 
+            image.inside("--group-add ${dockergid} -v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
               def exclusions = splits.get(index).join('\n')
               writeFile file: 'excludes.txt', text: exclusions
               infra.withArtifactCachingProxy {
