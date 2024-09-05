@@ -30,7 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.474</jenkins.version>
+    <jenkins.version>2.475</jenkins.version>
     <selenium.version>4.24.0</selenium.version>
     <guava.version>33.3.0-jre</guava.version> <!-- aligned with selenium -->
     <maven.version>3.8.1</maven.version>
@@ -351,7 +351,7 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.112.Final</version>
+        <version>4.1.113.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
