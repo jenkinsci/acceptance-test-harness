@@ -34,6 +34,7 @@ docker run \
 	--user ath-user \
 	--workdir /home/ath-user/sources \
 	--shm-size 2g \
+	--group-add $(getent group docker | cut -d: -f3) \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v "$(pwd):/home/ath-user/sources" \
 	-v "${HOME}/.m2/repository:/home/ath-user/.m2/repository" \
