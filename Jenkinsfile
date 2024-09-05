@@ -140,6 +140,8 @@ for (int i = 0; i < splits.size(); i++) {
                     allowEmptyResults: true
                     ) {
                       sh """
+                          id
+                          ls -lan /var/run/docker.sock
                           set-java.sh ${jdk}
                           eval \$(vnc.sh)
                           java -version
