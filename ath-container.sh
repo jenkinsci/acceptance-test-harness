@@ -27,7 +27,7 @@ docker build \
 	-t "$tag"
 
 # obtain the groupId to grant to access the docker socket
-dockergid=$(docker run --rm -v /var/run/docker.sock:/var/run/docker.sock alpine stat -c %g /var/run/docker.sock)
+dockergid=$(docker run --rm -v /var/run/docker.sock:/var/run/docker.sock ubuntu:noble stat -c %g /var/run/docker.sock)
 
 docker run \
 	--interactive \
