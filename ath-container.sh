@@ -26,6 +26,9 @@ docker build \
 	"$DIR/src/main/resources/ath-container" \
 	-t "$tag"
 
+# obtain the groupId to grant to access the docker socket
+dockergid=$(docker run --rm -v /var/run/docker.sock:/var/run/docker.sock alpine stat -c %g /var/run/docker.sock)
+
 docker run \
 	--interactive \
 	--tty \
@@ -34,7 +37,7 @@ docker run \
 	--user ath-user \
 	--workdir /home/ath-user/sources \
 	--shm-size 2g \
-	--group-add $(getent group docker | cut -d: -f3) \
+	--group-add ${dockergid} \
 	-v /var/run/docker.sock:/var/run/docker.sock \
 	-v "$(pwd):/home/ath-user/sources" \
 	-v "${HOME}/.m2/repository:/home/ath-user/.m2/repository" \
