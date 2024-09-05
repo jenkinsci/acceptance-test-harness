@@ -37,16 +37,9 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Despite the docker SUID hack below, test-containers accesses /var/run/docker.sock directly and so we can not rely on the SUID hack.
-# Rather take the docker user group as an arg and make the ath-user a member of that group
-# we retain the suid workaround as this method requires a local build of the container
-# we need to do this before we install docker so that any files have the correct permission
-ARG dockergid=1002
-RUN groupadd docker -g $dockergid
-
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
 ARG DOCKER_BUILDX_VERSION=0.16.2
-ARG DOCKER_VERSION=27.1.2
+ARG DOCKER_VERSION=27.2.0
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
   && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
@@ -91,13 +84,7 @@ EXPOSE 5942
 
 RUN deluser --remove-home ubuntu \
   && groupadd ath-user -g $gid \
-  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -G docker -m -d /home/ath-user -s /bin/bash
-
-# Set SUID and SGID for docker binary so it can communicate with mapped socket its uid:gid we can not control. This alternative
-# approach is used as adding ath-user to the group of /var/run/docker.sock is a build time option and any published container may
-# not match what is needed, and changing this at runtime would require root permission we do not
-# have in ENTRYPOINT as the container is started as ath-user.
-RUN chmod ug+s /usr/bin/docker*
+  && useradd ath-user -l -c 'ATH User' -u $uid -g $gid -m -d /home/ath-user -s /bin/bash
 
 # Give permission to modify the alternatives links to change the java version in use
 RUN chmod u+s "$(which update-alternatives)"
