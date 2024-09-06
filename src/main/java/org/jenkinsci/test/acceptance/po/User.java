@@ -64,7 +64,7 @@ public class User extends ContainerPageObject {
                 if (property.isArray()) {
                     for (JsonNode propertyNodes : property) {
                         if (propertyNodes.get("address") != null
-                                && propertyNodes.get("address").asText() != "null") {
+                                && !propertyNodes.get("address").asText().equals("null")) {
                             mail = propertyNodes.get("address").asText();
                         }
                     }

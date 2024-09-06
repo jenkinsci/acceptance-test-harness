@@ -249,7 +249,7 @@ public class MockUpdateCenter implements AutoCleaned {
         if (!String.valueOf(val).equals(String.valueOf(old))) {
             // "-1" and "size" are both string literals in the caller,
             // so only check their identity to prevent a fallback to checking characters which is unneeded.
-            if (MINUS_ONE_STRING == val && "size" == key) {
+            if (MINUS_ONE_STRING == val && "size".equals(key)) {
                 LOGGER.log(Level.FINE, "for {0} updating {1} from {2} to {3}", new Object[] {
                     plugin.getString("name"), key, old, val
                 });
