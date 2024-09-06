@@ -118,9 +118,7 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
         if (name.endsWith(".jpi")) {
             return true;
         }
-        if (name.endsWith("_JPI")) { // http://stackoverflow.com/a/36992531/12916
-            return true;
-        }
-        return false;
+        // http://stackoverflow.com/a/36992531/12916
+        return name.endsWith("_JPI");
     }
 }
