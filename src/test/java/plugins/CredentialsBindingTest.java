@@ -234,7 +234,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
 
         final WorkflowJob job = PipelineTestUtils.createPipelineJobWithScript(jenkins.jobs, jobScript);
         Build b = job.startBuild();
-        assertBuild(b, false, String.format("Could not find credentials entry with ID \'%s\'", CRED_ID));
+        assertBuild(b, false, String.format("Could not find credentials entry with ID '%s'", CRED_ID));
 
         this.authorizeUserToLaunchProject();
 
