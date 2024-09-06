@@ -101,8 +101,7 @@ public class SSHCredentialsTest extends AbstractCredentialsTest {
         dp.save();
 
         CredentialsPage cp = createCredentialsPage(false);
-        final SshPrivateKeyCredential credInDomain =
-                (SshPrivateKeyCredential) createCredentials(SshPrivateKeyCredential.class, cp, SYSTEM_SCOPE);
+        final SshPrivateKeyCredential credInDomain = createCredentials(SshPrivateKeyCredential.class, cp, SYSTEM_SCOPE);
 
         prepareForVerify(cp, CRED_DSCR);
         verifyValueForCredential(cp, credInDomain.username, CRED_USER);

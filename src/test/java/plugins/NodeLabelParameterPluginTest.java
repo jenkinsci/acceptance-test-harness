@@ -99,7 +99,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
 
         b = j.startBuild(Map.of("slavelabel", String.format("!%s && !%s", s1.getName(), s2.getName())))
                 .shouldSucceed();
-        assertThat(b.getNode(), is((Node) jenkins));
+        assertThat(b.getNode(), is(jenkins));
     }
 
     @Test
