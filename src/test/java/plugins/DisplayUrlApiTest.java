@@ -136,7 +136,7 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
 
     private String[] getURLS(String jobName) {
         return jenkins.runScript(
-                        "" + "import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider\n"
+                        "import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider\n"
                                 + "import org.jenkinsci.plugins.workflow.job.*\n"
                                 + "\n"
                                 + "WorkflowJob p = new WorkflowJob(Jenkins.getInstance(),\"%s\");\n"

@@ -107,7 +107,7 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         verifyExternalWorkspacesAction(upstreamJob.name, upstreamBuild);
 
         WorkflowJob downstreamJob = createWorkflowJob(String.format(
-                "" + "def run = selectRun '%s' \n"
+                "def run = selectRun '%s' \n"
                         + "def extWorkspace = exwsAllocate selectedRun: run \n"
                         + "node ('test') { \n"
                         + "   exws (extWorkspace) { \n"
@@ -129,7 +129,7 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
     @Test
     public void externalWorkspaceCleanup() {
         WorkflowJob job = createWorkflowJob(String.format(
-                "" + "def extWorkspace = exwsAllocate '%s' \n"
+                "def extWorkspace = exwsAllocate '%s' \n"
                         + "node ('linux') { \n"
                         + "	exws (extWorkspace) { \n"
                         + "		try { \n"
