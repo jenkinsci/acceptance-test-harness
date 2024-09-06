@@ -30,7 +30,7 @@
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
     <!-- TODO https://github.com/jenkinsci/jenkins/pull/9696 -->
-    <jenkins.version>2.476-rc35309.670fcb_f703b_7</jenkins.version>
+    <jenkins.version>2.476-rc35313.0144a_9701da_2</jenkins.version>
     <selenium.version>4.24.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.3.0-jre</guava.version>
