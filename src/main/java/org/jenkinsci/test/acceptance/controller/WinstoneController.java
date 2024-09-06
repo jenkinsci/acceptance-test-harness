@@ -9,7 +9,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -37,7 +36,7 @@ public class WinstoneController extends LocalController {
         if (getenv == null) {
             return Collections.emptyList();
         }
-        return Arrays.asList(getenv.split("\\s+"));
+        return List.of(getenv.split("\\s+"));
     }
 
     public void addJavaOpt(String javaOpt) {

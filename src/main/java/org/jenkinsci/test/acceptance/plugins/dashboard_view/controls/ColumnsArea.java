@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view.controls;
 
-import java.util.Arrays;
 import java.util.List;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -56,7 +55,7 @@ public class ColumnsArea extends PageAreaImpl {
         By xpath = By.xpath("//div[@name='columns' and not(contains(.,'" + Column.LAST_STABLE.getText()
                 + "'))]//button[@title='Delete']");
         List<WebElement> columns = control(form).resolve().findElements(xpath);
-        Arrays.stream(columns.toArray(new WebElement[0])).forEach(WebElement::click);
+        columns.stream().forEach(WebElement::click);
     }
 
     /**

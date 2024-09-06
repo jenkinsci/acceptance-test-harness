@@ -18,7 +18,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -107,7 +106,7 @@ public class FallbackConfig extends AbstractModule {
                 setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
                 GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
                 if (display != null) {
-                    builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
+                    builder.withEnvironment(Map.of("DISPLAY", display));
                 }
                 GeckoDriverService service = builder.build();
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));

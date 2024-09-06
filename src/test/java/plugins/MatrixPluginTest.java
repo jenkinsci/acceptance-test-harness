@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 
 import com.google.inject.Inject;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
@@ -152,16 +152,13 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("condition");
         job.save();
 
-        MatrixBuild b = job.startBuild(Collections.singletonMap("condition", "false"))
-                .waitUntilFinished()
-                .as(MatrixBuild.class);
+        MatrixBuild b =
+                job.startBuild(Map.of("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldNotExist();
         b.getConfiguration("run=no").shouldNotExist();
 
-        b = job.startBuild(Collections.singletonMap("condition", "true"))
-                .waitUntilFinished()
-                .as(MatrixBuild.class);
+        b = job.startBuild(Map.of("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldExist();
         b.getConfiguration("run=no").shouldNotExist();

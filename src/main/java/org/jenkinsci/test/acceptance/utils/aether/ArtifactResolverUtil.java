@@ -26,7 +26,7 @@ package org.jenkinsci.test.acceptance.utils.aether;
 
 import jakarta.inject.Inject;
 import java.io.File;
-import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.settings.Settings;
@@ -100,7 +100,7 @@ public class ArtifactResolverUtil {
         RemoteRepository repo = repoBuilder.build();
         ArtifactResult r;
         try {
-            r = repoSystem.resolveArtifact(repoSystemSession, new ArtifactRequest(artifact, Arrays.asList(repo), null));
+            r = repoSystem.resolveArtifact(repoSystemSession, new ArtifactRequest(artifact, List.of(repo), null));
         } catch (ArtifactResolutionException e) {
             throw new RuntimeException("Could not resolve " + artifact + " from Maven repository", e);
         }

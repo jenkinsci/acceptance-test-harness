@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -190,7 +189,7 @@ public class PluginManager extends ContainerPageObject {
                 return false;
             }
             List<PluginMetadata> pluginToBeInstalled =
-                    ucmd.get(jenkins).transitiveDependenciesOf(jenkins, Arrays.asList(specs));
+                    ucmd.get(jenkins).transitiveDependenciesOf(jenkins, List.of(specs));
             for (PluginMetadata newPlugin : pluginToBeInstalled) {
                 final String name = newPlugin.getName();
                 String requiredVersion = candidates.get(name);

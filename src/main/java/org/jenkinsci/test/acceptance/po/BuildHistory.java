@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class BuildHistory extends PageObject {
     }
 
     public Set<Build> getBuildsOf(Job... _jobs) {
-        List<Job> jobs = Arrays.asList(_jobs);
+        List<Job> jobs = List.of(_jobs);
         LinkedHashSet<Build> builds = new LinkedHashSet<>();
         for (Build b : getBuilds()) {
             if (jobs.contains(b.job)) {

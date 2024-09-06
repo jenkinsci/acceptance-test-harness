@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ServerSocket;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class IOUtil {
@@ -54,7 +54,7 @@ public class IOUtil {
             }
         }
 
-        throw new IOException("None of the paths exist: " + Arrays.asList(candidatePaths));
+        throw new IOException("None of the paths exist: " + List.of(candidatePaths));
     }
 
     /**

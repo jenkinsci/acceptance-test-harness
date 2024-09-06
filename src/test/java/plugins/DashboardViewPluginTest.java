@@ -9,7 +9,6 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertEquals;
 
 import jakarta.inject.Inject;
-import java.util.Arrays;
 import java.util.List;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
@@ -231,13 +230,13 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         view.open();
 
         final List<String> jobIDs = view.projectStatus.getJobIDs();
-        assertEquals(Arrays.asList("a", "aa", "b"), jobIDs);
+        assertEquals(List.of("a", "aa", "b"), jobIDs);
 
         view.configure(() -> view.jobFilters.setIncludeRegex("a*"));
         view.open();
 
         final List<String> jobIDsFiltered = view.projectStatus.getJobIDs();
-        assertEquals(Arrays.asList("a", "aa"), jobIDsFiltered);
+        assertEquals(List.of("a", "aa"), jobIDsFiltered);
     }
 
     @Test

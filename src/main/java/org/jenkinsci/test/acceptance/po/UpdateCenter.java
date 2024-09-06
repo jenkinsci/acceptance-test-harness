@@ -5,7 +5,7 @@ import static org.hamcrest.Matchers.not;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Iterables;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jenkinsci.test.acceptance.Matchers;
@@ -58,7 +58,7 @@ public class UpdateCenter extends ContainerPageObject {
         }
 
         throw new AssertionError(
-                "No record of installation being attempted for " + pluginShortName + "\n" + Arrays.asList(jobs));
+                "No record of installation being attempted for " + pluginShortName + "\n" + List.of(jobs));
     }
 
     /**

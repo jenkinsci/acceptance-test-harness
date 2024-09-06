@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -501,7 +500,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
                 return type.cast(c.newInstance(args));
             }
 
-            throw new AssertionError("No matching constructor found in " + type + ": " + Arrays.asList(args));
+            throw new AssertionError("No matching constructor found in " + type + ": " + List.of(args));
         } catch (ReflectiveOperationException e) {
             throw new AssertionError("Failed to invoke a constructor of " + type, e);
         }

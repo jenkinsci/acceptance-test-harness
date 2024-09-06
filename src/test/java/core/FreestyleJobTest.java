@@ -17,7 +17,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -163,7 +164,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         j.addShellStep("echo \">$text<\"");
         j.save();
 
-        Build build = j.scheduleBuild(Collections.singletonMap("text", "asdf")).waitUntilFinished();
+        Build build = j.scheduleBuild(Map.of("text", "asdf")).waitUntilFinished();
         assertThat(build.getConsole(), containsString(">asdf<"));
     }
 
@@ -284,7 +285,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
 
         view.scheduleJob(j.name);
         BuildWithParameters paramPage = new BuildWithParameters(j, new URL(driver.getCurrentUrl()));
-        paramPage.enter(Collections.singletonList(p), Collections.singletonMap("foo", "bar"));
+        paramPage.enter(List.of(p), Map.of("foo", "bar"));
         paramPage.start();
 
         j.build(2).waitUntilStarted().shouldSucceed();
