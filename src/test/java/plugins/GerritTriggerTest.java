@@ -307,9 +307,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         assertThat(p.waitFor(), is(equalTo(0)));
         StringWriter writer = new StringWriter();
         IOUtils.copy(p.getInputStream(), writer, StandardCharsets.UTF_8);
-        String string = writer.toString()
-                .replaceAll(System.getProperty("line.separator"), "")
-                .replaceAll(" ", "");
+        String string = writer.toString().replaceAll(System.lineSeparator(), "").replaceAll(" ", "");
         writer.close();
         return string;
     }

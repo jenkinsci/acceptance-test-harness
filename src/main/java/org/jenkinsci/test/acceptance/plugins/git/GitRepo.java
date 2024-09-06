@@ -149,7 +149,7 @@ public class GitRepo implements Closeable {
 
             while ((line = reader.readLine()) != null) {
                 builder.append(line);
-                builder.append(System.getProperty("line.separator"));
+                builder.append(System.lineSeparator());
             }
 
             int r = p.waitFor();
