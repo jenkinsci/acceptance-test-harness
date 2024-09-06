@@ -128,11 +128,10 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
             return true;
         }
 
-        if (!(other instanceof ContainerPageObject)) {
+        if (!(other instanceof ContainerPageObject rhs)) {
             return false;
         }
 
-        ContainerPageObject rhs = (ContainerPageObject) other;
         return this.url.toExternalForm().equals(rhs.url.toExternalForm());
     }
 

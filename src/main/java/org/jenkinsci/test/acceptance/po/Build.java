@@ -333,11 +333,10 @@ public class Build extends ContainerPageObject {
             return true;
         }
 
-        if (!(other instanceof Build)) {
+        if (!(other instanceof Build rhs)) {
             return false;
         }
 
-        Build rhs = (Build) other;
         // There is a problem comparing jobs for equality as there is no nice
         // way to access its full name. The default implementation assumes that
         // POs are equal iff they share the same URL which is not true for jobs inside view.

@@ -178,8 +178,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
         @Override
         public Void call() throws IOException {
-            if (controller instanceof LogListenable) {
-                LogListenable ll = (LogListenable) controller;
+            if (controller instanceof LogListenable ll) {
                 ll.addLogListener(l);
             }
             return null;
