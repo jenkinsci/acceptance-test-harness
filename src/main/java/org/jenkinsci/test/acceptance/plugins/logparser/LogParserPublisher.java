@@ -24,7 +24,6 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
         RuleType(String projecttype) {
             this.projecttype = projecttype;
         }
-        ;
 
         public String getProjecttype() {
             return projecttype;
