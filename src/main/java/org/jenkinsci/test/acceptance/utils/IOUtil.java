@@ -44,8 +44,10 @@ public class IOUtil {
      * @throws IOException If nothing found.
      */
     public static @NonNull File firstExisting(boolean directory, String... candidatePaths) throws IOException {
-        for (String path: candidatePaths) {
-            if (path == null) continue;
+        for (String path : candidatePaths) {
+            if (path == null) {
+                continue;
+            }
             File f = new File(path);
             if (directory ? f.isDirectory() : f.isFile()) {
                 return f;
@@ -82,14 +84,13 @@ public class IOUtil {
      * @param from if {@code <=0} then default value 49152 is used
      * @param to   if {@code <=0} then default value 65535 is used
      */
-    public static int randomTcpPort(int from, int to){
-        from = (from <=0) ? 49152 : from;
+    public static int randomTcpPort(int from, int to) {
+        from = (from <= 0) ? 49152 : from;
         to = (to <= 0) ? 65535 : to;
 
-
-        while(true){
-            int candidate = (int) ((Math.random() * (to-from)) + from);
-            if(isTcpPortFree(candidate)){
+        while (true) {
+            int candidate = (int) ((Math.random() * (to - from)) + from);
+            if (isTcpPortFree(candidate)) {
                 return candidate;
             }
             LOGGER.info(String.format("Port %s is in use", candidate));
@@ -99,11 +100,11 @@ public class IOUtil {
     /**
      * Gives random available TCP port.
      */
-    public static int randomTcpPort(){
-        return randomTcpPort(-1,-1);
+    public static int randomTcpPort() {
+        return randomTcpPort(-1, -1);
     }
 
-    public static boolean isTcpPortFree(int port){
+    public static boolean isTcpPortFree(int port) {
         try {
             ServerSocket ss = new ServerSocket(port);
             ss.close();

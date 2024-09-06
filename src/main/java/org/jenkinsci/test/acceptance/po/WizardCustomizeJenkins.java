@@ -67,7 +67,11 @@ public class WizardCustomizeJenkins extends PageObject {
                 .ignoring(NoSuchElementException.class, NoSuchFrameException.class)
                 .until(() -> {
                     try {
-                        WebElement element = driver.switchTo().defaultContent().switchTo().frame("setup-first-user").findElement(by.name("username"));
+                        WebElement element = driver.switchTo()
+                                .defaultContent()
+                                .switchTo()
+                                .frame("setup-first-user")
+                                .findElement(by.name("username"));
                         return element != null;
                     } finally {
                         driver.switchTo().defaultContent();

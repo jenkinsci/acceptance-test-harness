@@ -27,7 +27,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@ToolInstallationPageObject(name="Groovy", installer="hudson.plugins.groovy.GroovyInstaller")
+@ToolInstallationPageObject(name = "Groovy", installer = "hudson.plugins.groovy.GroovyInstaller")
 public class GroovyInstallation extends ToolInstallation {
 
     public static final String DEFAULT_GROOVY_ID = "default_Groovy";

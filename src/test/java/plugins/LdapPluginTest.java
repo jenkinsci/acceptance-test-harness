@@ -3,16 +3,21 @@ package plugins;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.fullNameIs;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.hasLoggedInUser;
+import static org.jenkinsci.test.acceptance.Matchers.isMemberOf;
+import static org.jenkinsci.test.acceptance.Matchers.mailAddressIs;
 
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.LdapContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapEnvironmentVariable;
 import org.jenkinsci.test.acceptance.plugins.ldap.SearchForGroupsLdapGroupMembershipStrategy;
@@ -23,7 +28,6 @@ import org.jenkinsci.test.acceptance.po.User;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-
 
 /**
  * This test suite always runs against the latest ldap plugin version.
@@ -54,21 +58,26 @@ public class LdapPluginTest extends AbstractJUnitTest {
      *
      * @param ldapContainer a docker LdapContainer
      * @return default ldap connection details
-     * @throws MalformedURLException 
+     * @throws MalformedURLException
      */
     private LdapDetails createDefaults(LdapContainer ldapContainer) throws MalformedURLException {
         return ldapContainer.createDefault();
     }
-    
+
     /**
      * Creates default ldap connection details without manager credentials from a running docker LdapContainer.
-     * 
+     *
      * @param ldapContainer
      * @return default ldap connection details without the manager credentials
-     * @throws MalformedURLException 
+     * @throws MalformedURLException
      */
     private LdapDetails createDefaultsWithoutManagerCred(LdapContainer ldapContainer) throws MalformedURLException {
-        return new LdapDetails(LdapContainer.addBracketsIfNeeded(ldapContainer.getHost()), ldapContainer.getPort(), "", "", ldapContainer.getRootDn());
+        return new LdapDetails(
+                LdapContainer.addBracketsIfNeeded(ldapContainer.getHost()),
+                ldapContainer.getPort(),
+                "",
+                "",
+                ldapContainer.getRootDn());
     }
 
     @Test
@@ -124,7 +133,8 @@ public class LdapPluginTest extends AbstractJUnitTest {
         security.configure();
         LdapSecurityRealm realm = security.useRealm(LdapSecurityRealm.class);
         int freePort = findAvailablePort();
-        LdapDetails notRunningLdap = new LdapDetails("localhost", freePort, "cn=admin,dc=jenkins-ci,dc=org", "root", "dc=jenkins-ci,dc=org");
+        LdapDetails notRunningLdap =
+                new LdapDetails("localhost", freePort, "cn=admin,dc=jenkins-ci,dc=org", "root", "dc=jenkins-ci,dc=org");
         realm.configure(notRunningLdap);
         security.save();
         // Then
@@ -166,7 +176,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(jenkins, hasLoggedInUser("jenkins@jenkins-ci.org"));
     }
-    
+
     @Test
     public void invalid_user_search_filter() throws MalformedURLException {
         // Given
@@ -191,11 +201,16 @@ public class LdapPluginTest extends AbstractJUnitTest {
         securityConfig.configure();
         LdapSecurityRealm realm = securityConfig.useRealm(LdapSecurityRealm.class);
         int freePort = this.findAvailablePort();
-        LdapDetails ldapDetails = new LdapDetails("", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
+        LdapDetails ldapDetails = new LdapDetails(
+                "", 0, ldapContainer.getManagerDn(), ldapContainer.getManagerPassword(), ldapContainer.getRootDn());
         // Fallback-Config: primary server is not running, alternative server is running docker fixture
         String host = LdapContainer.addBracketsIfNeeded(ldapContainer.getHost());
-        ldapDetails.setHostWithPort((
-                LdapContainer.ipv6Enabled() ? "[::1]:" : "localhost:") + freePort + ' ' + host + ':' + ldapContainer.getPort());
+        ldapDetails.setHostWithPort((LdapContainer.ipv6Enabled() ? "[::1]:" : "localhost:")
+                + freePort
+                + ' '
+                + host
+                + ':'
+                + ldapContainer.getPort());
         realm.configure(ldapDetails);
         securityConfig.save();
 
@@ -205,7 +220,6 @@ public class LdapPluginTest extends AbstractJUnitTest {
 
         // Then
         assertThat(jenkins, hasLoggedInUser("jenkins"));
-
     }
 
     @Test
@@ -235,7 +249,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         User u = new User(jenkins, "jenkins");
         assertThat(u.mail(), nullValue());
     }
-    
+
     @Test
     public void enable_cache() throws IOException {
         // Given
@@ -261,7 +275,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         // Then
         assertThat(jenkins, not(hasLoggedInUser("jenkins")));
     }
-   
+
     @Test
     public void resolve_group_memberships_with_defaults() throws MalformedURLException {
         // Given
@@ -330,7 +344,9 @@ public class LdapPluginTest extends AbstractJUnitTest {
     @Test
     public void custom_invalid_group_membership_filter() throws MalformedURLException {
         // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("(member={0})"));
+        useLdapAsSecurityRealm(createDefaults(ldap.get())
+                .groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class)
+                .groupMembershipStrategyParam("(member={0})"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
@@ -339,11 +355,13 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(userJenkins, not(isMemberOf("ldap1")));
         assertThat(userJenkins, not(isMemberOf("ldap2")));
     }
-    
+
     @Test
     public void custom_valid_group_membership_filter() throws MalformedURLException {
         // Given
-        useLdapAsSecurityRealm(createDefaults(ldap.get()).groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class).groupMembershipStrategyParam("memberUid={1}"));
+        useLdapAsSecurityRealm(createDefaults(ldap.get())
+                .groupMembershipStrategy(SearchForGroupsLdapGroupMembershipStrategy.class)
+                .groupMembershipStrategyParam("memberUid={1}"));
         // When
         Login login = jenkins.login();
         login.doLogin("jenkins", "root");
@@ -352,7 +370,7 @@ public class LdapPluginTest extends AbstractJUnitTest {
         assertThat(userJenkins, isMemberOf("ldap1"));
         assertThat(userJenkins, isMemberOf("ldap2"));
     }
-    
+
     @Test
     public void custom_mail_filter() throws MalformedURLException {
         // Given

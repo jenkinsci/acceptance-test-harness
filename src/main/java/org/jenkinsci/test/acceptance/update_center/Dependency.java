@@ -18,12 +18,13 @@ public class Dependency {
 
     public Dependency(String specification) {
         optional = specification.endsWith(OPTIONAL);
-        if(optional)
-            specification = specification.substring(0, specification.length()-OPTIONAL.length());
+        if (optional) {
+            specification = specification.substring(0, specification.length() - OPTIONAL.length());
+        }
         String[] tokens = specification.split(":");
-        if (tokens.length != 2) throw new IllegalArgumentException(
-                "Unable to parse dependency declaration " + specification
-        );
+        if (tokens.length != 2) {
+            throw new IllegalArgumentException("Unable to parse dependency declaration " + specification);
+        }
         name = tokens[0];
         version = tokens[1];
     }
@@ -31,8 +32,7 @@ public class Dependency {
     public Dependency(
             @JsonProperty("name") String name,
             @JsonProperty("version") String version,
-            @JsonProperty("optional") boolean optional
-    ) {
+            @JsonProperty("optional") boolean optional) {
         this.name = name;
         this.version = version;
         this.optional = optional;
@@ -46,7 +46,8 @@ public class Dependency {
         return owner.plugins.get(name);
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "Dependency[" + name + (version == null ? "" : ("@" + version)) + ";optional=" + optional + "]";
     }
 }

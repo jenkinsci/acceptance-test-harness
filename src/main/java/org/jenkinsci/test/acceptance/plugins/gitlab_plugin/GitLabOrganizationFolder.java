@@ -1,13 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.gitlab_plugin;
 
 import com.google.inject.Injector;
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.po.*;
-
-import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Folder;
 
 @Describable("jenkins.branch.OrganizationFolder")
 public class GitLabOrganizationFolder extends Folder {
@@ -28,7 +25,6 @@ public class GitLabOrganizationFolder extends Folder {
 
     public String getCheckLog() {
         return driver.getPageSource();
-
     }
 
     public GitLabOrganizationFolder waitForCheckFinished(final int timeout) {

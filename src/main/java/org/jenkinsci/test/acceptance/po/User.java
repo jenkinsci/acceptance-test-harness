@@ -52,7 +52,9 @@ public class User extends ContainerPageObject {
     }
 
     private void load() {
-        if (id != null) return;
+        if (id != null) {
+            return;
+        }
         try {
             JsonNode json = getJson();
             id = json.get("id").asText();
@@ -61,7 +63,8 @@ public class User extends ContainerPageObject {
             if (property != null) {
                 if (property.isArray()) {
                     for (JsonNode propertyNodes : property) {
-                        if (propertyNodes.get("address") != null && propertyNodes.get("address").asText() != "null") {
+                        if (propertyNodes.get("address") != null
+                                && propertyNodes.get("address").asText() != "null") {
                             mail = propertyNodes.get("address").asText();
                         }
                     }
@@ -108,10 +111,16 @@ public class User extends ContainerPageObject {
 
     @Override
     public boolean equals(Object rhs) {
-        if (this == rhs) return true;
-        if (rhs == null) return false;
+        if (this == rhs) {
+            return true;
+        }
+        if (rhs == null) {
+            return false;
+        }
 
-        if (!getClass().equals(rhs.getClass())) return false;
+        if (!getClass().equals(rhs.getClass())) {
+            return false;
+        }
 
         User other = (User) rhs;
         return id().equals(other.id());

@@ -47,20 +47,22 @@ public class WorkflowJob extends Job {
             try {
                 super.set(text);
             } catch (NoSuchElementException x) {
-                // As of JENKINS-28769, the textarea is set display: none due to the ACE editor, so CapybaraPortingLayerImpl.find, called by super.resolve, calls isDisplayed and fails.
+                // As of JENKINS-28769, the textarea is set display: none due to the ACE editor, so
+                // CapybaraPortingLayerImpl.find, called by super.resolve, calls isDisplayed and fails.
                 // Anyway we cannot use the web driver to interact with the hidden textarea.
                 // Some code cannibalized from #45:
                 String cssSelector = waitFor("#workflow-editor-1");
                 executeScript(
-                        "var targets = document.getElementsBySelector(arguments[0]);" +
-                                "if (!targets || targets.length === 0) {" +
-                                "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];" +
-                                "}" +
-                                "if (!targets[0].aceEditor) {" +
-                                "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];" +
-                                "}" +
-                                "targets[0].aceEditor.setValue(arguments[1]);",
-                        cssSelector, text);
+                        "var targets = document.getElementsBySelector(arguments[0]);"
+                                + "if (!targets || targets.length === 0) {"
+                                + "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];"
+                                + "}"
+                                + "if (!targets[0].aceEditor) {"
+                                + "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];"
+                                + "}"
+                                + "targets[0].aceEditor.setValue(arguments[1]);",
+                        cssSelector,
+                        text);
             }
         }
 
@@ -71,20 +73,21 @@ public class WorkflowJob extends Job {
     };
 
     private static void waitForRenderOf(@NonNull final String cssSelector, @NonNull final Jenkins jenkins) {
-        jenkins.waitFor().withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
+        jenkins.waitFor()
+                .withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
                 .withTimeout(Duration.ofSeconds(20))
-                .until(() -> isRendered(cssSelector, jenkins))
-        ;
+                .until(() -> isRendered(cssSelector, jenkins));
     }
 
     private static boolean isRendered(@NonNull String cssSelector, @NonNull Jenkins jenkins) {
         return (boolean) jenkins.executeScript(
-                "var targets = document.getElementsBySelector(arguments[0]);" +
-                        "if (!targets || targets.length === 0) {" +
-                        "    return false;" +
-                        "} else {" +
-                        "    return true;" +
-                        "}", cssSelector);
+                "var targets = document.getElementsBySelector(arguments[0]);"
+                        + "if (!targets || targets.length === 0) {"
+                        + "    return false;"
+                        + "} else {"
+                        + "    return true;"
+                        + "}",
+                cssSelector);
     }
 
     public final Control sandbox = control("/definition/sandbox");
@@ -94,6 +97,7 @@ public class WorkflowJob extends Job {
         return String.format("sh '''%s'''%n", copyResourceShell(res, res.getName()));
     }
 
+    @Override
     public void delete() {
         open();
         runThenHandleDialog(() -> clickLink("Delete Pipeline"));
@@ -112,7 +116,8 @@ public class WorkflowJob extends Job {
         select("Git");
         WebElement gitUrl = waitFor(by.path("/definition/scm/userRemoteConfigs/url"), 10);
         gitUrl.sendKeys(gitRepositoryUrl);
-        Select credentials = new Select(control(By.className("credentials-select")).resolve());
+        Select credentials =
+                new Select(control(By.className("credentials-select")).resolve());
         credentials.selectByVisibleText(credentialsKey);
     }
 

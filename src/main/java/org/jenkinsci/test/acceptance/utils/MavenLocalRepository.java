@@ -31,7 +31,7 @@ public class MavenLocalRepository {
     private final File mavenLocalRepository;
 
     private MavenLocalRepository() {
-        if(System.getProperty("mavenRepoPath") != null) {
+        if (System.getProperty("mavenRepoPath") != null) {
             mavenLocalRepository = new File(System.getProperty("mavenRepoPath"));
         } else {
             File userHome = new File(System.getProperty("user.home"));
@@ -46,6 +46,4 @@ public class MavenLocalRepository {
     public static File getMavenLocalRepository() {
         return LazyHolder.INSTANCE.mavenLocalRepository;
     }
-
-
 }

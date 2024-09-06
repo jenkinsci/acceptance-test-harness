@@ -37,15 +37,11 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
      * by {@code area.getPath()}. IOW, it needs to be <i>in</i> parent area.
      */
     protected PageAreaImpl(PageArea area, String path) {
-        this(area.getPage(), path.startsWith(area.getPath())
-                ? path
-                : area.getPath() + "/" + path
-        );
+        this(area.getPage(), path.startsWith(area.getPath()) ? path : area.getPath() + "/" + path);
 
         if (path.startsWith("/") && !path.startsWith(area.getPath())) {
             throw new IllegalArgumentException(
-                    "Child area '" + path + "' is not part of its parent: " + area.getPath()
-            );
+                    "Child area '" + path + "' is not part of its parent: " + area.getPath());
         }
     }
 
@@ -74,9 +70,11 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
 
     @Override
     public String getPath(String rel, int index) {
-        assert index >= 0: "Negative index is forbidden";
+        assert index >= 0 : "Negative index is forbidden";
         String path = getPath(rel);
-        if (index == 0) return path;
+        if (index == 0) {
+            return path;
+        }
 
         return path + '[' + index + ']';
     }
@@ -115,6 +113,7 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
         return new Control(injector, selector);
     }
 
+    @Override
     public @NonNull String createPageArea(String name, Runnable action) throws TimeoutException {
         String pathPrefix = getPath() + '/' + name;
         return getPage().createPageArea(pathPrefix, action);

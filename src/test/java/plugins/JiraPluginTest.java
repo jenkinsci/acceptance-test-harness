@@ -26,7 +26,7 @@ import org.junit.experimental.categories.Category;
 @WithPlugins({"jira", "git"})
 @Category(DockerTest.class)
 @WithDocker
-@Since( "2.73.3" )
+@Since("2.73.3")
 public class JiraPluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<JiraContainer> docker;
@@ -47,14 +47,18 @@ public class JiraPluginTest extends AbstractJUnitTest {
 
     @After
     public void tearDown() throws Exception {
-        if (git!=null)
+        if (git != null) {
             git.close();
+        }
 
         jenkins.runScript("hudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT = false");
     }
 
     @Test
-    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {USERNAME, PASSWORD}, id = CREDENTIALS_ID)
+    @WithCredentials(
+            credentialType = WithCredentials.USERNAME_PASSWORD,
+            values = {USERNAME, PASSWORD},
+            id = CREDENTIALS_ID)
     public void jira_ticket_gets_updated_with_a_build_link() throws Exception {
         JiraContainer jira = docker.get();
         jira.waitForReady(this);

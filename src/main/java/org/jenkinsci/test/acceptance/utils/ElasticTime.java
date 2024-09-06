@@ -46,6 +46,7 @@ public class ElasticTime {
      * Amount of threads executing concurrently. Time is slowed down proportionally multiplying the time;
      */
     private final int concurrency;
+
     {
         int forkCount = 1;
         try {
@@ -71,7 +72,7 @@ public class ElasticTime {
         double actualSeconds = getSlowDownFactor();
         return Math.round(ms * actualSeconds);
     }
-    
+
     /**
      * Get the factor by which we slow down time.
      * Default is {@code 1.0} (no difference). Use {@code >1} in case of slower environment, {@code <1} in case of faster one.

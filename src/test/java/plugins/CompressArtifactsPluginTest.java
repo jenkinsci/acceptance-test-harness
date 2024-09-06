@@ -77,7 +77,8 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
         assertThat(compressedBuild, hasCompressedArtifacts());
     }
 
-    @Test @Issue("JENKINS-27558")
+    @Test
+    @Issue("JENKINS-27558")
     @WithPlugins("maven-plugin")
     public void archiveMavenProject() {
         MavenInstallation.installSomeMaven(jenkins);
@@ -105,11 +106,12 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
 
     private void compareArtifacts(Build lhs, Build rhs) {
         final List<Artifact> lhsArtifacts = lhs.getArtifacts();
-        for (Artifact ra: lhsArtifacts) {
+        for (Artifact ra : lhsArtifacts) {
             String rap = ra.getRelativePath();
             assertEquals(rap, rhs.getArtifact(rap).getRelativePath());
         }
-        assertEquals("Artifacts differs", lhsArtifacts.size(), rhs.getArtifacts().size());
+        assertEquals(
+                "Artifacts differs", lhsArtifacts.size(), rhs.getArtifacts().size());
         assertThat("No artifacts", lhsArtifacts.size(), greaterThan(0));
     }
 

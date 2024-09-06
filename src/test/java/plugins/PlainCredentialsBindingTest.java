@@ -60,22 +60,22 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
     public void globalSecretFileCredentialTest() throws URISyntaxException {
         createAndUseCredential(GLOBAL_SCOPE, FileCredentials.class);
     }
-    
+
     @Test
     public void globalSecretTextCredentialTest() throws URISyntaxException {
         createAndUseCredential(GLOBAL_SCOPE, StringCredentials.class);
     }
-    
+
     @Test
     public void systemSecretFileCredentialTest() throws URISyntaxException {
         createAndUseCredential(SYSTEM_SCOPE, FileCredentials.class);
     }
-    
+
     @Test
     public void systemSecretTextCredentialTest() throws URISyntaxException {
         createAndUseCredential(SYSTEM_SCOPE, StringCredentials.class);
     }
-    
+
     @Test
     public void domainSecretFileCredentialTest() throws URISyntaxException {
         createAndUseDomainCredential(GLOBAL_SCOPE, FileCredentials.class);
@@ -85,19 +85,23 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
     public void domainSecretTextCredentialsTest() throws URISyntaxException {
         createAndUseDomainCredential(GLOBAL_SCOPE, StringCredentials.class);
     }
-    
+
     /**
-     * Creates a credential of the type passed as parameter. 
+     * Creates a credential of the type passed as parameter.
      * Use it in a Free style job and performs relevant assertions.
-     * 
+     *
      * @param scope
      * @param credentialClazz
      * @throws URISyntaxException
      */
-    private <T extends BaseStandardCredentials> void createAndUseCredential(String scope, Class<T> credentialClazz) throws URISyntaxException {
+    private <T extends BaseStandardCredentials> void createAndUseCredential(String scope, Class<T> credentialClazz)
+            throws URISyntaxException {
         // Get credential binding class
-        Class<? extends CredentialsBinding> credentialsBindingClazz = credentialClazz.isAssignableFrom(FileCredentials.class) ? SecretFileCredentialsBinding.class : SecretStringCredentialsBinding.class;
-        
+        Class<? extends CredentialsBinding> credentialsBindingClazz =
+                credentialClazz.isAssignableFrom(FileCredentials.class)
+                        ? SecretFileCredentialsBinding.class
+                        : SecretStringCredentialsBinding.class;
+
         // Create credential of whatever type has been passed as parameter
         final CredentialsPage cp = createCredentialsPage(false);
         createCredentials(credentialClazz, cp, null);
@@ -105,21 +109,25 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
         // Create and configure job and perform relevant assertions
         createJobAndCheck(scope, credentialClazz, credentialsBindingClazz);
     }
-    
+
     /**
-     * Creates a credential of the type passed as parameter inside a domain. 
+     * Creates a credential of the type passed as parameter inside a domain.
      * Use it in a Free style job and performs relevant assertions.
-     * 
+     *
      * @param scope
      * @param credentialClazz
      * @throws URISyntaxException
      */
-    private <T extends BaseStandardCredentials, K extends CredentialsBinding> void createAndUseDomainCredential(String scope, Class<T> credentialClazz) throws URISyntaxException {
+    private <T extends BaseStandardCredentials, K extends CredentialsBinding> void createAndUseDomainCredential(
+            String scope, Class<T> credentialClazz) throws URISyntaxException {
         // Get credential binding class
-        Class<? extends CredentialsBinding> credentialsBindingClazz = credentialClazz.isAssignableFrom(FileCredentials.class) ? SecretFileCredentialsBinding.class : SecretStringCredentialsBinding.class;
-        
+        Class<? extends CredentialsBinding> credentialsBindingClazz =
+                credentialClazz.isAssignableFrom(FileCredentials.class)
+                        ? SecretFileCredentialsBinding.class
+                        : SecretStringCredentialsBinding.class;
+
         final String domainName = "domain";
-        
+
         // Create domain
         DomainPage dp = new DomainPage(jenkins);
         dp.open();
@@ -127,11 +135,11 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
         d.name.set(domainName);
         d.description.set("domain description");
         dp.save();
-        
+
         // Create credential inside the domain
         final CredentialsPage c = createCredentialsPage(false, domainName);
         BaseStandardCredentials cred = createCredentials(credentialClazz, c, null);
-        
+
         // Create and configure job and perform relevant assertions
         createJobAndCheck(scope, credentialClazz, credentialsBindingClazz);
     }
@@ -139,34 +147,34 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
     /**
      * Creates a job and uses a credential in a shell script using the credentials binding functionality.
      * Perform relevant assertions.
-     * 
+     *
      * @param scope
      * @param credentialClazz
      * @param credentialsBindingClazz
      */
-    private <K extends CredentialsBinding, T extends BaseStandardCredentials> void createJobAndCheck(String scope,
-            Class<T> credentialClazz, Class<K> credentialsBindingClazz) {
+    private <K extends CredentialsBinding, T extends BaseStandardCredentials> void createJobAndCheck(
+            String scope, Class<T> credentialClazz, Class<K> credentialsBindingClazz) {
         // Create free style job
         FreeStyleJob job = jenkins.jobs.create();
-        
+
         job.configure();
         job.check("Use secret text(s) or file(s)");
-        
+
         // Add a credential binding
         final ManagedCredentialsBinding mcb = new ManagedCredentialsBinding(job);
         K cb = mcb.addCredentialBinding(credentialsBindingClazz);
-        
+
         // If the scope is GLOBAL, job has access to credentials
         if (scope.equals(GLOBAL_SCOPE)) {
             // No need to select credential. Since there is only one it is already selected.
             cb.variable.set(BINDING_VARIABLE);
-            
+
             // Add build step that echoes the value of the variable
             addBuildStepEchoingCredentials(job, credentialClazz);
 
             job.save();
             Build b = job.scheduleBuild();
-    
+
             // Build should succeed
             b.shouldSucceed();
             // Binding should be OK
@@ -177,25 +185,28 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
         }
     }
 
-
-    private <T extends BaseStandardCredentials> void addBuildStepEchoingCredentials(FreeStyleJob job, Class<T> credentialClazz) {
+    private <T extends BaseStandardCredentials> void addBuildStepEchoingCredentials(
+            FreeStyleJob job, Class<T> credentialClazz) {
         if (SystemUtils.IS_OS_UNIX) {
             ShellBuildStep shell = job.addBuildStep(ShellBuildStep.class);
 
             if (credentialClazz.isAssignableFrom(FileCredentials.class)) {
-                shell.command("if echo \"$BINDING_VARIABLE\" | grep -q \"" + SECRET_FILE + "\"  \n then \n echo \"" + BINDING_SUCCESS + "\" \n fi");
+                shell.command("if echo \"$BINDING_VARIABLE\" | grep -q \"" + SECRET_FILE + "\"  \n then \n echo \""
+                        + BINDING_SUCCESS + "\" \n fi");
             } else {
-                shell.command("if [ \"$" + BINDING_VARIABLE + "\" = \"" + SECRET_TEXT + "\" ] \n then \n echo \"" + BINDING_SUCCESS + "\" \n fi");
+                shell.command("if [ \"$" + BINDING_VARIABLE + "\" = \"" + SECRET_TEXT + "\" ] \n then \n echo \""
+                        + BINDING_SUCCESS + "\" \n fi");
             }
         } else {
             BatchCommandBuildStep shell = job.addBuildStep(BatchCommandBuildStep.class);
 
             if (credentialClazz.isAssignableFrom(FileCredentials.class)) {
-                shell.command("@echo \"%BINDING_VARIABLE%\" | findstr \"" + SECRET_FILE + "\">NUL && echo \"" + BINDING_SUCCESS + "\"");
+                shell.command("@echo \"%BINDING_VARIABLE%\" | findstr \"" + SECRET_FILE + "\">NUL && echo \""
+                        + BINDING_SUCCESS + "\"");
             } else {
-                shell.command("@if \"%" + BINDING_VARIABLE + "%\"==\"" + SECRET_TEXT + "\" echo \"" + BINDING_SUCCESS + "\"");
+                shell.command(
+                        "@if \"%" + BINDING_VARIABLE + "%\"==\"" + SECRET_TEXT + "\" echo \"" + BINDING_SUCCESS + "\"");
             }
         }
     }
-
 }

@@ -1,6 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.deploy;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 import org.openqa.selenium.NoSuchElementException;
 
 /**
@@ -16,7 +20,7 @@ public class DeployPublisher extends AbstractStep implements PostBuildStep {
     public final Control contextPath = control("contextPath");
     public final Control url = control("adapters/url");
 
-    public void setCredentials(String credentials){
+    public void setCredentials(String credentials) {
         control("adapters/credentialsId").select(credentials);
     }
 

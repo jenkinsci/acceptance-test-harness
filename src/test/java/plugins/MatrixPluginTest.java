@@ -13,7 +13,13 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.matrix_reloaded.MatrixReloadedAction;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.LabelAxis;
+import org.jenkinsci.test.acceptance.po.MatrixBuild;
+import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
+import org.jenkinsci.test.acceptance.po.MatrixProject;
+import org.jenkinsci.test.acceptance.po.MatrixRun;
+import org.jenkinsci.test.acceptance.po.Slave;
+import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.slave.SlaveProvider;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,18 +40,17 @@ public class MatrixPluginTest extends AbstractJUnitTest {
      *   [3,2]: Not built
      *   [3,3]: Built
      */
-    private static final String GROOVY_SELECTOR_SCRIPT = "combinations.each{\n" +
-            "   def x = it.axis_x as Integer\n" +
-            "   def y = it.axis_y as Integer\n" +
-            "   def i = (x * y) % 2\n" +
-            "   if(i == 0) {\n" +
-            "      return \n" +
-            "   }\n" +
-            "   result[it.axis_y] = result[it.axis_y] ?: []\n" +
-            "   result[it.axis_y] << it\n" +
-            "}\n" +
-            " \n" +
-            "[result, true]";
+    private static final String GROOVY_SELECTOR_SCRIPT = "combinations.each{\n" + "   def x = it.axis_x as Integer\n"
+            + "   def y = it.axis_y as Integer\n"
+            + "   def i = (x * y) % 2\n"
+            + "   if(i == 0) {\n"
+            + "      return \n"
+            + "   }\n"
+            + "   result[it.axis_y] = result[it.axis_y] ?: []\n"
+            + "   result[it.axis_y] << it\n"
+            + "}\n"
+            + " \n"
+            + "[result, true]";
     private static final String STRATEGY = "Groovy Script Matrix Executor Strategy";
     private static final int AXIS_MAX_VALUE = 3;
     private static final int AXIS_X_TEST_NOT_BUILT = 1;
@@ -147,12 +152,16 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         job.addParameter(StringParameter.class).setName("condition");
         job.save();
 
-        MatrixBuild b = job.startBuild(Collections.singletonMap("condition", "false")).waitUntilFinished().as(MatrixBuild.class);
+        MatrixBuild b = job.startBuild(Collections.singletonMap("condition", "false"))
+                .waitUntilFinished()
+                .as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldNotExist();
         b.getConfiguration("run=no").shouldNotExist();
 
-        b = job.startBuild(Collections.singletonMap("condition", "true")).waitUntilFinished().as(MatrixBuild.class);
+        b = job.startBuild(Collections.singletonMap("condition", "true"))
+                .waitUntilFinished()
+                .as(MatrixBuild.class);
         b.getConfiguration("run=yes").shouldExist();
         b.getConfiguration("run=maybe").shouldExist();
         b.getConfiguration("run=no").shouldNotExist();
@@ -174,8 +183,10 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         job.save();
 
         MatrixBuild b = job.startBuild().waitUntilFinished().as(MatrixBuild.class);
-        b.getConfiguration("label=" + builtInNodeName).shouldContainsConsoleOutput("(Building|Building remotely) on " + builtInNodeDescription);
-        b.getConfiguration("label=label1").shouldContainsConsoleOutput("(Building|Building remotely) on " + s.getName());
+        b.getConfiguration("label=" + builtInNodeName)
+                .shouldContainsConsoleOutput("(Building|Building remotely) on " + builtInNodeDescription);
+        b.getConfiguration("label=label1")
+                .shouldContainsConsoleOutput("(Building|Building remotely) on " + s.getName());
     }
 
     @Test
@@ -186,8 +197,10 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         job.addUserAxis(AXIS_X, AXIS_X_VALUES);
         job.addUserAxis(AXIS_Y, AXIS_Y_VALUES);
 
-        job.control(by.xpath("//div[normalize-space(text())='%s']/..//select", "Execution Strategy")).select(STRATEGY);
-        job.control(by.xpath("//div[normalize-space(text())='%s']/..//textarea", "Groovy Script")).set(GROOVY_SELECTOR_SCRIPT);
+        job.control(by.xpath("//div[normalize-space(text())='%s']/..//select", "Execution Strategy"))
+                .select(STRATEGY);
+        job.control(by.xpath("//div[normalize-space(text())='%s']/..//textarea", "Groovy Script"))
+                .set(GROOVY_SELECTOR_SCRIPT);
 
         job.save();
         job.startBuild();
@@ -196,13 +209,15 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         MatrixBuild build = waitForSuccessBuild(job);
         assertExist(build);
 
-        // Rebuild a non-allowed combination: Valid combinations exist but aren't built. Invalid combinations don't exist.
+        // Rebuild a non-allowed combination: Valid combinations exist but aren't built. Invalid combinations don't
+        // exist.
         rebuildCombination(job, AXIS_X + "=" + AXIS_X_TEST_NOT_BUILT + "," + AXIS_Y + "=" + AXIS_Y_TEST_NOT_BUILT);
         build = waitForSuccessBuild(job);
         assertExist(build);
         assertBuilt(build, AXIS_X_TEST_NOT_BUILT, AXIS_Y_TEST_NOT_BUILT);
 
-        // Rebuild only one valid combination ([1,1]): This combination exists and is built. The rest of valid combinations exist but aren't built. Invalid combinations don't exist.
+        // Rebuild only one valid combination ([1,1]): This combination exists and is built. The rest of valid
+        // combinations exist but aren't built. Invalid combinations don't exist.
         rebuildCombination(job, AXIS_X + "=" + AXIS_X_TEST_BUILT + "," + AXIS_Y + "=" + AXIS_Y_TEST_BUILT);
         build = waitForSuccessBuild(job);
         assertExist(build);
@@ -228,9 +243,11 @@ public class MatrixPluginTest extends AbstractJUnitTest {
         for (int x = AXIS_INITIAL_VALUE; x <= AXIS_MAX_VALUE; x++) {
             for (int y = AXIS_INITIAL_VALUE; y <= AXIS_MAX_VALUE; y++) {
                 if (isOdd(x * y)) {
-                    build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y).shouldExist();
+                    build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y)
+                            .shouldExist();
                 } else {
-                    build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y).shouldNotExist();
+                    build.getConfiguration(AXIS_X + "=" + x + "," + AXIS_Y + "=" + y)
+                            .shouldNotExist();
                 }
             }
         }

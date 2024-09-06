@@ -35,10 +35,14 @@ import org.openqa.selenium.WebDriver;
 public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should use TestRule instead
     @Override
     public Statement apply(final Statement base, final FrameworkMethod method, final Object target) {
-        final Description description = Description.createTestDescription(target.getClass(), method.getName(), method.getAnnotations());
+        final Description description =
+                Description.createTestDescription(target.getClass(), method.getName(), method.getAnnotations());
         return new Statement() {
-            @Inject JenkinsController controller;
-            @Inject Injector injector;
+            @Inject
+            JenkinsController controller;
+
+            @Inject
+            Injector injector;
 
             @Override
             public void evaluate() throws Throwable {
@@ -65,7 +69,9 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
              */
             private Throwable causedBy(Throwable caught, Class<? extends Throwable> type) {
                 for (Throwable cur = caught; cur != null; cur = cur.getCause()) {
-                    if (type.isInstance(cur)) return cur;
+                    if (type.isInstance(cur)) {
+                        return cur;
+                    }
                 }
                 return null;
             }
@@ -87,8 +93,8 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 rules.computeIfAbsent(0, k -> new LinkedHashSet<TestRule>());
                 rules.get(0).add(jenkinsBoot(rules));
 
-                for (Set<TestRule> rulesGroup: rules.values()) {
-                    for (TestRule rule: rulesGroup) {
+                for (Set<TestRule> rulesGroup : rules.values()) {
+                    for (TestRule rule : rulesGroup) {
                         try {
                             body = rule.apply(body, description);
                         } catch (Exception e) {
@@ -107,7 +113,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                     throw new Error("Unable to collect global annotations", e);
                 }
 
-                for (Class<?> rule: impls) {
+                for (Class<?> rule : impls) {
                     if (!TestRule.class.isAssignableFrom(rule)) {
                         throw new Error("GlobalRule is applicable for TestRules only");
                     }
@@ -116,13 +122,14 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 }
             }
 
-            private void collectRuleAnnotations(final FrameworkMethod method, final Object target, TreeMap<Integer, Set<TestRule>> rules) {
+            private void collectRuleAnnotations(
+                    final FrameworkMethod method, final Object target, TreeMap<Integer, Set<TestRule>> rules) {
                 Set<Class<? extends Annotation>> annotations = new HashSet<>();
                 collectAnnotationTypes(method.getMethod(), annotations);
                 collectAnnotationTypes(target.getClass(), annotations);
-                for (Class<? extends  Annotation> a : annotations) {
+                for (Class<? extends Annotation> a : annotations) {
                     RuleAnnotation r = a.getAnnotation(RuleAnnotation.class);
-                    if (r!=null) {
+                    if (r != null) {
                         addRule(rules, r.priority(), r.value());
                     }
                 }
@@ -141,12 +148,13 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
 
             private TestRule jenkinsBoot(final TreeMap<Integer, Set<TestRule>> rules) {
                 return (base1, description1) -> new Statement() {
-                    @Override public void evaluate() throws Throwable {
+                    @Override
+                    public void evaluate() throws Throwable {
                         controller.start();
                         // Now it is safe to inject Jenkins
                         injector.injectMembers(target);
-                        for (Set<TestRule> rg: rules.values()) {
-                            for (TestRule rule: rg) {
+                        for (Set<TestRule> rg : rules.values()) {
+                            for (TestRule rule : rg) {
                                 injector.injectMembers(rule);
                             }
                         }

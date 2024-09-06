@@ -37,5 +37,4 @@ public class Rvm extends BuildWrapper {
     public Rvm(Job context) {
         super(context, "/rvm-RvmWrapper");
     }
-
 }

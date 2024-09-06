@@ -11,7 +11,8 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 @Describable("Project default Build Authorization")
 public class ProjectDefaultBuildAccessControl extends BuildAccessControl {
 
-    public final Control strategy = control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators/"));
+    public final Control strategy =
+            control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators/"));
     public final Control userId = control(by.name("_.userid"));
 
     public ProjectDefaultBuildAccessControl(GlobalSecurityConfig security, String path) {

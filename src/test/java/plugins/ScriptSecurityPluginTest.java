@@ -56,10 +56,10 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
             JenkinsDatabaseSecurityRealm realm = security.useRealm(JenkinsDatabaseSecurityRealm.class);
             realm.allowUsersToSignUp(true);
             security.save();
-            
+
             realm.signup(ADMIN);
             realm.signup(USER);
-            
+
             security.open();
             MatrixAuthorizationStrategy mas = security.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
             mas.addUser(ADMIN).admin();
@@ -74,7 +74,10 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
         {
             job = jenkins.jobs.create();
             job.configure();
-            job.addPublisher(GroovyPostBuildStep.class).setScript(script).setSandbox(sandbox).setBehavior(GroovyPostBuildStep.FAILED);
+            job.addPublisher(GroovyPostBuildStep.class)
+                    .setScript(script)
+                    .setSandbox(sandbox)
+                    .setBehavior(GroovyPostBuildStep.FAILED);
             job.save();
             job.scheduleBuild().shouldFail(); // Script not approved
         }
@@ -140,7 +143,7 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithPlugins({"workflow-job","workflow-cps"})
+    @WithPlugins({"workflow-job", "workflow-cps"})
     public void pipelineSignatureNeedsApproval() throws Exception {
         final WorkflowJob job = createFailedPipeline("def h = java.lang.System.getProperty('java.version')", true);
         login(ADMIN);
@@ -151,5 +154,4 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
         }
         shouldSucceed(job); // Script approved
     }
-
 }

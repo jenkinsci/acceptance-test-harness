@@ -25,14 +25,12 @@ package org.jenkinsci.test.acceptance.po;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import com.google.inject.Injector;
 import groovy.lang.Closure;
 import java.net.URL;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
-
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -111,14 +109,18 @@ public abstract class ConfigurablePageObject extends PageObject {
             visit(getConfigUrl());
         }
         waitFor(By.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
-        waitFor(By.xpath("//div[contains(@class, 'bottom-sticker-inner')]//input[@type='submit'] | //div[contains(@class, 'bottom-sticker-inner')]//button[contains(text(), '" + getSubmitButtonText() + "')]"), 5);
+        waitFor(
+                By.xpath(
+                        "//div[contains(@class, 'bottom-sticker-inner')]//input[@type='submit'] | //div[contains(@class, 'bottom-sticker-inner')]//button[contains(text(), '"
+                                + getSubmitButtonText() + "')]"),
+                5);
     }
 
-    public String getFormName(){
+    public String getFormName() {
         return "config";
     }
 
-    public String getSubmitButtonText(){
+    public String getSubmitButtonText() {
         return "Save";
     }
 
@@ -126,7 +128,8 @@ public abstract class ConfigurablePageObject extends PageObject {
      * Makes sure that the browser is currently opening the configuration page.
      */
     public void ensureConfigPage() {
-        assertThat("config page is open", driver.getCurrentUrl(), is(getConfigUrl().toExternalForm()));
+        assertThat(
+                "config page is open", driver.getCurrentUrl(), is(getConfigUrl().toExternalForm()));
     }
 
     public abstract URL getConfigUrl();

@@ -43,7 +43,8 @@ public class ListView extends View {
      * @return The new dashboard column.
      */
     public <T extends ListViewColumn> T addColumn(final Class<T> type) {
-        String path = createPageArea("/columns", () -> control("/hetero-list-add[columns]").selectDropdownMenu(type));
+        String path = createPageArea(
+                "/columns", () -> control("/hetero-list-add[columns]").selectDropdownMenu(type));
         T col = newInstance(type, this, path);
         columns.add(col);
         return col;
@@ -54,8 +55,9 @@ public class ListView extends View {
      */
     public <T extends ListViewColumn> T getColumn(Class<T> type) {
         for (ListViewColumn p : columns) {
-            if (type.isAssignableFrom(p.getClass()))
+            if (type.isAssignableFrom(p.getClass())) {
                 return (T) p;
+            }
         }
         throw new NoSuchElementException();
     }
@@ -71,9 +73,12 @@ public class ListView extends View {
     public void scheduleJob(String name) {
         open();
 
-        find(by.xpath("//a[contains(@href, '/%1$s/build?') and contains(@title, 'Schedule a')]/.." +
-                "| //a[contains(@href, '/%1$s/build?')]/span[contains(text(), 'Schedule a')]/.." +
-                "| //a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a')]", name)).click();
+        find(by.xpath(
+                        "//a[contains(@href, '/%1$s/build?') and contains(@title, 'Schedule a')]/.."
+                                + "| //a[contains(@href, '/%1$s/build?')]/span[contains(text(), 'Schedule a')]/.."
+                                + "| //a[contains(@href, '/%1$s/build?')]/img[contains(@title, 'Schedule a')]",
+                        name))
+                .click();
     }
 
     public void scheduleJob(String name, Map<String, Object> params) {

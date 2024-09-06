@@ -44,10 +44,13 @@ public class ByFactory {
 
     // XPath 1.0 supported by JDK and browsers has no way to escape quotes in string literals. Therefore whenever such
     // argument is specified it needs to be delimited by the other kind of quotes. In case the string contains both kind
-    // of quotes, it needs to be split to substrings containing only one kind of quotes each so the literals can be quoted
-    // as described earlier and then glued together using xpath's concat function. Note that we can not use variable resolvers
+    // of quotes, it needs to be split to substrings containing only one kind of quotes each so the literals can be
+    // quoted
+    // as described earlier and then glued together using xpath's concat function. Note that we can not use variable
+    // resolvers
     // or XPath 2.0 here as java is not executing the xpath, it merely passes that to browser to execute. To make this a
-    // bit more fun, this is an API relied upon external clients that might have written something like `xpath("//foo[text()='%s']", var)`
+    // bit more fun, this is an API relied upon external clients that might have written something like
+    // `xpath("//foo[text()='%s']", var)`
     // so we need to control the quotes around String.format placeholders as well.
     // Therefore we ...
     /*package for testing*/ String formatXPath(String format, Object... args) {
@@ -77,7 +80,7 @@ public class ByFactory {
         boolean doublequote = value.contains("\"");
         if (quote && doublequote) {
             return "concat('" + value.replace("'", "', \"'\", '") + "', '')";
-        } else if (quote){
+        } else if (quote) {
             return '"' + value + '"';
         } else {
             return "'" + value + "'";
@@ -112,7 +115,9 @@ public class ByFactory {
      *      Text, id, title, or image alt attribute of the link
      */
     public By link(String locator) {
-        return xpath(".//A[@href][@id='%1$s' or normalize-space(.)='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]",locator);
+        return xpath(
+                ".//A[@href][@id='%1$s' or normalize-space(.)='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]",
+                locator);
     }
 
     /**
@@ -121,7 +126,7 @@ public class ByFactory {
      * @param locator
      *      href of the link
      */
-    public By href(String locator){
+    public By href(String locator) {
         return css("a[href='%s']", locator);
     }
 
@@ -149,15 +154,18 @@ public class ByFactory {
      *      Text, id, title.
      */
     public By input(String locator) {
-        return xpath(fieldXPath("*[name()='INPUT' or name()='input' or name()='textarea' or name()='TEXTAREA' or name()='select' or name()='SELECT']",locator));
+        return xpath(fieldXPath(
+                "*[name()='INPUT' or name()='input' or name()='textarea' or name()='TEXTAREA' or name()='select' or name()='SELECT']",
+                locator));
     }
 
     private static String fieldXPath(String base, String locator) {
         // TODO: there's actually a lot more
         return String.format(
-                "  .//%2$s[./@id = '%1$s' or ./@name = '%1$s' or ./@value = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(.), '%1$s')]/@for]"+
-                "| .//label[contains(normalize-space(.), '%1$s')]//%2$s"+
-                "| .//label[contains(normalize-space(.), '%1$s')][contains(@class, 'attach-previous')]/preceding-sibling::%2$s",locator, base);
+                "  .//%2$s[./@id = '%1$s' or ./@name = '%1$s' or ./@value = '%1$s' or ./@placeholder = '%1$s' or ./@id = //label[contains(normalize-space(.), '%1$s')]/@for]"
+                        + "| .//label[contains(normalize-space(.), '%1$s')]//%2$s"
+                        + "| .//label[contains(normalize-space(.), '%1$s')][contains(@class, 'attach-previous')]/preceding-sibling::%2$s",
+                locator, base);
     }
 
     /**
@@ -165,8 +173,8 @@ public class ByFactory {
      */
     public By button(String locator) {
         return xpath(
-                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][((./@id = '%1$s' or ./@name = '%1$s' or contains(./@value, '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')] | .//button[(((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(normalize-space(.), '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')]"
-                ,locator);
+                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][((./@id = '%1$s' or ./@name = '%1$s' or contains(./@value, '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')] | .//button[(((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(normalize-space(.), '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')]",
+                locator);
     }
 
     public By css(String css, Object... args) {
@@ -178,13 +186,11 @@ public class ByFactory {
     }
 
     public By option(String name) {
-        return xpath(
-            ".//option[normalize-space(.)='%1$s' or @value='%1$s']", name
-        );
+        return xpath(".//option[normalize-space(.)='%1$s' or @value='%1$s']", name);
     }
 
     public By id(String s) {
-        return css("#"+s);
+        return css("#" + s);
     }
 
     public By parent() {
@@ -192,7 +198,7 @@ public class ByFactory {
     }
 
     public By ancestor(String tagName) {
-        return xpath("ancestor::%s[1]",tagName);
+        return xpath("ancestor::%s[1]", tagName);
     }
 
     /**
@@ -207,7 +213,7 @@ public class ByFactory {
             public List<WebElement> findElements(SearchContext context) {
                 ArrayList<WebElement> ret = new ArrayList<>();
                 List<WebElement> allPrefixed = context.findElements(xpath);
-                for (WebElement webElement: allPrefixed) {
+                for (WebElement webElement : allPrefixed) {
                     String path = webElement.getAttribute("path");
 
                     // Ensure /foo matches /foo and /boo[bar], but not /foo/bar or /foolish/bartender
@@ -232,5 +238,4 @@ public class ByFactory {
     public By partialLinkText(final String linkText) {
         return By.partialLinkText(linkText);
     }
-
 }

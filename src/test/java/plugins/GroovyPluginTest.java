@@ -65,10 +65,11 @@ public class GroovyPluginTest extends AbstractJUnitTest {
     public void run_system_groovy() {
         configureJob();
 
-        job.addBuildStep(SystemGroovyStep.class).script(
-                "job = jenkins.model.Jenkins.instance.getJob('my_job');" +
-                "println \"name: ${job.displayName}. number: ${job.lastBuild.number}\""
-        , false);
+        job.addBuildStep(SystemGroovyStep.class)
+                .script(
+                        "job = jenkins.model.Jenkins.instance.getJob('my_job');"
+                                + "println \"name: ${job.displayName}. number: ${job.lastBuild.number}\"",
+                        false);
         job.save();
 
         shouldReport("name: my_job. number: 1");
@@ -88,10 +89,12 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         if (build.isSuccess()) {
             build.shouldContainsConsoleOutput("running groovy file");
         } else {
-            build.shouldContainsConsoleOutput("org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException: Scripts not permitted to use method groovy.lang.Script println java.lang.Object");
+            build.shouldContainsConsoleOutput(
+                    "org.jenkinsci.plugins.scriptsecurity.sandbox.RejectedAccessException: Scripts not permitted to use method groovy.lang.Script println java.lang.Object");
             ScriptApproval sa = new ScriptApproval(jenkins);
             sa.open();
-            sa.findSignature("method groovy.lang.Script println java.lang.Object").approve();
+            sa.findSignature("method groovy.lang.Script println java.lang.Object")
+                    .approve();
             job.startBuild().shouldSucceed().shouldContainsConsoleOutput("running groovy file");
         }
     }
@@ -104,14 +107,13 @@ public class GroovyPluginTest extends AbstractJUnitTest {
 
         final GroovyStep step = job.addBuildStep(GroovyStep.class);
         step.version.select("groovy-4.0.12");
-        step.script(
-                "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
-        );
+        step.script("println 'version: ' + groovy.lang.GroovySystem.getVersion()");
         job.save();
         shouldReport("version: 4.0.12");
     }
 
-    @Test @Native("groovy")
+    @Test
+    @Native("groovy")
     public void use_native_groovy() {
         GroovyInstallation groovy = ToolInstallation.addTool(jenkins, GroovyInstallation.class);
         groovy.name.set("local-groovy");
@@ -121,9 +123,7 @@ public class GroovyPluginTest extends AbstractJUnitTest {
         configureJob();
         final GroovyStep step = job.addBuildStep(GroovyStep.class);
         step.version.select("local-groovy");
-        step.script(
-                "println 'version: ' + groovy.lang.GroovySystem.getVersion()"
-        );
+        step.script("println 'version: ' + groovy.lang.GroovySystem.getVersion()");
         job.save();
         Build build = job.startBuild().shouldSucceed();
 

@@ -41,5 +41,4 @@ public interface UpdateCenterMetadataProvider {
      * @throws IOException if there is any problem
      */
     UpdateCenterMetadata get(Jenkins jenkins) throws IOException;
-
 }

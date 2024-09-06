@@ -29,14 +29,14 @@ import org.openqa.selenium.By;
  * @author Alexandru Somai
  */
 @WithPlugins({
-        "external-workspace-manager",
-        "git",
-        "run-selector",
-        "workflow-basic-steps",
-        "workflow-cps",
-        "workflow-durable-task-step",
-        "workflow-job",
-        "ws-cleanup",
+    "external-workspace-manager",
+    "git",
+    "run-selector",
+    "workflow-basic-steps",
+    "workflow-cps",
+    "workflow-durable-task-step",
+    "workflow-job",
+    "ws-cleanup",
 })
 public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
@@ -65,22 +65,25 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
     @Test
     public void shareWorkspaceOneJobTwoNodes() {
         WorkflowJob job = createWorkflowJob(String.format(
-                "def extWorkspace = exwsAllocate '%s' \n" +
-                "node ('linux') { \n" +
-                "   exws (extWorkspace) { \n" +
-                "      writeFile file: 'marker', text: 'content' \n" +
-                "   } \n" +
-                "} \n" +
-                "node ('test') { \n" +
-                "   exws (extWorkspace) { \n" +
-                "       def content = readFile(file: 'marker') \n" +
-                "       if (content != 'content') error('Content mismatch: ' + content) \n" +
-                "   } \n" +
-                "}", DISK_POOL_ID));
+                "def extWorkspace = exwsAllocate '%s' \n" + "node ('linux') { \n"
+                        + "   exws (extWorkspace) { \n"
+                        + "      writeFile file: 'marker', text: 'content' \n"
+                        + "   } \n"
+                        + "} \n"
+                        + "node ('test') { \n"
+                        + "   exws (extWorkspace) { \n"
+                        + "       def content = readFile(file: 'marker') \n"
+                        + "       if (content != 'content') error('Content mismatch: ' + content) \n"
+                        + "   } \n"
+                        + "}",
+                DISK_POOL_ID));
 
         Build build = job.startBuild();
         build.shouldSucceed();
-        assertThat(build.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
+        assertThat(
+                build.getConsole(),
+                containsString(
+                        String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
 
         verifyExternalWorkspacesAction(job.name, build);
     }
@@ -88,61 +91,78 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
     @Test
     public void shareWorkspaceTwoJobsTwoNodes() {
         WorkflowJob upstreamJob = createWorkflowJob(String.format(
-                "def extWorkspace = exwsAllocate '%s' \n" +
-                "node ('linux') { \n" +
-                "   exws (extWorkspace) { \n" +
-                "      writeFile file: 'marker', text: 'content' \n " +
-                "   } \n" +
-                "}", DISK_POOL_ID));
+                "def extWorkspace = exwsAllocate '%s' \n" + "node ('linux') { \n"
+                        + "   exws (extWorkspace) { \n"
+                        + "      writeFile file: 'marker', text: 'content' \n "
+                        + "   } \n"
+                        + "}",
+                DISK_POOL_ID));
 
         Build upstreamBuild = upstreamJob.startBuild();
         upstreamBuild.shouldSucceed();
-        assertThat(upstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
+        assertThat(
+                upstreamBuild.getConsole(),
+                containsString(String.format(
+                        "Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
         verifyExternalWorkspacesAction(upstreamJob.name, upstreamBuild);
 
-        WorkflowJob downstreamJob = createWorkflowJob(String.format("" +
-                "def run = selectRun '%s' \n" +
-                "def extWorkspace = exwsAllocate selectedRun: run \n" +
-                "node ('test') { \n" +
-                "   exws (extWorkspace) { \n" +
-                "       def content = readFile(file: 'marker') \n" +
-                "       if (content != 'content') error('Content mismatch: ' + content) \n" +
-                "   } \n" +
-                "}", upstreamJob.name));
+        WorkflowJob downstreamJob = createWorkflowJob(String.format(
+                "" + "def run = selectRun '%s' \n"
+                        + "def extWorkspace = exwsAllocate selectedRun: run \n"
+                        + "node ('test') { \n"
+                        + "   exws (extWorkspace) { \n"
+                        + "       def content = readFile(file: 'marker') \n"
+                        + "       if (content != 'content') error('Content mismatch: ' + content) \n"
+                        + "   } \n"
+                        + "}",
+                upstreamJob.name));
 
         Build downstreamBuild = downstreamJob.startBuild();
         downstreamBuild.shouldSucceed();
-        assertThat(downstreamBuild.getConsole(), containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
+        assertThat(
+                downstreamBuild.getConsole(),
+                containsString(String.format(
+                        "Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
         verifyExternalWorkspacesAction(upstreamJob.name, downstreamBuild);
     }
 
     @Test
     public void externalWorkspaceCleanup() {
-        WorkflowJob job = createWorkflowJob(String.format("" +
-                "def extWorkspace = exwsAllocate '%s' \n" +
-                "node ('linux') { \n" +
-                "	exws (extWorkspace) { \n" +
-                "		try { \n" +
-                "           writeFile file: 'foobar.txt', text: 'any' \n" +
-                "		} finally { \n" +
-                "			step ([$class: 'WsCleanup']) \n" +
-                "		} \n" +
-                "	} \n" +
-                "}", DISK_POOL_ID));
+        WorkflowJob job = createWorkflowJob(String.format(
+                "" + "def extWorkspace = exwsAllocate '%s' \n"
+                        + "node ('linux') { \n"
+                        + "	exws (extWorkspace) { \n"
+                        + "		try { \n"
+                        + "           writeFile file: 'foobar.txt', text: 'any' \n"
+                        + "		} finally { \n"
+                        + "			step ([$class: 'WsCleanup']) \n"
+                        + "		} \n"
+                        + "	} \n"
+                        + "}",
+                DISK_POOL_ID));
 
         Build build = job.startBuild();
         build.shouldSucceed();
         String console = build.getConsole();
-        assertThat(console, containsString(String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
+        assertThat(
+                console,
+                containsString(
+                        String.format("Running in %s/%s/%s", fakeNodeMountingPoint, job.name, build.getNumber())));
         assertThat(console, containsString("[WS-CLEANUP] Deleting project workspace"));
         assertThat(console, containsString("[WS-CLEANUP] done"));
-        assertThat(FileUtils.listFiles(tmp.getRoot(), FileFilterUtils.nameFileFilter("foobar.txt"), FileFilterUtils.directoryFileFilter()), hasSize(0));
+        assertThat(
+                FileUtils.listFiles(
+                        tmp.getRoot(),
+                        FileFilterUtils.nameFileFilter("foobar.txt"),
+                        FileFilterUtils.directoryFileFilter()),
+                hasSize(0));
     }
 
     private void setUpGlobalConfig() {
         jenkins.configure();
         ExternalGlobalConfig globalConfig = new ExternalGlobalConfig(jenkins.getConfigPage());
-        globalConfig.addDiskPool(DISK_POOL_ID, DISK_ONE, DISK_TWO, MOUNT_FROM_MASTER_TO_DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_TWO);
+        globalConfig.addDiskPool(
+                DISK_POOL_ID, DISK_ONE, DISK_TWO, MOUNT_FROM_MASTER_TO_DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_TWO);
         jenkins.save();
     }
 
@@ -170,8 +190,13 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
         String exwsAllocateText = driver.findElement(By.id("main-panel")).getText();
         assertThat(exwsAllocateText, containsString(String.format("Disk Pool ID: %s", DISK_POOL_ID)));
         assertThat(exwsAllocateText, containsString(String.format("Disk ID: %s", DISK_ONE)));
-        assertThat(exwsAllocateText, containsString(String.format("Workspace path on %s: %s/%s", DISK_ONE, jobName, build.getNumber())));
-        assertThat(exwsAllocateText, containsString(String.format("Complete workspace path on %s (from Jenkins master): %s/%s/%s",
-                DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_ONE, jobName, build.getNumber())));
+        assertThat(
+                exwsAllocateText,
+                containsString(String.format("Workspace path on %s: %s/%s", DISK_ONE, jobName, build.getNumber())));
+        assertThat(
+                exwsAllocateText,
+                containsString(String.format(
+                        "Complete workspace path on %s (from Jenkins master): %s/%s/%s",
+                        DISK_ONE, MOUNT_FROM_MASTER_TO_DISK_ONE, jobName, build.getNumber())));
     }
 }

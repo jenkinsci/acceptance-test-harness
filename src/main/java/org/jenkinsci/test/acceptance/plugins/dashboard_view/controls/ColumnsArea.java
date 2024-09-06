@@ -19,7 +19,6 @@ public class ColumnsArea extends PageAreaImpl {
      */
     private final Control addColumns = control("/hetero-list-add[columns]");
 
-
     /**
      * Creates a new PageArea for the config list of columns that should be shown in the default job list.
      */
@@ -34,8 +33,8 @@ public class ColumnsArea extends PageAreaImpl {
      * @return A control for the delete button
      */
     private Control getDeleteFor(Column column) {
-        final By xpath = By.xpath("//div[@name='columns' and contains(.,'" +
-                column.getText() + "')]//button[@title='Delete']");
+        final By xpath =
+                By.xpath("//div[@name='columns' and contains(.,'" + column.getText() + "')]//button[@title='Delete']");
         return control(xpath);
     }
 
@@ -54,10 +53,10 @@ public class ColumnsArea extends PageAreaImpl {
      */
     public void removeAll() {
         By form = By.xpath("//form[@name='viewConfig']");
-        By xpath = By.xpath("//div[@name='columns' and not(contains(.,'" + Column.LAST_STABLE.getText()+ "'))]//button[@title='Delete']");
+        By xpath = By.xpath("//div[@name='columns' and not(contains(.,'" + Column.LAST_STABLE.getText()
+                + "'))]//button[@title='Delete']");
         List<WebElement> columns = control(form).resolve().findElements(xpath);
-        Arrays.stream(columns.toArray(new WebElement[columns.size()]))
-                .forEach(WebElement::click);
+        Arrays.stream(columns.toArray(new WebElement[columns.size()])).forEach(WebElement::click);
     }
 
     /**
@@ -73,8 +72,13 @@ public class ColumnsArea extends PageAreaImpl {
      * Provides a simple enumeration for all possible Columns.
      */
     public enum Column {
-        STATUS("Status"), WEATHER("Weather"), NAME("Name"), LAST_SUCCESS("Last Success"),
-        LAST_FAILURE("Last Failure"), LAST_STABLE("Last Stable"), LAST_DURATION("Last Duration"),
+        STATUS("Status"),
+        WEATHER("Weather"),
+        NAME("Name"),
+        LAST_SUCCESS("Last Success"),
+        LAST_FAILURE("Last Failure"),
+        LAST_STABLE("Last Stable"),
+        LAST_DURATION("Last Duration"),
         BUILD_BUTTON("Build Button");
 
         private final String text;

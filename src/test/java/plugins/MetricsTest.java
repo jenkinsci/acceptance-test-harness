@@ -45,7 +45,6 @@ public class MetricsTest extends AbstractPipelineTest {
 
     private final Logger LOGGER = Logger.getLogger(MetricsTest.class.getName());
 
-
     @Test
     @WithPlugins({"metrics", "parameter-separator"})
     public void testMetrics() throws IOException {
@@ -59,12 +58,16 @@ public class MetricsTest extends AbstractPipelineTest {
                 @Override
                 public Boolean call() {
                     Pattern pattern = Pattern.compile(".*Jenkins.* doesn.*t have label .*" + NOT_EXISTENT_NODE + ".*");
-                    return b.getConsole().contains("Waiting for next available executor") ||
-                            pattern.matcher(b.getConsole()).find();
+                    return b.getConsole().contains("Waiting for next available executor")
+                            || pattern.matcher(b.getConsole()).find();
                 }
             });
         } catch (TimeoutException ex) {
-            LOGGER.log(Level.SEVERE, String.format("Waiting for available executor message not displayed. Console output: %s", b.getConsole()));
+            LOGGER.log(
+                    Level.SEVERE,
+                    String.format(
+                            "Waiting for available executor message not displayed. Console output: %s",
+                            b.getConsole()));
             throw ex;
         }
 
@@ -81,7 +84,8 @@ public class MetricsTest extends AbstractPipelineTest {
     private void checkHealthcheck() {
         jenkins.visit(String.format(METRICS_URL, "healthcheck"));
 
-        Pattern pattern = Pattern.compile(".*\"plugins.*\":.*\\{.*\"healthy.*\":true,.*\"message.*\":.*\"No failed plugins.*\"\\}");
+        Pattern pattern = Pattern.compile(
+                ".*\"plugins.*\":.*\\{.*\"healthy.*\":true,.*\"message.*\":.*\"No failed plugins.*\"\\}");
         assertThat(driver, hasContent(pattern));
     }
 
@@ -96,5 +100,4 @@ public class MetricsTest extends AbstractPipelineTest {
         final String expectedMetric = String.format("\"jenkins.queue.size.value\":{\"value\":%d}", numberQueuedJobs);
         assertThat(driver, hasContent(expectedMetric));
     }
-
 }

@@ -48,7 +48,9 @@ public class DomainPage extends ConfigurablePageObject {
     }
 
     private boolean onDomainConfigurationPage() {
-        return this.domainName != null && driver.getCurrentUrl().contains(String.format("%s/domain/%s/%s", SYSTEM_STORE_URL, this.domainName, CONFIGURE_URL));
+        return this.domainName != null
+                && driver.getCurrentUrl()
+                        .contains(String.format("%s/domain/%s/%s", SYSTEM_STORE_URL, this.domainName, CONFIGURE_URL));
     }
 
     public void delete() {
@@ -56,5 +58,4 @@ public class DomainPage extends ConfigurablePageObject {
         waitFor(by.button("Yes"));
         clickButton("Yes");
     }
-
 }

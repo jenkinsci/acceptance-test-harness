@@ -24,8 +24,8 @@ public class WorkflowMultiBranchJob extends Folder {
     public <T extends BranchSource> T addBranchSource(final Class<T> type) {
         ensureConfigPage();
 
-        final String path = createPageArea("/sources",
-                () -> control(by.path("/hetero-list-add[sources]")).selectDropdownMenu(type));
+        final String path = createPageArea(
+                "/sources", () -> control(by.path("/hetero-list-add[sources]")).selectDropdownMenu(type));
 
         return newInstance(type, this, path + "/source");
     }
@@ -40,8 +40,8 @@ public class WorkflowMultiBranchJob extends Folder {
 
     public WorkflowMultiBranchJob waitForBranchIndexingFinished(final int timeout) {
         waitFor()
-            .withTimeout(Duration.ofMillis(super.time.seconds(timeout)))
-            .until(() -> WorkflowMultiBranchJob.this.getBranchIndexingLog().contains("Finished: "));
+                .withTimeout(Duration.ofMillis(super.time.seconds(timeout)))
+                .until(() -> WorkflowMultiBranchJob.this.getBranchIndexingLog().contains("Finished: "));
 
         return this;
     }
@@ -51,16 +51,17 @@ public class WorkflowMultiBranchJob extends Folder {
     }
 
     public void reIndex() {
-        final List<WebElement> scanRepoNow = driver.findElements(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository Now\"]"));
+        final List<WebElement> scanRepoNow =
+                driver.findElements(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository Now\"]"));
 
         if (scanRepoNow.size() > 0) {
             // JENKINS-41416
             scanRepoNow.get(0).click();
         } else {
             // Previous versions
-            find(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository\" or text()=\"Branch Indexing\"]")).click();
+            find(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository\" or text()=\"Branch Indexing\"]"))
+                    .click();
             find(by.xpath("//div[@class=\"subtasks\"]//*[text()=\"Run Now\"]")).click();
         }
     }
-
 }

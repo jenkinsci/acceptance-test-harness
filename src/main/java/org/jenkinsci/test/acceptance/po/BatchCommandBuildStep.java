@@ -15,8 +15,7 @@ public class BatchCommandBuildStep extends AbstractStep implements BuildStep {
     public void command(String command) {
         try {
             control("command").set(command);
-        }
-        catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             new CodeMirror(this, "command").set(command);
         }
     }

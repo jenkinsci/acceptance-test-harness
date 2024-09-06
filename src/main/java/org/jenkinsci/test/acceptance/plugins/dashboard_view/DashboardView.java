@@ -52,7 +52,6 @@ public class DashboardView extends View {
     public final ColumnsArea columnsArea = new ColumnsArea(this, "");
     public final DashboardPortlets dashboardPortlets = new DashboardPortlets(this, "");
 
-
     public final BreadCrumbs breadCrumbs = new BreadCrumbs(this, "");
     public final BuildExecutorStatus buildExecutorStatus = new BuildExecutorStatus(this, "");
     public final ProjectStatusStdJobList projectStatus = new ProjectStatusStdJobList(this, "");
@@ -123,14 +122,14 @@ public class DashboardView extends View {
      * @return The new portlet.
      */
     public <T extends AbstractDashboardViewPortlet> T addBottomPortlet(final Class<T> portletClass) {
-        String path = createPageArea("/bottomPortlet", () ->
-                bottomPortlet.selectDropdownMenu(portletClass));
+        String path = createPageArea("/bottomPortlet", () -> bottomPortlet.selectDropdownMenu(portletClass));
         T portlet = newInstance(portletClass, this, path);
         bottomPortlets.add(portlet);
         return portlet;
     }
 
-    private <T extends AbstractDashboardViewPortlet> T getPortlet(List<AbstractDashboardViewPortlet> portlets, Class<T> portletClass) {
+    private <T extends AbstractDashboardViewPortlet> T getPortlet(
+            List<AbstractDashboardViewPortlet> portlets, Class<T> portletClass) {
         for (AbstractDashboardViewPortlet p : portlets) {
             if (portletClass.isInstance(p)) {
                 return portletClass.cast(p);
@@ -189,7 +188,7 @@ public class DashboardView extends View {
      * @return main panel of this dashboard.
      */
     public WebElement getPanel() {
-        if(!Objects.equals(getCurrentUrl(), url.toString())) {
+        if (!Objects.equals(getCurrentUrl(), url.toString())) {
             open();
         }
         return find(By.id("main-panel"));
@@ -208,7 +207,6 @@ public class DashboardView extends View {
         } catch (NoSuchElementException ex) {
             return null;
         }
-
     }
 
     /**
@@ -250,7 +248,9 @@ public class DashboardView extends View {
     }
 
     private WebElement getRightPortletOnExactPosition(String name, int positionInTable) {
-        return getPanel().findElement(By.xpath("//table[2]/tbody/tr/td[" + positionInTable + "]/div[contains(.,'" + name + "')]"));
+        return getPanel()
+                .findElement(
+                        By.xpath("//table[2]/tbody/tr/td[" + positionInTable + "]/div[contains(.,'" + name + "')]"));
     }
 
     /**

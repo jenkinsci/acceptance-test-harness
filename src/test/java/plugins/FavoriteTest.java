@@ -1,8 +1,5 @@
 package plugins;
 
-import static org.junit.Assert.assertFalse;
-
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -28,14 +25,16 @@ public class FavoriteTest extends AbstractJUnitTest {
         realm.signup(USER);
         jenkins.login().doLogin(USER);
 
-        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']")).click();
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']"))
+                .click();
         // ensure the project is now a favourite
         waitFor(by.css(".icon-fav-active:not(.jenkins-hidden)"));
 
         final User user = new User(jenkins, USER);
         jenkins.visit(user.url("favorites").toString());
         // will fail if the project has not been favorited
-        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='true']")).click();
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='true']"))
+                .click();
         // ensure the project is no longer a favourite
         waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']"));
     }

@@ -7,9 +7,11 @@ package org.jenkinsci.test.acceptance.plugins.subversion;
  */
 public class SubversionPluginTestException extends Exception {
 
-    private static final String REPO_MAY_NOT_BE_PROTECTED = "Could not find the link to the credential page. Maybe the svn-pluginversion is not 1.54 or the repository is not protected.";
+    private static final String REPO_MAY_NOT_BE_PROTECTED =
+            "Could not find the link to the credential page. Maybe the svn-pluginversion is not 1.54 or the repository is not protected.";
     private static final String MALFORMED_URL = "The URL %s seems to be malformed.";
-    private static final String COULD_NOT_DETERMINE_POPUP_WINDOW = "Could not determine the popup window handle. There seem to be more than two windows handled by the driver at the moment.";
+    private static final String COULD_NOT_DETERMINE_POPUP_WINDOW =
+            "Could not determine the popup window handle. There seem to be more than two windows handled by the driver at the moment.";
 
     public SubversionPluginTestException(String message, Throwable cause) {
         super(message, cause);

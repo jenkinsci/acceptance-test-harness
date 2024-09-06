@@ -30,7 +30,7 @@ import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-@ToolInstallationPageObject(name="Maven", installer="hudson.tasks.Maven.MavenInstaller")
+@ToolInstallationPageObject(name = "Maven", installer = "hudson.tasks.Maven.MavenInstaller")
 public class MavenInstallation extends ToolInstallation {
     public static final String DEFAULT_MAVEN_ID = "default_maven";
 
@@ -45,7 +45,7 @@ public class MavenInstallation extends ToolInstallation {
         new GlobalToolConfig(jenkins).configure();
         final By advancedButtonBy = by.path("/hudson-tasks-Maven$MavenInstallation/advanced-button");
         WebElement mavenAdvancedButton = jenkins.getElement(advancedButtonBy);
-        if(mavenAdvancedButton == null) {
+        if (mavenAdvancedButton == null) {
             installSomeMaven(jenkins);
         }
     }
@@ -57,7 +57,6 @@ public class MavenInstallation extends ToolInstallation {
     public MavenInstallation(Jenkins context, String path) {
         super(context, path);
     }
-
 
     public void useNative() {
         installedIn(fakeHome("mvn", "M2_HOME"));

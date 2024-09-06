@@ -103,54 +103,56 @@ public class FallbackConfig extends AbstractModule {
 
         String display = getBrowserDisplay();
         switch (browser) {
-        case "firefox":
-            setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
-            GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
-            if (display != null) {
-                builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
-            }
-            GeckoDriverService service = builder.build();
-            return new FirefoxDriver(service, buildFirefoxOptions(testName));
-        case "firefox-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-firefox:4.24.0", buildFirefoxOptions(testName));
-        case "chrome-container":
-            return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.24.0", new ChromeOptions());
-        case "chrome":
-            Map<String, String> prefs = new HashMap<String, String>();
-            prefs.put(LANGUAGE_SELECTOR, "en");
-            ChromeOptions options = new ChromeOptions();
-            options.setExperimentalOption("prefs", prefs);
-            if (HarRecorder.isCaptureHarEnabled()) {
-                options.setAcceptInsecureCerts(true);
-                options.setProxy(createSeleniumProxy(testName.get()));
-            }
+            case "firefox":
+                setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
+                GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
+                if (display != null) {
+                    builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
+                }
+                GeckoDriverService service = builder.build();
+                return new FirefoxDriver(service, buildFirefoxOptions(testName));
+            case "firefox-container":
+                return createContainerWebDriver(
+                        cleaner, "selenium/standalone-firefox:4.24.0", buildFirefoxOptions(testName));
+            case "chrome-container":
+                return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.24.0", new ChromeOptions());
+            case "chrome":
+                Map<String, String> prefs = new HashMap<String, String>();
+                prefs.put(LANGUAGE_SELECTOR, "en");
+                ChromeOptions options = new ChromeOptions();
+                options.setExperimentalOption("prefs", prefs);
+                if (HarRecorder.isCaptureHarEnabled()) {
+                    options.setAcceptInsecureCerts(true);
+                    options.setProxy(createSeleniumProxy(testName.get()));
+                }
 
-            setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
-            return new ChromeDriver(options);
-        case "safari":
-            return new SafariDriver();
-        case "saucelabs":
-        case "saucelabs-firefox":
-            FirefoxOptions caps = new FirefoxOptions();
-            caps.setCapability("version", "29");
-            caps.setCapability("platform", "Windows 7");
-            caps.setCapability("name", testName.get());
-            if (HarRecorder.isCaptureHarEnabled()) {
-                caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
-            }
+                setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
+                return new ChromeDriver(options);
+            case "safari":
+                return new SafariDriver();
+            case "saucelabs":
+            case "saucelabs-firefox":
+                FirefoxOptions caps = new FirefoxOptions();
+                caps.setCapability("version", "29");
+                caps.setCapability("platform", "Windows 7");
+                caps.setCapability("name", testName.get());
+                if (HarRecorder.isCaptureHarEnabled()) {
+                    caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
+                }
 
-            // if running inside Jenkins, expose build ID
-            String tag = System.getenv("BUILD_TAG");
-            if (tag!=null)
-                caps.setCapability("build", tag);
+                // if running inside Jenkins, expose build ID
+                String tag = System.getenv("BUILD_TAG");
+                if (tag != null) {
+                    caps.setCapability("build", tag);
+                }
 
-            return new SauceLabsConnection().createWebDriver(caps);
-        case "remote-webdriver-firefox":
-            return buildRemoteWebDriver(buildFirefoxOptions(testName));
-        case "remote-webdriver-chrome":
-            return buildRemoteWebDriver(buildChromeOptions(testName));
-        default:
-            throw new Error("Unrecognized browser type: "+browser);
+                return new SauceLabsConnection().createWebDriver(caps);
+            case "remote-webdriver-firefox":
+                return buildRemoteWebDriver(buildFirefoxOptions(testName));
+            case "remote-webdriver-chrome":
+                return buildRemoteWebDriver(buildChromeOptions(testName));
+            default:
+                throw new Error("Unrecognized browser type: " + browser);
         }
     }
 
@@ -159,17 +161,18 @@ public class FallbackConfig extends AbstractModule {
         if (StringUtils.isBlank(u)) {
             throw new Error("remote-webdriver type browsers require REMOTE_WEBDRIVER_URL to be set");
         }
-        RemoteWebDriver driver =  new RemoteWebDriver(
-                new URL(u), //http://192.168.99.100:4444/wd/hub
-                options
-        );
+        RemoteWebDriver driver = new RemoteWebDriver(
+                new URL(u), // http://192.168.99.100:4444/wd/hub
+                options);
         driver.setFileDetector(new LocalFileDetector());
         return driver;
-
     }
+
     private String getBrowser() {
         String browser = System.getenv("BROWSER");
-        if (browser==null) browser = "firefox";
+        if (browser == null) {
+            browser = "firefox";
+        }
         browser = browser.toLowerCase(Locale.ENGLISH);
         return browser;
     }
@@ -178,9 +181,12 @@ public class FallbackConfig extends AbstractModule {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
         // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
-        firefoxOptions.addPreference(DOM_MAX_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-        firefoxOptions.addPreference(DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int)getElasticTime().seconds(600));
-        firefoxOptions.addPreference(DOM_DISABLE_BEFOREUNLOAD, false); // TODO remove when we require Firefox 129 or newer
+        firefoxOptions.addPreference(
+                DOM_MAX_SCRIPT_RUN_TIME, (int) getElasticTime().seconds(600));
+        firefoxOptions.addPreference(
+                DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int) getElasticTime().seconds(600));
+        firefoxOptions.addPreference(
+                DOM_DISABLE_BEFOREUNLOAD, false); // TODO remove when we require Firefox 129 or newer
         firefoxOptions.enableBiDi();
         if (HarRecorder.isCaptureHarEnabled()) {
             firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
@@ -199,7 +205,8 @@ public class FallbackConfig extends AbstractModule {
         return chromeOptions;
     }
 
-    private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities) throws IOException {
+    private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities)
+            throws IOException {
         try {
             final int controlPort = IOUtil.randomTcpPort();
             final int vncPort = IOUtil.randomTcpPort(5900, 6000);
@@ -209,24 +216,37 @@ public class FallbackConfig extends AbstractModule {
             LOGGER.info("Starting selenium container '" + image + "'. Logs in " + log);
 
             Docker.cmd("pull", image).popen().verifyOrDieWith("Failed to pull image " + image);
-            // While this only needs to expose two ports (controlPort, vncPort), it needs to be able to talk to Jenkins running
+            // While this only needs to expose two ports (controlPort, vncPort), it needs to be able to talk to Jenkins
+            // running
             // out of container so using host networking is the most straightforward way to go.
             String[] args = {
-                    "run", "-d", "--shm-size=2g", "--network=host",
-                    "-e", "SE_OPTS=--port " + controlPort,
-                    "-e", "DISPLAY=:" + displayNumber + ".0",
-                    "-e", "DISPLAY_NUM=" + displayNumber,
-                    "-e", "SE_VNC_PORT=" + vncPort,
-                    image
+                "run",
+                "-d",
+                "--shm-size=2g",
+                "--network=host",
+                "-e",
+                "SE_OPTS=--port " + controlPort,
+                "-e",
+                "DISPLAY=:" + displayNumber + ".0",
+                "-e",
+                "DISPLAY_NUM=" + displayNumber,
+                "-e",
+                "SE_VNC_PORT=" + vncPort,
+                image
             };
             ProcessInputStream popen = Docker.cmd(args).popen();
             popen.waitFor();
-            String cid = popen.verifyOrDieWith("Failed to run selenium container").trim();
+            String cid =
+                    popen.verifyOrDieWith("Failed to run selenium container").trim();
 
-            new ProcessBuilder(Docker.cmd("logs", "-f", cid).toCommandArray()).redirectErrorStream(true).redirectOutput(log.toFile()).start();
+            new ProcessBuilder(Docker.cmd("logs", "-f", cid).toCommandArray())
+                    .redirectErrorStream(true)
+                    .redirectOutput(log.toFile())
+                    .start();
 
             Closeable cleanContainer = new Closeable() {
-                @Override public void close() {
+                @Override
+                public void close() {
                     try {
                         Docker.cmd("kill", cid).popen().verifyOrDieWith("Failed to kill " + cid);
                         Docker.cmd("rm", cid).popen().verifyOrDieWith("Failed to rm " + cid);
@@ -235,14 +255,16 @@ public class FallbackConfig extends AbstractModule {
                     }
                 }
 
-                @Override public String toString() {
+                @Override
+                public String toString() {
                     return "Kill and remove selenium container";
                 }
             };
             Thread.sleep(3000); // Give the container and selenium some time to spawn
 
             try {
-                RemoteWebDriver remoteWebDriver = new RemoteWebDriver(new URL("http://127.0.0.1:" + controlPort + "/wd/hub"), capabilities);
+                RemoteWebDriver remoteWebDriver =
+                        new RemoteWebDriver(new URL("http://127.0.0.1:" + controlPort + "/wd/hub"), capabilities);
                 cleaner.addTask(cleanContainer);
                 return remoteWebDriver;
             } catch (RuntimeException e) {
@@ -274,23 +296,21 @@ public class FallbackConfig extends AbstractModule {
 
     private void setDriverPropertyIfMissing(final String driverCommand, final String property) {
         if (System.getProperty(property) != null) {
-          return;
+            return;
         }
         String executable = locateDriver(driverCommand);
         if (StringUtils.isNotBlank(executable)) {
             System.setProperty(property, executable);
-        }
-        else {
+        } else {
             LOGGER.warning("Unable to locate " + driverCommand);
         }
     }
 
     private String locateDriver(final String name) {
-        String command = OS.isFamilyWindows() ? "where": "which";
+        String command = OS.isFamilyWindows() ? "where" : "which";
         try (ProcessInputStream pis = new CommandBuilder(command, name).popen()) {
             return pis.asText().trim();
-        }
-        catch (IOException | InterruptedException exception) {
+        } catch (IOException | InterruptedException exception) {
             return StringUtils.EMPTY;
         }
     }
@@ -302,7 +322,9 @@ public class FallbackConfig extends AbstractModule {
      */
     public static @CheckForNull String getBrowserDisplay() {
         String d = System.getenv("BROWSER_DISPLAY");
-        if (d != null) return d;
+        if (d != null) {
+            return d;
+        }
 
         d = System.getenv("DISPLAY");
         return d;
@@ -311,7 +333,8 @@ public class FallbackConfig extends AbstractModule {
     /**
      * Creates a {@link WebDriver} for each test, then make sure to clean it up at the end.
      */
-    @Provides @TestScope
+    @Provides
+    @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
         WebDriver base = createWebDriver(cleaner, testName);
 
@@ -335,13 +358,13 @@ public class FallbackConfig extends AbstractModule {
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() {
-                switch(getBrowser()) {
+                switch (getBrowser()) {
                     case "firefox":
                     case "saucelabs-firefox":
                     case "remote-webdriver-firefox":
-                        //https://github.com/mozilla/geckodriver/issues/1151
-                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
-                        //https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
+                        // https://github.com/mozilla/geckodriver/issues/1151
+                        // https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
+                        // https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
                         d.navigate().to("about:mozilla");
                         Alert alert = ExpectedConditions.alertIsPresent().apply(d);
                         if (alert != null) {
@@ -352,7 +375,8 @@ public class FallbackConfig extends AbstractModule {
                 d.quit();
             }
 
-            @Override public String toString() {
+            @Override
+            public String toString() {
                 return "Close WebDriver after test";
             }
         });
@@ -367,18 +391,20 @@ public class FallbackConfig extends AbstractModule {
     /**
      * Instantiates a controller through the "TYPE" attribute and {@link JenkinsControllerFactory}.
      */
-    @Provides @TestScope
-    public JenkinsController createController(Injector injector, ExtensionList<JenkinsControllerFactory> factories) throws IOException {
-        String type = System.getenv("type");  // this is lower case for backward compatibility
-        if (type==null)
+    @Provides
+    @TestScope
+    public JenkinsController createController(Injector injector, ExtensionList<JenkinsControllerFactory> factories)
+            throws IOException {
+        String type = System.getenv("type"); // this is lower case for backward compatibility
+        if (type == null) {
             type = System.getenv("TYPE");
-        if (type==null) {
+        }
+        if (type == null) {
             File socket = getSocket();
             if (socket.exists() && !JenkinsControllerPoolProcess.MAIN) {
                 LOGGER.info("Found pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 return new PooledJenkinsController(injector, socket);
-            }
-            else {
+            } else {
                 LOGGER.warning("No pooled jenkins controller listening on socket " + socket.getAbsolutePath());
                 type = "winstone";
             }
@@ -392,22 +418,25 @@ public class FallbackConfig extends AbstractModule {
             }
         }
 
-        throw new AssertionError("Invalid controller type: "+type);
+        throw new AssertionError("Invalid controller type: " + type);
     }
 
-    @Provides @TestScope
+    @Provides
+    @TestScope
     public Jenkins createJenkins(Injector injector, JenkinsController controller) {
-        if (!controller.isRunning()) return null;
+        if (!controller.isRunning()) {
+            return null;
+        }
         return new Jenkins(injector, controller);
     }
-
 
     /**
      * Returns whether Jenkins should be quite and should not report any logging information.
      *
      * @return {@code true} if Jenkins should be quite during the tests
      */
-    @Provides @Named("quite")
+    @Provides
+    @Named("quite")
     public boolean getQuite() {
         return System.getProperty("quite") != null;
     }
@@ -418,7 +447,8 @@ public class FallbackConfig extends AbstractModule {
      * Note that this directory might not exist on the Jenkins master, since it can be
      * running on a separate computer.
      */
-    @Provides @Named("WORKSPACE")
+    @Provides
+    @Named("WORKSPACE")
     public String getWorkspace() {
         return new File(System.getProperty("user.dir"), "target").getPath();
     }
@@ -430,13 +460,14 @@ public class FallbackConfig extends AbstractModule {
      * @return the name of the socket
      * @see JenkinsControllerPoolProcess
      */
-    @Provides @Named("socket")
+    @Provides
+    @Named("socket")
     public File getSocket() {
         String socket = System.getenv("JUT_SOCKET");
         if (StringUtils.isNotBlank(socket)) {
             return new File(socket);
         }
-        return new File(System.getProperty("user.home"),"jenkins.sock");
+        return new File(System.getProperty("user.home"), "jenkins.sock");
     }
 
     /**
@@ -444,7 +475,8 @@ public class FallbackConfig extends AbstractModule {
      * <p>
      * The file will exist on machine where tests run.
      */
-    @Provides @Named("jenkins.war")
+    @Provides
+    @Named("jenkins.war")
     public File getJenkinsWar(RepositorySystem repositorySystem, RepositorySystemSession repositorySystemSession) {
         try {
             return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"));
@@ -454,7 +486,8 @@ public class FallbackConfig extends AbstractModule {
         String version = System.getenv("JENKINS_VERSION");
         if (version != null && !version.isEmpty()) {
             ArtifactResolverUtil resolverUtil = new ArtifactResolverUtil(repositorySystem, repositorySystemSession);
-            ArtifactResult resolvedArtifact = resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.main", "jenkins-war", "war", version));
+            ArtifactResult resolvedArtifact =
+                    resolverUtil.resolve(new DefaultArtifact("org.jenkins-ci.main", "jenkins-war", "war", version));
             return resolvedArtifact.getArtifact().getFile();
         }
 
@@ -462,7 +495,8 @@ public class FallbackConfig extends AbstractModule {
 
         try {
             // Lowest priority of all
-            return IOUtil.firstExisting(false, System.getenv("JENKINS_WAR"), getWorkspace() + "/jenkins.war", "./jenkins.war");
+            return IOUtil.firstExisting(
+                    false, System.getenv("JENKINS_WAR"), getWorkspace() + "/jenkins.war", "./jenkins.war");
         } catch (IOException ex) {
             throw new Error("Could not find jenkins.war, use JENKINS_WAR or JENKINS_VERSION to specify it.", ex);
         }
@@ -474,22 +508,23 @@ public class FallbackConfig extends AbstractModule {
      *
      *  @return An ExercisedPluginReporter based on env var EXERCISEDPLUGINREPORTER
      */
-     @Provides @Named("ExercisedPluginReporter")
-     public ExercisedPluginsReporter createExercisedPluginReporter() {
-         String reporter = System.getenv("EXERCISEDPLUGINREPORTER");
-         if (reporter==null) {
-             reporter = "console";
-         } else {
-             reporter = reporter.toLowerCase(Locale.ENGLISH);
-         }
+    @Provides
+    @Named("ExercisedPluginReporter")
+    public ExercisedPluginsReporter createExercisedPluginReporter() {
+        String reporter = System.getenv("EXERCISEDPLUGINREPORTER");
+        if (reporter == null) {
+            reporter = "console";
+        } else {
+            reporter = reporter.toLowerCase(Locale.ENGLISH);
+        }
 
-         switch (reporter) {
-         case "console":
-             return new ConsoleExercisedPluginReporter();
-         case "textfile":
-             return TextFileExercisedPluginReporter.getInstance();
-         default:
-             throw new AssertionError("Unrecognized Exercised Plugin Report type: "+reporter);
-         }
-     }
+        switch (reporter) {
+            case "console":
+                return new ConsoleExercisedPluginReporter();
+            case "textfile":
+                return TextFileExercisedPluginReporter.getInstance();
+            default:
+                throw new AssertionError("Unrecognized Exercised Plugin Report type: " + reporter);
+        }
+    }
 }

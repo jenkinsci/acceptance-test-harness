@@ -16,5 +16,4 @@ public class BranchSource extends PageAreaImpl {
     public BranchSource(WorkflowSharedLibrary sharedLibrary, String path) {
         super(sharedLibrary, path);
     }
-
 }

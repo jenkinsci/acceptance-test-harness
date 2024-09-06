@@ -45,5 +45,4 @@ public class GitLabScm extends GitScm {
         this.gitlabVersion.set(version);
         return this;
     }
-
 }

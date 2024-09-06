@@ -21,5 +21,4 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 @ScopeAnnotation
-public @interface TestScope {
-}
+public @interface TestScope {}

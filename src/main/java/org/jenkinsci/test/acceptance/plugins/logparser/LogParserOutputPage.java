@@ -21,9 +21,11 @@ public class LogParserOutputPage extends PageObject {
      * Defines the different types of frames used by the parsed output of the logparser
      */
     public enum LogParserFrame {
-        SIDEBAR("sidebar"), CONTENT("content");
+        SIDEBAR("sidebar"),
+        CONTENT("content");
 
         private String frameName;
+
         LogParserFrame(String frameName) {
             this.frameName = frameName;
         }
@@ -56,12 +58,12 @@ public class LogParserOutputPage extends PageObject {
         WebElement e = driver.findElement(By.xpath("//div[@id='main-panel']//table//tbody//tr//td//iframe"));
         driver.switchTo().frame(e);
     }
-    
+
     /**
-     * Switch focus of the driver to the specified frame. 
-     * Calls {@link LogParserOutputPage#switchToMainframe()} before switching to the specified frame. 
-     * 
-     * @param frame The frame to switch to. 
+     * Switch focus of the driver to the specified frame.
+     * Calls {@link LogParserOutputPage#switchToMainframe()} before switching to the specified frame.
+     *
+     * @param frame The frame to switch to.
      */
     private void switchToFrame(LogParserFrame frame) {
         switchToMainframe();
@@ -114,7 +116,8 @@ public class LogParserOutputPage extends PageObject {
         try {
             switchToFrame(LogParserFrame.SIDEBAR);
             driver.findElement(By.partialLinkText(category)).click();
-            driver.findElement(By.xpath("//ul[@id='" + category + "']/li[" + index + "]/a")).click();
+            driver.findElement(By.xpath("//ul[@id='" + category + "']/li[" + index + "]/a"))
+                    .click();
             switchToDefaultContent();
             switchToFrame(LogParserFrame.CONTENT);
             String[] parts = getCurrentUrlWithFragment().split("#");
@@ -139,7 +142,8 @@ public class LogParserOutputPage extends PageObject {
                 String xpath = "//a[@name='" + category.toUpperCase() + index + "']/following-sibling::span[1]";
                 span = find(by.xpath(xpath));
             } catch (NoSuchElementException ex) {
-                String xpath = "//a[@name='" + category.toUpperCase() + index + "']/parent::p/following-sibling::span[1]";
+                String xpath =
+                        "//a[@name='" + category.toUpperCase() + index + "']/parent::p/following-sibling::span[1]";
                 span = find(by.xpath(xpath));
             }
             Pattern colorPattern = Pattern.compile("color: (\\S*);");

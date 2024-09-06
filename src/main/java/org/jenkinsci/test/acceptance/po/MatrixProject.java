@@ -35,7 +35,7 @@ public class MatrixProject extends Job {
         ensureConfigPage();
         String path = createPageArea("/axis", () -> addAxis.selectDropdownMenu(type));
 
-        return newInstance(type,this,path);
+        return newInstance(type, this, path);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class MatrixProject extends Job {
     }
 
     public MatrixConfiguration getConfiguration(String name) {
-        return new MatrixConfiguration(injector, url(name+'/'), name);
+        return new MatrixConfiguration(injector, url(name + '/'), name);
     }
 
     public void setTouchStoneBuild(String filter, String result) {

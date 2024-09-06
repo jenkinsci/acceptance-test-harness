@@ -34,8 +34,9 @@ public class CredentialsTest extends AbstractJUnitTest {
     private static final String CRED_USER = "user";
     private static final String CRED_PWD = "password";
     private static final String CRED_DESCR = "descr";
-    
-    @Test @WithPlugins("ssh-credentials")
+
+    @Test
+    @WithPlugins("ssh-credentials")
     public void createSshKeys() throws Exception {
         CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
 
@@ -46,7 +47,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         sc.description.set("ssh_creds");
         cp.create();
 
-        //now verify
+        // now verify
         final ManagedCredentials c = new ManagedCredentials(jenkins);
         String href = c.credentialById("ssh_creds");
         cp.setConfigUrl(href);
@@ -60,7 +61,7 @@ public class CredentialsTest extends AbstractJUnitTest {
         ManagedCredentials mc = new ManagedCredentials(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
         verifyValueInDomain(ManagedCredentials.DEFAULT_DOMAIN, null, mc.checkIfCredentialsExist(CRED_DESCR), CRED_USER);
     }
-    
+
     @Test
     public void manageSystemScopedCredentialsTest() throws Exception {
         createUpdateDeleteTest(null, ManagedCredentials.DEFAULT_DOMAIN, SYSTEM_SCOPE);
@@ -152,12 +153,12 @@ public class CredentialsTest extends AbstractJUnitTest {
         dp.delete();
         verifyElementNotPresent(c.checkSystemPage(domainNameModified));
     }
-    
+
     @Test
     public void domainScopedAndGlobalDomainCredentialsTest() {
         final String domainCredUser = "domainUser";
         final String globalCredUser = "globalUser";
-        
+
         this.createDomain(CRED_DOMAIN);
         this.createUserPwdCredential(CRED_DOMAIN, null, SYSTEM_SCOPE, null, domainCredUser);
         this.createUserPwdCredential(ManagedCredentials.DEFAULT_DOMAIN, null, SYSTEM_SCOPE, null, globalCredUser);
@@ -166,7 +167,8 @@ public class CredentialsTest extends AbstractJUnitTest {
         ManagedCredentials global = new ManagedCredentials(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
 
         verifyValueInDomain(CRED_DOMAIN, null, listed.checkIfCredentialsExist(CRED_DESCR), domainCredUser);
-        verifyValueInDomain(ManagedCredentials.DEFAULT_DOMAIN, null, global.checkIfCredentialsExist(CRED_DESCR), globalCredUser);
+        verifyValueInDomain(
+                ManagedCredentials.DEFAULT_DOMAIN, null, global.checkIfCredentialsExist(CRED_DESCR), globalCredUser);
     }
 
     @Test
@@ -186,13 +188,13 @@ public class CredentialsTest extends AbstractJUnitTest {
 
     private void verifyValueForElement(Control element, String expected) {
         jenkins.visit("credentials/store/system/");
-        assert(element.exists());
+        assert (element.exists());
         assertThat(element.resolve().getText(), containsString(expected));
     }
 
     private void verifyElementNotPresent(Control element) {
         jenkins.visit("credentials/store/system/");
-        assert(!element.exists());
+        assert (!element.exists());
     }
 
     /**
@@ -203,22 +205,22 @@ public class CredentialsTest extends AbstractJUnitTest {
      */
     private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {
         cp.configure();
-        assert(element.exists());
+        assert (element.exists());
         assertThat(element.resolve().getAttribute("value"), containsString(expected));
     }
 
-    private void verifyValueForCredentialKey(SshPrivateKeyCredential credential, String expected, boolean isUserScopedCredentials) {
+    private void verifyValueForCredentialKey(
+            SshPrivateKeyCredential credential, String expected, boolean isUserScopedCredentials) {
         String id = credential.control(By.name("_.id")).resolve().getAttribute("value");
         String script = String.format(
                 "println(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey.class, Jenkins.instance, %s, null).find {it.id == \"%s\" }.privateKey);",
-                isUserScopedCredentials ? "hudson.model.User.current().impersonate()" : "null",
-                id);
+                isUserScopedCredentials ? "hudson.model.User.current().impersonate()" : "null", id);
         assertEquals("Expect private key and real one do not match", expected, jenkins.runScript(script));
     }
 
     private void verifyValueInDomain(String domain, String user, Control element, String expected) {
         jenkins.visit(this.generateUrlForCredentialsStore(domain, user));
-        assert(element.exists());
+        assert (element.exists());
         assertThat(element.resolve().getText(), containsString(expected));
     }
 
@@ -237,7 +239,8 @@ public class CredentialsTest extends AbstractJUnitTest {
         }
     }
 
-    private UserPwdCredential createUserPwdCredential(String domainName, String user, String scope, String descr, String credUser) {
+    private UserPwdCredential createUserPwdCredential(
+            String domainName, String user, String scope, String descr, String credUser) {
         String descrToUse = (descr != null) ? descr : CRED_DESCR;
         String credUserToUse = (credUser != null) ? credUser : CRED_USER;
 
@@ -249,7 +252,8 @@ public class CredentialsTest extends AbstractJUnitTest {
         }
 
         cp.open();
-        UserPwdCredential cred = configureUserPwdCredential(cp.add(UserPwdCredential.class), credUserToUse, CRED_PWD, descrToUse, scope);
+        UserPwdCredential cred =
+                configureUserPwdCredential(cp.add(UserPwdCredential.class), credUserToUse, CRED_PWD, descrToUse, scope);
         cp.create();
 
         return cred;
@@ -257,7 +261,7 @@ public class CredentialsTest extends AbstractJUnitTest {
 
     /**
      * Populates a UserPwdCredential with the values passed as parameter
-     * 
+     *
      * @param c The credential
      * @param user The username
      * @param pwd The password
@@ -265,14 +269,15 @@ public class CredentialsTest extends AbstractJUnitTest {
      * @param scope (optional) The scope of the credential
      * @return
      */
-    private UserPwdCredential configureUserPwdCredential(final UserPwdCredential c, String user, String pwd, String descr, String scope) {
+    private UserPwdCredential configureUserPwdCredential(
+            final UserPwdCredential c, String user, String pwd, String descr, String scope) {
         if (descr != null && !descr.isEmpty()) {
             c.description.set(descr);
         }
         if (scope != null && !scope.isEmpty()) {
             c.scope.select(scope);
         }
-        
+
         c.username.set(user);
         c.password.set(pwd);
         return c;
@@ -299,5 +304,4 @@ public class CredentialsTest extends AbstractJUnitTest {
 
         return d;
     }
-
 }

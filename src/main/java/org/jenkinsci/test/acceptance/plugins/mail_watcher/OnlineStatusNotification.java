@@ -30,7 +30,9 @@ import org.jenkinsci.test.acceptance.po.Slave;
 public class OnlineStatusNotification extends PageAreaImpl {
 
     public OnlineStatusNotification(Jenkins context) {
-        super(context, "/jenkins-model-GlobalNodePropertiesConfiguration/globalNodeProperties/org-jenkinsci-plugins-mailwatcher-WatcherNodeProperty");
+        super(
+                context,
+                "/jenkins-model-GlobalNodePropertiesConfiguration/globalNodeProperties/org-jenkinsci-plugins-mailwatcher-WatcherNodeProperty");
         control("").click();
     }
 

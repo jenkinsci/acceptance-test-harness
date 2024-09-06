@@ -20,10 +20,10 @@ public class TestCleaner extends Cleaner {
         for (Object o : lifecycle.getInstances()) {
             if (o instanceof AutoCleaned) {
                 try {
-                    ((AutoCleaned)o).close();
+                    ((AutoCleaned) o).close();
                 } catch (Throwable t) {
                     // just log and move on so that other cleaners can run
-                    System.out.println(o+" clean up failed");
+                    System.out.println(o + " clean up failed");
                     t.printStackTrace();
                 }
             }

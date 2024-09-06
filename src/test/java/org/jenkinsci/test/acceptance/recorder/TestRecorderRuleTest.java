@@ -31,7 +31,7 @@ public class TestRecorderRuleTest {
             File outputFile = outputFile(desc);
             assertThat(outputFile, is(not(existingFile())));
 
-            //Clean the field
+            // Clean the field
             outputFile.delete();
         } finally {
             restoreRecorderOption(oldMode);
@@ -49,19 +49,18 @@ public class TestRecorderRuleTest {
             testRecorderRule.starting(desc);
 
             System.out.println("Good Bye World");
-            //succeeded is not called since a failure is simulated
-            //testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
+            // succeeded is not called since a failure is simulated
+            // testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
             testRecorderRule.finished(desc);
 
             File outputFile = outputFile(desc);
             assertThat(outputFile, is(existingFile()));
 
-            //Clean the field
+            // Clean the field
             outputFile.delete();
         } finally {
             restoreRecorderOption(oldValue);
         }
-
     }
 
     @Test
@@ -69,7 +68,7 @@ public class TestRecorderRuleTest {
 
         final String oldValue = updateRecorderToDefaultOption();
         try {
-            //Since configured recorder option is static we need to set it manually in each test.
+            // Since configured recorder option is static we need to set it manually in each test.
             TestRecorderRule.RECORDER_OPTION = TestRecorderRule.ALWAYS;
 
             Description desc = description("shouldRecordSuccessTestExecutionWhenSaveAll");
@@ -95,7 +94,7 @@ public class TestRecorderRuleTest {
     public void shouldNotRecordWhenRecorderIsDisabled() {
 
         try {
-            //Since configured recorder option is static we need to set it manually in each test.
+            // Since configured recorder option is static we need to set it manually in each test.
             TestRecorderRule.RECORDER_OPTION = TestRecorderRule.OFF;
 
             Description desc = description("shouldNotRecordWhenRecorderIsDisabled");
@@ -104,14 +103,14 @@ public class TestRecorderRuleTest {
 
             System.out.println("Hello World");
 
-            //testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
+            // testRecorderRule.succeeded(shouldNotRecordSuccessTestExecutionByDefault);
             testRecorderRule.finished(desc);
 
             File outputFile = outputFile(desc);
             assertThat(outputFile, is(not(existingFile())));
             outputFile.delete();
         } finally {
-            //Clean the field
+            // Clean the field
             TestRecorderRule.RECORDER_OPTION = TestRecorderRule.FAILURES;
         }
     }
@@ -125,7 +124,7 @@ public class TestRecorderRuleTest {
     }
 
     private File outputFile(Description desc) {
-        return new File("target/diagnostics/" +desc + "/ui-recording.mov");
+        return new File("target/diagnostics/" + desc + "/ui-recording.mov");
     }
 
     private String updateRecorderToDefaultOption() {

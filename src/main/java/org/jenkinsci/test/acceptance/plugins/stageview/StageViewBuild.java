@@ -82,5 +82,4 @@ public class StageViewBuild {
     public String toString() {
         return this.buildNo + " - " + webWebElement.getText().replace("\n", "") + " - css: " + this.cssClasses;
     }
-
 }

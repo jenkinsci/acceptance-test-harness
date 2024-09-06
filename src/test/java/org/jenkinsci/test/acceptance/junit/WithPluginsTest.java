@@ -40,28 +40,26 @@ public class WithPluginsTest {
         // TODO test annotation harvesting and test class inheritance
         List<WithPlugins> annotations = Arrays.asList(
                 FakeTestClass.class.getAnnotation(WithPlugins.class),
-                FakeTestClass.class.getMethod("test").getAnnotation(WithPlugins.class)
-        );
+                FakeTestClass.class.getMethod("test").getAnnotation(WithPlugins.class));
 
         List<PluginSpec> actual = WithPlugins.RuleImpl.combinePlugins(annotations);
         List<PluginSpec> expected = Arrays.asList(
                 new PluginSpec("keep"),
                 new PluginSpec("keepv@1"),
-                new PluginSpec("specify@42"), // any version specification is more strict then plugin presence requirement
+                new PluginSpec(
+                        "specify@42"), // any version specification is more strict then plugin presence requirement
                 new PluginSpec("keepspecific@42"), // ditto
                 new PluginSpec("override@2"), // never version is the more specific one
                 new PluginSpec("donotoverride@2"), // ditto
                 new PluginSpec("inherit"),
-                new PluginSpec("add")
-        );
+                new PluginSpec("add"));
         assertThat(actual, equalTo(expected));
     }
 
-    @WithPlugins(          {"keep", "keepv@1", "specify",    "keepspecific@42", "override@1", "donotoverride@2", "inherit"})
+    @WithPlugins({"keep", "keepv@1", "specify", "keepspecific@42", "override@1", "donotoverride@2", "inherit"})
     public static final class FakeTestClass {
-        @Test @WithPlugins({"keep", "keepv@1", "specify@42", "keepspecific",    "override@2", "donotoverride@1", "add"})
-        public void test() throws Exception {
-
-        }
+        @Test
+        @WithPlugins({"keep", "keepv@1", "specify@42", "keepspecific", "override@2", "donotoverride@1", "add"})
+        public void test() throws Exception {}
     }
 }

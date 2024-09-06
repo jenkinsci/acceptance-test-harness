@@ -25,7 +25,9 @@ package core;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.jenkinsci.test.acceptance.po.FormValidation.*;
+import static org.jenkinsci.test.acceptance.po.FormValidation.Kind;
+import static org.jenkinsci.test.acceptance.po.FormValidation.reports;
+import static org.jenkinsci.test.acceptance.po.FormValidation.silent;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.po.FormValidation;
@@ -73,7 +75,8 @@ public class FormValidationTest extends AbstractJUnitTest {
     }
 
     private void navigateAway() {
-        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a")).click());
+        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a"))
+                .click());
         sleep(1000); // Needed for some reason
     }
 }

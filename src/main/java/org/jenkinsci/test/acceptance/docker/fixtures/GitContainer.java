@@ -18,7 +18,7 @@ public class GitContainer extends DockerContainer {
     public String host() {
         return ipBound(22);
     }
-    
+
     public int port() {
         return port(22);
     }
@@ -27,7 +27,7 @@ public class GitContainer extends DockerContainer {
         return new URL("http", host(), port(), "");
     }
 
-    /** URL visible from the host. 
+    /** URL visible from the host.
      * @throws MalformedURLException */
     public String getRepoUrl() throws MalformedURLException {
         return "ssh://git@" + addBracketsIfNeeded(host()) + ":" + port() + REPO_DIR;
@@ -51,11 +51,12 @@ public class GitContainer extends DockerContainer {
      * @param pubKey the certificate public key
      */
     public void addSSHCertificate(String pubKey) throws IOException, InterruptedException {
-        Docker.cmd("exec", getCid()).add("/bin/bash",  "-c",  "echo " + pubKey + " >> /home/git/.ssh/authorized_keys")
+        Docker.cmd("exec", getCid())
+                .add("/bin/bash", "-c", "echo " + pubKey + " >> /home/git/.ssh/authorized_keys")
                 .popen()
                 .verifyOrDieWith("Unable to add SSH public key to authorized keys");
     }
-    
+
     public static String addBracketsIfNeeded(String host) throws MalformedURLException {
         return new URL("http", host, 0, "").getHost();
     }

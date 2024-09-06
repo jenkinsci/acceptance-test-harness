@@ -51,15 +51,16 @@ public class TriggerRemoteBuildsTest extends AbstractJUnitTest {
         subject.addParameter(StringParameter.class).setName("ID");
         // Trigger builds remotely (e.g., from scripts)")
         // TODO move to page area
-        jenkins.control("/pseudoRemoteTrigger").resolve().findElement(by.xpath("../label")).click();
+        jenkins.control("/pseudoRemoteTrigger")
+                .resolve()
+                .findElement(by.xpath("../label"))
+                .click();
         jenkins.control("/pseudoRemoteTrigger/authToken").fillIn("authToken", "TOKEN");
         subject.addShellStep("test 'id_to_pass' = $ID");
         subject.save();
 
         FreeStyleJob trigger = jenkins.jobs.create();
-        trigger.addShellStep(
-                "curl " + subject.url.toString() + "buildWithParameters?token=TOKEN\\&ID=id_to_pass"
-        );
+        trigger.addShellStep("curl " + subject.url.toString() + "buildWithParameters?token=TOKEN\\&ID=id_to_pass");
         trigger.save();
 
         trigger.startBuild().shouldSucceed();

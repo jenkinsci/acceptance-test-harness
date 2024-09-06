@@ -53,7 +53,9 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     }
 
     private boolean connect() throws IOException {
-        if (conn != null)      return false;
+        if (conn != null) {
+            return false;
+        }
 
         System.out.println("Requesting jut instance using socket " + socket.getAbsolutePath());
         UnixSocketAddress address = new UnixSocketAddress(socket);
@@ -64,7 +66,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
                 .build(ChannelStream.in(conn), ChannelStream.out(conn));
 
         try {
-            controller = (IJenkinsController)channel.waitForRemoteProperty("controller");
+            controller = (IJenkinsController) channel.waitForRemoteProperty("controller");
             controller.start();
             url = controller.getUrl();
 
@@ -73,7 +75,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
             }
 
             final LogListener l = channel.export(LogListener.class, splitter);
-            channel.call(new InstallLogger(controller,l));
+            channel.call(new InstallLogger(controller, l));
 
             for (byte[] content : toUnpack) {
                 controller.populateJenkinsHome(content, false);
@@ -110,8 +112,9 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
     @Override
     public URL getUrl() {
-        if (url==null)
+        if (url == null) {
             throw new IllegalStateException("This controller has not been started");
+        }
         return url;
     }
 
@@ -123,8 +126,9 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
         } catch (InterruptedException e) {
             throw new IOException(e);
         } finally {
-            if (conn !=null)
+            if (conn != null) {
                 conn.close();
+            }
             conn = null;
         }
     }
@@ -133,7 +137,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
     public void diagnose(Throwable cause) {
         // TODO: Report jenkins log
         cause.printStackTrace(System.out);
-        if(System.getenv("INTERACTIVE") != null && System.getenv("INTERACTIVE").equals("true")){
+        if (System.getenv("INTERACTIVE") != null && System.getenv("INTERACTIVE").equals("true")) {
             System.out.println("Commencing interactive debugging. Browser session was kept open.");
             System.out.println("Press return to proceed.");
             try {
@@ -146,7 +150,8 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
-        @Inject Injector i;
+        @Inject
+        Injector i;
 
         @Override
         public String getId() {
@@ -181,8 +186,7 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
         }
 
         @Override
-        public void checkRoles(RoleChecker checker) throws SecurityException {
-        }
+        public void checkRoles(RoleChecker checker) throws SecurityException {}
 
         private static final long serialVersionUID = 1L;
     }

@@ -40,8 +40,9 @@ public class ArtifactManagement extends PageAreaImpl {
     }
 
     public <T extends Factory> T add(final Class<T> impl) {
-        String path = createPageArea("artifactManagerFactories",
-                () -> control("hetero-list-add[artifactManagerFactories]").selectDropdownMenu(impl));
+        String path =
+                createPageArea("artifactManagerFactories", () -> control("hetero-list-add[artifactManagerFactories]")
+                        .selectDropdownMenu(impl));
         return newInstance(impl, this, path);
     }
 

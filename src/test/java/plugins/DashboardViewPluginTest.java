@@ -3,7 +3,6 @@ package plugins;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
@@ -66,7 +65,8 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
      * @throws AssertionError If shouldContain is true and the Portlet doesn't contain the job.
      *                        Or if shouldContain is false and the Portlet does contain the job.
      */
-    private void assertJobInUnstableJobsPortlet(UnstableJobsPortlet portlet, String jobName, boolean shouldContain) throws AssertionError {
+    private void assertJobInUnstableJobsPortlet(UnstableJobsPortlet portlet, String jobName, boolean shouldContain)
+            throws AssertionError {
         portlet.getPage().open();
         assertThat(portlet.hasJob(jobName), is(shouldContain));
 
@@ -104,7 +104,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         buildSuccessfulJob(success);
         v.open();
         assertThat(stats.getPercentageOfBuilds(JobType.SUCCESS), is("100.0"));
-
 
         buildFailingJob(failing);
         v.open();
@@ -162,7 +161,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         LatestBuildsPortlet latestBuilds = v.addBottomPortlet(LatestBuildsPortlet.class);
         v.save();
 
-
         FreeStyleJob job = createFreeStyleJob();
 
         v.open();
@@ -170,7 +168,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         Build build1 = buildSuccessfulJob(job);
         Build build2 = buildSuccessfulJob(job);
-
 
         v.open();
         assertThat(latestBuilds.hasJob(job.name), is(true));
@@ -186,8 +183,9 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
 
         FreeStyleJob job = createFreeStyleJob();
 
-        for (int i = 0; i <= LatestBuildsPortlet.NUMBER_OF_BUILDS + 1; i++)
+        for (int i = 0; i <= LatestBuildsPortlet.NUMBER_OF_BUILDS + 1; i++) {
             buildSuccessfulJob(job);
+        }
 
         v.open();
         assertThat(latestBuilds.hasBuild(1), is(false));
@@ -214,7 +212,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(breadCrumbs, hasSize(2));
         final String nameCrumb = breadCrumbs.get(breadCrumbs.size() - 1);
         assertThat(nameCrumb, is(name));
-
 
         assertThat(v.mainPanel.getTabName(), equalToIgnoringCase(name));
         assertThat(v.mainPanel.getDescription(), is(description));

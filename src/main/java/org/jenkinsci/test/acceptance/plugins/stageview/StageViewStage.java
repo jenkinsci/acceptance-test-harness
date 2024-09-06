@@ -31,7 +31,6 @@ public class StageViewStage {
         return name;
     }
 
-
     @Override
     public String toString() {
         return "-- Stage: " + this.name;

@@ -11,7 +11,7 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 
-@WithPlugins ("antisamy-markup-formatter")
+@WithPlugins("antisamy-markup-formatter")
 public class AntisamyMarkupFormatterTest extends AbstractJUnitTest {
 
     private static final String NO_HTML = "safe text with no html";
@@ -56,5 +56,4 @@ public class AntisamyMarkupFormatterTest extends AbstractJUnitTest {
             }
         }
     }
-
 }

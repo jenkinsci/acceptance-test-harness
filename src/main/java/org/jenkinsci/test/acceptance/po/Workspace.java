@@ -38,7 +38,8 @@ public class Workspace extends PageObject {
 
     public static Matcher<Job> workspaceContains(final String file) {
         return new Matcher<Job>("%s in job workspace", file) {
-            @Override public boolean matchesSafely(Job job) {
+            @Override
+            public boolean matchesSafely(Job job) {
                 job.getWorkspace().open();
                 return job.getElement(by.xpath("//table[@class='fileList']//a[text()='%s']", file)) != null;
             }

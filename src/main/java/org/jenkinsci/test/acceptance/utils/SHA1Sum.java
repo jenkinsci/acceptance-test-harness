@@ -42,7 +42,6 @@ public class SHA1Sum {
         return this.sha1;
     }
 
-
     private String convertByteToString(byte[] inByte) {
         try (Formatter formatter = new Formatter()) {
             for (final byte b : inByte) {
@@ -66,7 +65,5 @@ public class SHA1Sum {
             }
             return digest.digest();
         }
-
     }
-
 }

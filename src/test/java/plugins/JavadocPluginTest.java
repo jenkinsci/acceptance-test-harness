@@ -32,7 +32,8 @@ public class JavadocPluginTest extends AbstractJUnitTest {
         assertJavadoc(job);
     }
 
-    @Test @WithPlugins("matrix-project")
+    @Test
+    @WithPlugins("matrix-project")
     public void publish_javadoc_from_matrix_job() {
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);
         setup(job);
@@ -62,11 +63,13 @@ public class JavadocPluginTest extends AbstractJUnitTest {
 
     private void setup(Job job) {
         // https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy#ConfiguringContentSecurityPolicy-JavadocPlugin
-        jenkins.runScript("System.setProperty('hudson.model.DirectoryBrowserSupport.CSP', \"default-src 'none'; img-src 'self'; style-src 'self'; child-src 'self'; frame-src 'self';\")");
+        jenkins.runScript(
+                "System.setProperty('hudson.model.DirectoryBrowserSupport.CSP', \"default-src 'none'; img-src 'self'; style-src 'self'; child-src 'self'; frame-src 'self';\")");
 
         job.configure();
         MavenBuildStep m = job.addBuildStep(MavenBuildStep.class);
-        m.targets.set("archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B");
+        m.targets.set(
+                "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B");
         m = job.addBuildStep(MavenBuildStep.class);
         m.targets.set("javadoc:javadoc -f my-app/pom.xml");
 
@@ -76,7 +79,7 @@ public class JavadocPluginTest extends AbstractJUnitTest {
     }
 
     private void setupForRetention(Job job) {
-        job.editPublisher(JavadocPublisher.class, (publisher) -> {
+        job.editPublisher(JavadocPublisher.class, publisher -> {
             job.removeFirstBuildStep();
             publisher.keepAll.check();
         });

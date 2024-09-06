@@ -13,8 +13,5 @@ public class SvnRepositoryBrowser extends PageObject {
 
     public SvnRepositoryBrowser(Scm area, URL path) {
         super(area.getPage(), path);
-
     }
-
-
 }

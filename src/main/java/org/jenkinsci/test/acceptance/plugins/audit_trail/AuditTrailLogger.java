@@ -33,7 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 
-abstract public class AuditTrailLogger extends JenkinsLogger {
+public abstract class AuditTrailLogger extends JenkinsLogger {
 
     private static final Pattern LOG_PATTERN = Pattern.compile("((?:\\/\\w+)+.*?) by (.*)");
 
@@ -55,11 +55,10 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         public ExposedFile(Jenkins jenkins) {
             super(jenkins, "../userContent/audit-trail.log");
 
-            String logfile = jenkins.runScript(
-                    "def log = new File(Jenkins.instance.rootDir, 'userContent/audit-trail.log');" +
-                            "log.createNewFile();" +
-                            "println log.absolutePath;"
-            );
+            String logfile =
+                    jenkins.runScript("def log = new File(Jenkins.instance.rootDir, 'userContent/audit-trail.log');"
+                            + "log.createNewFile();"
+                            + "println log.absolutePath;");
 
             jenkins.configure();
             AuditTrailGlobalConfiguration area = new AuditTrailGlobalConfiguration(jenkins.getConfigPage());
@@ -92,8 +91,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
                 }
 
                 return events;
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 throw new AssertionError("Audit trail log not exposed", ex);
             }
         }
@@ -101,8 +99,7 @@ abstract public class AuditTrailLogger extends JenkinsLogger {
         private String getContent() {
             try {
                 return IOUtils.toString(url.openStream(), StandardCharsets.UTF_8);
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 throw new AssertionError("Audit trail log not exposed", ex);
             }
         }

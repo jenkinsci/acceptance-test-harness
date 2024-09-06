@@ -19,6 +19,6 @@ public class JiraGlobalConfig extends PageAreaImpl {
     public void addSite(URL url, String credentialsId) {
         control("repeatable-add").click();
         control("sites/url").set(url);
-        control( "sites/credentialsId" ).select( credentialsId );
+        control("sites/credentialsId").select(credentialsId);
     }
 }

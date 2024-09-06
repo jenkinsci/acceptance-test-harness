@@ -46,11 +46,12 @@ public @interface Since {
                 }
 
                 private void check(Since s) {
-                    if (s!=null) {
-                        VersionNumber actual = injector.getInstance(Jenkins.class).getVersion();
+                    if (s != null) {
+                        VersionNumber actual =
+                                injector.getInstance(Jenkins.class).getVersion();
                         VersionNumber expected = new VersionNumber(s.value());
-                        System.out.printf("Version check: actual=%s, expected=%s\n",actual,expected);
-                        Assume.assumeTrue("Requires "+s.value(), actual.compareTo(expected)>=0);
+                        System.out.printf("Version check: actual=%s, expected=%s\n", actual, expected);
+                        Assume.assumeTrue("Requires " + s.value(), actual.compareTo(expected) >= 0);
                     }
                 }
             };

@@ -18,8 +18,8 @@ public class AuditTrailGlobalConfiguration extends PageAreaImpl {
     }
 
     // TODO
-//    public LoggerPageObject addLogger() {
-//        addLogger.selectDropdownMenu("Log file");
-//        ....
-//    }
+    //    public LoggerPageObject addLogger() {
+    //        addLogger.selectDropdownMenu("Log file");
+    //        ....
+    //    }
 }

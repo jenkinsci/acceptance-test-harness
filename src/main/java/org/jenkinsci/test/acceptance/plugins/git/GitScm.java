@@ -23,7 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.plugins.git;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.Scm;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.Select;
 
@@ -248,10 +252,9 @@ public class GitScm extends Scm {
         return addBehaviour(MergeBeforeBuild.class);
     }
 
-
     public <T extends Behaviour> T addBehaviour(Class<T> type) {
         control("hetero-list-add[extensions]").selectDropdownMenu(type);
-        return newInstance(type, this, "extensions");   // FIXME: find the last extension added
+        return newInstance(type, this, "extensions"); // FIXME: find the last extension added
     }
 
     private void advanced() {
@@ -362,8 +365,6 @@ public class GitScm extends Scm {
 
             return this;
         }
-
-
     }
 
     @Describable("Calculate changelog against a specific branch")
@@ -477,7 +478,6 @@ public class GitScm extends Scm {
 
             return this;
         }
-
     }
 
     @Describable("Polling ignores commits from certain users")
@@ -518,14 +518,14 @@ public class GitScm extends Scm {
 
     @Describable("Sparse Checkout paths")
     public static class SparseCheckoutPaths extends Behaviour {
-        private  int pathCounter = 0;
+        private int pathCounter = 0;
         private final Control btnAdd = control("repeatable-add");
 
         public SparseCheckoutPaths(GitScm git, String path) {
             super(git, path);
         }
 
-        public SparseCheckoutPaths addPath (String name) {
+        public SparseCheckoutPaths addPath(String name) {
             String relativePaths = "sparseCheckoutPaths";
 
             if (pathCounter == 0) {
@@ -543,7 +543,7 @@ public class GitScm extends Scm {
 
     @Describable("Strategy for choosing what to build")
     public static class StrategyToChooseBuild extends Behaviour {
-        private final Control selStrategy = control("/"); //absolute path is "/scm[1]/extensions/"
+        private final Control selStrategy = control("/"); // absolute path is "/scm[1]/extensions/"
         private final Control numMaxAge = control("buildChooser/maximumAgeInDays");
         private final Control txtAncestorCommit = control("buildChooser/ancestorCommitSha1");
 

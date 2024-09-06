@@ -1,16 +1,16 @@
 package org.jenkinsci.test.acceptance.utils.keycloack;
 
+import jakarta.inject.Inject;
 import java.net.URL;
-
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.openqa.selenium.WebDriver;
-import jakarta.inject.Inject;
 
 public class KeycloakUtils extends CapybaraPortingLayerImpl {
 
     @Inject
     public WebDriver driver;
+
     @Inject
     public ElasticTime time;
 
@@ -33,7 +33,6 @@ public class KeycloakUtils extends CapybaraPortingLayerImpl {
         find(by.id("kc-login")).click();
     }
 
-
     public User getCurrentUser(String keycloakUrl, String realm) {
         driver.get(String.format("%s/realms/%s/account", keycloakUrl, realm));
 
@@ -42,7 +41,6 @@ public class KeycloakUtils extends CapybaraPortingLayerImpl {
         String email = find(by.id("email")).getDomProperty("value");
         String firstName = find(by.id("firstName")).getDomProperty("value");
         String lastName = find(by.id("lastName")).getDomProperty("value");
-
 
         return new User(null /* id not available in this page*/, username, email, firstName, lastName);
     }

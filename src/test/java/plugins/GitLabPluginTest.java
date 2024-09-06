@@ -1,18 +1,37 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.junit.Assert.assertEquals;
+
 import jakarta.inject.Inject;
+import java.io.IOException;
+import java.net.http.HttpResponse;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.GroupApi;
 import org.gitlab4j.api.ProjectApi;
-import org.gitlab4j.api.models.*;
+import org.gitlab4j.api.models.AccessLevel;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.GroupParams;
+import org.gitlab4j.api.models.MergeRequestParams;
+import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.RepositoryFile;
+import org.gitlab4j.api.models.Visibility;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
-import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.*;
+import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabBranchSource;
+import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabOrganizationFolder;
+import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabPersonalAccessTokenCredential;
+import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabServerConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
@@ -20,15 +39,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-
-import java.net.http.HttpResponse;
-
-import java.io.IOException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.junit.Assert.*;
 
 @WithDocker
 @Category(DockerTest.class)
@@ -56,30 +66,28 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private String groupName = "firstgroup";
 
-    private String JenkinsfileContent = "pipeline {\n" +
-            "    agent any\n" +
-            "\n" +
-            "    stages {\n" +
-            "        stage('Build') {\n" +
-            "            steps {\n" +
-            "                echo 'Building..'\n" +
-            "            }\n" +
-            "        }\n" +
-            "        stage('Test') {\n" +
-            "            steps {\n" +
-            "                echo 'Testing..'\n" +
-            "            }\n" +
-            "        }\n" +
-            "        stage('Deploy') {\n" +
-            "            steps {\n" +
-            "                echo 'Deploying....'\n" +
-            "            }\n" +
-            "        }\n" +
-            "    }\n" +
-            "}";
+    private String JenkinsfileContent = "pipeline {\n" + "    agent any\n"
+            + "\n"
+            + "    stages {\n"
+            + "        stage('Build') {\n"
+            + "            steps {\n"
+            + "                echo 'Building..'\n"
+            + "            }\n"
+            + "        }\n"
+            + "        stage('Test') {\n"
+            + "            steps {\n"
+            + "                echo 'Testing..'\n"
+            + "            }\n"
+            + "        }\n"
+            + "        stage('Deploy') {\n"
+            + "            steps {\n"
+            + "                echo 'Deploying....'\n"
+            + "            }\n"
+            + "        }\n"
+            + "    }\n"
+            + "}";
 
-    private String brokenJenkinsfile = "pipeline {\n" +
-            "    agent any\n";
+    private String brokenJenkinsfile = "pipeline {\n" + "    agent any\n";
 
     String mainBranch = "main";
 
@@ -94,6 +102,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     public String getPrivateTokenUser() {
         return privateTokenUser;
     }
+
     @Before
     public void init() throws InterruptedException, IOException {
         container = gitLabServer.get();
@@ -102,10 +111,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.waitForReady(this);
 
         // create an admin user
-        privateTokenAdmin = container.createUserToken(adminUserName, "arandompassword12#", "testadmin@invalid.test", "true");
+        privateTokenAdmin =
+                container.createUserToken(adminUserName, "arandompassword12#", "testadmin@invalid.test", "true");
 
         // create another user
-        privateTokenUser = container.createUserToken(userName, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
+        privateTokenUser =
+                container.createUserToken(userName, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
     }
 
     @Test
@@ -116,7 +127,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         // initialize GitLabApi and Project
         GitLabApi gitlabapi = new GitLabApi(container.getHttpUrl().toString(), getPrivateTokenAdmin());
         ProjectApi projApi = new ProjectApi(gitlabapi);
-        Project project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
+        Project project = projApi.getProjects().stream()
+                .filter((proj -> repoName.equals(proj.getName())))
+                .findAny()
+                .orElse(null);
 
         // create 2 new branches
         createBranch(gitlabapi, project, firstBranch, mainBranch);
@@ -143,7 +157,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         this.configureJobWithGitLabBranchSource(multibranchJob, adminUserName, repoName);
         multibranchJob.save();
 
-        multibranchJob.waitForBranchIndexingFinished((int)time.seconds(20));
+        multibranchJob.waitForBranchIndexingFinished((int) time.seconds(20));
         this.assertBranchIndexing(multibranchJob);
 
         final WorkflowJob successJob1 = multibranchJob.getJob(mainBranch);
@@ -160,7 +174,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         container.deleteRepo(getPrivateTokenAdmin(), repoName);
     }
 
-    // TODO: re-enable when flaky tests have been resolved. see: https://github.com/jenkinsci/acceptance-test-harness/pull/1365
+    // TODO: re-enable when flaky tests have been resolved. see:
+    // https://github.com/jenkinsci/acceptance-test-harness/pull/1365
     @Ignore("flaky test")
     @Test
     public void gitLabGroupFolderOrganization() throws GitLabApiException, IOException {
@@ -173,30 +188,34 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         organizationFolder.save();
 
         // test the pipeline
-        organizationFolder.waitForCheckFinished((int)time.seconds(20));
+        organizationFolder.waitForCheckFinished((int) time.seconds(20));
 
         this.assertCheckFinishedSuccessfully(organizationFolder);
 
         // test the builds for the first project
-        final WorkflowMultiBranchJob first_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName+"%2F"+repoName);
+        final WorkflowMultiBranchJob first_project =
+                organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName + "%2F" + repoName);
         checksBuildsWithinProject(first_project);
 
         // test the builds for the second project
-        final WorkflowMultiBranchJob second_project = organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName+"%2F"+anotherRepoName);
+        final WorkflowMultiBranchJob second_project =
+                organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, groupName + "%2F" + anotherRepoName);
         checksBuildsWithinProject(second_project);
     }
 
     public void createRepo() throws RuntimeException {
-        //This sends a request to make a new repo in the gitlab server with the name "testrepo"
+        // This sends a request to make a new repo in the gitlab server with the name "testrepo"
         HttpResponse<String> response = container.createRepo(repoName, getPrivateTokenAdmin());
         assertEquals(201, response.statusCode()); // 201 means the repo was created successfully
     }
 
-    private void createBranch(GitLabApi gitlabapi, Project project, String branchName, String sourceBranch) throws GitLabApiException {
+    private void createBranch(GitLabApi gitlabapi, Project project, String branchName, String sourceBranch)
+            throws GitLabApiException {
         gitlabapi.getRepositoryApi().createBranch(project.getId(), branchName, sourceBranch);
     }
 
-    private void addFile(GitLabApi gitlabapi, Project project, String branchName, String JenkinsfileContent) throws GitLabApiException {
+    private void addFile(GitLabApi gitlabapi, Project project, String branchName, String JenkinsfileContent)
+            throws GitLabApiException {
         RepositoryFile file = new RepositoryFile();
         file.setFileName("Jenkinsfile");
         file.setFilePath("Jenkinsfile");
@@ -206,7 +225,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         gitlabapi.getRepositoryFileApi().createFile(project.getId(), file, branchName, "Add Jenkinsfile");
     }
 
-    private void createMergeRequest(GitLabApi gitlabapi, Project project, String sourceBranch, String targetBranch, String mrTitle) throws GitLabApiException {
+    private void createMergeRequest(
+            GitLabApi gitlabapi, Project project, String sourceBranch, String targetBranch, String mrTitle)
+            throws GitLabApiException {
         MergeRequestParams params = new MergeRequestParams()
                 .withSourceBranch(sourceBranch)
                 .withTargetBranch(targetBranch)
@@ -244,7 +265,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertThat(branchIndexingLog, containsString("1 merge requests were processed"));
     }
 
-    private void configureJobWithGitLabBranchSource(final WorkflowMultiBranchJob job, String adminUserName, String project) {
+    private void configureJobWithGitLabBranchSource(
+            final WorkflowMultiBranchJob job, String adminUserName, String project) {
         final GitLabBranchSource ghBranchSource = job.addBranchSource(GitLabBranchSource.class);
         ghBranchSource.setOwner(adminUserName);
         ghBranchSource.setProject(adminUserName, project);
@@ -252,8 +274,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private void assertExistAndResult(final WorkflowJob job, final boolean withSuccess) {
         final Build.Result expectedResult = (withSuccess) ? Build.Result.SUCCESS : Build.Result.FAILURE;
-        waitFor(job, Matchers.pageObjectExists(), (int)time.seconds(3));
-        waitFor(job.getLastBuild().getResult(), Matchers.containsString(expectedResult.name()), (int)time.seconds(3));
+        waitFor(job, Matchers.pageObjectExists(), (int) time.seconds(3));
+        waitFor(job.getLastBuild().getResult(), Matchers.containsString(expectedResult.name()), (int) time.seconds(3));
     }
 
     private void checksBuildsWithinProject(WorkflowMultiBranchJob project) {
@@ -271,18 +293,23 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     private void createGroup() throws GitLabApiException, IOException {
         GitLabApi gitlabapi = new GitLabApi(container.getHttpUrl().toString(), privateTokenAdmin);
         GroupApi groupApi = new GroupApi(gitlabapi);
-        GroupParams groupParams = new GroupParams().withName(groupName).withPath(groupName).withMembershipLock(false);
+        GroupParams groupParams =
+                new GroupParams().withName(groupName).withPath(groupName).withMembershipLock(false);
         Group group = groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
-        groupApi.addMember(group.getId(), gitlabapi.getUserApi().getOptionalUser(userName).get().getId(), AccessLevel.DEVELOPER);
+        groupApi.addMember(
+                group.getId(),
+                gitlabapi.getUserApi().getOptionalUser(userName).get().getId(),
+                AccessLevel.DEVELOPER);
 
         // create a project in the group
-        Project project = new Project().withPublic(false)
-                .withPath(repoName)
-                .withNamespaceId(group.getId());
+        Project project = new Project().withPublic(false).withPath(repoName).withNamespaceId(group.getId());
         ProjectApi projApi = new ProjectApi(gitlabapi);
         projApi.createProject(project);
 
-        project = projApi.getProjects().stream().filter((proj -> repoName.equals(proj.getName()))).findAny().orElse(null);
+        project = projApi.getProjects().stream()
+                .filter((proj -> repoName.equals(proj.getName())))
+                .findAny()
+                .orElse(null);
 
         // populate the repository
         createBranch(gitlabapi, project, firstBranch, mainBranch);
@@ -297,13 +324,14 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         createMergeRequest(gitlabapi, project, secondBranch, mainBranch, "test_mr");
 
         // create another project within the group
-        project = new Project().withPublic(false)
-                .withPath(anotherRepoName)
-                .withNamespaceId(group.getId());
+        project = new Project().withPublic(false).withPath(anotherRepoName).withNamespaceId(group.getId());
 
         projApi.createProject(project);
 
-        project = projApi.getProjects().stream().filter((proj -> anotherRepoName.equals(proj.getName()))).findAny().orElse(null);
+        project = projApi.getProjects().stream()
+                .filter((proj -> anotherRepoName.equals(proj.getName())))
+                .findAny()
+                .orElse(null);
 
         // populate the repository
         createBranch(gitlabapi, project, firstBranch, mainBranch);

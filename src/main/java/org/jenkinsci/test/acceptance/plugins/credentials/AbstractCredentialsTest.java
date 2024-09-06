@@ -62,15 +62,15 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
         jenkins.login().doLogin(CRED_USER);
     }
 
-    protected CredentialsPage createCredentialsPage(Boolean userCredentials)  {
+    protected CredentialsPage createCredentialsPage(Boolean userCredentials) {
         return createCredentialsPage(userCredentials, ManagedCredentials.DEFAULT_DOMAIN);
     }
 
-    protected CredentialsPage createCredentialsPage(Boolean userCredentials, String domain)  {
+    protected CredentialsPage createCredentialsPage(Boolean userCredentials, String domain) {
         CredentialsPage cp = null;
         if (userCredentials) {
             cp = new CredentialsPage(jenkins, domain, CREATED_USER);
-            //Make sure we are not going to have a 404, we got some issues like that
+            // Make sure we are not going to have a 404, we got some issues like that
             navigateToCreateCredentials();
         } else {
             cp = new CredentialsPage(jenkins, domain);
@@ -79,11 +79,13 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
         return cp;
     }
 
-    protected  <T extends BaseStandardCredentials> T createCredentials(Class<T> credClazz, CredentialsPage cp, String scope) {
-        return createCredentials(credClazz,cp, scope, SECRET_FILE);
+    protected <T extends BaseStandardCredentials> T createCredentials(
+            Class<T> credClazz, CredentialsPage cp, String scope) {
+        return createCredentials(credClazz, cp, scope, SECRET_FILE);
     }
 
-    protected <T extends BaseStandardCredentials> T createCredentials(Class<T> credClazz, CredentialsPage cp, String scope, String file) {
+    protected <T extends BaseStandardCredentials> T createCredentials(
+            Class<T> credClazz, CredentialsPage cp, String scope, String file) {
         final T cred = cp.add(credClazz);
 
         if (UserPwdCredential.class.equals(credClazz)) {
@@ -101,7 +103,8 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
             final WebElement we = castedCred.file.resolve();
             Class<? extends AbstractCredentialsTest> kl = getClass();
             String dir = kl.getSimpleName().toLowerCase(Locale.ENGLISH).replace("test", "");
-            final File fileToUpload = new File(kl.getResource("/" + dir + "/" + file).getFile());
+            final File fileToUpload =
+                    new File(kl.getResource("/" + dir + "/" + file).getFile());
             we.sendKeys(fileToUpload.getAbsolutePath());
         } else if (SshPrivateKeyCredential.class.equals(credClazz)) {
             SshPrivateKeyCredential castedCred = (SshPrivateKeyCredential) cred;
@@ -128,7 +131,8 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
     }
 
     private void tryCredentialsClick() {
-        WebElement credentials = getElement(by.xpath("//a[contains(@href, '/user/" + CREATED_USER + "/credentials') and contains(@class, 'task-link')]"));
+        WebElement credentials = getElement(by.xpath(
+                "//a[contains(@href, '/user/" + CREATED_USER + "/credentials') and contains(@class, 'task-link')]"));
         if (credentials == null) {
             // Somehow login has been lost (we have found this problem on rosie) so we try to re login again
             reTryLogin();
@@ -140,5 +144,4 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
     private void reTryLogin() {
         jenkins.login().doLogin(CRED_USER);
     }
-
 }

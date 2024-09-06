@@ -40,8 +40,9 @@ public class World extends AbstractModule {
     }
 
     public Injector getInjector() {
-        if (injector==null)
+        if (injector == null) {
             injector = Guice.createInjector(this);
+        }
         return injector;
     }
 
@@ -94,7 +95,9 @@ public class World extends AbstractModule {
             Injector i = INSTANCE.getInjector();
 
             TestCleaner tc = i.getInstance(TestCleaner.class);
-            if (tc!=null)   tc.performCleanUp();
+            if (tc != null) {
+                tc.performCleanUp();
+            }
             i.getInstance(WorldCleaner.class).performCleanUp();
 
             for (SubWorld sw : subworlds.list(i)) {
@@ -106,7 +109,7 @@ public class World extends AbstractModule {
     private static World INSTANCE;
 
     public static World get() {
-        if (INSTANCE==null) {
+        if (INSTANCE == null) {
             INSTANCE = new World(Thread.currentThread().getContextClassLoader());
             Runtime.getRuntime().addShutdownHook(INSTANCE.cleaner);
         }

@@ -23,8 +23,9 @@
  */
 package core;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.po.View.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.po.View.containsJob;
+import static org.jenkinsci.test.acceptance.po.View.hasDescription;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.SmokeTest;

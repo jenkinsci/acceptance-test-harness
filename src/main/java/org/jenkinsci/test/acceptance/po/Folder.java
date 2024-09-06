@@ -40,7 +40,8 @@ public class Folder extends TopLevelItem implements Container {
 
     private final JobsMixIn jobs;
     private final ViewsMixIn views;
-    private final Control properties = control("/com-cloudbees-hudson-plugins-folder-properties-EnvVarsFolderProperty/properties");
+    private final Control properties =
+            control("/com-cloudbees-hudson-plugins-folder-properties-EnvVarsFolderProperty/properties");
     private final By viewTab = by.css(".tabBar .tab a");
     private final By activeViewTab = by.css(".tabBar .tab.active a");
 
@@ -100,7 +101,7 @@ public class Folder extends TopLevelItem implements Container {
         return find(activeViewTab).getText();
     }
 
-    public <T extends View> T  selectView(final Class<T> type, final String viewName) {
+    public <T extends View> T selectView(final Class<T> type, final String viewName) {
         final List<WebElement> viewTabs = this.getViewTabs();
         int i = 0;
 
@@ -127,11 +128,11 @@ public class Folder extends TopLevelItem implements Container {
 
         final int lastViewIndex = viewTabs.size() - 1;
 
-        if ("+".equals(viewTabs.get(lastViewIndex).getText()) || "New View".equals(viewTabs.get(lastViewIndex).getAttribute("aria-label"))) {
+        if ("+".equals(viewTabs.get(lastViewIndex).getText())
+                || "New View".equals(viewTabs.get(lastViewIndex).getAttribute("aria-label"))) {
             viewTabs.remove(lastViewIndex);
         }
 
         return viewTabs;
     }
-
 }

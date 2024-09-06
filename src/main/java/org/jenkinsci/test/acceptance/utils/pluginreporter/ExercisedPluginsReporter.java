@@ -27,7 +27,7 @@ package org.jenkinsci.test.acceptance.utils.pluginreporter;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 
 /**
- * Interface for the ability to create a report to show plugins 
+ * Interface for the ability to create a report to show plugins
  * and their versions that were exercised during the test suite run
  *
  * @author scott.hebert@ericsson.com
@@ -42,5 +42,4 @@ public interface ExercisedPluginsReporter {
      * @param pluginVersion Version of Plugin that was installed
      */
     void log(String testName, String pluginName, String pluginVersion);
-
 }

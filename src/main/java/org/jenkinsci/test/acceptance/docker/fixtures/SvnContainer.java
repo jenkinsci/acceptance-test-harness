@@ -14,7 +14,9 @@ import org.jenkinsci.test.acceptance.plugins.subversion.SubversionPluginTestExce
  *
  * @author Matthias Karl
  */
-@DockerFixture(id = "svn", ports = {80, 3690, 22})
+@DockerFixture(
+        id = "svn",
+        ports = {80, 3690, 22})
 public class SvnContainer extends DockerContainer {
     public static final String USER = "svnUser";
     public static final String PWD = "test";

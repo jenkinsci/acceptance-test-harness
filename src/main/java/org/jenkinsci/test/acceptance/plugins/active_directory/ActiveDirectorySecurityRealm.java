@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.plugins.active_directory;
 
-
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import org.jenkinsci.test.acceptance.po.Describable;
@@ -37,8 +36,8 @@ import org.jenkinsci.test.acceptance.po.SecurityRealm;
 @Describable("Active Directory")
 public class ActiveDirectorySecurityRealm extends SecurityRealm {
 
-    public ActiveDirectorySecurityRealm(GlobalSecurityConfig context,String path) {
-        super(context,path);
+    public ActiveDirectorySecurityRealm(GlobalSecurityConfig context, String path) {
+        super(context, path);
     }
 
     /**
@@ -48,17 +47,18 @@ public class ActiveDirectorySecurityRealm extends SecurityRealm {
         control("domain").set(ActiveDirectoryEnv.get().getDomain());
         control("advanced-button").click();
 
-        if(ActiveDirectoryEnv.get().getController() != null) {
+        if (ActiveDirectoryEnv.get().getController() != null) {
             control("server").set(ActiveDirectoryEnv.get().getController());
         }
-        if(ActiveDirectoryEnv.get().getSite() != null) {
+        if (ActiveDirectoryEnv.get().getSite() != null) {
             control("site").set(ActiveDirectoryEnv.get().getSite());
         }
         control("bindPassword").set(ActiveDirectoryEnv.get().getPassword());
 
         String bindDN = ActiveDirectoryEnv.get().getBindDN();
-        if(bindDN == null) {
-            bindDN = ActiveDirectoryEnv.get().getUser()+"@"+ActiveDirectoryEnv.get().getDomain();
+        if (bindDN == null) {
+            bindDN = ActiveDirectoryEnv.get().getUser() + "@"
+                    + ActiveDirectoryEnv.get().getDomain();
         }
         control("bindName").set(bindDN);
 

@@ -37,13 +37,10 @@ public class ProjectStatusStdJobList extends PageAreaImpl {
      * @return the names of the headers.
      */
     public List<String> getHeaders() {
-        return find(projectStatusTable).findElement(header)
-                .findElements(By.xpath(".//a"))
-                .stream().map(WebElement::getText)
+        return find(projectStatusTable).findElement(header).findElements(By.xpath(".//a")).stream()
+                .map(WebElement::getText)
                 .collect(Collectors.toList());
-
     }
-
 
     /**
      * Get all job ids (names) appearing in the table.
@@ -51,11 +48,9 @@ public class ProjectStatusStdJobList extends PageAreaImpl {
      * @return a list of all ids displayed in the table.
      */
     public List<String> getJobIDs() {
-        return find(projectStatusTable).findElements(By.xpath(".//tr"))
-                .stream()
+        return find(projectStatusTable).findElements(By.xpath(".//tr")).stream()
                 .map(el -> el.getAttribute("id"))
                 .map(s -> s.replaceFirst(JOB_ID_PREFIX, ""))
                 .collect(Collectors.toList());
-
     }
 }

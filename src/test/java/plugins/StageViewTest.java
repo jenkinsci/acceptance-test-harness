@@ -1,7 +1,9 @@
 package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -57,7 +59,7 @@ public class StageViewTest extends AbstractJUnitTest {
         job.open();
 
         StageView stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getAllStageViewJobs(), hasSize(8)); //as not max display
+        assertThat(stageView.getAllStageViewJobs(), hasSize(8)); // as not max display
 
         for (int i = 0; i < 10; i++) {
             build = job.startBuild().shouldSucceed();
@@ -65,7 +67,7 @@ public class StageViewTest extends AbstractJUnitTest {
         assertThat(build, notNullValue());
         job.open();
         stageView = new StageView(job, JOB_PATH);
-        assertThat(stageView.getAllStageViewJobs(), hasSize(10));//max diplay is 10
+        assertThat(stageView.getAllStageViewJobs(), hasSize(10)); // max diplay is 10
     }
 
     /**
@@ -78,9 +80,7 @@ public class StageViewTest extends AbstractJUnitTest {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         String pre = "node {\n";
         String post = "}";
-        String singleStage = "stage ('Clone sources'){\n" +
-                "           echo 'cloned'\n" +
-                "    }\n";
+        String singleStage = "stage ('Clone sources'){\n" + "           echo 'cloned'\n" + "    }\n";
         job.script.set("");
         job.sandbox.check();
         job.save();
@@ -97,7 +97,6 @@ public class StageViewTest extends AbstractJUnitTest {
         StageView stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getAllStageViewJobs(), hasSize(10));
         assertThat(stageView.getStageViewHeadlines(), hasSize(10));
-
     }
 
     @Test
@@ -128,9 +127,10 @@ public class StageViewTest extends AbstractJUnitTest {
         job.open();
         stageView = new StageView(job, JOB_PATH);
         assertThat(stageView.getStageViewHeadlines().get(0).getName(), containsString("-"));
-        assertThat(stageView.getStageViewHeadlines().get(1).getName(), containsString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"));
+        assertThat(
+                stageView.getStageViewHeadlines().get(1).getName(),
+                containsString("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"));
         assertThat(stageView.getStageViewHeadlines().get(2).getName(), containsString(",.-;:_*+#"));
-
     }
 
     /**
@@ -192,9 +192,9 @@ public class StageViewTest extends AbstractJUnitTest {
     private String readFromRessourceFolder(String fileName) {
         ClassLoader classloader = Thread.currentThread().getContextClassLoader();
         return new BufferedReader(new InputStreamReader(classloader.getResourceAsStream(fileName)))
-                .lines().collect(Collectors.joining("\n"));
+                .lines()
+                .collect(Collectors.joining("\n"));
     }
-
 
     /**
      * Helper Method for Workflow job generation. The filename represents
@@ -221,6 +221,4 @@ public class StageViewTest extends AbstractJUnitTest {
     private String repeatString(String str, int times) {
         return Stream.generate(() -> str).limit(times).collect(Collectors.joining());
     }
-
-
 }

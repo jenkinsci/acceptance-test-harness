@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-
 import java.net.URL;
 
 /**

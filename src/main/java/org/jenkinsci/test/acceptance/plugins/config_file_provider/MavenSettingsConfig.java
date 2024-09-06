@@ -26,10 +26,9 @@ public class MavenSettingsConfig extends ProvidedFile {
     }
 
     public ServerCredentialMapping addServerCredentialMapping() {
-        final String path = createPageArea("/config/serverCredentialMappings",
-                () -> control("/config/repeatable-add").click());
+        final String path = createPageArea("/config/serverCredentialMappings", () -> control("/config/repeatable-add")
+                .click());
 
         return new ServerCredentialMapping(this, path);
     }
-
 }

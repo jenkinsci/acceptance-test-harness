@@ -89,7 +89,9 @@ public class JUnitPluginTest extends AbstractJUnitTest {
             driver.get(page);
             found = hasContent(content).matchesSafely(driver);
             driver.navigate().back();
-            if (found) break;
+            if (found) {
+                break;
+            }
         }
         assertThat("No test found with given content", found);
     }

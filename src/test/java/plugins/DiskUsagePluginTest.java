@@ -94,5 +94,6 @@ public class DiskUsagePluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent(Pattern.compile(workspace)));
     }
 
-    private static final String JOB_GRAPH = "//img[@src='disk-usage/graph/png' or starts-with(@src, 'diskUsage/graph/png')]";
+    private static final String JOB_GRAPH =
+            "//img[@src='disk-usage/graph/png' or starts-with(@src, 'diskUsage/graph/png')]";
 }

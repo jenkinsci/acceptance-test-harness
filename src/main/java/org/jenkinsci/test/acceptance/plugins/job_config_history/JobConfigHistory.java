@@ -50,7 +50,7 @@ public class JobConfigHistory extends Action {
         final List<WebElement> rows = all(by.xpath("//table//a[text()='(RAW)']/../../*[1]"));
         final ArrayList<Change> changes = new ArrayList<Change>(rows.size());
 
-        for (WebElement row: rows) {
+        for (WebElement row : rows) {
             changes.add(new Change(this, row.getText()));
         }
 

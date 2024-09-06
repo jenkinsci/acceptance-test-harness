@@ -25,9 +25,10 @@ public class Config extends AbstractModule {
     protected void configure() {
         try {
             String loc = System.getProperty("CONFIG");
-            if (loc==null)
+            if (loc == null) {
                 loc = System.getenv("CONFIG");
-            if (loc==null) {
+            }
+            if (loc == null) {
                 // none specified.
                 return;
             }
@@ -43,15 +44,14 @@ public class Config extends AbstractModule {
 
             m.getCompilerConfiguration().setScriptBaseClass(AdditionalBinderDsl.class.getName());
             m.addStarImports(
-                JenkinsController.class.getPackage().getName(),
-                WebDriver.class.getPackage().getName()
-            );
+                    JenkinsController.class.getPackage().getName(),
+                    WebDriver.class.getPackage().getName());
             m.addImports(TestScope.class);
 
             // install the config
             install(m);
         } catch (IOException e) {
-            throw new Error("Failed to load configuration script",e);
+            throw new Error("Failed to load configuration script", e);
         }
     }
 }

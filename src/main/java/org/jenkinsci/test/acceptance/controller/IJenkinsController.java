@@ -11,7 +11,9 @@ import java.net.URL;
  */
 public interface IJenkinsController extends Closeable {
     URL getUrl();
+
     void start() throws IOException;
+
     void stop() throws IOException;
     /**
      * Populates the Jenkins Home with the specified ZIP template.

@@ -63,5 +63,4 @@ public final class GroovyPostBuildStep extends AbstractStep implements PostBuild
         this.behavior.select(behavior);
         return this;
     }
-
 }

@@ -42,7 +42,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
 
 @WithPlugins("jobConfigHistory")
-@Ignore("Flaky see issue 1052") //https://github.com/jenkinsci/acceptance-test-harness/issues/1052
+@Ignore("Flaky see issue 1052") // https://github.com/jenkinsci/acceptance-test-harness/issues/1052
 public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
 
     private static final String LS_COMMAND = "ls";
@@ -63,7 +63,9 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         assertThat(all(by.xpath("//tr//a[contains(text(),'(RAW)')]")).size(), is(greaterThan(2)));
     }
 
-    @Test @Issue("JENKINS-24410") @WithPlugins("matrix-project")
+    @Test
+    @Issue("JENKINS-24410")
+    @WithPlugins("matrix-project")
     public void track_change_in_matrix_project() {
         MatrixProject job = jenkins.jobs.create(MatrixProject.class);
 
@@ -80,7 +82,9 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         assertThat("New changes saved", newOnes.size(), greaterThan(original.size()));
     }
 
-    @Test @Issue("JENKINS-24410") @WithPlugins("maven-plugin")
+    @Test
+    @Issue("JENKINS-24410")
+    @WithPlugins("maven-plugin")
     public void track_change_in_maven_project() {
         MavenModuleSet job = jenkins.jobs.create(MavenModuleSet.class);
 
@@ -113,7 +117,13 @@ public class JobConfigHistoryPluginTest extends AbstractJUnitTest {
         assertThat(driver, Matchers.hasContent("Changed"));
 
         action.showLastChange();
-        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_original' and contains(string(.), '" + String.format(COMMAND_NODE, LS_COMMAND) + "')]")));
-        assertThat(driver, Matchers.hasElement(by.xpath("//td[@class='diff_revised' and contains(string(.), '" + String.format(COMMAND_NODE, LS_LH_COMMAND) + "')]")));
+        assertThat(
+                driver,
+                Matchers.hasElement(by.xpath("//td[@class='diff_original' and contains(string(.), '"
+                        + String.format(COMMAND_NODE, LS_COMMAND) + "')]")));
+        assertThat(
+                driver,
+                Matchers.hasElement(by.xpath("//td[@class='diff_revised' and contains(string(.), '"
+                        + String.format(COMMAND_NODE, LS_LH_COMMAND) + "')]")));
     }
 }

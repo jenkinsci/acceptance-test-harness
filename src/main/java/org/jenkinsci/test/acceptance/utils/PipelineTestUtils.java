@@ -47,12 +47,16 @@ public class PipelineTestUtils {
         return job;
     }
 
-    public static String scriptForPipelineFromResource(final Class resourceOwner, final String resourceName) throws IOException {
-        String resourceDirName = resourceOwner.getSimpleName().toLowerCase(Locale.ENGLISH).replace("test", "");
-        return IOUtils.toString(resourceOwner.getResourceAsStream( "/" + resourceDirName + "/" + resourceName), StandardCharsets.UTF_8);
+    public static String scriptForPipelineFromResource(final Class resourceOwner, final String resourceName)
+            throws IOException {
+        String resourceDirName =
+                resourceOwner.getSimpleName().toLowerCase(Locale.ENGLISH).replace("test", "");
+        return IOUtils.toString(
+                resourceOwner.getResourceAsStream("/" + resourceDirName + "/" + resourceName), StandardCharsets.UTF_8);
     }
 
-    public static String scriptForPipelineFromResourceWithParameters(final Class resourceOwner, final String resourceName, final String... scriptParameters) throws IOException {
+    public static String scriptForPipelineFromResourceWithParameters(
+            final Class resourceOwner, final String resourceName, final String... scriptParameters) throws IOException {
         final String script = scriptForPipelineFromResource(resourceOwner, resourceName);
         checkScript(script);
 

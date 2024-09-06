@@ -53,7 +53,7 @@ import org.jenkinsci.test.acceptance.utils.PipelineTestUtils;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
-@WithPlugins ({"credentials", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
+@WithPlugins({"credentials", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
 public class CredentialsBindingTest extends AbstractCredentialsTest {
 
     private static final String USERNAME_CORRECT_MESSAGE = "username has the correct value";
@@ -66,8 +66,8 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     private static final String SECRET_TEXT = "secret";
     private static final String SECRET_OUTPUT = " variable binded";
 
-
-    @Test @WithPlugins({"plain-credentials", "credentials-binding"})
+    @Test
+    @WithPlugins({"plain-credentials", "credentials-binding"})
     public void testTextBinding() {
         CredentialsPage mc = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
         mc.open();
@@ -83,9 +83,10 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
         SecretStringCredentialsBinding cb = mcb.addCredentialBinding(SecretStringCredentialsBinding.class);
         cb.variable.set("BINDED_SECRET");
         ShellBuildStep shell = job.addBuildStep(ShellBuildStep.class);
-        shell.command("if [ \"$BINDED_SECRET\" = \"" + SECRET_TEXT + "\" ] \n then \n echo \"" + SECRET_OUTPUT + "\" \n fi");
+        shell.command(
+                "if [ \"$BINDED_SECRET\" = \"" + SECRET_TEXT + "\" ] \n then \n echo \"" + SECRET_OUTPUT + "\" \n fi");
         job.save();
-        
+
         Build b = job.scheduleBuild();
         b.shouldSucceed();
         assertThat(b.getConsole(), containsString(SECRET_OUTPUT));
@@ -97,59 +98,110 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
         CredentialsPage cp = createCredentialsPage(false);
         createCredentials(UserPwdCredential.class, cp, GLOBAL_SCOPE, null);
 
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), PipelineTestUtils.resolveScriptName("usernameSplitPasswordScript"), CRED_ID, CRED_USER, USERNAME_CORRECT_MESSAGE, CRED_PWD, PASSWORD_CORRECT_MESSAGE);
-        final Build b = PipelineTestUtils.createPipelineJobWithScript(jenkins.jobs, script).startBuild();
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(
+                this.getClass(),
+                PipelineTestUtils.resolveScriptName("usernameSplitPasswordScript"),
+                CRED_ID,
+                CRED_USER,
+                USERNAME_CORRECT_MESSAGE,
+                CRED_PWD,
+                PASSWORD_CORRECT_MESSAGE);
+        final Build b = PipelineTestUtils.createPipelineJobWithScript(jenkins.jobs, script)
+                .startBuild();
         assertBuild(b, true, USERNAME_CORRECT_MESSAGE, PASSWORD_CORRECT_MESSAGE);
     }
 
     @Test
     @WithPlugins({"credentials-binding", "authorize-project"})
     public void pipelineUsernamePersonalCredentials() throws URISyntaxException, IOException {
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), PipelineTestUtils.resolveScriptName("usernameSplitPasswordScript"), CRED_ID, CRED_USER, USERNAME_CORRECT_MESSAGE, CRED_PWD, PASSWORD_CORRECT_MESSAGE);
-        this.testPersonalCredentials(UserPwdCredential.class, null, script, USERNAME_CORRECT_MESSAGE, PASSWORD_CORRECT_MESSAGE);
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(
+                this.getClass(),
+                PipelineTestUtils.resolveScriptName("usernameSplitPasswordScript"),
+                CRED_ID,
+                CRED_USER,
+                USERNAME_CORRECT_MESSAGE,
+                CRED_PWD,
+                PASSWORD_CORRECT_MESSAGE);
+        this.testPersonalCredentials(
+                UserPwdCredential.class, null, script, USERNAME_CORRECT_MESSAGE, PASSWORD_CORRECT_MESSAGE);
     }
-
 
     @Test
     @WithPlugins({"credentials-binding", "authorize-project"})
     public void pipelineUsernameTogetherPersonalCredentials() throws URISyntaxException, IOException {
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), PipelineTestUtils.resolveScriptName("usernameTogetherPasswordScript"), CRED_ID, CRED_USER + ":" + CRED_PWD, COMPLETE_PASSWORD_CORRECT_MESSAGE);
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(
+                this.getClass(),
+                PipelineTestUtils.resolveScriptName("usernameTogetherPasswordScript"),
+                CRED_ID,
+                CRED_USER + ":" + CRED_PWD,
+                COMPLETE_PASSWORD_CORRECT_MESSAGE);
         this.testPersonalCredentials(UserPwdCredential.class, null, script, COMPLETE_PASSWORD_CORRECT_MESSAGE);
     }
 
     @Test
     @WithPlugins({"credentials-binding", "authorize-project"})
     public void pipelineSecretTextPersonalCredentials() throws URISyntaxException, IOException {
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), PipelineTestUtils.resolveScriptName("secretTextScript"), CRED_ID, AbstractCredentialsTest.SECRET_TEXT, SECRET_TEXT_CORRECT_MESSAGE);
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(
+                this.getClass(),
+                PipelineTestUtils.resolveScriptName("secretTextScript"),
+                CRED_ID,
+                AbstractCredentialsTest.SECRET_TEXT,
+                SECRET_TEXT_CORRECT_MESSAGE);
         this.testPersonalCredentials(StringCredentials.class, null, script, SECRET_TEXT_CORRECT_MESSAGE);
     }
 
     @Test
     @WithPlugins({"credentials-binding", "authorize-project"})
     public void pipelineSecretFilePersonalCredentials() throws URISyntaxException, IOException {
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), PipelineTestUtils.resolveScriptName("secretFileScript"), CRED_ID, SECRET_FILE_TEXT, SECRET_FILE_CORRECT_MESSAGE);
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(
+                this.getClass(),
+                PipelineTestUtils.resolveScriptName("secretFileScript"),
+                CRED_ID,
+                SECRET_FILE_TEXT,
+                SECRET_FILE_CORRECT_MESSAGE);
         this.testPersonalCredentials(FileCredentials.class, SECRET_FILE, script, SECRET_FILE_CORRECT_MESSAGE);
     }
 
     @Test
     @WithPlugins({"credentials-binding", "authorize-project"})
     public void pipelineSecretZipPersonalCredentials() throws URISyntaxException, IOException {
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), PipelineTestUtils.resolveScriptName("secretZipFileScript"), CRED_ID, SECRET_ZIP_FILE_TEXT, SECRET_ZIP_FILE_CORRECT_MESSAGE);
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(
+                this.getClass(),
+                PipelineTestUtils.resolveScriptName("secretZipFileScript"),
+                CRED_ID,
+                SECRET_ZIP_FILE_TEXT,
+                SECRET_ZIP_FILE_CORRECT_MESSAGE);
         this.testPersonalCredentials(FileCredentials.class, SECRET_ZIP_FILE, script, SECRET_ZIP_FILE_CORRECT_MESSAGE);
     }
 
     @Test
     @WithPlugins({"credentials-binding", "authorize-project"})
     public void pipelineSSHUserPrivateKeyCredentials() throws URISyntaxException, IOException {
-        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(this.getClass(), PipelineTestUtils.resolveScriptName("sshUserPrivateKeyScript"), CRED_ID, CRED_USER, USERNAME_CORRECT_MESSAGE, "", PASSWORD_CORRECT_MESSAGE, CRED_PWD, PRIVATE_KEY_CORRECT_MESSAGE);
-        this.testPersonalCredentials(SshPrivateKeyCredential.class, null, script, USERNAME_CORRECT_MESSAGE, PASSWORD_CORRECT_MESSAGE, PRIVATE_KEY_CORRECT_MESSAGE);
+        final String script = PipelineTestUtils.scriptForPipelineFromResourceWithParameters(
+                this.getClass(),
+                PipelineTestUtils.resolveScriptName("sshUserPrivateKeyScript"),
+                CRED_ID,
+                CRED_USER,
+                USERNAME_CORRECT_MESSAGE,
+                "",
+                PASSWORD_CORRECT_MESSAGE,
+                CRED_PWD,
+                PRIVATE_KEY_CORRECT_MESSAGE);
+        this.testPersonalCredentials(
+                SshPrivateKeyCredential.class,
+                null,
+                script,
+                USERNAME_CORRECT_MESSAGE,
+                PASSWORD_CORRECT_MESSAGE,
+                PRIVATE_KEY_CORRECT_MESSAGE);
     }
 
     private void authorizeUserToLaunchProject() {
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
 
-        final ProjectDefaultBuildAccessControl control = security.addBuildAccessControl(ProjectDefaultBuildAccessControl.class);
+        final ProjectDefaultBuildAccessControl control =
+                security.addBuildAccessControl(ProjectDefaultBuildAccessControl.class);
         control.runAsSpecificUser(CREATED_USER);
         security.save();
     }
@@ -161,16 +213,21 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
             b.shouldFail();
         }
 
-        //Job ending does not imply that console log has been completely updated so we wait
+        // Job ending does not imply that console log has been completely updated so we wait
         waitForLogToBeFullyLoaded(b, "Finished");
 
         final String consoleOutput = b.getConsole();
         for (final String message : messagesToCheck) {
-           assertThat(consoleOutput, Matchers.containsString(message));
+            assertThat(consoleOutput, Matchers.containsString(message));
         }
     }
 
-    private void testPersonalCredentials(final Class<? extends BaseStandardCredentials> credClazz, final String credSecretResource, final String jobScript, final String... messagesToCheck) throws URISyntaxException {
+    private void testPersonalCredentials(
+            final Class<? extends BaseStandardCredentials> credClazz,
+            final String credSecretResource,
+            final String jobScript,
+            final String... messagesToCheck)
+            throws URISyntaxException {
         createMockUserAndLogin();
         CredentialsPage cp = createCredentialsPage(true);
         createCredentials(credClazz, cp, null, credSecretResource);
@@ -186,17 +243,20 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     }
 
     private void waitForLogToBeFullyLoaded(final Build b, String text) {
-        waitFor(driver, new Matcher<WebDriver>("Console log is not fully loaded") {
-            @Override
-            public boolean matchesSafely(WebDriver item) {
-                String pageText = CapybaraPortingLayerImpl.getPageContent(visit(b.getConsoleUrl()));
-                return pageText.contains(text);
-            }
+        waitFor(
+                driver,
+                new Matcher<WebDriver>("Console log is not fully loaded") {
+                    @Override
+                    public boolean matchesSafely(WebDriver item) {
+                        String pageText = CapybaraPortingLayerImpl.getPageContent(visit(b.getConsoleUrl()));
+                        return pageText.contains(text);
+                    }
 
-            @Override
-            public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
-                mismatchDescription.appendText("Timeout waiting for console log to be fully loaded");
-            }
-        }, 30);
+                    @Override
+                    public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
+                        mismatchDescription.appendText("Timeout waiting for console log to be fully loaded");
+                    }
+                },
+                30);
     }
 }

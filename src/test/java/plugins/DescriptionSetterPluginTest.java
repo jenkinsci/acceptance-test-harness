@@ -12,8 +12,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 @WithPlugins({
-        "matrix-project", // JENKINS-37545
-        "description-setter"
+    "matrix-project", // JENKINS-37545
+    "description-setter"
 })
 public class DescriptionSetterPluginTest extends AbstractJUnitTest {
 
@@ -37,6 +37,9 @@ public class DescriptionSetterPluginTest extends AbstractJUnitTest {
         assertThat(find(by.css("div#description div")).getText(), is(equalTo(msg)));
 
         j.open();
-        assertThat(find(by.css("#buildHistoryPage .desc, #buildHistoryPage .app-builds-container__item__description")).getText(), is(equalTo(msg)));
+        assertThat(
+                find(by.css("#buildHistoryPage .desc, #buildHistoryPage .app-builds-container__item__description"))
+                        .getText(),
+                is(equalTo(msg)));
     }
 }

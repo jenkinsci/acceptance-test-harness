@@ -1,11 +1,19 @@
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+
+import dasniko.testcontainers.keycloak.KeycloakContainer;
+import jakarta.inject.Inject;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
@@ -27,15 +35,6 @@ import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.openqa.selenium.NoSuchElementException;
-import dasniko.testcontainers.keycloak.KeycloakContainer;
-import jakarta.inject.Inject;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
 
 @WithPlugins("oic-auth")
 public class OicAuthPluginTest extends AbstractJUnitTest {
@@ -94,11 +93,28 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
             group = theRealm.groups().group(groupId);
             group.subGroup(sales);
 
-            List<GroupRepresentation> subGroups = theRealm.groups().group(groupId).getSubGroups(0, 2, true);
-            String devsId = subGroups.stream().filter(g -> g.getName().equals("devs")).findFirst().orElseThrow(() -> new Exception("Something went wrong initialization keycloak")).getId();
-            String salesId = subGroups.stream().filter(g -> g.getName().equals("sales")).findFirst().orElseThrow(() -> new Exception("Something went wrong initialization keycloak")).getId();
-            theRealm.groups().group(devsId).roles().realmLevel().add(List.of(theRealm.roles().get("jenkinsAdmin").toRepresentation()));
-            theRealm.groups().group(salesId).roles().realmLevel().add(List.of(theRealm.roles().get("jenkinsRead").toRepresentation()));
+            List<GroupRepresentation> subGroups =
+                    theRealm.groups().group(groupId).getSubGroups(0, 2, true);
+            String devsId = subGroups.stream()
+                    .filter(g -> g.getName().equals("devs"))
+                    .findFirst()
+                    .orElseThrow(() -> new Exception("Something went wrong initialization keycloak"))
+                    .getId();
+            String salesId = subGroups.stream()
+                    .filter(g -> g.getName().equals("sales"))
+                    .findFirst()
+                    .orElseThrow(() -> new Exception("Something went wrong initialization keycloak"))
+                    .getId();
+            theRealm.groups()
+                    .group(devsId)
+                    .roles()
+                    .realmLevel()
+                    .add(List.of(theRealm.roles().get("jenkinsAdmin").toRepresentation()));
+            theRealm.groups()
+                    .group(salesId)
+                    .roles()
+                    .realmLevel()
+                    .add(List.of(theRealm.roles().get("jenkinsRead").toRepresentation()));
 
             // Users
             UserRepresentation bob = new UserRepresentation();
@@ -146,21 +162,38 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
             // Assert that the realm is properly created
             assertThat("group is created", theRealm.groups().groups().get(0).getName(), is("employees"));
             GroupResource g = theRealm.groups().group(groupId);
-            assertThat("subgroups are created",
-                       g.getSubGroups(0, 2, true).stream().map(GroupRepresentation::getName).collect(Collectors.toList()),
-                       containsInAnyOrder("devs", "sales"));
-            assertThat("users are created", theRealm.users().list().stream().map(UserRepresentation::getUsername).collect(Collectors.toList()),
-                       containsInAnyOrder("bob", "john"));
-            userBobKeycloakId = theRealm.users().searchByUsername("bob", true).get(0).getId();
-            assertThat("User bob with the correct groups",
-                       theRealm.users().get(userBobKeycloakId).groups().stream().map(GroupRepresentation::getPath).collect(Collectors.toList()),
-                       containsInAnyOrder("/employees", "/employees/devs"));
-            userJohnKeycloakId = theRealm.users().searchByUsername("john", true).get(0).getId();
-            assertThat("User john with the correct groups",
-                       theRealm.users().get(userJohnKeycloakId).groups().stream().map(GroupRepresentation::getPath).collect(Collectors.toList()),
-                       containsInAnyOrder("/employees", "/employees/sales"));
-            assertThat("client is created",
-                       theRealm.clients().findByClientId(CLIENT).get(0).getProtocol(), is("openid-connect"));
+            assertThat(
+                    "subgroups are created",
+                    g.getSubGroups(0, 2, true).stream()
+                            .map(GroupRepresentation::getName)
+                            .collect(Collectors.toList()),
+                    containsInAnyOrder("devs", "sales"));
+            assertThat(
+                    "users are created",
+                    theRealm.users().list().stream()
+                            .map(UserRepresentation::getUsername)
+                            .collect(Collectors.toList()),
+                    containsInAnyOrder("bob", "john"));
+            userBobKeycloakId =
+                    theRealm.users().searchByUsername("bob", true).get(0).getId();
+            assertThat(
+                    "User bob with the correct groups",
+                    theRealm.users().get(userBobKeycloakId).groups().stream()
+                            .map(GroupRepresentation::getPath)
+                            .collect(Collectors.toList()),
+                    containsInAnyOrder("/employees", "/employees/devs"));
+            userJohnKeycloakId =
+                    theRealm.users().searchByUsername("john", true).get(0).getId();
+            assertThat(
+                    "User john with the correct groups",
+                    theRealm.users().get(userJohnKeycloakId).groups().stream()
+                            .map(GroupRepresentation::getPath)
+                            .collect(Collectors.toList()),
+                    containsInAnyOrder("/employees", "/employees/sales"));
+            assertThat(
+                    "client is created",
+                    theRealm.clients().findByClientId(CLIENT).get(0).getProtocol(),
+                    is("openid-connect"));
         }
     }
 
@@ -170,7 +203,8 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         sc.open();
         OicAuthSecurityRealm securityRealm = sc.useRealm(OicAuthSecurityRealm.class);
         securityRealm.configureClient(CLIENT, CLIENT);
-        securityRealm.setAutomaticConfiguration(String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
+        securityRealm.setAutomaticConfiguration(
+                String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
         securityRealm.setLogoutFromOpenidProvider(true);
         securityRealm.setPostLogoutUrl(jenkins.url("OicLogout").toExternalForm());
         securityRealm.setUserFields(null, null, null, "groups");
@@ -187,8 +221,10 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void loginAndLogoutInJenkinsIsReflectedInKeycloak() {
-        final KeycloakUtils.User bob = new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@jenkins-ath.test", "Bob", "Smith");
-        final KeycloakUtils.User john = new KeycloakUtils.User(userJohnKeycloakId, "john", "john@jenkins-ath.test", "John", "Smith");
+        final KeycloakUtils.User bob =
+                new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@jenkins-ath.test", "Bob", "Smith");
+        final KeycloakUtils.User john =
+                new KeycloakUtils.User(userJohnKeycloakId, "john", "john@jenkins-ath.test", "John", "Smith");
         jenkins.open();
 
         jenkins.clickLink("log in");
@@ -216,8 +252,10 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
      */
     @Test
     public void loginAndLogoutInKeycloakIsReflectedInJenkins() throws Exception {
-        final KeycloakUtils.User bob = new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@jenkins-ath.test", "Bob", "Smith");
-        final KeycloakUtils.User john = new KeycloakUtils.User(userJohnKeycloakId, "john", "john@jenkins-ath.test", "John", "Smith");
+        final KeycloakUtils.User bob =
+                new KeycloakUtils.User(userBobKeycloakId, "bob", "bob@jenkins-ath.test", "Bob", "Smith");
+        final KeycloakUtils.User john =
+                new KeycloakUtils.User(userJohnKeycloakId, "john", "john@jenkins-ath.test", "John", "Smith");
         final String loginUrl = String.format("%s/realms/%s/account", keycloak.getAuthServerUrl(), REALM);
         keycloakUtils.open(new URL(loginUrl));
 
@@ -242,8 +280,10 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
     private void assertLoggedOut() {
         assertNull("User has logged out from Jenkins", jenkins.getCurrentUser().id());
 
-        assertThrows("User has logged out from keycloak", NoSuchElementException.class,
-                     () -> keycloakUtils.getCurrentUser(keycloak.getAuthServerUrl(), REALM));
+        assertThrows(
+                "User has logged out from keycloak",
+                NoSuchElementException.class,
+                () -> keycloakUtils.getCurrentUser(keycloak.getAuthServerUrl(), REALM));
     }
 
     private void assertLoggedUser(KeycloakUtils.User expectedUser, String roleToCheck) {
@@ -253,7 +293,10 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         whoAmI.open();
         JSONObject jsonData = new JSONObject(whoAmI.getJson().toString());
         assertThat("User is the expected one", jsonData.getString("name"), is(expectedUser.getId()));
-        assertThat("User has the expected roles inherited from keycloak", roleToCheck, is(in(jsonData.getJSONArray("authorities").toList())));
+        assertThat(
+                "User has the expected roles inherited from keycloak",
+                roleToCheck,
+                is(in(jsonData.getJSONArray("authorities").toList())));
 
         KeycloakUtils.User fromKeyCloak = keycloakUtils.getCurrentUser(keycloak.getAuthServerUrl(), REALM);
         assertThat("User has logged in keycloack", fromKeyCloak.getUserName(), is(expectedUser.getUserName()));
@@ -261,5 +304,4 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         assertThat("User has logged in keycloack", fromKeyCloak.getFirstName(), is(expectedUser.getFirstName()));
         assertThat("User has logged in keycloack", fromKeyCloak.getLastName(), is(expectedUser.getLastName()));
     }
-
 }

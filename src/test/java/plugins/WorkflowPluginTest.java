@@ -26,8 +26,8 @@ package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.junit.Assert.*;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.junit.Assert.assertTrue;
 
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -66,10 +66,17 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     private static final String NAME = "myname";
     private static final String EXPECTED_OUTPUT_FROM_LIBRARY_VARS = "Hello from vars my friend " + NAME;
 
-    @Inject private SlaveController slaveController;
-    @Inject DockerContainerHolder<GitContainer> gitServer;
-    @Inject DockerContainerHolder<SvnContainer> svn;
-    @Inject JenkinsController controller;
+    @Inject
+    private SlaveController slaveController;
+
+    @Inject
+    DockerContainerHolder<GitContainer> gitServer;
+
+    @Inject
+    DockerContainerHolder<SvnContainer> svn;
+
+    @Inject
+    JenkinsController controller;
 
     @Before
     public void useNoVerificationSshHostKeyStrategy() {
@@ -81,7 +88,9 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     @Category(DockerTest.class)
     @WithDocker
-    @WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {CREDENTIALS_ID, KEY_FILENAME})
+    @WithCredentials(
+            credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
+            values = {CREDENTIALS_ID, KEY_FILENAME})
     @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "git"})
     @Test
     public void hello_world_from_git() throws IOException {
@@ -106,46 +115,57 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         }
     }
 
-    @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "pipeline-input-step", "junit", "git"})
-    @Test public void linearFlow() throws Exception {
+    @WithPlugins({
+        "workflow-job",
+        "workflow-cps",
+        "workflow-basic-steps",
+        "workflow-durable-task-step",
+        "pipeline-input-step",
+        "junit",
+        "git"
+    })
+    @Test
+    public void linearFlow() throws Exception {
         MavenInstallation.installMaven(jenkins, "M3", "3.9.4");
         final DumbSlave slave = (DumbSlave) slaveController.install(jenkins).get();
         slave.configure(() -> slave.labels.set("remote"));
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set(
-            "node('remote') {\n" +
-            "  git 'https://github.com/jenkinsci/hello-world-maven-builder.git'\n" +
-            "  def v = version()\n" +
-            "  if (v) {\n" +
-            "    echo(/Building version $v/)\n" +
-            "  }\n" +
-            "  def mvnHome = tool 'M3'\n" +
-            "  withEnv([\"PATH+MAVEN=$mvnHome/bin\", \"M2_HOME=$mvnHome\"]) {\n" +
-            "    sh 'mvn -B -Dmaven.test.failure.ignore verify'\n" +
-            "  }\n" +
-            "  input 'Ready to go?'\n" +
-            "  archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true\n" +
-            "  junit '**/target/surefire-reports/TEST-*.xml'\n" +
-            "}\n" +
-            "def version() {\n" +
-            "  def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'\n" +
-            "  matcher ? matcher[0][1] : null\n" +
-            "}");
+        job.script.set("node('remote') {\n" + "  git 'https://github.com/jenkinsci/hello-world-maven-builder.git'\n"
+                + "  def v = version()\n"
+                + "  if (v) {\n"
+                + "    echo(/Building version $v/)\n"
+                + "  }\n"
+                + "  def mvnHome = tool 'M3'\n"
+                + "  withEnv([\"PATH+MAVEN=$mvnHome/bin\", \"M2_HOME=$mvnHome\"]) {\n"
+                + "    sh 'mvn -B -Dmaven.test.failure.ignore verify'\n"
+                + "  }\n"
+                + "  input 'Ready to go?'\n"
+                + "  archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true\n"
+                + "  junit '**/target/surefire-reports/TEST-*.xml'\n"
+                + "}\n"
+                + "def version() {\n"
+                + "  def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'\n"
+                + "  matcher ? matcher[0][1] : null\n"
+                + "}");
         job.sandbox.check();
         job.save();
         final Build build = job.startBuild();
         waitFor().until(new Wait.Predicate<Boolean>() {
-            @Override public Boolean apply() throws Exception {
+            @Override
+            public Boolean apply() throws Exception {
                 return build.getConsole().contains("Ready to go?");
             }
-            @Override public String diagnose(Throwable lastException, String message) {
+
+            @Override
+            public String diagnose(Throwable lastException, String message) {
                 return "Console output:\n" + build.getConsole() + "\n";
             }
         });
         assertThat(build.getConsole(), containsString("Building version 1.0-SNAPSHOT"));
 
         jenkins.restart();
-        // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
+        // Default 120s timeout of Build.waitUntilFinished sometimes expires waiting for RetentionStrategy.Always to
+        // tick (after initial failure of CommandLauncher.launch: EOFException: unexpected stream termination):
         slave.waitUntilOnline(); // TODO rather wait for build output: "Ready to run"
         visit(build.getConsoleUrl());
         clickLink("Proceed");
@@ -162,36 +182,47 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertThat(driver, hasContent("All Tests"));
     }
 
-    @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "parallel-test-executor", "junit", "git"})
+    @WithPlugins({
+        "workflow-job",
+        "workflow-cps",
+        "workflow-basic-steps",
+        "workflow-durable-task-step",
+        "parallel-test-executor",
+        "junit",
+        "git"
+    })
     @Native("mvn")
-    @Test public void parallelTests() throws Exception {
+    @Test
+    public void parallelTests() throws Exception {
         for (int i = 0; i < 3; i++) {
             slaveController.install(jenkins);
         }
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set(
-            "node('built-in || master') {\n" +
-            // TODO could be switched to multibranch, in which case this initial `node` is unnecessary, and each branch can just `checkout scm`
-            "  git 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n" +
-            "  stash 'sources'\n" +
-            "}\n" +
-            "def splits = splitTests parallelism: count(3), estimateTestsFromFiles: true\n" +
-            "def branches = [:]\n" +
-            "for (int i = 0; i < splits.size(); i++) {\n" +
-            "  def exclusions = splits.get(i);\n" +
-            "  branches[\"split${i}\"] = {\n" +
-            "    node('!master') {\n" +
-            "      sh 'rm -rf *'\n" +
-            "      unstash 'sources'\n" +
-            "      writeFile file: 'exclusions.txt', text: exclusions.join(\"\\n\")\n" +
-            // Do not bother with ${tool 'M3'}; would take too long to unpack Maven on all slaves.
-            // TODO would be useful for ToolInstallation to support the URL installer, hosting the tool ZIP ourselves somewhere cached.
-            "      sh 'mvn -B -Dmaven.test.failure.ignore test'\n" +
-            "      junit 'target/surefire-reports/*.xml'\n" +
-            "    }\n" +
-            "  }\n" +
-            "}\n" +
-            "parallel branches");
+        job.script.set("node('built-in || master') {\n" +
+                // TODO could be switched to multibranch, in which case this initial `node` is unnecessary, and each
+                // branch can just `checkout scm`
+                "  git 'https://github.com/jenkinsci/parallel-test-executor-plugin-sample.git'\n"
+                + "  stash 'sources'\n"
+                + "}\n"
+                + "def splits = splitTests parallelism: count(3), estimateTestsFromFiles: true\n"
+                + "def branches = [:]\n"
+                + "for (int i = 0; i < splits.size(); i++) {\n"
+                + "  def exclusions = splits.get(i);\n"
+                + "  branches[\"split${i}\"] = {\n"
+                + "    node('!master') {\n"
+                + "      sh 'rm -rf *'\n"
+                + "      unstash 'sources'\n"
+                + "      writeFile file: 'exclusions.txt', text: exclusions.join(\"\\n\")\n"
+                +
+                // Do not bother with ${tool 'M3'}; would take too long to unpack Maven on all slaves.
+                // TODO would be useful for ToolInstallation to support the URL installer, hosting the tool ZIP
+                // ourselves somewhere cached.
+                "      sh 'mvn -B -Dmaven.test.failure.ignore test'\n"
+                + "      junit 'target/surefire-reports/*.xml'\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n"
+                + "parallel branches");
         job.sandbox.check();
         job.save();
         Build build = job.startBuild();
@@ -215,7 +246,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     @Category(DockerTest.class)
     @WithDocker
     @WithPlugins({"workflow-cps", "workflow-job", "workflow-durable-task-step", "subversion"})
-    @Test public void subversion() throws Exception {
+    @Test
+    public void subversion() throws Exception {
         final SvnContainer svnContainer = svn.get();
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
         job.script.set("node {svn '" + svnContainer.getUrlUnauthenticatedRepoAtRevision(1) + "'}");
@@ -228,7 +260,16 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         assertTrue(b2.getChanges().hasChanges());
     }
 
-    @WithPlugins({"git", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source", "pipeline-groovy-lib"})
+    @WithPlugins({
+        "git",
+        "workflow-job",
+        "workflow-cps",
+        "workflow-basic-steps",
+        "workflow-durable-task-step",
+        "workflow-multibranch",
+        "github-branch-source",
+        "pipeline-groovy-lib"
+    })
     @Test
     public void testSharedLibraryFromGithub() {
         this.configureSharedLibrary();
@@ -243,7 +284,8 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
     private void configureSharedLibrary() {
         jenkins.configure();
 
-        WorkflowGithubSharedLibrary sharedLibrary = new WorkflowSharedLibraryGlobalConfig(jenkins).addSharedLibrary(WorkflowGithubSharedLibrary.class);
+        WorkflowGithubSharedLibrary sharedLibrary =
+                new WorkflowSharedLibraryGlobalConfig(jenkins).addSharedLibrary(WorkflowGithubSharedLibrary.class);
         sharedLibrary.name.set(SHARED_LIBRARY_NAME);
         final GithubBranchSource source = sharedLibrary.selectSCM();
 
@@ -254,14 +296,10 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
 
     private WorkflowJob configureJob() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set(
-                "@Library('" + SHARED_LIBRARY_NAME + "@master') _\n" +
-                        "\n" +
-                        "otherGreeting('" + NAME + "')");
+        job.script.set("@Library('" + SHARED_LIBRARY_NAME + "@master') _\n" + "\n" + "otherGreeting('" + NAME + "')");
         job.sandbox.check();
         job.save();
 
         return job;
     }
-
 }

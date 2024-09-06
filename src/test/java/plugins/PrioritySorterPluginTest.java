@@ -71,7 +71,8 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
         FreeStyleJob p2 = jenkins.views.create(ListView.class, "normal").jobs.create(FreeStyleJob.class, "P2");
         tieToLabel(p2, LABEL);
 
-        FreeStyleJob p1 = jenkins.views.create(ListView.class, "prioritized").jobs.create(FreeStyleJob.class, "P1");
+        FreeStyleJob p1 =
+                jenkins.views.create(ListView.class, "prioritized").jobs.create(FreeStyleJob.class, "P1");
         tieToLabel(p1, LABEL);
 
         PriorityConfig priority = jenkins.action(PriorityConfig.class);
@@ -98,8 +99,10 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
         assertThat(slave, runBuildsInOrder(p1, p2));
     }
 
-    // Reproduce regression fixed in https://github.com/jenkinsci/priority-sorter-plugin/commit/e46b2b1fbc4396f441c69692eb328fb982325572
-    @Test @WithPlugins("jobConfigHistory")
+    // Reproduce regression fixed in
+    // https://github.com/jenkinsci/priority-sorter-plugin/commit/e46b2b1fbc4396f441c69692eb328fb982325572
+    @Test
+    @WithPlugins("jobConfigHistory")
     public void saving_global_config_should_not_create_job_change() {
         FreeStyleJob job = jenkins.jobs.create();
         job.save();

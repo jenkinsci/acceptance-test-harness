@@ -23,7 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.plugins.priority_sorter;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Action;
+import org.jenkinsci.test.acceptance.po.ActionPageObject;
+import org.jenkinsci.test.acceptance.po.ContainerPageObject;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
 @ActionPageObject("advanced-build-queue")
 public class PriorityConfig extends Action {
@@ -38,7 +43,8 @@ public class PriorityConfig extends Action {
     }
 
     public Group addGroup() {
-        String path = createPageArea("/jobGroup", () -> control("/repeatable-add").click());
+        String path =
+                createPageArea("/jobGroup", () -> control("/repeatable-add").click());
         return new Group(this, path);
     }
 
@@ -61,7 +67,8 @@ public class PriorityConfig extends Action {
             control("").select("Jobs included in a view");
             control("jobGroupStrategy/viewName").select("All");
             control("jobGroupStrategy/jobFilter").check();
-            control("jobGroupStrategy/jobFilter/jobPattern", "jobGroupStrategy/jobPattern").set(pattern);
+            control("jobGroupStrategy/jobFilter/jobPattern", "jobGroupStrategy/jobPattern")
+                    .set(pattern);
         }
 
         public void byView(String name) {
