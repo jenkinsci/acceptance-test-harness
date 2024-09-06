@@ -532,7 +532,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<Build> started() {
-        return new Matcher<Build>("Build has started") {
+        return new Matcher<>("Build has started") {
             @Override
             public boolean matchesSafely(Build build) {
                 return build.hasStarted();

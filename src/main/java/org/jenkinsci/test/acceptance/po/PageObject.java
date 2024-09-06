@@ -146,7 +146,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
         final int existingSize = existing.size();
         action.run();
 
-        return waitFor().withTimeout(Duration.ofSeconds(10)).until(new Function<CapybaraPortingLayer, String>() {
+        return waitFor().withTimeout(Duration.ofSeconds(10)).until(new Function<>() {
             @Nullable
             @Override
             public String apply(@Nullable CapybaraPortingLayer input) {

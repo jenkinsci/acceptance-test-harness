@@ -179,7 +179,7 @@ public class Jenkins extends Node implements Container {
     }
 
     public void waitForLoad(int seconds) {
-        List<Class<? extends Throwable>> ignoring = new ArrayList<Class<? extends Throwable>>();
+        List<Class<? extends Throwable>> ignoring = new ArrayList<>();
         ignoring.add(AssertionError.class);
         ignoring.add(NoSuchElementException.class);
         ignoring.add(WebDriverException.class);

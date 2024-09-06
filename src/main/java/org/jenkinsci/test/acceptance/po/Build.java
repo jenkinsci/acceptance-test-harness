@@ -242,7 +242,7 @@ public class Build extends ContainerPageObject {
     }
 
     private Matcher<Build> resultIs(final Result expected) {
-        return new Matcher<Build>("Build result %s", expected) {
+        return new Matcher<>("Build result %s", expected) {
             @Override
             public boolean matchesSafely(Build item) {
                 return item.getResult().equals(expected.name());

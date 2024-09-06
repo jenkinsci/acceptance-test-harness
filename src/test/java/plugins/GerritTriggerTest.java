@@ -108,7 +108,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     private String gtPrivateKey;
 
     // List of changes to abandon
-    private List<String> changes = new ArrayList<String>();
+    private List<String> changes = new ArrayList<>();
     private File ssh;
 
     @After
@@ -160,7 +160,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
                 ssh.toPath(),
                 new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
 
-        changes = new ArrayList<String>();
+        changes = new ArrayList<>();
     }
 
     @BeforeClass

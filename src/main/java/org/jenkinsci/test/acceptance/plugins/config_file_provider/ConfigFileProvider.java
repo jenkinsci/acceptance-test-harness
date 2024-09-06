@@ -45,7 +45,7 @@ public class ConfigFileProvider extends PageObject {
     public <T extends ProvidedFile> T addFile(Class<T> type) {
         visit(url("selectProvider"));
 
-        WebElement radio = findCaption(type, new Finder<WebElement>() {
+        WebElement radio = findCaption(type, new Finder<>() {
             @Override
             protected WebElement find(String caption) {
                 return outer.find(by.radioButton(caption));

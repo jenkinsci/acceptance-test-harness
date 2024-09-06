@@ -57,7 +57,7 @@ public class PostBuildScriptPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<Build> runPostBuildStep() {
-        return new Matcher<Build>("post build step was run") {
+        return new Matcher<>("post build step was run") {
             @Override
             public boolean matchesSafely(Build item) {
                 return item.getConsole().contains("RUNNING_POST_BUILD_STEP");

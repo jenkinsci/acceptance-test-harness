@@ -64,7 +64,7 @@ public class Slave extends Node {
     }
 
     public static Matcher<Slave> runBuildsInOrder(final Job... jobs) {
-        return new Matcher<Slave>("agent run build in order: %s", Joiner.on(' ').join(jobs)) {
+        return new Matcher<>("agent run build in order: %s", Joiner.on(' ').join(jobs)) {
             @Override
             public boolean matchesSafely(Slave slave) {
                 slave.visit("builds");

@@ -31,7 +31,7 @@ public class BuildHistory extends PageObject {
         WebElement progressiveRendering = findIfNotVisible(by.xpath("//*[@tooltip='Computation in progress.']"));
         waitFor(progressiveRendering).until(we -> !we.isDisplayed());
 
-        LinkedHashSet<Build> builds = new LinkedHashSet<Build>();
+        LinkedHashSet<Build> builds = new LinkedHashSet<>();
         for (WebElement element : all(by.xpath(
                 "//a[@href]/span[text() = 'Console output']/.. | " + "//a[@href][img/@alt = 'Console output']"))) {
             String href = element.getAttribute("href");
@@ -50,7 +50,7 @@ public class BuildHistory extends PageObject {
 
     public Set<Build> getBuildsOf(Job... _jobs) {
         List<Job> jobs = Arrays.asList(_jobs);
-        LinkedHashSet<Build> builds = new LinkedHashSet<Build>();
+        LinkedHashSet<Build> builds = new LinkedHashSet<>();
         for (Build b : getBuilds()) {
             if (jobs.contains(b.job)) {
                 builds.add(b);
@@ -61,7 +61,7 @@ public class BuildHistory extends PageObject {
     }
 
     public static Matcher<BuildHistory> containsBuildOf(final Job job) {
-        return new Matcher<BuildHistory>("Build history containing a build of %s", job) {
+        return new Matcher<>("Build history containing a build of %s", job) {
             @Override
             public boolean matchesSafely(BuildHistory item) {
                 return !item.getBuildsOf(job).isEmpty();
