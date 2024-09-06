@@ -7,7 +7,7 @@ package org.jenkinsci.test.acceptance.utils;
  */
 public class SystemEnvironmentVariables {
 
-    public static final String getPropertyVariableOrEnvironment(String property, String def) {
+    public static String getPropertyVariableOrEnvironment(String property, String def) {
 
         String propertyValue = System.getProperty(property);
 
