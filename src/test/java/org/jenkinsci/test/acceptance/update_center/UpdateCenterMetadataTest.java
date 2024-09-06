@@ -66,7 +66,7 @@ public class UpdateCenterMetadataTest {
     @Test
     public void transitiveDependenciesOfSimple() throws Exception {
 
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs()), Matchers.<PluginMetadata>emptyIterable());
+        assertThat(ucm.transitiveDependenciesOf(jenkins, specs()), Matchers.emptyIterable());
         assertThat(
                 ucm.transitiveDependenciesOf(jenkins, specs("standalone")),
                 Matchers.contains(plugins.get("standalone")));
