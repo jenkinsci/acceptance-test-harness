@@ -222,7 +222,7 @@ public class Control extends CapybaraPortingLayerImpl {
                 // With enough implementations registered the one we are looking for might
                 // require scrolling in menu to become visible. This dirty hack stretch
                 // yui menu so that all the items are visible.
-                executeScript("" + "YAHOO.util.Dom.batch("
+                executeScript("YAHOO.util.Dom.batch("
                         + "    document.querySelector('.yui-menu-body-scrolled'),"
                         + "    function (el) {"
                         + "        el.style.height = 'auto';"
@@ -253,7 +253,7 @@ public class Control extends CapybaraPortingLayerImpl {
             // With enough implementations registered the one we are looking for might
             // require scrolling in menu to become visible. This dirty hack stretch
             // yui menu so that all the items are visible.
-            executeScript("" + "YAHOO.util.Dom.batch("
+            executeScript("YAHOO.util.Dom.batch("
                     + "    document.querySelector('.yui-menu-body-scrolled'),"
                     + "    function (el) {"
                     + "        el.style.height = 'auto';"
