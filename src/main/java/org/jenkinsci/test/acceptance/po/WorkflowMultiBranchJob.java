@@ -54,7 +54,7 @@ public class WorkflowMultiBranchJob extends Folder {
         final List<WebElement> scanRepoNow =
                 driver.findElements(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository Now\"]"));
 
-        if (scanRepoNow.size() > 0) {
+        if (!scanRepoNow.isEmpty()) {
             // JENKINS-41416
             scanRepoNow.get(0).click();
         } else {
