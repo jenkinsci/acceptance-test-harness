@@ -183,7 +183,7 @@ public @interface WithPlugins {
                         LOGGER.info("All required plugins already installed.");
                     } else {
                         LOGGER.info("Installing plugins for test: " + install);
-                        PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
+                        PluginSpec[] installList = install.toArray(new PluginSpec[0]);
                         try {
                             //noinspection deprecation
                             pm.installPlugins(installList);
