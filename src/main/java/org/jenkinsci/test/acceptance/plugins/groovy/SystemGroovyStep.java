@@ -23,7 +23,10 @@
  */
 package org.jenkinsci.test.acceptance.plugins.groovy;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.NoSuchElementException;
 
 @Describable("Execute system Groovy script")

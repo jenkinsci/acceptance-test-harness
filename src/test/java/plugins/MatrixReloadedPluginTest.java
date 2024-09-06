@@ -37,8 +37,8 @@ import org.jenkinsci.test.acceptance.po.TextAxis;
 import org.junit.Test;
 
 @WithPlugins({
-        "matrix-project", // JENKINS-37545
-        "matrix-reloaded"
+    "matrix-project", // JENKINS-37545
+    "matrix-reloaded"
 })
 public class MatrixReloadedPluginTest extends AbstractJUnitTest {
 
@@ -62,8 +62,7 @@ public class MatrixReloadedPluginTest extends AbstractJUnitTest {
         action.shouldHaveCombination("AAA=111,BBB=333")
                 .shouldHaveCombination("AAA=111,BBB=444")
                 .shouldHaveCombination("AAA=222,BBB=333")
-                .shouldHaveCombination("AAA=222,BBB=444")
-        ;
+                .shouldHaveCombination("AAA=222,BBB=444");
 
         action.rebuild("AAA=111,BBB=333");
         MatrixBuild build = (MatrixBuild) job.getLastBuild().shouldSucceed();

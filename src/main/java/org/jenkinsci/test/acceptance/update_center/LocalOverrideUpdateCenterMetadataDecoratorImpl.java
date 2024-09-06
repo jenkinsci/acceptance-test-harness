@@ -28,19 +28,28 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
             VersionScheme versionScheme = new GenericVersionScheme();
             for (Map.Entry<String, PluginMetadata> entry : ucm.plugins.entrySet()) {
                 DefaultArtifact artifact = entry.getValue().getDefaultArtifact();
-                File artifactDir = new File(new File(localRepo, artifact.getGroupId().replace('.', File.separatorChar)), artifact.getArtifactId());
+                File artifactDir = new File(
+                        new File(localRepo, artifact.getGroupId().replace('.', File.separatorChar)),
+                        artifact.getArtifactId());
                 File metadata = new File(artifactDir, "maven-metadata-local.xml");
                 if (metadata.isFile()) {
                     try {
                         Version ucVersion = versionScheme.parseVersion(artifact.getVersion());
-                        NodeList versions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(metadata).getElementsByTagName("version");
+                        NodeList versions = DocumentBuilderFactory.newInstance()
+                                .newDocumentBuilder()
+                                .parse(metadata)
+                                .getElementsByTagName("version");
                         for (int i = 0; i < versions.getLength(); i++) {
                             String version = versions.item(i).getTextContent();
-                            if (version.endsWith("-SNAPSHOT") && versionScheme.parseVersion(version).compareTo(ucVersion) > 0) {
-                                File hpi = new File(new File(artifactDir, version), artifact.getArtifactId() + "-" + version + ".hpi");
+                            if (version.endsWith("-SNAPSHOT")
+                                    && versionScheme.parseVersion(version).compareTo(ucVersion) > 0) {
+                                File hpi = new File(
+                                        new File(artifactDir, version),
+                                        artifact.getArtifactId() + "-" + version + ".hpi");
                                 if (hpi.isFile()) {
                                     String name = entry.getKey();
-                                    System.err.println("Overriding " + name + " " + ucVersion + " with local build of " + version);
+                                    System.err.println(
+                                            "Overriding " + name + " " + ucVersion + " with local build of " + version);
                                     PluginMetadata m = PluginMetadata.LocalOverride.create(hpi);
                                     String parsedName = m.getName();
                                     if (!name.equals(parsedName)) {
@@ -58,22 +67,23 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
         }
 
         // deprecated mechanism, as of 1.57
-        for (Map.Entry<String,String> e : System.getenv().entrySet()) {
+        for (Map.Entry<String, String> e : System.getenv().entrySet()) {
             String key = e.getKey();
-            if (!isPluginEnvironmentVariable(key))
+            if (!isPluginEnvironmentVariable(key)) {
                 continue;
+            }
 
             try {
                 override(ucm, e.getValue());
                 System.err.println("Using XXX.jpi/XXX_JPI env vars is deprecated. Use LOCAL_JARS instead.");
             } catch (Exception x) {
-                throw new IllegalArgumentException("Unable to honor environment variable "+key, x);
+                throw new IllegalArgumentException("Unable to honor environment variable " + key, x);
             }
         }
 
         // past 1.57, preferred way
         String localJars = System.getenv("LOCAL_JARS");
-        if (localJars!=null) {
+        if (localJars != null) {
             for (String jar : localJars.split(File.pathSeparator)) {
                 try {
                     override(ucm, jar);
@@ -86,14 +96,17 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
 
     private void override(UpdateCenterMetadata ucm, String jpi) {
         File file = new File(jpi);
-        if (!file.exists()) throw new IllegalArgumentException("Plugin file does not exist: " + file.getAbsolutePath());
+        if (!file.exists()) {
+            throw new IllegalArgumentException("Plugin file does not exist: " + file.getAbsolutePath());
+        }
 
         PluginMetadata m = PluginMetadata.LocalOverride.create(file);
         PluginMetadata stock = ucm.plugins.get(m.getName());
         if (stock == null) {
             System.err.println("Creating new plugin " + m.getName() + " with local build of " + m.getVersion());
         } else {
-            System.err.println("Overriding " + m.getName() + " " + stock.getVersion() + " with local build of " + m.getVersion());
+            System.err.println(
+                    "Overriding " + m.getName() + " " + stock.getVersion() + " with local build of " + m.getVersion());
         }
         ucm.plugins.put(m.getName(), m);
     }
@@ -102,10 +115,12 @@ public class LocalOverrideUpdateCenterMetadataDecoratorImpl implements UpdateCen
      * Returns true if the given environment variable name is an override to point to a local JPI file.
      */
     private boolean isPluginEnvironmentVariable(String name) {
-        if (name.endsWith(".jpi"))
+        if (name.endsWith(".jpi")) {
             return true;
-        if (name.endsWith("_JPI"))   // http://stackoverflow.com/a/36992531/12916
+        }
+        if (name.endsWith("_JPI")) { // http://stackoverflow.com/a/36992531/12916
             return true;
+        }
         return false;
     }
 }

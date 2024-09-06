@@ -25,10 +25,12 @@ import org.junit.runner.Description;
 @GlobalRule
 public class HarRecorder extends TestWatcher {
 
-    private final static Logger LOGGER = Logger.getLogger(HarRecorder.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(HarRecorder.class.getName());
 
     public enum State {
-        OFF("off", false, false), FAILURES_ONLY("failuresOnly", true, false), ALWAYS("always", true, true);
+        OFF("off", false, false),
+        FAILURES_ONLY("failuresOnly", true, false),
+        ALWAYS("always", true, true);
 
         private final String value;
         private final boolean saveOnSuccess;
@@ -56,7 +58,6 @@ public class HarRecorder extends TestWatcher {
             return value;
         }
 
-
         public static State value(String value) {
             for (State s : values()) {
                 if (s.value.equals(value)) {
@@ -67,7 +68,8 @@ public class HarRecorder extends TestWatcher {
         }
     }
 
-    static State CAPTURE_HAR = State.value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("RECORD_BROWSER_TRAFFIC", State.FAILURES_ONLY.getValue()));
+    static State CAPTURE_HAR = State.value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment(
+            "RECORD_BROWSER_TRAFFIC", State.FAILURES_ONLY.getValue()));
 
     private static BrowserUpProxy proxy;
 
@@ -86,15 +88,15 @@ public class HarRecorder extends TestWatcher {
                     CaptureType.REQUEST_HEADERS,
                     CaptureType.REQUEST_CONTENT,
                     CaptureType.RESPONSE_HEADERS,
-                    CaptureType.RESPONSE_CONTENT
-            );
+                    CaptureType.RESPONSE_CONTENT);
             proxy.setTrustAllServers(true);
             proxy.setMitmDisabled(true);
             proxy.start(0, networkAddress);
             LOGGER.log(Level.INFO, "Proxy Created and listening on port {0}", proxy.getPort());
-        }
-        else {
-            LOGGER.log(Level.INFO, "Existing Proxy for {0} returned using port {1}", new Object[] {testName, proxy.getPort()});
+        } else {
+            LOGGER.log(Level.INFO, "Existing Proxy for {0} returned using port {1}", new Object[] {
+                testName, proxy.getPort()
+            });
         }
         return proxy;
     }

@@ -82,10 +82,9 @@ public class Scroller implements WebDriverListener {
     public Scroller(WebDriver driver) {
         this.driver = driver;
         try {
-            scrollJs = IOUtils.toString(getClass()
-                    .getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
-            disableStickyElementsJs = IOUtils.toString(getClass()
-                    .getResourceAsStream("disable-sticky-elements.js"), StandardCharsets.UTF_8);
+            scrollJs = IOUtils.toString(getClass().getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
+            disableStickyElementsJs = IOUtils.toString(
+                    getClass().getResourceAsStream("disable-sticky-elements.js"), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
@@ -150,12 +149,15 @@ public class Scroller implements WebDriverListener {
         try {
             new Wait<>(Boolean.TRUE)
                     .withTimeout(Duration.ofSeconds(5)) // Wall-clock time
-                    .until(() -> (Boolean) executor.executeScript(scrollJs, eYCoord, eXCoord, id))
-            ;
+                    .until(() -> (Boolean) executor.executeScript(scrollJs, eYCoord, eXCoord, id));
         } catch (TimeoutException ex) {
-            // Scrolling failed, but sometimes the element to click is already visible, let the test continue and eventually fail later
+            // Scrolling failed, but sometimes the element to click is already visible, let the test continue and
+            // eventually fail later
             // This log message should be sufficient to diagnose the issue
-            LOGGER.log(Level.WARNING, "Scrolling failed, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown", ex);
+            LOGGER.log(
+                    Level.WARNING,
+                    "Scrolling failed, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown",
+                    ex);
         }
     }
 }

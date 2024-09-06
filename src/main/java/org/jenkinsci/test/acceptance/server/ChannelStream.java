@@ -21,14 +21,17 @@ import java.nio.channels.WritableByteChannel;
 class ChannelStream {
     public static InputStream in(final ReadableByteChannel ch) throws IOException {
         return Channels.newInputStream(new ReadableByteChannel() {
+            @Override
             public int read(ByteBuffer dst) throws IOException {
                 return ch.read(dst);
             }
 
+            @Override
             public void close() throws IOException {
-//                ch.close();
+                //                ch.close();
             }
 
+            @Override
             public boolean isOpen() {
                 return ch.isOpen();
             }
@@ -37,14 +40,17 @@ class ChannelStream {
 
     public static OutputStream out(final WritableByteChannel ch) throws IOException {
         return Channels.newOutputStream(new WritableByteChannel() {
+            @Override
             public int write(ByteBuffer src) throws IOException {
                 return ch.write(src);
             }
 
+            @Override
             public void close() throws IOException {
-//                ch.close();
+                //                ch.close();
             }
 
+            @Override
             public boolean isOpen() {
                 return ch.isOpen();
             }

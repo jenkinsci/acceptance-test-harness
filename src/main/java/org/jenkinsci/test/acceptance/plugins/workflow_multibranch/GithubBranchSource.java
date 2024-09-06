@@ -33,7 +33,8 @@ public class GithubBranchSource extends BranchSource {
         // This hack is necessary for the repository drop down population to be triggered
         final String elementTag = this.owner.resolve().getTagName();
         final String elementNameAttribute = this.owner.resolve().getAttribute("name");
-        executeScript("var event = new Event('change');document.getElementsBySelector(\"" + elementTag + "[name='" + elementNameAttribute + "']\")[0].dispatchEvent(event);");
+        executeScript("var event = new Event('change');document.getElementsBySelector(\"" + elementTag + "[name='"
+                + elementNameAttribute + "']\")[0].dispatchEvent(event);");
         return this;
     }
 
@@ -43,11 +44,10 @@ public class GithubBranchSource extends BranchSource {
     }
 
     public GithubBranchSource selectRepository(final String repoName) {
-        waitFor().withTimeout(Duration.ofSeconds(10))
-                .until((Callable<Object>) () -> {
-                    final Select select = new Select(repository.resolve());
-                    return select.getOptions().size() > 0;
-                });
+        waitFor().withTimeout(Duration.ofSeconds(10)).until((Callable<Object>) () -> {
+            final Select select = new Select(repository.resolve());
+            return select.getOptions().size() > 0;
+        });
 
         this.repository.select(repoName);
         return this;

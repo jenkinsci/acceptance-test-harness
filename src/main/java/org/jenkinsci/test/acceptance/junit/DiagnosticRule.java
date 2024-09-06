@@ -20,8 +20,10 @@ public class DiagnosticRule extends TestWatcher {
 
     @Inject
     FailureDiagnostics diagnostics;
+
     @Inject
     JenkinsController controller;
+
     @Inject
     WebDriver driver;
 
@@ -38,7 +40,6 @@ public class DiagnosticRule extends TestWatcher {
         } catch (IOException e) {
             throw new Error(e);
         }
-
     }
 
     private void takeScreenshot() {
@@ -62,10 +63,10 @@ public class DiagnosticRule extends TestWatcher {
      */
     private boolean causedBy(Throwable caught, Class<? extends Throwable> type) {
         for (Throwable cur = caught; cur != null; cur = cur.getCause()) {
-            if (type.isInstance(cur))
+            if (type.isInstance(cur)) {
                 return true;
+            }
         }
         return false;
     }
-
 }

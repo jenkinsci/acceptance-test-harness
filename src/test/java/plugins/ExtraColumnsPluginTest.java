@@ -1,9 +1,9 @@
 package plugins;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.iterableWithSize;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 
 import java.util.List;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -26,7 +26,8 @@ public class ExtraColumnsPluginTest extends AbstractJUnitTest {
      * Sets up a job within a folder. Starts a succeeding build. Adds the last console column to a new view
      * and verifies that clicking the link to the last console opens the console log.
      */
-    @Test @WithPlugins("cloudbees-folder")
+    @Test
+    @WithPlugins("cloudbees-folder")
     public void should_show_console_link_in_folder() {
         Folder folder = jenkins.jobs.create(Folder.class, createRandomName());
         folder.save();

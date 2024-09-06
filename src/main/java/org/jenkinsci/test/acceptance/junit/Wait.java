@@ -85,6 +85,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     /** Predicate and input reference stored when {@link Predicate} is used so we can diagnose. */
     private Predicate<?> predicate;
+
     private Subject input;
 
     /**
@@ -137,11 +138,13 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     public void until(final Matcher<? super Subject> matcher) {
         until(new Predicate<Boolean>() {
-            @Override public Boolean apply() throws Exception {
+            @Override
+            public Boolean apply() throws Exception {
                 return matcher.matches(input);
             }
 
-            @Override public String diagnose(Throwable lastException, String message) {
+            @Override
+            public String diagnose(Throwable lastException, String message) {
                 StringDescription desc = new StringDescription();
                 matcher.describeMismatch(input, desc);
                 return desc.toString();
@@ -164,7 +167,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
             @Override
             public String toString() {
-              return isTrue.toString();
+                return isTrue.toString();
             }
         };
 
@@ -188,7 +191,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
         return super.timeoutException(message, lastException);
     }
 
-    public static abstract class Predicate<Return> {
+    public abstract static class Predicate<Return> {
 
         public abstract Return apply() throws Exception;
 

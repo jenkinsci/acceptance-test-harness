@@ -10,8 +10,8 @@ import java.util.Map;
 /**
  * Keeps track of {@link TestScope} objects.
  *
-* @author Kohsuke Kawaguchi
-*/
+ * @author Kohsuke Kawaguchi
+ */
 public class TestLifecycle implements Scope {
     /**
      * Records components that are scoped to tests.
@@ -52,10 +52,13 @@ public class TestLifecycle implements Scope {
     public <T> Provider<T> scope(final Key<T> key, final Provider<T> base) {
         return () -> {
             Map m = testScopeObjects.get();
-            if (m==null)    return null;
-            T v = (T)m.get(key);
-            if (v==null)
+            if (m == null) {
+                return null;
+            }
+            T v = (T) m.get(key);
+            if (v == null) {
                 m.put(key, v = base.get());
+            }
             return v;
         };
     }

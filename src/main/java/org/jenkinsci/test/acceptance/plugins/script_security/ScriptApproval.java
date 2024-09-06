@@ -21,7 +21,7 @@ public class ScriptApproval extends PageObject {
     public PendingScript find(String context) {
         for (WebElement e : all(by.xpath(".//div[starts-with(@id,'ps-')]"))) {
             if (e.findElement(by.tagName("p")).getText().contains(context)) {
-                return new PendingScript(injector,e);
+                return new PendingScript(injector, e);
             }
         }
         throw new NoSuchElementException(context);
@@ -33,10 +33,9 @@ public class ScriptApproval extends PageObject {
     public PendingSignature findSignature(String context) {
         for (WebElement e : all(by.xpath(".//div[starts-with(@id,'s-')]"))) {
             if (e.findElement(by.tagName("code")).getText().contains(context)) {
-                return new PendingSignature(injector,e);
+                return new PendingSignature(injector, e);
             }
         }
         throw new NoSuchElementException(context);
     }
-
 }

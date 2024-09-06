@@ -60,13 +60,14 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
      * @param printer
      *      The printer to use to write the Jenkins logging statements to
      */
-    public JenkinsLogWatcher(String id, InputStream pipe, File logFile, final LogListener printer) throws FileNotFoundException {
+    public JenkinsLogWatcher(String id, InputStream pipe, File logFile, final LogListener printer)
+            throws FileNotFoundException {
         this.logFile = logFile;
-        this.pipe = new TeeInputStream(pipe,new FileOutputStream(logFile));
+        this.pipe = new TeeInputStream(pipe, new FileOutputStream(logFile));
 
         splitter.addLogListener(printer);
         splitter.addLogListener(watcher);
-        reader = new Thread(new LogReader(this.pipe,splitter),"Log reader: "+id);
+        reader = new Thread(new LogReader(this.pipe, splitter), "Log reader: " + id);
 
         ready = watcher.watch(Pattern.compile("Jenkins is fully up and running"));
         portConflict = watcher.watch(Pattern.compile("java.net.BindException: Address already in use"));
@@ -81,7 +82,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
 
     @Override
     public void close() throws IOException {
-        if(pipe != null){
+        if (pipe != null) {
             pipe.close();
             pipe = null;
         }
@@ -94,8 +95,9 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         try {
             ready.get(JenkinsController.STARTUP_TIMEOUT, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            if (portConflict.isDone())
+            if (portConflict.isDone()) {
                 throw new RuntimeException("Port conflict detected");
+            }
 
             throw new RuntimeException(failedToLoadMessage());
         } catch (InterruptedException | ExecutionException e) {
@@ -104,7 +106,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
     }
 
     private String failedToLoadMessage() {
-        String msg = getClass()+": Could not bring up a Jenkins server";
+        String msg = getClass() + ": Could not bring up a Jenkins server";
         msg += "\nprocess is " + (reader.isAlive() ? "alive" : "dead");
         msg += "\nnow = " + new Date();
         try {

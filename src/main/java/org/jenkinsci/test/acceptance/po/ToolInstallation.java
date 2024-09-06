@@ -43,29 +43,33 @@ public abstract class ToolInstallation extends PageAreaImpl {
 
     public static void waitForUpdates(final Jenkins jenkins, final Class<? extends ToolInstallation> type) {
 
-        if (hasUpdatesFor(jenkins, type)) return;
+        if (hasUpdatesFor(jenkins, type)) {
+            return;
+        }
 
         jenkins.getPluginManager().checkForUpdates();
 
         jenkins.waitFor()
-                .withMessage("tool installer metadata for %s has arrived", type.getAnnotation(ToolInstallationPageObject.class).installer())
+                .withMessage(
+                        "tool installer metadata for %s has arrived",
+                        type.getAnnotation(ToolInstallationPageObject.class).installer())
                 .withTimeout(Duration.ofSeconds(60))
                 .until(new Callable<Boolean>() {
                     @Override
                     public Boolean call() throws Exception {
                         return hasUpdatesFor(jenkins, type);
                     }
-        });
+                });
     }
 
     private static boolean hasUpdatesFor(final Jenkins jenkins, Class<? extends ToolInstallation> type) {
         return Boolean.parseBoolean(jenkins.runScript(
                 "println DownloadService.Downloadable.get('%s').data != null",
-                type.getAnnotation(ToolInstallationPageObject.class).installer()
-        ));
+                type.getAnnotation(ToolInstallationPageObject.class).installer()));
     }
 
-    public static <T extends ToolInstallation> T addTool(Jenkins jenkins, Class<T> type, String pathPrefix, Runnable action) {
+    public static <T extends ToolInstallation> T addTool(
+            Jenkins jenkins, Class<T> type, String pathPrefix, Runnable action) {
         final ConfigurablePageObject page = ensureConfigPage(jenkins);
 
         String path = page.createPageArea(pathPrefix, action);
@@ -89,19 +93,21 @@ public abstract class ToolInstallation extends PageAreaImpl {
         return page.newInstance(type, jenkins, path);
     }
 
-    public static <T extends ToolInstallation> void installTool(Jenkins jenkins, Class<T> type, String name, String version) {
+    public static <T extends ToolInstallation> void installTool(
+            Jenkins jenkins, Class<T> type, String name, String version) {
         waitForUpdates(jenkins, type);
 
         ConfigurablePageObject tools = ensureConfigPage(jenkins);
         T toolInstallation = addTool(jenkins, type);
         toolInstallation.name.set(name);
-        if(version != null) {
+        if (version != null) {
             toolInstallation.installVersion(version);
         }
         tools.save();
     }
 
-    public static <T extends ToolInstallation> void installTool(Jenkins jenkins, Class<T> type, String name, String version, String pathPrefix, Runnable action) {
+    public static <T extends ToolInstallation> void installTool(
+            Jenkins jenkins, Class<T> type, String name, String version, String pathPrefix, Runnable action) {
         waitForUpdates(jenkins, type);
 
         ConfigurablePageObject tools = ensureConfigPage(jenkins);
@@ -113,7 +119,8 @@ public abstract class ToolInstallation extends PageAreaImpl {
 
     public static ConfigurablePageObject ensureConfigPage(Jenkins jenkins) {
         ConfigurablePageObject configPage = getPageObject(jenkins);
-        boolean onConfigPage = jenkins.getCurrentUrl().equals(configPage.getConfigUrl().toString());
+        boolean onConfigPage =
+                jenkins.getCurrentUrl().equals(configPage.getConfigUrl().toString());
         if (!onConfigPage) {
             configPage.configure();
         }
@@ -125,7 +132,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
     }
 
     protected static ConfigurablePageObject getPageObject(Jenkins jenkins) {
-       return new GlobalToolConfig(jenkins);
+        return new GlobalToolConfig(jenkins);
     }
 
     @Override
@@ -154,30 +161,25 @@ public abstract class ToolInstallation extends PageAreaImpl {
             home.deleteOnExit();
 
             if (SystemUtils.IS_OS_UNIX) {
-                final String path = new CommandBuilder("which", binary).popen().asText().trim();
-                final String code = String.format(
-                        "#!/bin/sh\nexport %s=\nexec %s \"$@\"\n",
-                        homeEnvName, path
-                );
+                final String path =
+                        new CommandBuilder("which", binary).popen().asText().trim();
+                final String code = String.format("#!/bin/sh\nexport %s=\nexec %s \"$@\"\n", homeEnvName, path);
 
                 final File command = new File(home, "bin/" + binary);
                 FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
-            }
-            else {
-                String path = new CommandBuilder("where.exe", binary).popen().asText().trim();
+            } else {
+                String path =
+                        new CommandBuilder("where.exe", binary).popen().asText().trim();
                 // where will return all matches and we only want the first.
                 path = path.replaceAll("\r\n.*", "");
-                final String code = String.format("set %s=\r\ncall %s %%*\r\n",
-                                                  homeEnvName, path
-                                          );
+                final String code = String.format("set %s=\r\ncall %s %%*\r\n", homeEnvName, path);
                 final File command = new File(home, "bin/" + binary + ".cmd");
                 FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
             }
             return home.getAbsolutePath();
-        }
-        catch (IOException | InterruptedException ex) {
+        } catch (IOException | InterruptedException ex) {
             throw new Error(ex);
         }
     }

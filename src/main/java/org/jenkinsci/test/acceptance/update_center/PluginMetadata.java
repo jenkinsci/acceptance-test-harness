@@ -45,8 +45,7 @@ public class PluginMetadata {
             @JsonProperty("gav") String gav,
             @JsonProperty("version") String version,
             @JsonProperty("requiredCore") String requiredCore,
-            @JsonProperty("dependencies") List<Dependency> dependencies
-    ) {
+            @JsonProperty("dependencies") List<Dependency> dependencies) {
         this.name = name;
         this.gav = gav;
         this.version = version;
@@ -97,7 +96,9 @@ public class PluginMetadata {
     }
 
     public PluginMetadata withVersion(@NonNull String v) {
-        if (v == null) throw new IllegalArgumentException();
+        if (v == null) {
+            throw new IllegalArgumentException();
+        }
         String newGav = gav.replaceAll("\\b" + Pattern.quote(version) + "\\b", v);
         return new VersionOverride(name, newGav, v, requiredCore, dependencies);
     }
@@ -121,7 +122,8 @@ public class PluginMetadata {
 
     public static final class VersionOverride extends ModifyingMetadata {
 
-        public VersionOverride(String name, String gav, String version, String requiredCore, List<Dependency> dependencies) {
+        public VersionOverride(
+                String name, String gav, String version, String requiredCore, List<Dependency> dependencies) {
             super(name, gav, version, requiredCore, dependencies);
         }
     }
@@ -150,9 +152,9 @@ public class PluginMetadata {
                 }
                 String version = trimVersion(fullVersion);
                 String requiredCore = main.getValue("Jenkins-Version");
-                String gav = main.getValue("Group-Id")+":"+name+":"+version;
+                String gav = main.getValue("Group-Id") + ":" + name + ":" + version;
                 String dep = main.getValue("Plugin-Dependencies");
-                if (dep!=null) {
+                if (dep != null) {
                     for (String token : dep.split(",")) {
                         try {
                             dependencies.add(new Dependency(token));
@@ -164,13 +166,17 @@ public class PluginMetadata {
 
                 return new LocalOverride(name, gav, version, requiredCore, dependencies, jpi);
             } catch (IOException e) {
-                throw new AssertionError("Failed to parse metadata of "+jpi,e);
+                throw new AssertionError("Failed to parse metadata of " + jpi, e);
             }
         }
 
         public LocalOverride(
-                String name, String gav, String version, String requiredCore, List<Dependency> dependencies, File override
-        ) {
+                String name,
+                String gav,
+                String version,
+                String requiredCore,
+                List<Dependency> dependencies,
+                File override) {
             super(name, gav, version, requiredCore, dependencies);
             this.override = override;
         }
@@ -181,10 +187,7 @@ public class PluginMetadata {
          */
         private static String trimVersion(@NonNull String version) {
             int idx = version.indexOf(" ");
-            return idx > 0
-                ? version.substring(0, idx)
-                : version
-            ;
+            return idx > 0 ? version.substring(0, idx) : version;
         }
 
         @Override
@@ -201,9 +204,10 @@ public class PluginMetadata {
     /**
      * Metadata that alters what is coming from the update center. All modifications *must* use a subclass of this.
      */
-    public static abstract class ModifyingMetadata extends PluginMetadata {
+    public abstract static class ModifyingMetadata extends PluginMetadata {
 
-        public ModifyingMetadata(String name, String gav, String version, String requiredCore, List<Dependency> dependencies) {
+        public ModifyingMetadata(
+                String name, String gav, String version, String requiredCore, List<Dependency> dependencies) {
             super(name, gav, version, requiredCore, dependencies);
         }
 

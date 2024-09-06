@@ -11,7 +11,11 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Artifact;
+import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +31,7 @@ public class ArtifactsTest extends AbstractJUnitTest {
 
     @Inject
     private SlaveController slaveController;
+
     private FreeStyleJob job;
     private Slave slave;
 
@@ -46,13 +51,11 @@ public class ArtifactsTest extends AbstractJUnitTest {
         job.configure();
         job.setLabelExpression(slave.getName());
         if (SystemUtils.IS_OS_WINDOWS) {
-            job.addBatchStep("fsutil file createnew " + LARGE_FILE_GB + "GB-%BUILD_NUMBER%-file.txt " + (LARGE_FILE_GB * 1000 * 1000) + "\n" +
-                             "dir");
-        }
-        else {
-            job.addShellStep("#!/bin/bash\n" +
-                             "dd if=/dev/zero of=" + LARGE_FILE_GB + "GB-${BUILD_NUMBER}-file.txt bs=" + LARGE_FILE_GB + "M count=1000\n" +
-                             "ls -l");
+            job.addBatchStep("fsutil file createnew " + LARGE_FILE_GB + "GB-%BUILD_NUMBER%-file.txt "
+                    + (LARGE_FILE_GB * 1000 * 1000) + "\n" + "dir");
+        } else {
+            job.addShellStep("#!/bin/bash\n" + "dd if=/dev/zero of=" + LARGE_FILE_GB + "GB-${BUILD_NUMBER}-file.txt bs="
+                    + LARGE_FILE_GB + "M count=1000\n" + "ls -l");
         }
         ArtifactArchiver archiver = job.addPublisher(ArtifactArchiver.class);
         archiver.includes("*-file.txt");
@@ -73,19 +76,16 @@ public class ArtifactsTest extends AbstractJUnitTest {
         job.configure();
         job.setLabelExpression(slave.getName());
         if (SystemUtils.IS_OS_WINDOWS) {
-            job.addBatchStep("del /F /Q job*.txt\n" + 
-                             "for /l %%x in (1, 1, " + NO_SMALL_FILES +") do fsutil file createnew job-%BUILD_NUMBER%-file-%%x.txt 1000\n" +
-                             "dir");
+            job.addBatchStep("del /F /Q job*.txt\n" + "for /l %%x in (1, 1, " + NO_SMALL_FILES
+                    + ") do fsutil file createnew job-%BUILD_NUMBER%-file-%%x.txt 1000\n" + "dir");
 
-        }
-        else {
-            job.addShellStep("#!/bin/bash\n" +
-                    "rm ./job*.txt\n" +
-                    "for i in {1.." + NO_SMALL_FILES + "}\n" +
-                    "do\n" +
-                    " dd if=/dev/zero of=job-${BUILD_NUMBER}-file-$i.txt bs=1k count=1\n" +
-                    "done\n" +
-                    "ls -l");
+        } else {
+            job.addShellStep("#!/bin/bash\n" + "rm ./job*.txt\n"
+                    + "for i in {1.."
+                    + NO_SMALL_FILES + "}\n" + "do\n"
+                    + " dd if=/dev/zero of=job-${BUILD_NUMBER}-file-$i.txt bs=1k count=1\n"
+                    + "done\n"
+                    + "ls -l");
         }
         ArtifactArchiver archiver = job.addPublisher(ArtifactArchiver.class);
         archiver.includes("*-file*.txt");

@@ -22,12 +22,12 @@ import org.junit.runners.model.Statement;
  * and {@link org.jenkinsci.test.acceptance.po.PageArea} to use "path" based navigation.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Inherited
 @Documented
 @RuleAnnotation(value = WithInstallWizard.RuleImpl.class, priority = -10) // Run before Jenkins startup
 public @interface WithInstallWizard {
-    
+
     class RuleImpl implements TestRule {
         @Inject
         JenkinsController controller;
@@ -43,11 +43,14 @@ public @interface WithInstallWizard {
                 }
 
                 private void enableWizard(WithInstallWizard n) {
-                    if (n==null) return;
+                    if (n == null) {
+                        return;
+                    }
                     if (controller instanceof LocalController) {
                         ((LocalController) controller).setRunInstallWizard(true);
                     } else {
-                        throw new AssumptionViolatedException("Testing the setup wizard is only supported if a LocalController is in use. Test will be skipped.");
+                        throw new AssumptionViolatedException(
+                                "Testing the setup wizard is only supported if a LocalController is in use. Test will be skipped.");
                     }
                 }
             };

@@ -61,10 +61,16 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
 
         server.url.set("http://localhost:4898/blabla");
         server.testConnectionButton.click();
-        waitFor(hasContent(Pattern.compile("Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")));
+        waitFor(
+                hasContent(
+                        Pattern.compile(
+                                "Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")));
     }
 
-    @Test @WithPlugins("maven-plugin") @Ignore @Issue("JENKINS-66791")
+    @Test
+    @WithPlugins("maven-plugin")
+    @Ignore
+    @Issue("JENKINS-66791")
     public void maven_integration() {
         MavenInstallation.installSomeMaven(jenkins);
         final ArtifactoryContainer artifactory = artifactoryContainer.get();
@@ -88,7 +94,10 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
         assertThat(log, containsRegexp("Deploying build (info|descriptor) to: " + artifactory.getURL() + "/api/build"));
     }
 
-    @Test @WithPlugins("gradle") @Ignore @Issue("JENKINS-39323")
+    @Test
+    @WithPlugins("gradle")
+    @Ignore
+    @Issue("JENKINS-39323")
     public void gradle_integration() {
         final ArtifactoryContainer artifactory = artifactoryContainer.get();
         waitForArtifactory(artifactory);
@@ -134,7 +143,7 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
                 try {
                     String s = IOUtils.toString(artifactory.getPingURL().openStream(), StandardCharsets.UTF_8);
                     return s.contains("OK");
-                } catch (IOException e) {//catching IOException when server in not fully up and retuning 503
+                } catch (IOException e) { // catching IOException when server in not fully up and retuning 503
                     return null;
                 }
             }

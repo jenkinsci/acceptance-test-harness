@@ -23,7 +23,13 @@
  */
 package org.jenkinsci.test.acceptance.plugins.html_publisher;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 @Describable("Publish HTML reports")
 public class HtmlPublisher extends AbstractStep implements PostBuildStep {
@@ -32,7 +38,8 @@ public class HtmlPublisher extends AbstractStep implements PostBuildStep {
     }
 
     public Report addDir(String dir) {
-        String path = createPageArea("reportTargets", () -> control("repeatable-add").click());
+        String path =
+                createPageArea("reportTargets", () -> control("repeatable-add").click());
         Report report = new Report(parent, path);
         report.dir.set(dir);
         return report;

@@ -23,7 +23,13 @@ import org.openqa.selenium.WebElement;
  * @author Kohsuke Kawaguchi
  */
 public class Build extends ContainerPageObject {
-    public enum Result {SUCCESS, UNSTABLE, FAILURE, ABORTED, NOT_BUILT}
+    public enum Result {
+        SUCCESS,
+        UNSTABLE,
+        FAILURE,
+        ABORTED,
+        NOT_BUILT
+    }
 
     public final Job job;
 
@@ -67,7 +73,8 @@ public class Build extends ContainerPageObject {
     }
 
     public Build waitUntilStarted(int timeout) {
-        waitFor().withMessage("Next build of %s is started", job)
+        waitFor()
+                .withMessage("Next build of %s is started", job)
                 .withTimeout(Duration.ofSeconds(timeout))
                 .until(this::hasStarted);
         return this;
@@ -99,7 +106,8 @@ public class Build extends ContainerPageObject {
         // one can see what the build is doing
         visit("console");
 
-        waitFor().withMessage("Build %s is finished", this)
+        waitFor()
+                .withMessage("Build %s is finished", this)
                 .withTimeout(Duration.ofSeconds(timeout))
                 .until(new Wait.Predicate<Boolean>() {
                     @Override
@@ -111,7 +119,7 @@ public class Build extends ContainerPageObject {
                     public String diagnose(Throwable lastException, String message) {
                         return "Console output:\n" + Build.this.getConsole() + "\n";
                     }
-        });
+                });
         return this;
     }
 
@@ -202,10 +210,8 @@ public class Build extends ContainerPageObject {
     public List<Artifact> getArtifacts() {
         JsonNode data = getJson("tree=artifacts[*]").get("artifacts");
         List<Artifact> list = new LinkedList<>();
-        for (JsonNode e: data) {
-            list.add(getArtifact(
-                    e.get("relativePath").asText()
-            ));
+        for (JsonNode e : data) {
+            list.add(getArtifact(e.get("relativePath").asText()));
         }
         return list;
     }
@@ -244,9 +250,10 @@ public class Build extends ContainerPageObject {
 
             @Override
             public void describeMismatchSafely(Build item, Description dsc) {
-                dsc.appendText("was ").appendText(item.getResult())
-                        .appendText(". Console output:\n").appendText(getConsole())
-                ;
+                dsc.appendText("was ")
+                        .appendText(item.getResult())
+                        .appendText(". Console output:\n")
+                        .appendText(getConsole());
             }
         };
     }
@@ -319,10 +326,16 @@ public class Build extends ContainerPageObject {
 
     @Override
     public boolean equals(Object other) {
-        if (other == null) return false;
-        if (this == other) return true;
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
 
-        if (!(other instanceof Build)) return false;
+        if (!(other instanceof Build)) {
+            return false;
+        }
 
         Build rhs = (Build) other;
         // There is a problem comparing jobs for equality as there is no nice

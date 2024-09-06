@@ -20,5 +20,4 @@ public class UserPwdCredential extends BaseStandardCredentials {
     public UserPwdCredential(PageArea area, String relativePath) {
         super(area, relativePath);
     }
-
 }

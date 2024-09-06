@@ -36,7 +36,8 @@ import org.openqa.selenium.WebElement;
 
 public class PluginManagerTest extends AbstractJUnitTest {
 
-    @Test @Issue("JENKINS-36239")
+    @Test
+    @Issue("JENKINS-36239")
     public void reproduce() throws Exception {
         PluginManager pm = jenkins.getPluginManager();
         pm.checkForUpdates();

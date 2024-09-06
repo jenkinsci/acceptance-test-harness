@@ -16,6 +16,7 @@ public class LogParserGlobalConfig extends PageAreaImpl {
      * Repeatable-add Button.
      */
     private final Control addButton = control("repeatable-add");
+
     private final String rulePrefix;
 
     public static LogParserGlobalConfig getInstance(JenkinsConfig context) {

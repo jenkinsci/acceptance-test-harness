@@ -25,7 +25,6 @@ public class LatestBuildsPortlet extends AbstractDashboardViewPortlet {
      */
     public static final int NUMBER_OF_BUILDS = 10;
 
-
     /**
      * Constructs a new latest builds portlet.
      *

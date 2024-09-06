@@ -66,7 +66,8 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
             return context.getJenkins();
         }
         // TODO try to find the real Jenkins root according to the owner of this object, via breadcrumb
-        // Alternately, Job could have a method to get Jenkins by appending ../../ to its own URL, if not in a folder (need a separate method to find folder owner, but that needs its own page object too)
+        // Alternately, Job could have a method to get Jenkins by appending ../../ to its own URL, if not in a folder
+        // (need a separate method to find folder owner, but that needs its own page object too)
         return injector.getInstance(Jenkins.class);
     }
 
@@ -90,8 +91,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     public URL url(String rel) {
         try {
             return new URL(url, rel);
-        }
-        catch (MalformedURLException e) {
+        } catch (MalformedURLException e) {
             throw new AssertionError(e);
         }
     }
@@ -140,27 +140,33 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
      * @return The surrounding path of the area, exception thrown when not able to find out.
      */
     public @NonNull String createPageArea(final String pathPrefix, Runnable action) throws TimeoutException {
-        assert pathPrefix.startsWith("/"): "Path not absolute: " + pathPrefix;
+        assert pathPrefix.startsWith("/") : "Path not absolute: " + pathPrefix;
         final By by = PageObject.by.areaPath(pathPrefix);
         final List<String> existing = extractPaths(all(by));
         final int existingSize = existing.size();
         action.run();
 
         return waitFor().withTimeout(Duration.ofSeconds(10)).until(new Function<CapybaraPortingLayer, String>() {
-            @Nullable @Override public String apply(@Nullable CapybaraPortingLayer input) {
+            @Nullable
+            @Override
+            public String apply(@Nullable CapybaraPortingLayer input) {
                 List<String> current = extractPaths(all(by));
                 int size = current.size();
-                if (size == existingSize) return null; // Have not appeared yet
+                if (size == existingSize) {
+                    return null; // Have not appeared yet
+                }
                 if (size == existingSize + 1) { // Appeared
                     current.removeAll(existing);
                     assert current.size() == 1 : "Path mismatch. Existing: " + existing + "; filtered: " + current;
                     return current.get(0);
                 }
 
-                throw new AssertionError(String.format("Number of elements was %d, now is %d: %s", existingSize, size, current));
+                throw new AssertionError(
+                        String.format("Number of elements was %d, now is %d: %s", existingSize, size, current));
             }
 
-            @Override public String toString() {
+            @Override
+            public String toString() {
                 return "Page area to appear: " + by;
             }
         });

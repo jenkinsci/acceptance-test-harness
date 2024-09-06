@@ -68,7 +68,6 @@ public class JobFiltersArea extends PageAreaImpl {
         includeRegex.set(regex);
     }
 
-
     /**
      * Provides a collection of all possible filter types.
      *
@@ -107,6 +106,4 @@ public class JobFiltersArea extends PageAreaImpl {
             return caption;
         }
     }
-
-
 }

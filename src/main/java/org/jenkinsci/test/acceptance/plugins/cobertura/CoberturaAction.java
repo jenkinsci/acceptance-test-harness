@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 public class CoberturaAction extends ContainerPageObject {
     private final ContainerPageObject parent;
 
-    public CoberturaAction(ContainerPageObject parent) {// Build or Job
+    public CoberturaAction(ContainerPageObject parent) { // Build or Job
         super(parent, parent.url("cobertura/"));
         this.parent = parent;
     }
@@ -41,6 +41,6 @@ public class CoberturaAction extends ContainerPageObject {
 
     private int readInt(String xpath) {
         open();
-        return Integer.parseInt(find(by.xpath(xpath)).getText().replace("%",""));
+        return Integer.parseInt(find(by.xpath(xpath)).getText().replace("%", ""));
     }
 }

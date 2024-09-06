@@ -39,7 +39,8 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * jenkins.war. Subject under test.
      */
-    @Inject @Named("jenkins.war")
+    @Inject
+    @Named("jenkins.war")
     protected /*final*/ File war;
 
     @Inject
@@ -74,25 +75,25 @@ public abstract class LocalController extends JenkinsController implements LogLi
     /**
      * Partial implementation of {@link JenkinsControllerFactory} for subtypes.
      */
-    public static abstract class LocalFactoryImpl implements JenkinsControllerFactory {
-    }
+    public abstract static class LocalFactoryImpl implements JenkinsControllerFactory {}
 
     protected LocalController(Injector i) {
         super(i);
         try {
-            jenkinsHome = Files.createTempDirectory(new File(WORKSPACE).toPath(), "jenkins" + "home").toFile();
+            jenkinsHome = Files.createTempDirectory(new File(WORKSPACE).toPath(), "jenkins" + "home")
+                    .toFile();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create a temp file",e);
+            throw new RuntimeException("Failed to create a temp file", e);
         }
 
-        this.logFile = new File(this.jenkinsHome.getParentFile(), this.jenkinsHome.getName()+".log");
+        this.logFile = new File(this.jenkinsHome.getParentFile(), this.jenkinsHome.getName() + ".log");
     }
 
     @Override
     public void postConstruct(Injector injector) {
         super.postConstruct(injector);
 
-        File pluginDir = new File(jenkinsHome,"plugins");
+        File pluginDir = new File(jenkinsHome, "plugins");
         pluginDir.mkdirs();
 
         File givenPluginDir = null;
@@ -142,7 +143,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             if (clean && jenkinsHome.isDirectory()) {
                 FileUtils.cleanDirectory(jenkinsHome);
             }
-            if (!jenkinsHome.isDirectory() && ! jenkinsHome.mkdirs()) {
+            if (!jenkinsHome.isDirectory() && !jenkinsHome.mkdirs()) {
                 throw new IOException("Could not create directory: " + jenkinsHome);
             }
             File template = File.createTempFile("template", ".dat");
@@ -187,10 +188,10 @@ public abstract class LocalController extends JenkinsController implements LogLi
         this.process = startProcess();
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        logWatcher = new JenkinsLogWatcher(getLogId(),process,logFile, getLogPrinter());
+        logWatcher = new JenkinsLogWatcher(getLogId(), process, logFile, getLogPrinter());
         logWatcher.start();
         try {
-            LOGGER.info("Waiting for Jenkins (" + getLogId() + ") to become running in "+ this);
+            LOGGER.info("Waiting for Jenkins (" + getLogId() + ") to become running in " + this);
             this.logWatcher.waitTillReady();
             onReady();
         } catch (Exception e) {
@@ -243,12 +244,12 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
             System.out.println("Commencing interactive debugging. Browser session was kept open.");
             // Broken in current surefire
-//            out.println("Press return to proceed.");
-//            try {
-//                new BufferedReader(new InputStreamReader(System.in)).readLine();
-//            } catch (IOException e) {
-//                throw new Error(e);
-//            }
+            //            out.println("Press return to proceed.");
+            //            try {
+            //                new BufferedReader(new InputStreamReader(System.in)).readLine();
+            //            } catch (IOException e) {
+            //                throw new Error(e);
+            //            }
 
             synchronized (this) {
                 try {
@@ -258,18 +259,17 @@ public abstract class LocalController extends JenkinsController implements LogLi
                 }
             }
         }
-
     }
 
     @Override
-    public void tearDown(){
+    public void tearDown() {
         try {
             if (jenkinsHome.exists()) {
                 FileUtils.forceDelete(jenkinsHome);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Cleaning up temporary JENKINS_HOME failed, retrying in 5 sec.", e);
-            //maybe process is shutting down, wait for a sec then try again
+            // maybe process is shutting down, wait for a sec then try again
             try {
                 Thread.sleep(5000);
                 if (jenkinsHome.exists()) {
@@ -313,10 +313,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
         File log = diagnostics.touch("jenkins.log");
         Files.copy(logFile.toPath(), log.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-        throw (cause instanceof IOException)
-                ? (IOException) cause
-                : new IOException("Jenkins failed to load", cause)
-        ;
+        throw (cause instanceof IOException) ? (IOException) cause : new IOException("Jenkins failed to load", cause);
     }
 
     private @CheckForNull String getThreaddump() {
@@ -369,7 +366,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
 
     /**
      * Set the flag to run the install wizard.
-     * 
+     *
      * @param runInstallWizard - {@code true} to run the install wizard
      */
     public void setRunInstallWizard(boolean runInstallWizard) {

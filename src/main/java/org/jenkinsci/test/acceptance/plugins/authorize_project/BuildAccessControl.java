@@ -11,5 +11,4 @@ public class BuildAccessControl extends PageAreaImpl {
     public BuildAccessControl(GlobalSecurityConfig security, String path) {
         super(security, path);
     }
-
 }

@@ -35,7 +35,7 @@ public class SecurityDisabler extends PageObject {
     public final Jenkins jenkins;
 
     public SecurityDisabler(Jenkins jenkins) {
-        super(jenkins.injector,jenkins.url("configureSecurity"));
+        super(jenkins.injector, jenkins.url("configureSecurity"));
         this.jenkins = jenkins;
     }
 
@@ -45,7 +45,7 @@ public class SecurityDisabler extends PageObject {
     public void stopUsingSecurityAndSave() {
         open();
         Control use = control("/useSecurity");
-        if(use.resolve().isSelected()) {
+        if (use.resolve().isSelected()) {
             use.click();
             control("/Submit").click();
         }

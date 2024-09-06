@@ -59,7 +59,9 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
     @Inject
     private MailhogProvider mailhogProvider;
 
-    private HttpClient client = HttpClientBuilder.create().setRedirectStrategy(new LaxRedirectStrategy()).build();
+    private HttpClient client = HttpClientBuilder.create()
+            .setRedirectStrategy(new LaxRedirectStrategy())
+            .build();
 
     @Test
     public void testUrlInEmail() throws IOException, MessagingException {
@@ -94,24 +96,25 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
         if (pm.installationStatus(new PluginSpec("blueocean")) == PluginManager.InstallationStatus.NOT_INSTALLED) {
             doTestRedirects();
         } else {
-            throw new AssumptionViolatedException("Test redirect with Blue Ocean has already be tested by other test on this suite");
+            throw new AssumptionViolatedException(
+                    "Test redirect with Blue Ocean has already be tested by other test on this suite");
         }
     }
 
-
     private String scriptForMailerPipeline(boolean makeFail) {
         String status = makeFail ? "FAILURE" : "SUCCESS";
-        return String.format("node {\n" +
-                "    try {\n" +
-                "      error \" Failure\"" +
-                "    } catch (any) {\n" +
-                "        currentBuild.result = '%s'\n" +
-                "        if (currentBuild.result == 'FAILURE')\n" +
-                "            throw any\n" +
-                "    } finally {\n" +
-                "        step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'dev@example.com', sendToIndividuals: true])\n" +
-                "    }\n" +
-                "}", status);
+        return String.format(
+                "node {\n" + "    try {\n"
+                        + "      error \" Failure\""
+                        + "    } catch (any) {\n"
+                        + "        currentBuild.result = '%s'\n"
+                        + "        if (currentBuild.result == 'FAILURE')\n"
+                        + "            throw any\n"
+                        + "    } finally {\n"
+                        + "        step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: 'dev@example.com', sendToIndividuals: true])\n"
+                        + "    }\n"
+                        + "}",
+                status);
     }
 
     private void makeJobSucceed(WorkflowJob job) {
@@ -132,16 +135,18 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
     }
 
     private String[] getURLS(String jobName) {
-        return jenkins.runScript("" +
-                "import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider\n" +
-                "import org.jenkinsci.plugins.workflow.job.*\n" +
-                "\n" +
-                "WorkflowJob p = new WorkflowJob(Jenkins.getInstance(),\"%s\");\n" +
-                "WorkflowRun build = new WorkflowRun(p);\n" +
-                "\n" +
-                "print DisplayURLProvider.get().getRunURL(build)\n" +
-                "print \";\" + DisplayURLProvider.get().getJobURL(p)\n" +
-                "print \";\" + DisplayURLProvider.get().getChangesURL(build)", jobName).split(";");
+        return jenkins.runScript(
+                        "" + "import org.jenkinsci.plugins.displayurlapi.DisplayURLProvider\n"
+                                + "import org.jenkinsci.plugins.workflow.job.*\n"
+                                + "\n"
+                                + "WorkflowJob p = new WorkflowJob(Jenkins.getInstance(),\"%s\");\n"
+                                + "WorkflowRun build = new WorkflowRun(p);\n"
+                                + "\n"
+                                + "print DisplayURLProvider.get().getRunURL(build)\n"
+                                + "print \";\" + DisplayURLProvider.get().getJobURL(p)\n"
+                                + "print \";\" + DisplayURLProvider.get().getChangesURL(build)",
+                        jobName)
+                .split(";");
     }
 
     private void assertRedirect(String s) throws IOException {
@@ -155,5 +160,4 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
             response.close();
         }
     }
-
 }

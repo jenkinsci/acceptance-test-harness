@@ -36,16 +36,16 @@ public class Slave extends Node {
      * @see #isOnline
      */
     public Slave waitUntilOnline() {
-        waitFor().withMessage("Agent is online")
-                .until(new Wait.Predicate<Boolean>() {
-                    @Override public Boolean apply() {
-                        return isOnline();
-                    }
+        waitFor().withMessage("Agent is online").until(new Wait.Predicate<Boolean>() {
+            @Override
+            public Boolean apply() {
+                return isOnline();
+            }
 
-                    @Override
-                    public String diagnose(Throwable lastException, String message) {
-                        return "Agent log:\n" + getLog();
-                    }
+            @Override
+            public String diagnose(Throwable lastException, String message) {
+                return "Agent log:\n" + getLog();
+            }
         });
         return this;
     }
@@ -65,23 +65,22 @@ public class Slave extends Node {
 
     public static Matcher<Slave> runBuildsInOrder(final Job... jobs) {
         return new Matcher<Slave>("agent run build in order: %s", Joiner.on(' ').join(jobs)) {
-            @Override public boolean matchesSafely(Slave slave) {
+            @Override
+            public boolean matchesSafely(Slave slave) {
                 slave.visit("builds");
-                //Jobs table may take a little to be populated, give it some time
+                // Jobs table may take a little to be populated, give it some time
                 slave.elasticSleep(2000);
-                String list = slave.find(by.id("projectStatus")).getText()
-                        .replaceAll("\n", "");
+                String list = slave.find(by.id("projectStatus")).getText().replaceAll("\n", "");
 
                 StringBuilder sb = new StringBuilder(".*");
-                for (Job j: jobs) {
+                for (Job j : jobs) {
                     sb.append(j.name);
                     sb.append(".*");
                 }
 
                 return Pattern.compile(sb.toString(), Pattern.DOTALL)
                         .matcher(list)
-                        .matches()
-                ;
+                        .matches();
             }
         };
     }
@@ -95,7 +94,7 @@ public class Slave extends Node {
 
     public void markOffline(String message) {
 
-        if(isOnline()) {
+        if (isOnline()) {
             open();
             clickButton("Mark this node temporarily offline");
 
@@ -109,10 +108,9 @@ public class Slave extends Node {
     /**
      * If the agent has been marked offline, this method will bring it up again
      */
+    public void markOnline() {
 
-    public void markOnline(){
-
-        if(isOffline()) {
+        if (isOffline()) {
             open();
             clickButton("Bring this node back online");
         }

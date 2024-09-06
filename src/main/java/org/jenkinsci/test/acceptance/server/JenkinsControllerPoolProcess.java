@@ -55,10 +55,11 @@ public class JenkinsControllerPoolProcess {
 
     private BlockingQueue<QueueItem> queue;
 
-    @Option(name="-n",usage="Number of instances to pool. >=1.")
-    public int n = Integer.getInteger("count",1);
+    @Option(name = "-n", usage = "Number of instances to pool. >=1.")
+    public int n = Integer.getInteger("count", 1);
 
-    @Inject @Named("socket")
+    @Inject
+    @Named("socket")
     public File socket;
 
     private final ExecutorService executors = Executors.newCachedThreadPool();
@@ -80,10 +81,11 @@ public class JenkinsControllerPoolProcess {
     public void run() throws Exception {
         // there's always one process that's waiting to be in the queue,
         // so the actual length of the queue has to be n-1.
-        if (n==1)
+        if (n == 1) {
             queue = new SynchronousQueue<>();
-        else
-            queue = new LinkedBlockingDeque<>(n-1);
+        } else {
+            queue = new LinkedBlockingDeque<>(n - 1);
+        }
 
         World w = World.get();
         w.getInjector().injectMembers(this);
@@ -99,9 +101,9 @@ public class JenkinsControllerPoolProcess {
                     FallbackConfig f = new FallbackConfig();
                     while (true) {
                         lifecycle.startTestScope();
-                        JenkinsController c = f.createController(injector,factories);
+                        JenkinsController c = f.createController(injector, factories);
                         c.start();
-                        queue.put(new QueueItem(c,lifecycle.export()));
+                        queue.put(new QueueItem(c, lifecycle.export()));
                     }
                 } catch (Throwable e) {
                     // fail fatally
@@ -112,7 +114,6 @@ public class JenkinsControllerPoolProcess {
         }.start();
 
         processServerSocket();
-
     }
 
     /**
@@ -133,7 +134,7 @@ public class JenkinsControllerPoolProcess {
                 System.out.println("Accepted");
                 final QueueItem qi = queue.take();
                 final JenkinsController j = qi.controller;
-                System.out.println("Handed out "+j.getUrl());
+                System.out.println("Handed out " + j.getUrl());
 
                 new Thread("Connection handling thread") {
                     @Override
@@ -143,8 +144,9 @@ public class JenkinsControllerPoolProcess {
                             processConnection(c, j);
                         } finally {
                             TestCleaner scope = injector.getInstance(TestCleaner.class);
-                            if (scope!=null)
+                            if (scope != null) {
                                 scope.performCleanUp();
+                            }
                             lifecycle.endTestScope();
                         }
                     }
@@ -159,12 +161,13 @@ public class JenkinsControllerPoolProcess {
     private void processConnection(UnixSocketChannel c, JenkinsController j) {
         try {
             try {
-                try (
-                    InputStream in = ChannelStream.in(c);
-                    OutputStream out = ChannelStream.out(c)) {
+                try (InputStream in = ChannelStream.in(c);
+                        OutputStream out = ChannelStream.out(c)) {
 
-                    Channel ch = new ChannelBuilder(j.getLogId(), executors).withMode(Mode.BINARY).build(in, out);
-                    ch.setProperty("controller", ch.export(IJenkinsController.class,j));
+                    Channel ch = new ChannelBuilder(j.getLogId(), executors)
+                            .withMode(Mode.BINARY)
+                            .build(in, out);
+                    ch.setProperty("controller", ch.export(IJenkinsController.class, j));
 
                     // wait for the connection to be shut down
                     ch.join();
@@ -175,7 +178,7 @@ public class JenkinsControllerPoolProcess {
                 j.tearDown();
                 c.close();
             }
-        } catch (IOException|InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

@@ -22,5 +22,4 @@ public class ServerCredentialMapping extends PageAreaImpl {
     public void credentialsId(final String credId) {
         this.credentialsId.select(credId);
     }
-
 }

@@ -21,17 +21,17 @@ public class ViewsMixIn extends MixIn {
     public <T extends View> T create(final Class<T> type, String name) {
 
         final Finder<WebElement> finder = new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
+            @Override
+            protected WebElement find(String caption) {
                 return outer.find(by.radioButton(caption));
             }
         };
 
         // Views contributed by plugins might need some extra time to appear
-        WebElement typeRadio = waitFor().withTimeout(Duration.ofSeconds(5))
-                .until(() -> {
-                    visit("newView");
-                    return findCaption(type, finder);
-                });
+        WebElement typeRadio = waitFor().withTimeout(Duration.ofSeconds(5)).until(() -> {
+            visit("newView");
+            return findCaption(type, finder);
+        });
 
         typeRadio.click();
 

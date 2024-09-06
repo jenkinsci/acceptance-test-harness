@@ -35,20 +35,31 @@ public class GerritTriggerJob extends PageObject {
 
     public final Jenkins jenkins;
     public final Control event = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger");
-    public final Control server = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/serverName");
-    public final Control advanced = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/advanced-button");
-    public final Control passVerif = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildSuccessfulVerifiedValue");
-    public final Control failVerif = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildFailedVerifiedValue");
-    public final Control passRev = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildSuccessfulCodeReviewValue");
-    public final Control failRev = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildFailedCodeReviewValue");
-    public final Control project = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/pattern");
-    public final Control branch = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/branches/pattern");
-    public final Control triggerOnAdd = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/hetero-list-add[triggerOnEvents]");
-    public final Control commentAddedTriggerVerdictCategory = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/triggerOnEvents/verdictCategory");
-    public final Control commentAddedTriggerApprovalValue = control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/triggerOnEvents/commentAddedTriggerApprovalValue");
+    public final Control server =
+            control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/serverName");
+    public final Control advanced =
+            control("/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/advanced-button");
+    public final Control passVerif = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildSuccessfulVerifiedValue");
+    public final Control failVerif = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildFailedVerifiedValue");
+    public final Control passRev = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildSuccessfulCodeReviewValue");
+    public final Control failRev = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritBuildFailedCodeReviewValue");
+    public final Control project = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/pattern");
+    public final Control branch = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/gerritProjects/branches/pattern");
+    public final Control triggerOnAdd = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/hetero-list-add[triggerOnEvents]");
+    public final Control commentAddedTriggerVerdictCategory = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/triggerOnEvents/verdictCategory");
+    public final Control commentAddedTriggerApprovalValue = control(
+            "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/triggerOnEvents/commentAddedTriggerApprovalValue");
 
-    public GerritTriggerJob(Jenkins jenkins,String jobName) {
-        super(jenkins.injector,jenkins.url("job/"+jobName+"/configure"));
+    public GerritTriggerJob(Jenkins jenkins, String jobName) {
+        super(jenkins.injector, jenkins.url("job/" + jobName + "/configure"));
         this.jenkins = jenkins;
     }
 
@@ -57,12 +68,17 @@ public class GerritTriggerJob extends PageObject {
      * @param eventToTriggerOn event to trigger on
      */
     public void saveTestJobConfig(EventToTriggerOn eventToTriggerOn, String serverName, String projectName) {
-        if(!event.resolve().isSelected()) event.click();
+        if (!event.resolve().isSelected()) {
+            event.click();
+        }
         server.select(serverName);
 
         String displayName = eventToTriggerOn.getDisplayName();
         switch (eventToTriggerOn) {
-            case PatchsetCreated: case RefUpdated: case ChangeMerged: case DraftPublished:
+            case PatchsetCreated:
+            case RefUpdated:
+            case ChangeMerged:
+            case DraftPublished:
                 triggerOnAdd.selectDropdownMenu(displayName);
                 break;
 
@@ -89,12 +105,14 @@ public class GerritTriggerJob extends PageObject {
      * represents the options of events to trigger on for Gerrit-Trigger plugin
      */
     public enum EventToTriggerOn {
-        ChangeAbandoned("Change Abandoned"), ChangeMerged("Change Merged"), ChangeRestored(
-            "Change Restored"),
-        CommentAdded("Comment Added"), CommentAddedContainsRegularExpression(
-            "Comment Added Contains Regular Expression"),
-        DraftPublished("Draft Published"), PatchsetCreated("Patchset Created"), RefUpdated(
-            "Ref Updated");
+        ChangeAbandoned("Change Abandoned"),
+        ChangeMerged("Change Merged"),
+        ChangeRestored("Change Restored"),
+        CommentAdded("Comment Added"),
+        CommentAddedContainsRegularExpression("Comment Added Contains Regular Expression"),
+        DraftPublished("Draft Published"),
+        PatchsetCreated("Patchset Created"),
+        RefUpdated("Ref Updated");
         private String displayName;
 
         EventToTriggerOn(String displayName) {

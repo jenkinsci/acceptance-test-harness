@@ -5,9 +5,17 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.*;
-import static org.jenkinsci.test.acceptance.po.View.*;
-import static org.junit.Assert.*;
+import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.hasElement;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
+import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
+import static org.jenkinsci.test.acceptance.po.View.containsColumnHeader;
+import static org.jenkinsci.test.acceptance.po.View.containsColumnHeaderTooltip;
+import static org.jenkinsci.test.acceptance.po.View.containsJob;
+import static org.jenkinsci.test.acceptance.po.View.containsLinkWithTooltip;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +69,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies that all configurations, done on the job configuration page,
      * are saved correctly.
      */
-    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
+    @Test
+    @WithPlugins({"matrix-auth", "mock-security-realm"})
     public void should_save_configurations() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
@@ -79,20 +88,20 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         seedJob.configure();
         assertThat(jobDsl.isLookOnFilesystem(), is(true));
-        assertThat(jobDsl.getScriptTargetsOnFilesystem(), equalTo(new String[]{"JobTest.groovy", "AnotherJobTest.groovy"}));
+        assertThat(
+                jobDsl.getScriptTargetsOnFilesystem(),
+                equalTo(new String[] {"JobTest.groovy", "AnotherJobTest.groovy"}));
         assertThat(jobDsl.isIgnoreMissingFiles(), is(true));
         assertThat(jobDsl.isIgnoreExisting(), is(true));
         assertThat(jobDsl.getRemovedJobAction(), equalTo(JobDslRemovedJobAction.DELETE));
         assertThat(jobDsl.getRemovedViewAction(), equalTo(JobDslRemovedViewAction.DELETE));
         assertThat(jobDsl.getRemovedConfigFilesAction(), equalTo(JobDslRemovedConfigFilesAction.DELETE));
         assertThat(jobDsl.getLookupStrategy(), equalTo(JobDslLookupStrategy.SEED_JOB));
-        assertThat(jobDsl.getAdditionalClasspath(), equalTo(new String[]{"path1", "path2"}));
+        assertThat(jobDsl.getAdditionalClasspath(), equalTo(new String[] {"path1", "path2"}));
         assertThat(jobDsl.isFailOnMissingPlugin(), is(true));
         assertThat(jobDsl.isUnstableOnDeprecation(), is(true));
 
-        String script = "job('JobDSL-Test') {\n" +
-                        "    description('This is a description.')\n" +
-                        "}";
+        String script = "job('JobDSL-Test') {\n" + "    description('This is a description.')\n" + "}";
         jobDsl.setScript(script);
         seedJob.save();
 
@@ -115,7 +124,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * in this folder. If the order is changed, the build will fail because the
      * folder was not created yet.
      */
-    @Test @WithPlugins("cloudbees-folder")
+    @Test
+    @WithPlugins("cloudbees-folder")
     public void should_look_on_filesystem() {
         FreeStyleJob seedJob = createSeedJob();
         seedJob.copyResource(resource("/job_dsl_plugin/CreateFolder.groovy"));
@@ -124,8 +134,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         jobDsl.setScriptTargetsOnFilesystem("CreateFolder.groovy", "CreateJobInFolder.groovy");
         seedJob.save();
         Build build = seedJob.scheduleBuild().shouldSucceed();
-        Pattern expected = Pattern.compile("Processing DSL script CreateFolder.groovy(\\s*)" +
-                                           "Processing DSL script CreateJobInFolder.groovy");
+        Pattern expected = Pattern.compile(
+                "Processing DSL script CreateFolder.groovy(\\s*)" + "Processing DSL script CreateJobInFolder.groovy");
         assertThat(build.getConsole(), containsRegexp(expected));
     }
 
@@ -155,17 +165,13 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void should_ignore_existing_jobs() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("job('Existing_Job') {\n" +
-                         "   description('Existing description');\n" +
-                         "}");
+        jobDsl.setScript("job('Existing_Job') {\n" + "   description('Existing description');\n" + "}");
         seedJob.save();
         seedJob.scheduleBuild().shouldSucceed();
         FreeStyleJob existingJob = getJob("Existing_Job");
 
         seedJob.configure(() -> {
-            jobDsl.setScript("job('Existing_Job') {\n" +
-                             "   description('This is a description');\n" +
-                             "}");
+            jobDsl.setScript("job('Existing_Job') {\n" + "   description('This is a description');\n" + "}");
             jobDsl.setIgnoreExisting(true);
         });
         Build build = seedJob.scheduleBuild().shouldSucceed();
@@ -190,17 +196,13 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void should_ignore_existing_views() {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("listView('Existing_View') {\n" +
-                         "   description('Existing description');\n" +
-                         "}");
+        jobDsl.setScript("listView('Existing_View') {\n" + "   description('Existing description');\n" + "}");
         seedJob.save();
         seedJob.scheduleBuild().shouldSucceed();
         ListView existingView = getView("Existing_View");
 
         seedJob.configure(() -> {
-            jobDsl.setScript("listView('Existing_View') {\n" +
-                    "   description('This is a description');\n" +
-                    "}");
+            jobDsl.setScript("listView('Existing_View') {\n" + "   description('This is a description');\n" + "}");
             jobDsl.setIgnoreExisting(true);
         });
         Build build = seedJob.scheduleBuild().shouldSucceed();
@@ -239,7 +241,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void should_disable_removed_jobs() {
         FreeStyleJob seedJob = executeRemovedJobAction(JobDslRemovedJobAction.DISABLE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
-        Pattern expected = Pattern.compile("Unreferenced items:(\\s*)GeneratedJob[{]name='Old_Job'}(\\s*)Disabled items:(\\s*)GeneratedJob[{]name='Old_Job'}");
+        Pattern expected = Pattern.compile(
+                "Unreferenced items:(\\s*)GeneratedJob[{]name='Old_Job'}(\\s*)Disabled items:(\\s*)GeneratedJob[{]name='Old_Job'}");
         assertThat(build.getConsole(), containsRegexp(expected));
 
         FreeStyleJob oldJob = getJob("Old_Job");
@@ -255,7 +258,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void should_delete_removed_jobs() {
         FreeStyleJob seedJob = executeRemovedJobAction(JobDslRemovedJobAction.DELETE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
-        Pattern expected = Pattern.compile("Unreferenced items:(\\s*)GeneratedJob[{]name='Old_Job'}(\\s*)Removed items:(\\s*)GeneratedJob[{]name='Old_Job'}");
+        Pattern expected = Pattern.compile(
+                "Unreferenced items:(\\s*)GeneratedJob[{]name='Old_Job'}(\\s*)Removed items:(\\s*)GeneratedJob[{]name='Old_Job'}");
         assertThat(build.getConsole(), containsRegexp(expected));
 
         FreeStyleJob oldJob = getJob("Old_Job");
@@ -304,7 +308,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void should_delete_removed_views() {
         FreeStyleJob seedJob = executeRemovedViewAction(JobDslRemovedViewAction.DELETE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
-        Pattern expected = Pattern.compile("Unreferenced views:(\\s*)GeneratedView[{]name='Old_View'}(\\s*)Removed views:(\\s*)GeneratedView[{]name='Old_View'}");
+        Pattern expected = Pattern.compile(
+                "Unreferenced views:(\\s*)GeneratedView[{]name='Old_View'}(\\s*)Removed views:(\\s*)GeneratedView[{]name='Old_View'}");
         assertThat(build.getConsole(), containsRegexp(expected));
 
         ListView oldView = getView("Old_View");
@@ -334,11 +339,13 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies whether a previously generated config file will be ignored if it
      * is not referenced anymore.
      */
-    @Test @WithPlugins("config-file-provider")
+    @Test
+    @WithPlugins("config-file-provider")
     public void should_ignore_removed_config_files() {
         FreeStyleJob seedJob = executeRemovedConfigFilesAction(JobDslRemovedConfigFilesAction.IGNORE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
-        Pattern expected = Pattern.compile("Unreferenced config files:(\\s*)GeneratedConfigFile[{]name='Old_Config_File', id='123456789'}");
+        Pattern expected = Pattern.compile(
+                "Unreferenced config files:(\\s*)GeneratedConfigFile[{]name='Old_Config_File', id='123456789'}");
         assertThat(build.getConsole(), containsRegexp(expected));
 
         ConfigFileProvider configFileProvider = new ConfigFileProvider(jenkins);
@@ -351,11 +358,13 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies whether a previously generated config file will be deleted if it
      * is not referenced anymore.
      */
-    @Test @WithPlugins("config-file-provider")
+    @Test
+    @WithPlugins("config-file-provider")
     public void should_delete_removed_config_files() {
         FreeStyleJob seedJob = executeRemovedConfigFilesAction(JobDslRemovedConfigFilesAction.DELETE);
         Build build = seedJob.scheduleBuild().shouldSucceed();
-        Pattern expected = Pattern.compile("Unreferenced config files:(\\s*)GeneratedConfigFile[{]name='Old_Config_File', id='123456789'}");
+        Pattern expected = Pattern.compile(
+                "Unreferenced config files:(\\s*)GeneratedConfigFile[{]name='Old_Config_File', id='123456789'}");
         assertThat(build.getConsole(), containsRegexp(expected));
 
         ConfigFileProvider configFileProvider = new ConfigFileProvider(jenkins);
@@ -372,28 +381,26 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     private FreeStyleJob executeRemovedConfigFilesAction(JobDslRemovedConfigFilesAction action) {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("configFiles {\n" +
-                "  customConfig {\n" +
-                "    id('123456789')\n" +
-                "    name('Old_Config_File')\n" +
-                "    comment('This is a comment.')\n" +
-                "    content('My Content')\n" +
-                "    providerId('')\n" +
-                "  }\n" +
-                "}");
+        jobDsl.setScript("configFiles {\n" + "  customConfig {\n"
+                + "    id('123456789')\n"
+                + "    name('Old_Config_File')\n"
+                + "    comment('This is a comment.')\n"
+                + "    content('My Content')\n"
+                + "    providerId('')\n"
+                + "  }\n"
+                + "}");
         seedJob.save();
         seedJob.scheduleBuild().shouldSucceed();
 
         seedJob.configure(() -> {
-            jobDsl.setScript("configFiles {\n" +
-                    "  customConfig {\n" +
-                    "    id('456789123')\n" +
-                    "    name('New_Config_File')\n" +
-                    "    comment('This is a comment.')\n" +
-                    "    content('My Content')\n" +
-                    "    providerId('')\n" +
-                    "  }\n" +
-                    "}");
+            jobDsl.setScript("configFiles {\n" + "  customConfig {\n"
+                    + "    id('456789123')\n"
+                    + "    name('New_Config_File')\n"
+                    + "    comment('This is a comment.')\n"
+                    + "    content('My Content')\n"
+                    + "    providerId('')\n"
+                    + "  }\n"
+                    + "}");
             jobDsl.setRemovedConfigFilesAction(action);
         });
         return seedJob;
@@ -404,7 +411,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Even if the seed job is located in a folder, a new generated job is relative
      * to the Jenkins root.
      */
-    @Test @WithPlugins("cloudbees-folder")
+    @Test
+    @WithPlugins("cloudbees-folder")
     public void should_lookup_at_jenkins_root() {
         Folder folder = runSeedJobInFolder("New_Job", JobDslLookupStrategy.JENKINS_ROOT);
         FreeStyleJob newJob = getJob("New_Job");
@@ -417,7 +425,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies that relative job names are interpreted relative to the folder in which
      * the seed job is located.
      */
-    @Test @WithPlugins("cloudbees-folder")
+    @Test
+    @WithPlugins("cloudbees-folder")
     public void should_lookup_at_seed_job() {
         Folder folder = runSeedJobInFolder("New_Job", JobDslLookupStrategy.SEED_JOB);
         FreeStyleJob newJob = getJob("New_Job");
@@ -460,11 +469,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("job('New_Job') {\n" +
-                         "   publishers {\n" +
-                         "      chucknorris()\n" +
-                         "   }\n" +
-                         "}");
+        jobDsl.setScript("job('New_Job') {\n" + "   publishers {\n" + "      chucknorris()\n" + "   }\n" + "}");
         seedJob.save();
         Build build = seedJob.scheduleBuild().shouldBeUnstable();
         assertThat(build.getConsole(), containsString("plugin 'chucknorris' needs to be installed"));
@@ -485,14 +490,13 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.copyResource(resource("/job_dsl_plugin/MyUtilities.groovy"), "src/utilities/MyUtilities.groovy");
         seedJob.copyResource(resource("/job_dsl_plugin/Utility.jar"));
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("import utilities.MyUtilities\n" +
-                         "import utilities.MyUtilitiesFromJar\n" +
-                         "\n" +
-                         "def job_folder = job('job_src_folder')\n" +
-                         "MyUtilities.addDescription(job_folder)\n" +
-                         "\n" +
-                         "def job_jar = job('job_jar_file')\n" +
-                         "MyUtilitiesFromJar.addDescription(job_jar)");
+        jobDsl.setScript("import utilities.MyUtilities\n" + "import utilities.MyUtilitiesFromJar\n"
+                + "\n"
+                + "def job_folder = job('job_src_folder')\n"
+                + "MyUtilities.addDescription(job_folder)\n"
+                + "\n"
+                + "def job_jar = job('job_jar_file')\n"
+                + "MyUtilitiesFromJar.addDescription(job_jar)");
 
         seedJob.save();
         Build build = seedJob.scheduleBuild().shouldFail();
@@ -518,7 +522,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * wont be executed, because they are not approved.
      * If script security for Job DSL scripts is disabled, the script can be executed.
      */
-    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
+    @Test
+    @WithPlugins({"matrix-auth", "mock-security-realm"})
     public void should_use_script_security() {
         GlobalSecurityConfig sc = setUpSecurity();
 
@@ -554,7 +559,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * security is enabled, it is not possible to import Groovy classes from the
      * workspace.
      */
-    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
+    @Test
+    @WithPlugins({"matrix-auth", "mock-security-realm"})
     public void should_disallow_importing_groovy_classes_when_script_security_enabled() {
         GlobalSecurityConfig sc = setUpSecurity();
 
@@ -562,10 +568,9 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         FreeStyleJob seedJob = createSeedJob();
         seedJob.copyResource(resource("/job_dsl_plugin/MyUtilities.groovy"), "utilities/MyUtilities.groovy");
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("import utilities.MyUtilities\n" +
-                "\n" +
-                "def newJob = job('New_Job')\n" +
-                "MyUtilities.addDescription(newJob)");
+        jobDsl.setScript("import utilities.MyUtilities\n" + "\n"
+                + "def newJob = job('New_Job')\n"
+                + "MyUtilities.addDescription(newJob)");
 
         seedJob.save();
 
@@ -585,7 +590,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Administrators can approve scripts in the 'Script Approval' of the
      * 'Manage Jenkins' area. Approved scripts can be executed.
      */
-    @Test @WithPlugins({"matrix-auth","mock-security-realm"})
+    @Test
+    @WithPlugins({"matrix-auth", "mock-security-realm"})
     public void should_use_script_approval() {
         setUpSecurity();
 
@@ -623,7 +629,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * scripts saved by non administrators can run in a Groovy sandbox
      * without approval. All Job DSL methods are whitelisted by default.
      */
-    @Test @WithPlugins({"matrix-auth","mock-security-realm","authorize-project"})
+    @Test
+    @WithPlugins({"matrix-auth", "mock-security-realm", "authorize-project"})
     public void should_use_grooy_sandbox_whitelisted_content() {
         GlobalSecurityConfig sc = setUpSecurity();
         runBuildAsUserWhoTriggered(sc);
@@ -653,7 +660,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Administrators can approve this content in the 'Script Approval' of the
      * 'Manage Jenkins' area. Approved scripts can be executed.
      */
-    @Test @WithPlugins({"matrix-auth","mock-security-realm","authorize-project"})
+    @Test
+    @WithPlugins({"matrix-auth", "mock-security-realm", "authorize-project"})
     public void should_use_grooy_sandbox_no_whitelisted_content() {
         GlobalSecurityConfig sc = setUpSecurity();
         runBuildAsUserWhoTriggered(sc);
@@ -661,18 +669,18 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin(USER);
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("def jobNames = [\"First_Job\", \"Second_Job\"].toArray()\n" +
-                         "\n" +
-                         "for(name in jobNames) {\n" +
-                         "  job(name)\n" +
-                         "}");
+        jobDsl.setScript("def jobNames = [\"First_Job\", \"Second_Job\"].toArray()\n" + "\n"
+                + "for(name in jobNames) {\n"
+                + "  job(name)\n"
+                + "}");
         jobDsl.setUseSandbox(true);
         seedJob.save();
 
         // Build should fail because script contains not whitelisted content.
         // It don't matter that the script runs in sandbox.
         Build build = seedJob.scheduleBuild().shouldFail();
-        assertThat(build.getConsole(), containsString("Scripts not permitted to use method java.util.Collection toArray"));
+        assertThat(
+                build.getConsole(), containsString("Scripts not permitted to use method java.util.Collection toArray"));
 
         jenkins.logout();
         jenkins.login().doLogin(ADMIN);
@@ -692,7 +700,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
      * Verifies that Groovy sandbox can only used if 'Access Control for Builds'
      * is configured. The DSL job needs to run as a particular user.
      */
-    @Test @WithPlugins({"matrix-auth","mock-security-realm","authorize-project"})
+    @Test
+    @WithPlugins({"matrix-auth", "mock-security-realm", "authorize-project"})
     public void should_run_grooy_sandbox_as_particular_user() {
         GlobalSecurityConfig sc = setUpSecurity();
 
@@ -706,7 +715,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         // Build should fail because script runs in sandbox but no particular user is specified
         // which should run the build
         Build build = seedJob.scheduleBuild().shouldFail();
-        assertThat(build.getConsole(), containsString("You must configure the DSL job to run as a specific user in order to use the Groovy sandbox"));
+        assertThat(
+                build.getConsole(),
+                containsString(
+                        "You must configure the DSL job to run as a specific user in order to use the Groovy sandbox"));
 
         runBuildAsUserWhoTriggered(sc);
 
@@ -769,26 +781,31 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         String jobLabel = "!ubuntu";
         String linkUrl = "https://jenkins.io";
         String linkLabel = "jenkins.io";
-        String jobDslScript = String.format(IOUtil.multiline(
-                "job('%s') {",
-                "    description('%s');",
-                "    displayName('%s');",
-                "    label('%s');",
-                "    customWorkspace('/tmp/custom-workspace')",
-                "    environmentVariables(varname: 'varval')",
-                "    properties {",
-                "        sidebarLinks {",
-                "            link('%s', '%s')",
-                "        }",
-                "    };",
-                "    wrappers { buildName('custom-name') }",
-                "    concurrentBuild();",
-                "    steps {",
-                "        shell('sleep 10')",
-                "    }",
-                "}"),
-                jobName, jobDescription, jobDisplayName, jobLabel, linkUrl, linkLabel
-        );
+        String jobDslScript = String.format(
+                IOUtil.multiline(
+                        "job('%s') {",
+                        "    description('%s');",
+                        "    displayName('%s');",
+                        "    label('%s');",
+                        "    customWorkspace('/tmp/custom-workspace')",
+                        "    environmentVariables(varname: 'varval')",
+                        "    properties {",
+                        "        sidebarLinks {",
+                        "            link('%s', '%s')",
+                        "        }",
+                        "    };",
+                        "    wrappers { buildName('custom-name') }",
+                        "    concurrentBuild();",
+                        "    steps {",
+                        "        shell('sleep 10')",
+                        "    }",
+                        "}"),
+                jobName,
+                jobDescription,
+                jobDisplayName,
+                jobLabel,
+                linkUrl,
+                linkLabel);
         Job seed = createSeedJobWithJobDsl(jobDslScript);
 
         seed.startBuild().shouldSucceed();
@@ -893,20 +910,19 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     @Test
     public void are_columns_created() {
         Job job1 = createJobAndBuild();
-        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
-                "  columns {\n" +
-                "    status()\n" +
-                "    weather()\n" +
-                "    name()\n" +
-                "    lastSuccess()\n" +
-                "    lastFailure()\n" +
-                "    lastDuration()\n" +
-                "    buildButton()\n" +
-                "  }\n" +
-                "  jobs{\n" +
-                "    name('"+job1.name+"')\n" +
-                "  }\n" +
-                "}";
+        String jobDslScript = "listView('" + LIST_VIEW_NAME + "') {\n" + "  columns {\n"
+                + "    status()\n"
+                + "    weather()\n"
+                + "    name()\n"
+                + "    lastSuccess()\n"
+                + "    lastFailure()\n"
+                + "    lastDuration()\n"
+                + "    buildButton()\n"
+                + "  }\n"
+                + "  jobs{\n"
+                + "    name('"
+                + job1.name + "')\n" + "  }\n"
+                + "}";
         View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
         assertThat(view, containsColumnHeaderTooltip("Status of the last build"));
         assertThat(view, containsColumnHeaderTooltip("Weather report showing aggregated status of recent builds"));
@@ -928,15 +944,15 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void status_filter_only_shows_enabled_jobs() {
         List<Job> jobs = createAmountOfJobs(3, false);
         Job jobDisabled = createDisabledJob();
-        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
-                "  statusFilter(StatusFilter.ENABLED)\n" +
-                "  columns {\n" +
-                "    name()\n" +
-                "  }\n" +
-                "  jobs {\n" +
-                "    names('"+jobs.get(0).name+"', '"+jobs.get(1).name+"', '"+jobs.get(2).name+"', '"+jobDisabled.name+"')\n" +
-                "  }\n" +
-                "}";
+        String jobDslScript = "listView('" + LIST_VIEW_NAME + "') {\n" + "  statusFilter(StatusFilter.ENABLED)\n"
+                + "  columns {\n"
+                + "    name()\n"
+                + "  }\n"
+                + "  jobs {\n"
+                + "    names('"
+                + jobs.get(0).name + "', '" + jobs.get(1).name + "', '" + jobs.get(2).name + "', '" + jobDisabled.name
+                + "')\n" + "  }\n"
+                + "}";
         View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
         assertThat(view, not(containsJob(jobDisabled)));
         assertThat(view, containsJob(jobs.get(0)));
@@ -952,14 +968,13 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
         Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
         List<Job> jobs = createAmountOfJobs(2, false);
-        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
-                "  columns {\n" +
-                "    name()\n" +
-                "  }\n" +
-                "  jobs {\n" +
-                "    regex('"+LIST_VIEW_REGEX+"')\n" +
-                "  }\n" +
-                "}";
+        String jobDslScript = "listView('" + LIST_VIEW_NAME + "') {\n" + "  columns {\n"
+                + "    name()\n"
+                + "  }\n"
+                + "  jobs {\n"
+                + "    regex('"
+                + LIST_VIEW_REGEX + "')\n" + "  }\n"
+                + "}";
         View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
         assertThat(view, containsJob(job1));
         assertThat(view, containsJob(job2));
@@ -977,21 +992,20 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         Job job1 = createJobWithName(EXAMPLE_DISABLED_NAME);
         Job job2 = createJobWithName(EXAMPLE_ENABLED_NAME);
         List<Job> jobs = createAmountOfJobs(2, false);
-        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
-                "  columns {\n" +
-                "    name()\n" +
-                "  }\n" +
-                "  jobs{\n" +
-                "    names('"+job1.name+"','"+job2.name+"','"+jobs.get(0).name+"','"+jobs.get(1).name+"')\n" +
-                "  }\n" +
-                "  jobFilters {\n" +
-                "        regex {\n" +
-                "            matchType(MatchType.EXCLUDE_MATCHED)\n" +
-                "            matchValue(RegexMatchValue.NAME)\n" +
-                "            regex('"+LIST_VIEW_REGEX+"')\n" +
-                "        }\n" +
-                "  }\n" +
-                "}";
+        String jobDslScript = "listView('" + LIST_VIEW_NAME + "') {\n" + "  columns {\n"
+                + "    name()\n"
+                + "  }\n"
+                + "  jobs{\n"
+                + "    names('"
+                + job1.name + "','" + job2.name + "','" + jobs.get(0).name + "','" + jobs.get(1).name + "')\n" + "  }\n"
+                + "  jobFilters {\n"
+                + "        regex {\n"
+                + "            matchType(MatchType.EXCLUDE_MATCHED)\n"
+                + "            matchValue(RegexMatchValue.NAME)\n"
+                + "            regex('"
+                + LIST_VIEW_REGEX + "')\n" + "        }\n"
+                + "  }\n"
+                + "}";
         View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
         assertThat(view, not(containsJob(job1)));
         assertThat(view, not(containsJob(job2)));
@@ -1007,19 +1021,19 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     @WithPlugins("view-job-filters")
     public void job_filters_most_recent_3_jobs() {
         List<Job> jobs = createAmountOfJobs(5, true);
-        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
-                "  columns {\n" +
-                "    name()\n" +
-                "  }\n" +
-                "  jobs{\n" +
-                "    names('"+jobs.get(0).name+"','"+jobs.get(1).name+"','"+jobs.get(2).name+"','"+jobs.get(3).name+"','"+jobs.get(4).name+"')\n" +
-                "  }\n" +
-                "  jobFilters {\n" +
-                "    mostRecent {\n" +
-                "      maxToInclude(3)\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String jobDslScript = "listView('" + LIST_VIEW_NAME + "') {\n" + "  columns {\n"
+                + "    name()\n"
+                + "  }\n"
+                + "  jobs{\n"
+                + "    names('"
+                + jobs.get(0).name + "','" + jobs.get(1).name + "','" + jobs.get(2).name + "','" + jobs.get(3).name
+                + "','" + jobs.get(4).name + "')\n" + "  }\n"
+                + "  jobFilters {\n"
+                + "    mostRecent {\n"
+                + "      maxToInclude(3)\n"
+                + "    }\n"
+                + "  }\n"
+                + "}";
         View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
         assertThat(view, not(containsJob(jobs.get(0))));
         assertThat(view, not(containsJob(jobs.get(1))));
@@ -1037,18 +1051,17 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     public void job_filters_include_failed_jobs_built_at_least_once() {
         List<Job> jobs = createAmountOfJobs(2, true);
         Job job3 = createJobThatFails();
-        String jobDslScript = "listView('"+ LIST_VIEW_NAME +"') {\n" +
-                "  columns {\n" +
-                "    name()\n" +
-                "  }\n" +
-                "  jobFilters {\n" +
-                "    buildTrend {\n" +
-                "      matchType(MatchType.INCLUDE_MATCHED)\n" +
-                "      buildCountType(BuildCountType.AT_LEAST_ONE)\n" +
-                "      status(BuildStatusType.FAILED)\n" +
-                "    }\n" +
-                "  }\n" +
-                "}";
+        String jobDslScript = "listView('" + LIST_VIEW_NAME + "') {\n" + "  columns {\n"
+                + "    name()\n"
+                + "  }\n"
+                + "  jobFilters {\n"
+                + "    buildTrend {\n"
+                + "      matchType(MatchType.INCLUDE_MATCHED)\n"
+                + "      buildCountType(BuildCountType.AT_LEAST_ONE)\n"
+                + "      status(BuildStatusType.FAILED)\n"
+                + "    }\n"
+                + "  }\n"
+                + "}";
         View view = openNewlyCreatedListView(jobDslScript, LIST_VIEW_NAME);
         assertThat(view, not(containsJob(jobs.get(0))));
         assertThat(view, not(containsJob(jobs.get(1))));
@@ -1068,8 +1081,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
             Job job;
             if (isBuilt) {
                 job = createJobAndBuild();
-            }
-            else {
+            } else {
                 job = jenkins.jobs.create(FreeStyleJob.class);
             }
             jobs.add(job);
@@ -1171,7 +1183,7 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         GlobalSecurityConfig sc = new GlobalSecurityConfig(jenkins);
         sc.configure(() -> {
             MockSecurityRealm ms = sc.useRealm(MockSecurityRealm.class);
-            ms.configure(ADMIN,USER);
+            ms.configure(ADMIN, USER);
 
             MatrixAuthorizationStrategy mas = sc.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
 
@@ -1195,7 +1207,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     private void runBuildAsUserWhoTriggered(GlobalSecurityConfig sc) {
         jenkins.login().doLogin(ADMIN);
         sc.configure(() -> {
-            final ProjectDefaultBuildAccessControl control = sc.addBuildAccessControl(ProjectDefaultBuildAccessControl.class);
+            final ProjectDefaultBuildAccessControl control =
+                    sc.addBuildAccessControl(ProjectDefaultBuildAccessControl.class);
             control.runAsUserWhoTriggered();
 
             MatrixAuthorizationStrategy mas = sc.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);

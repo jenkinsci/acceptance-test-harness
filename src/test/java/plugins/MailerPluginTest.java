@@ -22,6 +22,7 @@ import org.junit.experimental.categories.Category;
 public class MailerPluginTest extends AbstractJUnitTest {
     @Inject
     private MailhogProvider mailhogProvider;
+
     private MailhogContainer mailhog;
 
     @Inject

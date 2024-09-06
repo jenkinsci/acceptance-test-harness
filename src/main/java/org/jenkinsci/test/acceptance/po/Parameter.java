@@ -53,7 +53,8 @@ public abstract class Parameter extends PageAreaImpl {
             return super.path(rel);
         }
 
-        String np = driver.findElement(by.xpath("//input[@name='name' and @value='%s']", name)).getAttribute("path");
+        String np = driver.findElement(by.xpath("//input[@name='name' and @value='%s']", name))
+                .getAttribute("path");
         String path = np.replaceAll("/name$", "") + "/" + rel;
         return by.path(path);
     }

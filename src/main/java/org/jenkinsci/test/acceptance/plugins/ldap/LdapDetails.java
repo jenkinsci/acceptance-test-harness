@@ -39,7 +39,6 @@ public class LdapDetails<T extends LdapGroupMembershipStrategy> {
         this.setHostWithPort(host + ":" + port);
     }
 
-
     public String getHost() {
         return host;
     }
@@ -279,7 +278,7 @@ public class LdapDetails<T extends LdapGroupMembershipStrategy> {
     public void setEnvironmentVariables(List<LdapEnvironmentVariable> environmentVariables) {
         this.environmentVariables = environmentVariables;
     }
-    
+
     public void addEnvironmentVariable(LdapEnvironmentVariable environmentVariable) {
         if (this.environmentVariables == null) {
             this.environmentVariables = new LinkedList<LdapEnvironmentVariable>();

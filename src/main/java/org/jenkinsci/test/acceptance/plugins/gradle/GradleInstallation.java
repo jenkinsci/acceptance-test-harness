@@ -27,7 +27,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@ToolInstallationPageObject(name="Gradle", installer="hudson.plugins.gradle.GradleInstaller")
+@ToolInstallationPageObject(name = "Gradle", installer = "hudson.plugins.gradle.GradleInstaller")
 public class GradleInstallation extends ToolInstallation {
     public GradleInstallation(Jenkins context, String path) {
         super(context, path);

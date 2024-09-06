@@ -17,8 +17,7 @@ public abstract class ClosureScript extends Script {
     private Object delegate;
     private MetaClass delegateMetaClass;
 
-    public ClosureScript() {
-    }
+    public ClosureScript() {}
 
     public ClosureScript(Binding binding) {
         super(binding);
@@ -38,7 +37,7 @@ public abstract class ClosureScript extends Script {
     @Override
     public Object getProperty(String property) {
         try {
-            return delegateMetaClass.getProperty(delegate,property);
+            return delegateMetaClass.getProperty(delegate, property);
         } catch (MissingPropertyException e) {
             return super.getProperty(property);
         }
@@ -47,7 +46,7 @@ public abstract class ClosureScript extends Script {
     @Override
     public void setProperty(String property, Object newValue) {
         try {
-            delegateMetaClass.setProperty(delegate,property,newValue);
+            delegateMetaClass.setProperty(delegate, property, newValue);
         } catch (MissingPropertyException e) {
             super.setProperty(property, newValue);
         }
@@ -58,7 +57,7 @@ public abstract class ClosureScript extends Script {
         try {
             return delegateMetaClass.invokeMethod(delegate, name, args);
         } catch (MissingMethodException e) {
-            return super.invokeMethod(name,args);
+            return super.invokeMethod(name, args);
         }
     }
 }

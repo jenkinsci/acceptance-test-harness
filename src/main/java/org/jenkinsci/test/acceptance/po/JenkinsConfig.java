@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.net.URL;
-
 import org.openqa.selenium.By;
 
 /**
@@ -40,7 +39,7 @@ public class JenkinsConfig extends ConfigurablePageObject {
     public void setJenkinsUrl(String url) {
         control("/jenkins-model-JenkinsLocationConfiguration/url").set(url);
     }
-    
+
     public void setShell(String path) {
         control("/hudson-tasks-Shell/shell").set(path);
     }

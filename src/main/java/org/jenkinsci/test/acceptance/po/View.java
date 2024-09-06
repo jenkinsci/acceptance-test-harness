@@ -2,7 +2,7 @@ package org.jenkinsci.test.acceptance.po;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
@@ -36,7 +36,8 @@ public abstract class View extends ContainerPageObject {
      * Clicks a build button for a job of the specified name.
      */
     public void build(String name) {
-        find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a')]", name)).click();
+        find(by.xpath("//a[contains(@href, '/%s/build?')]/img[contains(@title, 'Schedule a')]", name))
+                .click();
     }
 
     /**
@@ -73,9 +74,11 @@ public abstract class View extends ContainerPageObject {
         return new Matcher<View>("Contains job " + needle.name) {
             @Override
             public boolean matchesSafely(View view) {
-                for (JsonNode job: view.getJson().get("jobs")) {
+                for (JsonNode job : view.getJson().get("jobs")) {
                     String name = job.get("name").asText();
-                    if (needle.name.equals(name)) return true;
+                    if (needle.name.equals(name)) {
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -83,7 +86,7 @@ public abstract class View extends ContainerPageObject {
             @Override
             public void describeMismatchSafely(View view, Description mismatchDescription) {
                 mismatchDescription.appendText("view containing:");
-                for (JsonNode job: view.getJson().get("jobs")) {
+                for (JsonNode job : view.getJson().get("jobs")) {
                     String name = job.get("name").asText();
                     mismatchDescription.appendText(" ").appendText(name);
                 }
@@ -106,11 +109,13 @@ public abstract class View extends ContainerPageObject {
         descrElem.sendKeys(description);
     }
 
-    public String getFormName(){
+    @Override
+    public String getFormName() {
         return "viewConfig";
     }
 
-    public String getSubmitButtonText(){
+    @Override
+    public String getSubmitButtonText() {
         return "OK";
     }
 
@@ -118,7 +123,8 @@ public abstract class View extends ContainerPageObject {
         return new Matcher<>("Has description " + description) {
             @Override
             public boolean matchesSafely(View item) {
-                WebElement webElement = item.getElement(By.xpath(String.format("//div[@id='description']/div[text()='%s']", description)));
+                WebElement webElement = item.getElement(
+                        By.xpath(String.format("//div[@id='description']/div[text()='%s']", description)));
                 return webElement != null;
             }
         };
@@ -159,8 +165,7 @@ public abstract class View extends ContainerPageObject {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(
-                        By.xpath(String.format("//span[@class = 'jenkins-visually-hidden'][text() = '%s']", text))
-                );
+                        By.xpath(String.format("//span[@class = 'jenkins-visually-hidden'][text() = '%s']", text)));
                 return webElement != null;
             }
         };
@@ -170,9 +175,7 @@ public abstract class View extends ContainerPageObject {
         return new Matcher<View>("Contains link with tooltip " + text) {
             @Override
             public boolean matchesSafely(View item) {
-                WebElement webElement = item.getElement(
-                        By.cssSelector(String.format("a[tooltip='%s']", text))
-                );
+                WebElement webElement = item.getElement(By.cssSelector(String.format("a[tooltip='%s']", text)));
                 return webElement != null;
             }
         };

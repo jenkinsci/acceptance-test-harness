@@ -40,7 +40,7 @@ public class ActiveDirectoryEnv {
     private String password;
     private String site;
     private String user;
-    private String groupLookupStrategy; 
+    private String groupLookupStrategy;
 
     private ActiveDirectoryEnv() {
         bindDN = System.getenv("adBindDN");
@@ -59,7 +59,7 @@ public class ActiveDirectoryEnv {
     }
 
     public static ActiveDirectoryEnv get() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new ActiveDirectoryEnv();
         }
         return instance;

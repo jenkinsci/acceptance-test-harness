@@ -53,8 +53,7 @@ public class BuildTimeout extends PageAreaImpl {
     public void writeDescription() {
         try {
             control("writingDescription").check();
-        }
-        catch (NoSuchElementException ex) {
+        } catch (NoSuchElementException ex) {
             addAction.click();
             waitFor(by.button("Writing the build description"));
             clickButton("Writing the build description");

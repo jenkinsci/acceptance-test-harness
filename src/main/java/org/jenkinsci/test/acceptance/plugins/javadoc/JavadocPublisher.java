@@ -1,6 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.javadoc;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -13,5 +17,4 @@ public class JavadocPublisher extends AbstractStep implements PostBuildStep {
     public JavadocPublisher(Job parent, String path) {
         super(parent, path);
     }
-
 }

@@ -6,12 +6,15 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Folder;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.openqa.selenium.WebDriver;
 
 public class CredentialsPage extends ConfigurablePageObject {
-    public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')] | " +
-            "//select[contains(@class, 'jenkins-select__input dropdownList')]"));
+    public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')] | "
+            + "//select[contains(@class, 'jenkins-select__input dropdownList')]"));
     private URL configUrl;
     private URL deleteUrl;
 
@@ -47,13 +50,12 @@ public class CredentialsPage extends ConfigurablePageObject {
         return configUrl;
     }
 
-
     public void setConfigUrl(String url) throws MalformedURLException {
-        configUrl = new URL(url+"/update");
-        deleteUrl = new URL(url+"/delete");
+        configUrl = new URL(url + "/update");
+        deleteUrl = new URL(url + "/delete");
     }
 
-    public void create(){
+    public void create() {
         find(by.name("Submit")).click();
         assertThat(driver, not(hasContent("This page expects a form submission")));
     }
@@ -76,6 +78,7 @@ public class CredentialsPage extends ConfigurablePageObject {
         return wd;
     }
 
+    @Override
     public String getFormName() {
         return "update";
     }

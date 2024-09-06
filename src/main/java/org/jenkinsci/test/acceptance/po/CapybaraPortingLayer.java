@@ -50,7 +50,8 @@ public interface CapybaraPortingLayer {
     <T> T waitForCond(Callable<T> block);
 
     /** Wait until a matcher matches. */
-    <MatcherT, SubjectT extends MatcherT> void waitFor(SubjectT item, org.hamcrest.Matcher<MatcherT> matcher, int timeoutSec);
+    <MatcherT, SubjectT extends MatcherT> void waitFor(
+            SubjectT item, org.hamcrest.Matcher<MatcherT> matcher, int timeoutSec);
 
     /**
      * Returns the first visible element that matches the selector.

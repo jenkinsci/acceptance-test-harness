@@ -35,7 +35,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
  */
 @SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
-    public static final String LABEL_TO_INPUT_XPATH = "input | ../input | ../../div/input | ../../input | preceding-sibling::div/input";
+    public static final String LABEL_TO_INPUT_XPATH =
+            "input | ../input | ../../div/input | ../../input | preceding-sibling::div/input";
     /**
      * {@link org.openqa.selenium.WebDriver} that subtypes use to talk to the server.
      */
@@ -115,10 +116,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public <T> Wait<T> waitFor(T subject) {
-        return new Wait<>(subject, time)
-                .pollingEvery(Duration.ofMillis(500))
-                .withTimeout(Duration.ofSeconds(120))
-        ;
+        return new Wait<>(subject, time).pollingEvery(Duration.ofMillis(500)).withTimeout(Duration.ofSeconds(120));
     }
 
     @Override
@@ -131,7 +129,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      */
     @Override
     public WebElement waitFor(final By selector, final int timeoutSec) {
-        return waitFor(this).withMessage("Element matching %s is present", selector)
+        return waitFor(this)
+                .withMessage("Element matching %s is present", selector)
                 .withTimeout(Duration.ofSeconds(timeoutSec))
                 .ignoring(NoSuchElementException.class)
                 .until(() -> find(selector));
@@ -139,7 +138,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     @Override
     public WebElement waitFor(final By selector) {
-        return waitFor(this).withMessage("Element matching %s is present", selector)
+        return waitFor(this)
+                .withMessage("Element matching %s is present", selector)
                 .ignoring(NoSuchElementException.class)
                 .until(() -> find(selector));
     }
@@ -149,24 +149,27 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      * <p>
      * If it times out, an exception will be thrown.
      */
-    @Override @Deprecated
+    @Override
+    @Deprecated
     public <T> T waitForCond(Callable<T> block, int timeoutSec) {
         return waitFor(this).withTimeout(Duration.ofSeconds(timeoutSec)).until(block);
     }
 
-    @Override @Deprecated
+    @Override
+    @Deprecated
     public <T> T waitForCond(Callable<T> block) {
         return waitFor(this).until(block);
     }
 
     @Override
-    public <MatcherT, SubjectT extends MatcherT> void waitFor(SubjectT item, org.hamcrest.Matcher<MatcherT> matcher, final int timeout) {
+    public <MatcherT, SubjectT extends MatcherT> void waitFor(
+            SubjectT item, org.hamcrest.Matcher<MatcherT> matcher, final int timeout) {
         StringDescription desc = new StringDescription();
         matcher.describeTo(desc);
-        waitFor(item).withMessage(desc.toString())
+        waitFor(item)
+                .withMessage(desc.toString())
                 .withTimeout(Duration.ofSeconds(timeout))
-                .until(matcher)
-        ;
+                .until(matcher);
     }
 
     /**
@@ -179,18 +182,22 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public WebElement find(final By selector) {
         try {
             return waitFor().withTimeout(Duration.ofMillis(time.seconds(1))).until(new Callable<WebElement>() {
-                @Override public WebElement call() {
+                @Override
+                public WebElement call() {
                     for (WebElement element : driver.findElements(selector)) {
-                        if (isDisplayed(element)) return element;
+                        if (isDisplayed(element)) {
+                            return element;
+                        }
                     }
                     return null;
                 }
 
-                @Override public String toString() {
+                @Override
+                public String toString() {
                     return "Wait for the element (" + selector + ") to become visible";
                 }
             });
-        } catch (NoSuchElementException|TimeoutException x) {
+        } catch (NoSuchElementException | TimeoutException x) {
             // this is often the best place to set a breakpoint
             // Page url is not present in otherwise verbose message
             String msg = String.format("Unable to locate %s in %s", selector, driver.getCurrentUrl());
@@ -296,11 +303,12 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public void blur(WebElement e) {
         executeScript(
-            "var obj = arguments[0];"
-            + "var ev = document.createEvent('MouseEvents');"
-            + "ev.initEvent('blur', true, false);"
-            + "obj.dispatchEvent(ev);"
-            + "return true;", e);
+                "var obj = arguments[0];"
+                        + "var ev = document.createEvent('MouseEvents');"
+                        + "ev.initEvent('blur', true, false);"
+                        + "obj.dispatchEvent(ev);"
+                        + "return true;",
+                e);
     }
 
     /**
@@ -433,8 +441,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
         Wait<WebDriver> wait = new Wait<>(driver, time)
                 .pollingEvery(Duration.ofMillis(500))
-                .withTimeout(Duration.ofSeconds(timeoutSeconds))
-        ;
+                .withTimeout(Duration.ofSeconds(timeoutSeconds));
         Alert alert = wait.until(ExpectedConditions.alertIsPresent());
         try {
             action.accept(alert);
@@ -502,7 +509,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     protected <T> T findCaption(Class<?> type, Function<String, T> finder) {
         return findCaption(type, new Finder<T>() {
-            @Override protected T find(String caption) {
+            @Override
+            protected T find(String caption) {
                 return finder.apply(caption);
             }
         });
@@ -512,8 +520,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         String[] captions = type.getAnnotation(Describable.class).value();
 
         RuntimeException cause = new NoSuchElementException(
-                "None of the captions exists: " + Joiner.on(", ").join(captions)
-        );
+                "None of the captions exists: " + Joiner.on(", ").join(captions));
         for (String caption : captions) {
             try {
                 T out = call.find(caption);
@@ -529,11 +536,11 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     public static String getPageSource(WebDriver driver) {
-        return (String) ((JavascriptExecutor) driver).executeScript(
-                "return document.getElementsByTagName('html')[0].outerHTML"
-        );
+        return (String) ((JavascriptExecutor) driver)
+                .executeScript("return document.getElementsByTagName('html')[0].outerHTML");
     }
 
+    @Override
     public String getPageSource() {
         return getPageSource(driver);
     }
@@ -551,7 +558,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public Resource resource(String path) {
         final URL resource = getClass().getResource(path);
         if (resource == null) {
-            throw new AssertionError("No such resource " + path + " for " + getClass().getName());
+            throw new AssertionError(
+                    "No such resource " + path + " for " + getClass().getName());
         }
         return new Resource(resource);
     }

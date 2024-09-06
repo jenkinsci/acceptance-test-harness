@@ -8,5 +8,4 @@ import jakarta.inject.Singleton;
  * @author Kohsuke Kawaguchi
  */
 @Singleton
-public class WorldCleaner extends Cleaner {
-}
+public class WorldCleaner extends Cleaner {}

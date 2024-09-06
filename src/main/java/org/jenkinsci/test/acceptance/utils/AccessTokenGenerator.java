@@ -48,25 +48,32 @@ public class AccessTokenGenerator {
         return tokenCache.get(key);
     }
 
-    private ApiTokenResponse generateApiToken(@NonNull URL url, @NonNull Credentials credentials, CloseableHttpClient httpClient, Crumb crumb) throws IOException {
-        HttpPost post = new HttpPost(new URL(url, "me/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken").toExternalForm());
+    private ApiTokenResponse generateApiToken(
+            @NonNull URL url, @NonNull Credentials credentials, CloseableHttpClient httpClient, Crumb crumb)
+            throws IOException {
+        HttpPost post =
+                new HttpPost(new URL(url, "me/descriptorByName/jenkins.security.ApiTokenProperty/generateNewToken")
+                        .toExternalForm());
         post.setHeader(crumb.getCrumbRequestField(), crumb.getCrumb());
         List<NameValuePair> parameters = new ArrayList<>();
         parameters.add(new BasicNameValuePair("newTokenName", "ath-" + System.currentTimeMillis()));
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(parameters, "UTF-8");
         post.setEntity(entity);
-        CloseableHttpResponse postResponse = httpClient.execute(post, HttpUtils.buildHttpClientContext(url, credentials));
+        CloseableHttpResponse postResponse =
+                httpClient.execute(post, HttpUtils.buildHttpClientContext(url, credentials));
         return om.readValue(postResponse.getEntity().getContent(), ApiTokenResponse.class);
     }
 
-    private Crumb getCrumb(@NonNull URL url, @NonNull Credentials credentials, CloseableHttpClient httpClient) throws IOException {
+    private Crumb getCrumb(@NonNull URL url, @NonNull Credentials credentials, CloseableHttpClient httpClient)
+            throws IOException {
         HttpGet get = new HttpGet(new URL(url, "crumbIssuer/api/json").toExternalForm());
         CloseableHttpResponse getResponse = httpClient.execute(get, HttpUtils.buildHttpClientContext(url, credentials));
         int statusCode = getResponse.getStatusLine().getStatusCode();
         if (statusCode == 200) {
             return om.readValue(getResponse.getEntity().getContent(), Crumb.class);
         } else {
-            throw new IOException("Got status code " + statusCode + " while getting a crumb: " + EntityUtils.toString(getResponse.getEntity()));
+            throw new IOException("Got status code " + statusCode + " while getting a crumb: "
+                    + EntityUtils.toString(getResponse.getEntity()));
         }
     }
 
@@ -89,8 +96,12 @@ public class AccessTokenGenerator {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             CacheKey cacheKey = (CacheKey) o;
             return Objects.equals(url, cacheKey.url) && Objects.equals(username, cacheKey.username);
         }

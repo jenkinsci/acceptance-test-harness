@@ -54,10 +54,11 @@ import org.openqa.selenium.WebElement;
 @WithPlugins("maven-plugin")
 @Category(DockerTest.class)
 @WithDocker
-@Since( "2.204.6" )
+@Since("2.204.6")
 public class MavenPluginTest extends AbstractJUnitTest {
 
-    private static final String GENERATE = "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";
+    private static final String GENERATE =
+            "archetype:generate -DarchetypeGroupId=org.apache.maven.archetypes -DgroupId=com.mycompany.app -DartifactId=my-app -Dversion=1.0 -B";
 
     @Inject
     DockerContainerHolder<MailhogContainer> mailhogProvider;
@@ -153,10 +154,10 @@ public class MavenPluginTest extends AbstractJUnitTest {
         Map<String, String> params = new HashMap<>();
         params.put("CMD", "\"C:\\\\System\"");
         params.put("PROPERTY", "C:\\Windows");
-        job.startBuild(params).shouldSucceed()
+        job.startBuild(params)
+                .shouldSucceed()
                 .shouldContainsConsoleOutput("cmdline.property=C:\\\\System")
-                .shouldContainsConsoleOutput("property.property=C:\\\\Windows")
-        ;
+                .shouldContainsConsoleOutput("property.property=C:\\\\Windows");
     }
 
     @Test
@@ -169,18 +170,19 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.goals.set("package");
         job.save();
 
-        job.startBuild().shouldSucceed()
+        job.startBuild()
+                .shouldSucceed()
                 .shouldContainsConsoleOutput("Building root 1.0")
                 .shouldContainsConsoleOutput("Building module_a 2.0")
-                .shouldContainsConsoleOutput("Building module_b 3.0")
-        ;
+                .shouldContainsConsoleOutput("Building module_b 3.0");
 
         assertHasModule(job, "gid$root");
         assertHasModule(job, "gid$module_a");
         assertHasModule(job, "gid$module_b");
     }
 
-    @Test @Issue({"JENKINS-20209", "JENKINS-21045"})
+    @Test
+    @Issue({"JENKINS-20209", "JENKINS-21045"})
     public void send_mail() throws Exception {
         MavenInstallation.installSomeMaven(jenkins);
         MailhogContainer mailhog = mailhogProvider.get();
@@ -194,10 +196,7 @@ public class MavenPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldFail();
 
         mailhog.assertMail(
-                Pattern.compile("Build failed in Jenkins: .* #1"),
-                "root@example.com",
-                Pattern.compile(job.name)
-        );
+                Pattern.compile("Build failed in Jenkins: .* #1"), "root@example.com", Pattern.compile(job.name));
     }
 
     private void assertHasModule(MavenModuleSet job, String name) {

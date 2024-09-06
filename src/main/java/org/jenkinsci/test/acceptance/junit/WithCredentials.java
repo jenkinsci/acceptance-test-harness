@@ -41,7 +41,7 @@ import org.junit.runners.model.Statement;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
-@RuleAnnotation(value=WithCredentials.RuleImpl.class, priority = WithPlugins.PRIORITY + 1) // requires plugins
+@RuleAnnotation(value = WithCredentials.RuleImpl.class, priority = WithPlugins.PRIORITY + 1) // requires plugins
 public @interface WithCredentials {
 
     int USERNAME_PASSWORD = 1;
@@ -64,6 +64,7 @@ public @interface WithCredentials {
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
                 private Jenkins jenkins;
+
                 @Override
                 public void evaluate() throws Throwable {
                     jenkins = injector.getInstance(Jenkins.class);
@@ -80,18 +81,21 @@ public @interface WithCredentials {
                                 if (wp.values().length == 2) {
                                     addUsernamePasswordCredentials(wp.values()[0], wp.values()[1], wp.id());
                                 } else {
-                                    throw new RuntimeException("@WithCredentials: Wrong amount of values. Expected username,password. ");
+                                    throw new RuntimeException(
+                                            "@WithCredentials: Wrong amount of values. Expected username,password. ");
                                 }
                                 break;
                             case SSH_USERNAME_PRIVATE_KEY:
                                 if (wp.values().length == 2) {
                                     addSshUsernamePrivateKeyCredentials(wp.values()[0], wp.values()[1], wp.id());
                                 } else {
-                                    throw new RuntimeException("@WithCredentials: Wrong amount of values. Expected username,sshKeyPath.");
+                                    throw new RuntimeException(
+                                            "@WithCredentials: Wrong amount of values. Expected username,sshKeyPath.");
                                 }
                                 break;
                             default:
-                                throw new RuntimeException(String.format("@WithCredentials: Option '%s' not supported.", wp.credentialType()));
+                                throw new RuntimeException(String.format(
+                                        "@WithCredentials: Option '%s' not supported.", wp.credentialType()));
                         }
                     }
                     return wp != null;
@@ -108,7 +112,9 @@ public @interface WithCredentials {
                         cp.open();
                         SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
                         sc.username.set(username);
-                        sc.selectEnterDirectly().privateKey.set(resource(sshKeyPath).asText());
+                        sc.selectEnterDirectly()
+                                .privateKey
+                                .set(resource(sshKeyPath).asText());
                         maybeSetId(sc, id);
                         cp.create();
                     } catch (Exception ex) {
@@ -146,8 +152,10 @@ public @interface WithCredentials {
                  */
                 public Resource resource(String path) {
                     final URL resource = getClass().getResource(path);
-                    if (resource == null)
-                        throw new AssertionError("No such resource " + path + " for " + getClass().getName());
+                    if (resource == null) {
+                        throw new AssertionError("No such resource " + path + " for "
+                                + getClass().getName());
+                    }
                     return new Resource(resource);
                 }
             };

@@ -39,8 +39,6 @@ public class MavenBuild extends Build {
     public MavenModuleBuild module(String name) {
         MavenModuleSet project = ((MavenModuleSet) this.job);
 
-        return new MavenModuleBuild(
-                project.module(name), this.url("./%s/", name)
-        );
+        return new MavenModuleBuild(project.module(name), this.url("./%s/", name));
     }
 }

@@ -24,7 +24,11 @@
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
 import java.util.List;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.openqa.selenium.WebElement;
 
 @Describable("Invoke Gradle script")
@@ -43,8 +47,8 @@ public class GradleStep extends AbstractStep implements BuildStep {
     }
 
     private void ensureAdvancedOptionsOpen() {
-        List<WebElement> advancedButtons = control("").resolve()
-                .findElements(by.css(".advanced-button:not([data-expanded='true'])"));
+        List<WebElement> advancedButtons =
+                control("").resolve().findElements(by.css(".advanced-button:not([data-expanded='true'])"));
 
         advancedButtons.forEach(advancedButton -> {
             if (advancedButton.isDisplayed()) {
@@ -77,44 +81,55 @@ public class GradleStep extends AbstractStep implements BuildStep {
         this.tasks.set(tasks);
     }
 
-    public void setUseWrapper(){
+    public void setUseWrapper() {
         ensureAdvancedOptionsOpen();
         control("").resolve().findElement(by.checkbox("Use Gradle Wrapper")).click();
     }
 
-    public void setWrapperLocation(final String wrapperLocation){
+    public void setWrapperLocation(final String wrapperLocation) {
         ensureAdvancedOptionsOpen();
         this.wrapperLocation.set(wrapperLocation);
     }
 
-    public void setMakeWrapperExecutable(){
+    public void setMakeWrapperExecutable() {
         ensureAdvancedOptionsOpen();
-        control("").resolve().findElement(by.checkbox("Make gradlew executable")).click();
+        control("")
+                .resolve()
+                .findElement(by.checkbox("Make gradlew executable"))
+                .click();
     }
 
-    public void setProjectProperties(final String projectProperties){
+    public void setProjectProperties(final String projectProperties) {
         ensureAdvancedOptionsOpen();
         this.projectProperties.set(projectProperties);
     }
 
-    public void setPassAllAsProjectProperties(){
+    public void setPassAllAsProjectProperties() {
         ensureAdvancedOptionsOpen();
-        control("").resolve().findElement(by.checkbox("Pass all job parameters as Project properties")).click();
+        control("")
+                .resolve()
+                .findElement(by.checkbox("Pass all job parameters as Project properties"))
+                .click();
     }
 
-    public void setSystemProperties(final String systemProperties){
+    public void setSystemProperties(final String systemProperties) {
         ensureAdvancedOptionsOpen();
         this.systemProperties.set(systemProperties);
     }
 
-    public void setPassAllAsSystemProperties(){
+    public void setPassAllAsSystemProperties() {
         ensureAdvancedOptionsOpen();
-        control("").resolve().findElement(by.checkbox("Pass all job parameters as System properties")).click();
+        control("")
+                .resolve()
+                .findElement(by.checkbox("Pass all job parameters as System properties"))
+                .click();
     }
 
-    public void setForceGradleHomeToUseWorkspace(){
+    public void setForceGradleHomeToUseWorkspace() {
         ensureAdvancedOptionsOpen();
-        control("").resolve().findElement(by.checkbox("Force GRADLE_USER_HOME to use workspace")).click();
+        control("")
+                .resolve()
+                .findElement(by.checkbox("Force GRADLE_USER_HOME to use workspace"))
+                .click();
     }
-
 }

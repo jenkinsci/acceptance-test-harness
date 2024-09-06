@@ -11,7 +11,7 @@ public class LogPrinter implements LogListener {
     private final String prefix;
 
     public LogPrinter(String id) {
-        this.prefix = id==null ? "" : id+"|";
+        this.prefix = id == null ? "" : id + "|";
     }
 
     @Override
@@ -20,6 +20,5 @@ public class LogPrinter implements LogListener {
     }
 
     @Override
-    public void processClose(Exception t) {
-    }
+    public void processClose(Exception t) {}
 }

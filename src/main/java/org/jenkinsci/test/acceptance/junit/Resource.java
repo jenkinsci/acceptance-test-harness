@@ -28,7 +28,7 @@ public class Resource {
      */
     public String getName() {
         String s = url.toExternalForm();
-        return s.substring(s.lastIndexOf('/')+1);
+        return s.substring(s.lastIndexOf('/') + 1);
     }
 
     public InputStream asInputStream() {

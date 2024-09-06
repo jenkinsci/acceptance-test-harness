@@ -18,9 +18,15 @@ public class JUnitScreenRecorder extends ScreenRecorder {
     private FailureDiagnostics diag;
     private Format format;
 
-    public JUnitScreenRecorder(GraphicsConfiguration cfg, Rectangle captureArea, Format fileFormat,
-                               Format screenFormat, Format mouseFormat, Format audioFormat,
-                               FailureDiagnostics diag) throws IOException, AWTException {
+    public JUnitScreenRecorder(
+            GraphicsConfiguration cfg,
+            Rectangle captureArea,
+            Format fileFormat,
+            Format screenFormat,
+            Format mouseFormat,
+            Format audioFormat,
+            FailureDiagnostics diag)
+            throws IOException, AWTException {
         super(cfg, captureArea, fileFormat, screenFormat, mouseFormat, audioFormat);
         this.format = fileFormat;
         this.diag = diag;

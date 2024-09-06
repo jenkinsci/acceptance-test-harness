@@ -29,12 +29,16 @@ import org.jenkinsci.test.acceptance.log.NullPrinter;
  */
 @ExtensionPoint // TODO is it not the JenkinsControllerFactory that is the extension point?
 public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
-    @Inject @Named("quite")
+    @Inject
+    @Named("quite")
     protected boolean isQuite;
-    @Inject @Named("WORKSPACE")
+
+    @Inject
+    @Named("WORKSPACE")
     protected String WORKSPACE;
 
     public static final int STARTUP_TIMEOUT;
+
     static {
         int val = 360;
         String envvar = System.getenv("STARTUP_TIME");
@@ -77,10 +81,9 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
         if (!isRunning) {
             URL url = JenkinsController.class.getResource("/tool_installers.zip");
             if (url == null) {
-                throw new RuntimeException(
-                        "You need to run 'mvn generate-resources' before you can start test cases.\n"
-                                + "Starting the Jenkins server under test requires that the tools configuration\n"
-                                + "is provided in file tool_installers.zip in your class path.");
+                throw new RuntimeException("You need to run 'mvn generate-resources' before you can start test cases.\n"
+                        + "Starting the Jenkins server under test requires that the tools configuration\n"
+                        + "is provided in file tool_installers.zip in your class path.");
             }
             populateJenkinsHome(IOUtils.toByteArray(url), false);
             startNow();
@@ -92,7 +95,6 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      * Synchronously start Jenkins instance until it starts responding to {@linkplain #getUrl() the specified URL}.
      */
     public abstract void startNow() throws IOException;
-
 
     /**
      * Stops Jenkins
@@ -108,8 +110,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     protected LogListener getLogPrinter() {
         if (isQuite) {
             return new NullPrinter();
-        }
-        else {
+        } else {
             return new LogPrinter(getLogId());
         }
     }
@@ -138,16 +139,15 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      */
     public abstract void tearDown() throws IOException;
 
-
     /**
      * Stops and starts running Jenkins to perform a full JVM restart.
      */
-    public void restart() throws IOException{
+    public void restart() throws IOException {
         stop();
         start();
     }
 
-    public boolean isRunning(){
+    public boolean isRunning() {
         return isRunning;
     }
 
@@ -166,7 +166,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
      * Returns the short ID used to prefix log output from the process into the test.
      */
     public String getLogId() {
-        return String.format("master%05d",getUrl().getPort());
+        return String.format("master%05d", getUrl().getPort());
     }
 
     /**

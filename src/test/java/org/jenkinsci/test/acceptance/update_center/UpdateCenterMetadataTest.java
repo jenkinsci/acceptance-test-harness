@@ -23,24 +23,49 @@ public class UpdateCenterMetadataTest {
     public static final List<Dependency> NO_DEPS = Collections.emptyList();
 
     private Jenkins jenkins = mock(Jenkins.class);
+
     {
         when(jenkins.getVersion()).thenReturn(new VersionNumber("2"));
         when(jenkins.getPlugin(any(String.class))).thenThrow(new IllegalArgumentException("Not installed"));
     }
 
     private HashMap<String, PluginMetadata> plugins = new HashMap<>();
+
     {
         plugins.put("standalone", new PluginMetadata("standalone", "jenkins:standalone:1", "1", "1", NO_DEPS));
 
         plugins.put("provider", new PluginMetadata("provider", "jenkins:provider:1", "1", "1", NO_DEPS));
-            plugins.put("consumer", new PluginMetadata("consumer", "jenkins:consumer:1", "1", "1", Collections.singletonList(new Dependency("provider:1"))));
+        plugins.put(
+                "consumer",
+                new PluginMetadata(
+                        "consumer",
+                        "jenkins:consumer:1",
+                        "1",
+                        "1",
+                        Collections.singletonList(new Dependency("provider:1"))));
 
-        plugins.put("complex", new PluginMetadata("complex", "jenkins:complex:1", "1", "1", Arrays.asList(new Dependency("branchb:1"), new Dependency("brancha:1"))));
-            plugins.put("brancha", new PluginMetadata("brancha", "jenkins:brancha:1", "1", "1", Arrays.asList(new Dependency("depa:1"))));
-                plugins.put("depa", new PluginMetadata("depa", "jenkins:depa:1", "1", "1", NO_DEPS));
-            plugins.put("branchb", new PluginMetadata("branchb", "jenkins:branchb:1", "1", "1", Arrays.asList(new Dependency("depb0:1"), new Dependency("depb1:1"))));
-                plugins.put("depb0", new PluginMetadata("depb0", "jenkins:depb0:1", "1", "1", NO_DEPS));
-                plugins.put("depb1", new PluginMetadata("depb1", "jenkins:depb1:1", "1", "1", NO_DEPS));
+        plugins.put(
+                "complex",
+                new PluginMetadata(
+                        "complex",
+                        "jenkins:complex:1",
+                        "1",
+                        "1",
+                        Arrays.asList(new Dependency("branchb:1"), new Dependency("brancha:1"))));
+        plugins.put(
+                "brancha",
+                new PluginMetadata("brancha", "jenkins:brancha:1", "1", "1", Arrays.asList(new Dependency("depa:1"))));
+        plugins.put("depa", new PluginMetadata("depa", "jenkins:depa:1", "1", "1", NO_DEPS));
+        plugins.put(
+                "branchb",
+                new PluginMetadata(
+                        "branchb",
+                        "jenkins:branchb:1",
+                        "1",
+                        "1",
+                        Arrays.asList(new Dependency("depb0:1"), new Dependency("depb1:1"))));
+        plugins.put("depb0", new PluginMetadata("depb0", "jenkins:depb0:1", "1", "1", NO_DEPS));
+        plugins.put("depb1", new PluginMetadata("depb1", "jenkins:depb1:1", "1", "1", NO_DEPS));
     }
 
     private UpdateCenterMetadata ucm = UpdateCenterMetadata.get("id", plugins);
@@ -49,10 +74,15 @@ public class UpdateCenterMetadataTest {
     public void transitiveDependenciesOfSimple() throws Exception {
 
         assertThat(ucm.transitiveDependenciesOf(jenkins, specs()), Matchers.<PluginMetadata>emptyIterable());
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("standalone")), Matchers.contains(plugins.get("standalone")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("standalone")),
+                Matchers.contains(plugins.get("standalone")));
 
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("provider")), Matchers.contains(plugins.get("provider")));
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("consumer")), Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("provider")), Matchers.contains(plugins.get("provider")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("consumer")),
+                Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
 
         List<PluginMetadata> complexDeps = ucm.transitiveDependenciesOf(jenkins, specs("complex"));
 
@@ -71,12 +101,22 @@ public class UpdateCenterMetadataTest {
 
     @Test
     public void transitiveDependenciesOfExplicitOrder() throws Exception {
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("consumer", "provider")), Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("provider", "consumer")), Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("consumer", "provider")),
+                Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("provider", "consumer")),
+                Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
 
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("consumer@1", "provider")), Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("provider", "consumer@1")), Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
-        assertThat(ucm.transitiveDependenciesOf(jenkins, specs("provider@1", "consumer@1")), Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("consumer@1", "provider")),
+                Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("provider", "consumer@1")),
+                Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
+        assertThat(
+                ucm.transitiveDependenciesOf(jenkins, specs("provider@1", "consumer@1")),
+                Matchers.contains(plugins.get("provider"), plugins.get("consumer")));
     }
 
     private List<PluginSpec> specs(String... specs) {

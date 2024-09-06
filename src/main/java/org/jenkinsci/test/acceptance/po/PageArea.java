@@ -38,7 +38,9 @@ public interface PageArea extends CapybaraPortingLayer, Control.Owner {
     WebElement self();
 
     String getPath();
+
     String getPath(String rel);
+
     String getPath(String rel, int index);
 
     PageObject getPage();
@@ -66,5 +68,6 @@ public interface PageArea extends CapybaraPortingLayer, Control.Owner {
      * @param action An action that triggers the page area creation. Clicking the button, etc.
      * @return The surrounding path of the area, exception thrown when not able to find out.
      */
-    @NonNull String createPageArea(String name, Runnable action) throws TimeoutException;
+    @NonNull
+    String createPageArea(String name, Runnable action) throws TimeoutException;
 }

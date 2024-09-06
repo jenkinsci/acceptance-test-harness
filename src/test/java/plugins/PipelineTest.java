@@ -65,34 +65,32 @@ public class PipelineTest extends AbstractPipelineTest {
     @Override
     public String scriptForPipeline() {
         if (SystemUtils.IS_OS_UNIX) {
-            return "node {\n" +
-                    "  git url: '" + this.githubRepoURL() + "'\n" +
-                    "  def mvnHome = tool 'M3'\n" +
-                    "  cbEnv = [\"PATH+MVN=${mvnHome}/bin\", \"MAVEN_HOME=${mvnHome}\"]\n" +
-                    "  \n" +
-                    "  withEnv(cbEnv) {\n" +
-                    "      sh \"mvn test\"\n" +
-                    "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n" +
-                    "      \n" +
-                    "      sh \"mvn javadoc:javadoc -f pom.xml\"\n" +
-                    "      step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])\n" +
-                    "  }" +
-                    "}";
+            return "node {\n" + "  git url: '"
+                    + this.githubRepoURL() + "'\n" + "  def mvnHome = tool 'M3'\n"
+                    + "  cbEnv = [\"PATH+MVN=${mvnHome}/bin\", \"MAVEN_HOME=${mvnHome}\"]\n"
+                    + "  \n"
+                    + "  withEnv(cbEnv) {\n"
+                    + "      sh \"mvn test\"\n"
+                    + "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n"
+                    + "      \n"
+                    + "      sh \"mvn javadoc:javadoc -f pom.xml\"\n"
+                    + "      step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])\n"
+                    + "  }"
+                    + "}";
         } else {
             // Windows
-            return "node {\n" +
-                    "  git url: '" + this.githubRepoURL() + "'\n" +
-                    "  def mvnHome = tool 'M3'\n" +
-                    "  cbEnv = [\"PATH+MVN=${mvnHome}/bin\", \"MAVEN_HOME=${mvnHome}\"]\n" +
-                    "  \n" +
-                    "  withEnv(cbEnv) {\n" +
-                    "      bat \"mvn test\"\n" +
-                    "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n" +
-                    "      \n" +
-                    "      bat \"mvn javadoc:javadoc -f pom.xml\"\n" +
-                    "      step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])\n" +
-                    "  }" +
-                    "}";
+            return "node {\n" + "  git url: '"
+                    + this.githubRepoURL() + "'\n" + "  def mvnHome = tool 'M3'\n"
+                    + "  cbEnv = [\"PATH+MVN=${mvnHome}/bin\", \"MAVEN_HOME=${mvnHome}\"]\n"
+                    + "  \n"
+                    + "  withEnv(cbEnv) {\n"
+                    + "      bat \"mvn test\"\n"
+                    + "      junit 'target/surefire-reports/TEST-io.jenkins.tools.MainTest.xml'\n"
+                    + "      \n"
+                    + "      bat \"mvn javadoc:javadoc -f pom.xml\"\n"
+                    + "      step([$class: 'JavadocArchiver', javadocDir: 'target/reports/apidocs', keepAll: false])\n"
+                    + "  }"
+                    + "}";
         }
     }
 

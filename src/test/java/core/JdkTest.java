@@ -10,7 +10,8 @@ import org.junit.Test;
 public class JdkTest extends AbstractJUnitTest {
 
     // This actually tests any installed JDK, not necessarily oracle.
-    @Test @Native("java")
+    @Test
+    @Native("java")
     public void usePreinstalledJdk() {
         String expectedVersion = localJavaVersion();
 

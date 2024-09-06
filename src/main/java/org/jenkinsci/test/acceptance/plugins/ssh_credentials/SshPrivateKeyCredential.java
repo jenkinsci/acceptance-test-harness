@@ -43,5 +43,4 @@ public class SshPrivateKeyCredential extends BaseStandardCredentials {
             super(parent, path);
         }
     }
-
 }

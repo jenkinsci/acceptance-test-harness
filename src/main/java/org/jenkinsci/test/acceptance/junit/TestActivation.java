@@ -72,16 +72,16 @@ public @interface TestActivation {
                 }
 
                 private void check(TestActivation activation, Class<?> testClass) {
-                    if (activation == null) return; // No activation - always run
+                    if (activation == null) {
+                        return; // No activation - always run
+                    }
 
                     String className = testClass.getSimpleName();
 
-                    for (String property: activation.value()) {
+                    for (String property : activation.value()) {
                         String propertyName = className + "." + property;
                         if (System.getProperty(propertyName) == null) {
-                            throw new AssumptionViolatedException(
-                                    "Required property not provided: " + propertyName
-                            );
+                            throw new AssumptionViolatedException("Required property not provided: " + propertyName);
                         }
                     }
 

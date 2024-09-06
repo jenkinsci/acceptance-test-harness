@@ -22,9 +22,9 @@ public class JabberGlobalConfig extends PageAreaImpl {
         super(jenkins, "/hudson-plugins-jabber-im-transport-JabberPublisher");
     }
 
-    public EnabledConfig enableConfig(){
+    public EnabledConfig enableConfig() {
         enable.check();
-        return new EnabledConfig(getPage(),"/hudson-plugins-jabber-im-transport-JabberPublisher/enabled");
+        return new EnabledConfig(getPage(), "/hudson-plugins-jabber-im-transport-JabberPublisher/enabled");
     }
 
     public static class EnabledConfig extends PageAreaImpl {
@@ -37,16 +37,15 @@ public class JabberGlobalConfig extends PageAreaImpl {
         public final Control addMUC = control("repeatable-add");
         public final Control advanced = control("advanced-button");
 
-        public MUCConfig addMUCConfig(){
+        public MUCConfig addMUCConfig() {
             addMUC.click();
-            return new MUCConfig(getPage(), "/hudson-plugins-jabber-im-transport-JabberPublisher/enabled/initialChats" );
+            return new MUCConfig(getPage(), "/hudson-plugins-jabber-im-transport-JabberPublisher/enabled/initialChats");
         }
 
-        public AdvancedConfig addAdvancedConfig(){
+        public AdvancedConfig addAdvancedConfig() {
             advanced.click();
             return new AdvancedConfig(getPage(), "/hudson-plugins-jabber-im-transport-JabberPublisher/enabled");
         }
-
     }
 
     public static class MUCConfig extends PageAreaImpl {
@@ -58,8 +57,6 @@ public class JabberGlobalConfig extends PageAreaImpl {
         public final Control mucPassword = control("password");
         public final Control notificationsOnly = control("notificationOnly");
         public final Control mucDelete = control("repeatable-delete");
-
-
     }
 
     public static class AdvancedConfig extends PageAreaImpl {
@@ -79,7 +76,6 @@ public class JabberGlobalConfig extends PageAreaImpl {
         public final Control jenkinsLogin = control("jenkinsLogin");
         public final Control useProxy = control("useProxy");
     }
-
 
     // path="/hudson-plugins-jabber-im-transport-JabberPublisher/enabled/name"
 }

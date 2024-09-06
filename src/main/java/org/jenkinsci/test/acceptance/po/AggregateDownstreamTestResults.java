@@ -7,7 +7,6 @@ public class AggregateDownstreamTestResults extends AbstractStep implements Post
     public final Control jobs = control("specify/jobs");
     public final Control includeFailedBuilds = control("specify/includeFailedBuilds");
 
-
     public AggregateDownstreamTestResults(Job parent, String path) {
         super(parent, path);
     }

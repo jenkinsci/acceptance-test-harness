@@ -43,7 +43,7 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
      */
     @Override
     public synchronized T get() {
-        if (container==null) {
+        if (container == null) {
             try {
                 container = starter().start();
             } catch (InterruptedException | IOException e) {
@@ -61,7 +61,8 @@ public class DockerContainerHolder<T extends DockerContainer> implements Provide
         Class<T> fixture = (Class<T>) type.getRawType();
         File buildlog = diag.touch("docker-" + fixture.getSimpleName() + ".build.log");
         File runlog = diag.touch("docker-" + fixture.getSimpleName() + ".run.log");
-        Starter<T> containerStarter = docker.build(fixture, buildlog).start(fixture).withLog(runlog);
+        Starter<T> containerStarter =
+                docker.build(fixture, buildlog).start(fixture).withLog(runlog);
         if (portOffset != null) {
             containerStarter.withPortOffset(portOffset);
         }

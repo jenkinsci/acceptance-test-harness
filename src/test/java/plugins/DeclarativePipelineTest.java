@@ -27,18 +27,15 @@ public class DeclarativePipelineTest extends AbstractJUnitTest {
     @Test
     public void basicDeclarativeTests() throws Exception {
         WorkflowJob helloWorldJob = jenkins.jobs.create(WorkflowJob.class);
-        helloWorldJob.script.set(
-                "pipeline {\n" +
-                "  agent none\n" +
-                "  stages {\n" +
-                "    stage('foo') {\n" +
-                "      steps {\n" +
-                "        echo 'Hello world'\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n"
-        );
+        helloWorldJob.script.set("pipeline {\n" + "  agent none\n"
+                + "  stages {\n"
+                + "    stage('foo') {\n"
+                + "      steps {\n"
+                + "        echo 'Hello world'\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
 
         helloWorldJob.sandbox.check();
         helloWorldJob.save();
@@ -53,29 +50,26 @@ public class DeclarativePipelineTest extends AbstractJUnitTest {
             return null;
         });
         WorkflowJob toolsEnvAgentJob = jenkins.jobs.create(WorkflowJob.class);
-        toolsEnvAgentJob.script.set(
-                "pipeline {\n" +
-                "  agent { label 'remote' }\n" +
-                "  tools {\n" +
-                "    maven 'M3'\n" +
-                "  }\n" +
-                "  environment {\n" +
-                "    FOO = 'BAR'\n" +
-                "  }\n" +
-                "  stages {\n" +
-                "    stage('first') {\n" +
-                "      steps {\n" +
-                "        sh 'mvn --version'\n" +
-                "      }\n" +
-                "    }\n" +
-                "    stage('second') {\n" +
-                "      steps {\n" +
-                "        echo \"FOO is ${env.FOO}\"\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n"
-        );
+        toolsEnvAgentJob.script.set("pipeline {\n" + "  agent { label 'remote' }\n"
+                + "  tools {\n"
+                + "    maven 'M3'\n"
+                + "  }\n"
+                + "  environment {\n"
+                + "    FOO = 'BAR'\n"
+                + "  }\n"
+                + "  stages {\n"
+                + "    stage('first') {\n"
+                + "      steps {\n"
+                + "        sh 'mvn --version'\n"
+                + "      }\n"
+                + "    }\n"
+                + "    stage('second') {\n"
+                + "      steps {\n"
+                + "        echo \"FOO is ${env.FOO}\"\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
 
         toolsEnvAgentJob.sandbox.check();
         toolsEnvAgentJob.save();
@@ -88,17 +82,14 @@ public class DeclarativePipelineTest extends AbstractJUnitTest {
         assertThat(toolsEnvAgentConsole, containsRegexp("FOO is BAR", Pattern.MULTILINE));
 
         WorkflowJob missingAgentJob = jenkins.jobs.create(WorkflowJob.class);
-        missingAgentJob.script.set(
-                "pipeline {\n" +
-                "  stages {\n" +
-                "    stage('foo') {\n" +
-                "      steps {\n" +
-                "        echo 'Hello world'\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n"
-        );
+        missingAgentJob.script.set("pipeline {\n" + "  stages {\n"
+                + "    stage('foo') {\n"
+                + "      steps {\n"
+                + "        echo 'Hello world'\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
 
         missingAgentJob.sandbox.check();
         missingAgentJob.save();
@@ -109,36 +100,36 @@ public class DeclarativePipelineTest extends AbstractJUnitTest {
         assertThat(missingAgentConsole, not(containsRegexp("Hello world")));
 
         WorkflowJob missingToolVersionJob = jenkins.jobs.create(WorkflowJob.class);
-        missingToolVersionJob.script.set(
-                "pipeline {\n" +
-                "  agent { label 'remote' }\n" +
-                "  tools {\n" +
-                "    maven 'some-other-version'\n" +
-                "  }\n" +
-                "  environment {\n" +
-                "    FOO = 'BAR'\n" +
-                "  }\n" +
-                "  stages {\n" +
-                "    stage('first') {\n" +
-                "      steps {\n" +
-                "        sh 'mvn --version'\n" +
-                "      }\n" +
-                "    }\n" +
-                "    stage('second') {\n" +
-                "      steps {\n" +
-                "        echo \"FOO is ${env.FOO}\"\n" +
-                "      }\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n"
-        );
+        missingToolVersionJob.script.set("pipeline {\n" + "  agent { label 'remote' }\n"
+                + "  tools {\n"
+                + "    maven 'some-other-version'\n"
+                + "  }\n"
+                + "  environment {\n"
+                + "    FOO = 'BAR'\n"
+                + "  }\n"
+                + "  stages {\n"
+                + "    stage('first') {\n"
+                + "      steps {\n"
+                + "        sh 'mvn --version'\n"
+                + "      }\n"
+                + "    }\n"
+                + "    stage('second') {\n"
+                + "      steps {\n"
+                + "        echo \"FOO is ${env.FOO}\"\n"
+                + "      }\n"
+                + "    }\n"
+                + "  }\n"
+                + "}\n");
 
         missingToolVersionJob.sandbox.check();
         missingToolVersionJob.save();
 
         Build missingToolVersionBuild = missingToolVersionJob.startBuild().shouldFail();
         String missingToolVersionConsole = missingToolVersionBuild.getConsole();
-        assertThat(missingToolVersionConsole, containsRegexp("Tool type ['\"]maven['\"] does not have an install of ['\"]some-other-version['\"] configured"));
+        assertThat(
+                missingToolVersionConsole,
+                containsRegexp(
+                        "Tool type ['\"]maven['\"] does not have an install of ['\"]some-other-version['\"] configured"));
         assertThat(missingToolVersionConsole, not(containsRegexp("FOO is BAR")));
     }
 }

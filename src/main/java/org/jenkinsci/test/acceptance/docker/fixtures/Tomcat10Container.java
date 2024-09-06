@@ -10,12 +10,12 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
  *
  * @author Kohsuke Kawaguchi
  */
-@DockerFixture(id="tomcat10",ports=8080)
+@DockerFixture(id = "tomcat10", ports = 8080)
 public class Tomcat10Container extends DockerContainer {
     /**
      * URL of Tomcat.
      */
     public URL getUrl() throws IOException {
-        return new URL("http://"+ipBound(8080)+":"+port(8080));
+        return new URL("http://" + ipBound(8080) + ":" + port(8080));
     }
 }

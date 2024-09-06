@@ -27,8 +27,8 @@ public class JBossController extends LocalController {
     @Inject
     public JBossController(Injector i, @Named("jbossHome") File jbossHome) {
         super(i);
-        if(!jbossHome.isDirectory()){
-            throw new RuntimeException("Invalid JBoss Home: "+jbossHome.getAbsolutePath());
+        if (!jbossHome.isDirectory()) {
+            throw new RuntimeException("Invalid JBoss Home: " + jbossHome.getAbsolutePath());
         }
 
         this.jbossHome = jbossHome.getAbsoluteFile();
@@ -36,38 +36,40 @@ public class JBossController extends LocalController {
 
     @Override
     public ProcessInputStream startProcess() throws IOException {
-        File jenkinsDeploymentDir = new File(jbossHome,"standalone/deployments/jenkins.war.deployed");
-        if(jenkinsDeploymentDir.exists()){
+        File jenkinsDeploymentDir = new File(jbossHome, "standalone/deployments/jenkins.war.deployed");
+        if (jenkinsDeploymentDir.exists()) {
             FileUtils.forceDelete(jenkinsDeploymentDir);
         }
 
-        File jenkinsDeploymentFailDir = new File(jbossHome,"standalone/deployments/jenkins.war.failed");
-        if(jenkinsDeploymentFailDir.exists()){
+        File jenkinsDeploymentFailDir = new File(jbossHome, "standalone/deployments/jenkins.war.failed");
+        if (jenkinsDeploymentFailDir.exists()) {
             FileUtils.forceDelete(jenkinsDeploymentFailDir);
         }
 
-        File jenkinsWarDeploymentPath = new File(jbossHome,"standalone/deployments/jenkins.war");
-        if(jenkinsWarDeploymentPath.exists()){
+        File jenkinsWarDeploymentPath = new File(jbossHome, "standalone/deployments/jenkins.war");
+        if (jenkinsWarDeploymentPath.exists()) {
             FileUtils.forceDelete(jenkinsWarDeploymentPath);
         }
 
         FileUtils.copyFile(war, jenkinsWarDeploymentPath);
 
-        File jbossLog = new File(jbossHome,"/standalone/log/server.log");
-        if(jbossLog.exists()){
+        File jbossLog = new File(jbossHome, "/standalone/log/server.log");
+        if (jbossLog.exists()) {
             FileUtils.forceDelete(jbossLog);
         }
 
-        File context =  new File(jbossHome,"conf/context.xml");
-        if(context.exists()){
+        File context = new File(jbossHome, "conf/context.xml");
+        if (context.exists()) {
             org.apache.commons.io.FileUtils.forceDelete(context);
         }
-        org.apache.commons.io.FileUtils.write(context, "<Context>\n" +
-                "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n" +
-                "</Context>", StandardCharsets.UTF_8);
+        org.apache.commons.io.FileUtils.write(
+                context,
+                "<Context>\n"
+                        + "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n"
+                        + "</Context>",
+                StandardCharsets.UTF_8);
 
-
-        CommandBuilder cb = new CommandBuilder(jbossHome+"/bin/standalone.sh");
+        CommandBuilder cb = new CommandBuilder(jbossHome + "/bin/standalone.sh");
         cb.env.putAll(commonLaunchEnv());
         return cb.popen();
     }
@@ -75,11 +77,11 @@ public class JBossController extends LocalController {
     @Override
     public void stopNow() throws IOException {
         System.out.println("    Stopping a temporary Jenkins/JBoss instance\n");
-        CommandBuilder cb = new CommandBuilder(jbossHome+"/bin/jboss-cli.sh"," --connect", "--command=:shutdown");
+        CommandBuilder cb = new CommandBuilder(jbossHome + "/bin/jboss-cli.sh", " --connect", "--command=:shutdown");
         try {
             int status = cb.system();
-            if(status != 0){
-                System.out.println("Cannot stop JBoss: "+ cb);
+            if (status != 0) {
+                System.out.println("Cannot stop JBoss: " + cb);
             }
         } catch (InterruptedException e) {
             throw new IOException(e);
@@ -97,7 +99,8 @@ public class JBossController extends LocalController {
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
-        @Inject Injector i;
+        @Inject
+        Injector i;
 
         @Override
         public String getId() {
@@ -111,22 +114,22 @@ public class JBossController extends LocalController {
 
         public static final class ModuleImpl extends AbstractModule {
 
-            @Provides @Named("jbossHome")
+            @Provides
+            @Named("jbossHome")
             public File jbossHome(@Named("jenkins.war") File warFile) {
                 try {
-                    return IOUtil.firstExisting(true,
+                    return IOUtil.firstExisting(
+                            true,
                             System.getenv("JBOSS_HOME"),
                             new File(warFile.getParentFile(), "jboss").getAbsolutePath(),
-                            "./jboss"
-                    );
+                            "./jboss");
                 } catch (IOException ex) {
                     throw new AssertionError("Cannot find JBoss home, maybe you forgot to set JBOSS_HOME env var?", ex);
                 }
             }
 
             @Override
-            protected void configure() {
-            }
+            protected void configure() {}
         }
     }
 }

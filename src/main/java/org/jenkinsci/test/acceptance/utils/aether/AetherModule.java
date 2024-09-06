@@ -80,15 +80,16 @@ public class AetherModule extends AbstractModule implements ExtensionModule {
     public RepositorySystemSession newRepositorySystemSession(RepositorySystem system) {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
 
-        LocalRepository localRepo = new LocalRepository( MavenLocalRepository.getMavenLocalRepository());
+        LocalRepository localRepo = new LocalRepository(MavenLocalRepository.getMavenLocalRepository());
         session.setLocalRepositoryManager(system.newLocalRepositoryManager(session, localRepo));
 
         session.setTransferListener(new ConsoleTransferListener() {
-            @Override public void transferProgressed(TransferEvent event) {
+            @Override
+            public void transferProgressed(TransferEvent event) {
                 // NOOP
             }
         });
-//        session.setRepositoryListener(new ConsoleRepositoryListener());
+        //        session.setRepositoryListener(new ConsoleRepositoryListener());
 
         // uncomment to generate dirty trees
         // session.setDependencyGraphTransformer( null );

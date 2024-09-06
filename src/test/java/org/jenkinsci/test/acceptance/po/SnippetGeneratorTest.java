@@ -1,12 +1,11 @@
 package org.jenkinsci.test.acceptance.po;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import org.junit.Test;
 
 @WithPlugins("pipeline-model-definition")
 public class SnippetGeneratorTest extends AbstractJUnitTest {

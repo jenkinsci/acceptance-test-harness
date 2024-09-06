@@ -10,8 +10,8 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
 @WithPlugins({
-        "matrix-project", // JENKINS-37545
-        "project-description-setter"
+    "matrix-project", // JENKINS-37545
+    "project-description-setter"
 })
 public class ProjectDescriptionSetterPluginTest extends AbstractJUnitTest {
     @Test

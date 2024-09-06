@@ -8,7 +8,9 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
  *
  * @author Tobias Meyer
  */
-@DockerFixture(id="smb", ports={445, 139, 135})
+@DockerFixture(
+        id = "smb",
+        ports = {445, 139, 135})
 public class SMBContainer extends DockerContainer implements IPasswordDockerContainer {
     private final String username = "test";
 
@@ -19,6 +21,7 @@ public class SMBContainer extends DockerContainer implements IPasswordDockerCont
      *
      * @return Samba password
      */
+    @Override
     public String getPassword() {
         return password;
     }
@@ -28,8 +31,8 @@ public class SMBContainer extends DockerContainer implements IPasswordDockerCont
      *
      * @return Samba username
      */
+    @Override
     public String getUsername() {
         return username;
     }
-
 }

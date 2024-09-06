@@ -27,7 +27,7 @@ public class UnixDomainSocketTestServer {
             InputStream in = Channels.newInputStream(c);
             OutputStream out = Channels.newOutputStream(c);
 
-            IOUtils.copy(in,out);
+            IOUtils.copy(in, out);
             System.out.println("Closed");
             c.close();
         }

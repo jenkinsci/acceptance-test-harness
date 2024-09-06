@@ -17,11 +17,11 @@ public class SlavesMixIn extends MixIn {
     }
 
     public <S extends Slave> S get(Class<S> type, String name) {
-        return  newInstance(type,jenkins,name);
+        return newInstance(type, jenkins, name);
     }
 
     public <S extends Slave> S create(Class<S> type) {
-        return create(type,createRandomName());
+        return create(type, createRandomName());
     }
 
     /**
@@ -39,7 +39,6 @@ public class SlavesMixIn extends MixIn {
         // Automatic disabling of sticky elements doesn't occur after a redirect
         // so force it after the configuration page has loaded
         new Scroller(driver).disableStickyElements();
-
 
         // reasonable starting point values
         s.setExecutors(1);

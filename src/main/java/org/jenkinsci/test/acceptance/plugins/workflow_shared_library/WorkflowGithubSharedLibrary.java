@@ -23,5 +23,4 @@ public class WorkflowGithubSharedLibrary extends WorkflowSharedLibrary {
 
         return new GithubBranchSource(this, this.getPath() + "/retriever/scm");
     }
-
 }

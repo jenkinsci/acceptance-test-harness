@@ -28,7 +28,7 @@ public class Login extends PageObject {
      * Paths are usually available when using the default Jenkins controller.<br>
      * (Available thanks to pre-installed form-element-path plugin.)
      */
-    public Login doLogin(String user, String password){
+    public Login doLogin(String user, String password) {
         cUser.set(user);
         cPassword.set(password);
         // for some reason submit it just bogus...
@@ -40,7 +40,7 @@ public class Login extends PageObject {
      * @deprecated use {@link #doLogin(String, String)} instead. It doesn't require form-element-path.
      */
     @Deprecated
-    public Login doLoginDespiteNoPaths(String user, String password){
+    public Login doLoginDespiteNoPaths(String user, String password) {
         return doLogin(user, password);
     }
 
@@ -48,7 +48,7 @@ public class Login extends PageObject {
      * Login for a common case where the user name and the password are the same
      */
     public Login doLogin(String user) {
-        return doLogin(user,user);
+        return doLogin(user, user);
     }
 
     public Login doLogin(User user) {
@@ -86,5 +86,4 @@ public class Login extends PageObject {
     public Login doFailedLogin(User user) {
         return this.doFailedLogin(user.fullName());
     }
-
 }

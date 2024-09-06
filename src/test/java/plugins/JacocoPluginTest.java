@@ -1,7 +1,7 @@
 package plugins;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.junit.Assert.assertEquals;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -23,7 +23,8 @@ public class JacocoPluginTest extends AbstractJUnitTest {
     @Test
     public void checkSuccessfulExecutionAndsummary() {
         MavenInstallation.installSomeMaven(jenkins);
-        FreeStyleJob job = jenkins.jobs.create(); {
+        FreeStyleJob job = jenkins.jobs.create();
+        {
             job.copyDir(resource("/jacoco/test"));
 
             MavenBuildStep maven = job.addBuildStep(MavenBuildStep.class);

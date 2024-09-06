@@ -96,13 +96,21 @@ public class GitRepo implements Closeable {
                 ssh = Files.createTempFile("jenkins", "ssh.cmd").toFile();
                 // this works if ssh is on the path, for example
                 // https://learn.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse
-                Files.writeString(ssh.toPath(), "ssh.exe -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " %*", Charset.defaultCharset());
+                Files.writeString(
+                        ssh.toPath(),
+                        "ssh.exe -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " %*",
+                        Charset.defaultCharset());
             } else {
                 ssh = Files.createTempFile("jenkins", "ssh").toFile();
-                FileUtils.writeStringToFile(ssh,
-                        "#!/bin/sh\n" +
-                                "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath() + " \"$@\"", Charset.defaultCharset());
-                Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
+                FileUtils.writeStringToFile(
+                        ssh,
+                        "#!/bin/sh\n" + "exec ssh -o StrictHostKeyChecking=no -i " + privateKey.getAbsolutePath()
+                                + " \"$@\"",
+                        Charset.defaultCharset());
+                Files.setPosixFilePermissions(
+                        ssh.toPath(),
+                        new HashSet<>(
+                                Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
             }
             return createTempDir("git");
         } catch (IOException e) {
@@ -139,7 +147,7 @@ public class GitRepo implements Closeable {
             StringBuilder builder = new StringBuilder();
             String line;
 
-            while ( (line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 builder.append(line);
                 builder.append(System.getProperty("line.separator"));
             }

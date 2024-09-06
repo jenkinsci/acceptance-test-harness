@@ -67,6 +67,11 @@ public class AbstractJUnitTest extends CapybaraPortingLayerImpl {
 
     @After
     public void injectSpec() {
-        supportBundle.addSpec(jenkins, SupportBundleRequest.builder().includeDefaultComponents().setOutputFile(diagnostics.touch("support-bundle.zip")).build());
+        supportBundle.addSpec(
+                jenkins,
+                SupportBundleRequest.builder()
+                        .includeDefaultComponents()
+                        .setOutputFile(diagnostics.touch("support-bundle.zip"))
+                        .build());
     }
 }

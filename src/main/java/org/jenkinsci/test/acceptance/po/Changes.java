@@ -12,7 +12,6 @@ public class Changes extends PageObject {
         super(context, url);
     }
 
-
     /**
      * Are there any changes in the current build.
      *
@@ -20,7 +19,7 @@ public class Changes extends PageObject {
      */
     public boolean hasChanges() {
         try {
-            //TODO: improve test to be more failproove
+            // TODO: improve test to be more failproove
             find(by.xpath("//h2[text()='%s']/following-sibling::ol/li", "Summary"));
             return true;
         } catch (NoSuchElementException e) {
@@ -37,13 +36,11 @@ public class Changes extends PageObject {
      */
     public boolean hasDiffFileLink(String file) {
         try {
-            //TODO: improve test to be more failproove
+            // TODO: improve test to be more failproove
             find(by.xpath("//a[text()='/%s']/following-sibling::a[text()='(diff)']", file));
             return true;
         } catch (NoSuchElementException e) {
             return false;
         }
     }
-
-
 }

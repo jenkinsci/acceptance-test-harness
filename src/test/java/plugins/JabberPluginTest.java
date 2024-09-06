@@ -52,36 +52,40 @@ public class JabberPluginTest extends AbstractJUnitTest {
     @Test
     public void jabber_notification_success_publishing() throws IOException, InterruptedException {
         JabberContainer jabber = docker.get();
-        //Resource cp_file = resource(resourceFilePath);
-        //File sshFile = sshd.getPrivateKey();
+        // Resource cp_file = resource(resourceFilePath);
+        // File sshFile = sshd.getPrivateKey();
 
         FreeStyleJob j = jenkins.jobs.create();
         jenkins.configure();
-        EnabledConfig ec = new JabberGlobalConfig(jenkins).enableConfig(); {
+        EnabledConfig ec = new JabberGlobalConfig(jenkins).enableConfig();
+        {
             ec.jabberid.set(jabberIdString);
-            //sleep(10000);
+            // sleep(10000);
             ec.jabberPassword.set(jabberPasswordString);
-            //sleep(10000);
-        };
+            // sleep(10000);
+        }
+        ;
 
-        MUCConfig mc = ec.addMUCConfig();{
-            //sleep(10000);
+        MUCConfig mc = ec.addMUCConfig();
+        {
+            // sleep(10000);
             mc.mucName.set(mucNameString);
-            //mc.mucName.set(pwMucNameString);
-            //mc.mucPassword.set(pwMucPasswordString);
+            // mc.mucName.set(pwMucNameString);
+            // mc.mucPassword.set(pwMucPasswordString);
         }
 
-        AdvancedConfig ac = ec.addAdvancedConfig();{
-            //sleep(10000);
+        AdvancedConfig ac = ec.addAdvancedConfig();
+        {
+            // sleep(10000);
             ac.hostname.set(jabber.ipBound(5222));
-            //sleep(10000);
+            // sleep(10000);
             ac.port.set(jabber.port(5222));
             ac.enableSASL.check(false);
-
         }
         jenkins.save();
 
-        j.configure(); {
+        j.configure();
+        {
             j.addShellStep("echo 'Hello, Jenkins CI was here!'");
             JabberPublisher jp = j.addPublisher(JabberPublisher.class);
             Publishers publisher = jp.setPublisher();

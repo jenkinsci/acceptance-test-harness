@@ -8,11 +8,13 @@ import java.io.IOException;
  * @author Ullrich Hafner
  */
 public class NullPrinter implements LogListener {
-    @Override public void processLine(final String line) throws IOException {
+    @Override
+    public void processLine(final String line) throws IOException {
         // nothing to print
     }
 
-    @Override public void processClose(final Exception t) {
+    @Override
+    public void processClose(final Exception t) {
         // nothing to print
     }
 }

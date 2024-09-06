@@ -1,6 +1,10 @@
 package org.jenkinsci.test.acceptance.plugins.ant;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.BuildStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
 
 /**
  * Ant job configuration UI.

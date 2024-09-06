@@ -12,8 +12,8 @@ import org.openqa.selenium.By;
 public class MainPanel extends PageAreaImpl {
 
     final By tabName = By.xpath("//div[@id=\"main-panel\"]//div[@class=\"tab active\"]/a");
-    final By descriptionPath = By
-            .xpath("//div[@id=\"main-panel\"]/div[@id=\"view-message\"]/div[@id=\"description\"]/div[1]");
+    final By descriptionPath =
+            By.xpath("//div[@id=\"main-panel\"]/div[@id=\"view-message\"]/div[@id=\"description\"]/div[1]");
 
     public MainPanel(PageObject context, String path) {
         super(context, path);

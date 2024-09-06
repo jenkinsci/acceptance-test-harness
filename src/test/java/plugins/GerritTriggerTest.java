@@ -87,11 +87,25 @@ import org.junit.Test;
 public class GerritTriggerTest extends AbstractJUnitTest {
     private static final Logger LOGGER = Logger.getLogger(GerritTriggerTest.class.getName());
 
-    @Inject(optional = true) @Named("GerritTriggerTest.gtGerrituser") private String gtGerrituser;
-    @Inject(optional = true) @Named("GerritTriggerTest.gtHostname") private String gtHostname;
-    @Inject(optional = true) @Named("GerritTriggerTest.gtFrontEndUrl") private String gtGerritFrontUrl;
-    @Inject(optional = true) @Named("GerritTriggerTest.gtProject") private String gtProject;
-    @Inject(optional = true) @Named("GerritTriggerTest.gtPrivateKey") private String gtPrivateKey;
+    @Inject(optional = true)
+    @Named("GerritTriggerTest.gtGerrituser")
+    private String gtGerrituser;
+
+    @Inject(optional = true)
+    @Named("GerritTriggerTest.gtHostname")
+    private String gtHostname;
+
+    @Inject(optional = true)
+    @Named("GerritTriggerTest.gtFrontEndUrl")
+    private String gtGerritFrontUrl;
+
+    @Inject(optional = true)
+    @Named("GerritTriggerTest.gtProject")
+    private String gtProject;
+
+    @Inject(optional = true)
+    @Named("GerritTriggerTest.gtPrivateKey")
+    private String gtPrivateKey;
 
     // List of changes to abandon
     private List<String> changes = new ArrayList<String>();
@@ -99,19 +113,33 @@ public class GerritTriggerTest extends AbstractJUnitTest {
 
     @After
     public void abandonChanges() {
-        for(String changeId: changes) {
+        for (String changeId : changes) {
             try {
-                ProcessBuilder gerritQuery = new ProcessBuilder("ssh", "-p", "29418",
-                        "-i", gtPrivateKey,
-                        gtGerrituser + "@" + gtHostname, "gerrit",
-                        "query", "change_id="+changeId, "--format JSON");
+                ProcessBuilder gerritQuery = new ProcessBuilder(
+                        "ssh",
+                        "-p",
+                        "29418",
+                        "-i",
+                        gtPrivateKey,
+                        gtGerrituser + "@" + gtHostname,
+                        "gerrit",
+                        "query",
+                        "change_id=" + changeId,
+                        "--format JSON");
                 String json = removeLastLine(stringFrom(logProcessBuilderIssues(gerritQuery, "gerrit query")));
                 JSONObject obj = new JSONObject(json);
 
-                ProcessBuilder gerritAbandon = new ProcessBuilder("ssh", "-p", "29418",
-                        "-i", gtPrivateKey,
-                        gtGerrituser + "@" + gtHostname, "gerrit",
-                        "review", obj.getString("number") + ",1", "--abandon");
+                ProcessBuilder gerritAbandon = new ProcessBuilder(
+                        "ssh",
+                        "-p",
+                        "29418",
+                        "-i",
+                        gtPrivateKey,
+                        gtGerrituser + "@" + gtHostname,
+                        "gerrit",
+                        "review",
+                        obj.getString("number") + ",1",
+                        "--abandon");
                 logProcessBuilderIssues(gerritAbandon, "gerrit abandon");
             } catch (InterruptedException | IOException | JSONException e) {
                 LOGGER.warning(e.getMessage());
@@ -124,10 +152,13 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         ssh = File.createTempFile("jenkins", "ssh");
         ssh.deleteOnExit();
 
-        FileUtils.writeStringToFile(ssh,
-                "#!/bin/sh\n" +
-                        "exec ssh -o StrictHostKeyChecking=no -i " + gtPrivateKey + " \"$@\"", StandardCharsets.UTF_8);
-        Files.setPosixFilePermissions(ssh.toPath(), new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
+        FileUtils.writeStringToFile(
+                ssh,
+                "#!/bin/sh\n" + "exec ssh -o StrictHostKeyChecking=no -i " + gtPrivateKey + " \"$@\"",
+                StandardCharsets.UTF_8);
+        Files.setPosixFilePermissions(
+                ssh.toPath(),
+                new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
 
         changes = new ArrayList<String>();
     }
@@ -160,16 +191,23 @@ public class GerritTriggerTest extends AbstractJUnitTest {
             assertTrue(b.waitUntilFinished().isSuccess());
             elasticSleep(10000);
 
-            ProcessBuilder gerritQuery = new ProcessBuilder("ssh", "-p", "29418",
-                    "-i", gtPrivateKey,
-                    gtGerrituser + "@" + gtHostname, "gerrit",
-                    "query", "change_id="+changeId, "--all-approvals", "--format JSON");
+            ProcessBuilder gerritQuery = new ProcessBuilder(
+                    "ssh",
+                    "-p",
+                    "29418",
+                    "-i",
+                    gtPrivateKey,
+                    gtGerrituser + "@" + gtHostname,
+                    "gerrit",
+                    "query",
+                    "change_id=" + changeId,
+                    "--all-approvals",
+                    "--format JSON");
             String json = removeLastLine(stringFrom(logProcessBuilderIssues(gerritQuery, "gerrit query")));
 
             checkApprovalValueFromJSON(json, "Verified", 1);
             checkApprovalValueFromJSON(json, "Code-Review", 1);
-        }
-        catch(InterruptedException|IOException e) {
+        } catch (InterruptedException | IOException e) {
             fail(e.getMessage());
         }
     }
@@ -199,49 +237,68 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     private File createGitCommit(String jobName) throws IOException, InterruptedException {
         File dir = Files.createTempDirectory("jenkins" + "git").toFile();
 
-        ProcessBuilder pb = new ProcessBuilder("git", "clone", gtGerrituser
-                + "@" + gtHostname + ":"
-                + gtProject, jobName);
+        ProcessBuilder pb =
+                new ProcessBuilder("git", "clone", gtGerrituser + "@" + gtHostname + ":" + gtProject, jobName);
         pb.environment().put("GIT_SSH", ssh.getAbsolutePath());
 
         assertThat(logProcessBuilderIssues(pb.directory(dir), "git clone").exitValue(), is(equalTo(0)));
 
-        File file = new File(dir+"/"+jobName,jobName);
-        file.delete();//result !needed
+        File file = new File(dir + "/" + jobName, jobName);
+        file.delete(); // result !needed
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         writer.write(String.valueOf(System.currentTimeMillis()));
         writer.close();
         dir = file.getParentFile();
 
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "add", jobName ).directory(dir),
-                "git add").exitValue(), is(equalTo(0)));
-        File hooksDir = new File(dir,".git/hooks/");
+        assertThat(
+                logProcessBuilderIssues(new ProcessBuilder("git", "add", jobName).directory(dir), "git add")
+                        .exitValue(),
+                is(equalTo(0)));
+        File hooksDir = new File(dir, ".git/hooks/");
         if (!hooksDir.exists()) {
             assertTrue(hooksDir.mkdir());
         }
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("scp",
-                "-i", gtPrivateKey,
-                "-p", "-P", "29418",
-                gtGerrituser + "@" + gtHostname + ":hooks/commit-msg", ".git/hooks/").directory(dir),
-                "scp commit-msg").exitValue(), is(equalTo(0)));
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("git", "commit", "-m",
-                this.getClass().getName() + "(" + jobName + ")").directory(dir), "git commit").exitValue(),
+        assertThat(
+                logProcessBuilderIssues(
+                                new ProcessBuilder(
+                                                "scp",
+                                                "-i",
+                                                gtPrivateKey,
+                                                "-p",
+                                                "-P",
+                                                "29418",
+                                                gtGerrituser + "@" + gtHostname + ":hooks/commit-msg",
+                                                ".git/hooks/")
+                                        .directory(dir),
+                                "scp commit-msg")
+                        .exitValue(),
+                is(equalTo(0)));
+        assertThat(
+                logProcessBuilderIssues(
+                                new ProcessBuilder(
+                                                "git",
+                                                "commit",
+                                                "-m",
+                                                this.getClass().getName() + "(" + jobName + ")")
+                                        .directory(dir),
+                                "git commit")
+                        .exitValue(),
                 is(equalTo(0)));
         return dir;
     }
 
-    private GitLogResult pushChangeForReview(String jobName) throws InterruptedException,IOException {
+    private GitLogResult pushChangeForReview(String jobName) throws InterruptedException, IOException {
         File dir = createGitCommit(jobName);
         ProcessBuilder pb = new ProcessBuilder("git", "push", "origin", "HEAD:refs/for/master");
         pb.environment().put("GIT_SSH", ssh.getAbsolutePath());
 
         assertThat(logProcessBuilderIssues(pb.directory(dir), "git push").exitValue(), is(equalTo(0)));
 
-        ProcessBuilder gitLog1Pb = new ProcessBuilder("git","log","-1").directory(dir);
+        ProcessBuilder gitLog1Pb = new ProcessBuilder("git", "log", "-1").directory(dir);
         String output = stringFrom(logProcessBuilderIssues(gitLog1Pb, "git log"));
 
         GitLogResult gitLogResult = new GitLogResult();
-        gitLogResult.changeId = valueFrom(output,".+Change-Id:(.+)");
+        gitLogResult.changeId = valueFrom(output, ".+Change-Id:(.+)");
         gitLogResult.commitId = output.substring(6, 17);
         return gitLogResult;
     }
@@ -250,8 +307,9 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         assertThat(p.waitFor(), is(equalTo(0)));
         StringWriter writer = new StringWriter();
         IOUtils.copy(p.getInputStream(), writer, StandardCharsets.UTF_8);
-        String string = writer.toString().replaceAll(System.getProperty("line.separator"),
-                "").replaceAll(" ", "");
+        String string = writer.toString()
+                .replaceAll(System.getProperty("line.separator"), "")
+                .replaceAll(" ", "");
         writer.close();
         return string;
     }
@@ -305,25 +363,20 @@ public class GerritTriggerTest extends AbstractJUnitTest {
             Build b = new Build(j, j.getNextBuildNumber());
             assertTrue(b.waitUntilFinished().isSuccess());
             elasticSleep(10000);
-        }
-        catch(InterruptedException|IOException e) {
+        } catch (InterruptedException | IOException e) {
             fail(e.getMessage());
         }
-
     }
 
-    private String pushChangeToGerritNotForReview(String jobName) throws InterruptedException,IOException {
+    private String pushChangeToGerritNotForReview(String jobName) throws InterruptedException, IOException {
         File dir = createGitCommit(jobName);
         ProcessBuilder pb = new ProcessBuilder("git", "push", "origin", "master:master");
         pb.environment().put("GIT_SSH", ssh.getAbsolutePath());
 
-        assertThat(logProcessBuilderIssues(
-                pb.directory(dir), "git push")
-                .exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(pb.directory(dir), "git push").exitValue(), is(equalTo(0)));
 
-        ProcessBuilder gitLog1Pb = new ProcessBuilder("git","log","-1").directory(dir);
-        return valueFrom(stringFrom(logProcessBuilderIssues(gitLog1Pb, "git log")),
-                ".+Change-Id:(.+)");
+        ProcessBuilder gitLog1Pb = new ProcessBuilder("git", "log", "-1").directory(dir);
+        return valueFrom(stringFrom(logProcessBuilderIssues(gitLog1Pb, "git log")), ".+Change-Id:(.+)");
     }
 
     @Test
@@ -345,16 +398,23 @@ public class GerritTriggerTest extends AbstractJUnitTest {
             assertTrue(b.waitUntilFinished().isSuccess());
             elasticSleep(10000);
 
-            ProcessBuilder gerritQuery = new ProcessBuilder("ssh", "-p", "29418",
-                    "-i", gtPrivateKey,
-                    gtGerrituser + "@" + gtHostname, "gerrit",
-                    "query", "change_id="+gitLogResult.changeId, "--all-approvals", "--format JSON");
+            ProcessBuilder gerritQuery = new ProcessBuilder(
+                    "ssh",
+                    "-p",
+                    "29418",
+                    "-i",
+                    gtPrivateKey,
+                    gtGerrituser + "@" + gtHostname,
+                    "gerrit",
+                    "query",
+                    "change_id=" + gitLogResult.changeId,
+                    "--all-approvals",
+                    "--format JSON");
             String json = removeLastLine(stringFrom(logProcessBuilderIssues(gerritQuery, "gerrit query")));
 
             checkApprovalValueFromJSON(json, "Verified", 1);
             checkApprovalValueFromJSON(json, "Code-Review", 1);
-        }
-        catch(InterruptedException|IOException e) {
+        } catch (InterruptedException | IOException e) {
             fail(e.getMessage());
         }
     }
@@ -376,47 +436,64 @@ public class GerritTriggerTest extends AbstractJUnitTest {
             assertTrue(b.waitUntilFinished().isSuccess());
             elasticSleep(10000);
 
-            ProcessBuilder gerritQuery = new ProcessBuilder("ssh", "-p", "29418",
-                    "-i", gtPrivateKey,
-                    gtGerrituser + "@" + gtHostname, "gerrit",
-                    "query", "change_id="+changeId, "--all-approvals", "--format JSON");
+            ProcessBuilder gerritQuery = new ProcessBuilder(
+                    "ssh",
+                    "-p",
+                    "29418",
+                    "-i",
+                    gtPrivateKey,
+                    gtGerrituser + "@" + gtHostname,
+                    "gerrit",
+                    "query",
+                    "change_id=" + changeId,
+                    "--all-approvals",
+                    "--format JSON");
             String json = removeLastLine(stringFrom(logProcessBuilderIssues(gerritQuery, "gerrit query")));
             LOGGER.info(json);
 
             checkApprovalValueFromJSON(json, "Verified", 1);
             checkApprovalValueFromJSON(json, "Code-Review", 1);
-        }
-        catch(InterruptedException|IOException e) {
+        } catch (InterruptedException | IOException e) {
             fail(e.getMessage());
         }
     }
 
     private static String removeLastLine(String x) {
-        if(x.lastIndexOf("\n")>0) {
+        if (x.lastIndexOf("\n") > 0) {
             return x.substring(0, x.lastIndexOf("\n"));
         } else {
             return x;
         }
     }
 
-    public String pushDraftForPublishing(String jobName) throws InterruptedException,IOException {
+    public String pushDraftForPublishing(String jobName) throws InterruptedException, IOException {
         File dir = createGitCommit(jobName);
 
         ProcessBuilder pb = new ProcessBuilder("git", "push", "origin", "HEAD:refs/drafts/master");
         pb.environment().put("GIT_SSH", ssh.getAbsolutePath());
 
-        assertThat(logProcessBuilderIssues(pb.directory(dir), "git push").exitValue(),
-                is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(pb.directory(dir), "git push").exitValue(), is(equalTo(0)));
 
-        ProcessBuilder gitLog1Pb = new ProcessBuilder("git","rev-parse","HEAD").directory(dir);
+        ProcessBuilder gitLog1Pb = new ProcessBuilder("git", "rev-parse", "HEAD").directory(dir);
         String commitID = stringFrom(logProcessBuilderIssues(gitLog1Pb, "git log"));
-        ProcessBuilder gitLog2Pb = new ProcessBuilder("git","log","-1").directory(dir);
-        String changeID = valueFrom(stringFrom(logProcessBuilderIssues(gitLog2Pb, "git log")),
-                ".+Change-Id:(.+)");
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh",
-                "-i", gtPrivateKey,
-                "-p", "29418", gtGerrituser + "@" + gtHostname,
-                "gerrit", "review", commitID, "--publish").directory(dir), "git publish").exitValue(),
+        ProcessBuilder gitLog2Pb = new ProcessBuilder("git", "log", "-1").directory(dir);
+        String changeID = valueFrom(stringFrom(logProcessBuilderIssues(gitLog2Pb, "git log")), ".+Change-Id:(.+)");
+        assertThat(
+                logProcessBuilderIssues(
+                                new ProcessBuilder(
+                                                "ssh",
+                                                "-i",
+                                                gtPrivateKey,
+                                                "-p",
+                                                "29418",
+                                                gtGerrituser + "@" + gtHostname,
+                                                "gerrit",
+                                                "review",
+                                                commitID,
+                                                "--publish")
+                                        .directory(dir),
+                                "git publish")
+                        .exitValue(),
                 is(equalTo(0)));
         return changeID;
     }
@@ -439,62 +516,98 @@ public class GerritTriggerTest extends AbstractJUnitTest {
             assertTrue(b.waitUntilFinished().isSuccess());
             elasticSleep(10000);
 
-            ProcessBuilder gerritQuery = new ProcessBuilder("ssh", "-p", "29418",
-                    "-i", gtPrivateKey,
-                    gtGerrituser + "@" + gtHostname, "gerrit",
-                    "query", "change_id="+changeId, "--all-approvals", "--format JSON");
+            ProcessBuilder gerritQuery = new ProcessBuilder(
+                    "ssh",
+                    "-p",
+                    "29418",
+                    "-i",
+                    gtPrivateKey,
+                    gtGerrituser + "@" + gtHostname,
+                    "gerrit",
+                    "query",
+                    "change_id=" + changeId,
+                    "--all-approvals",
+                    "--format JSON");
             String json = removeLastLine(stringFrom(logProcessBuilderIssues(gerritQuery, "gerrit query")));
 
             checkApprovalValueFromJSON(json, "Verified", 1);
             checkApprovalValueFromJSON(json, "Code-Review", 1);
-        }
-        catch(InterruptedException|IOException e) {
+        } catch (InterruptedException | IOException e) {
             fail(e.getMessage());
         }
     }
 
-    public String pushChangeForMerge(String jobName) throws InterruptedException,IOException {
+    public String pushChangeForMerge(String jobName) throws InterruptedException, IOException {
         File dir = createGitCommit(jobName);
         ProcessBuilder pb = new ProcessBuilder("git", "push", "origin", "HEAD:refs/for/master");
         pb.environment().put("GIT_SSH", ssh.getAbsolutePath());
-        assertThat(logProcessBuilderIssues(pb.directory(dir),
-                "git push").exitValue(), is(equalTo(0)));
+        assertThat(logProcessBuilderIssues(pb.directory(dir), "git push").exitValue(), is(equalTo(0)));
 
-        String commitID = stringFrom(logProcessBuilderIssues(
-                new ProcessBuilder("git","rev-parse","HEAD").directory(dir), "git log"));
-        ProcessBuilder gitLog2Pb = new ProcessBuilder("git","log","-1").directory(dir);
-        String changeID = valueFrom(stringFrom(logProcessBuilderIssues(gitLog2Pb, "git log")),
-                ".+Change-Id:(.+)");
+        String commitID = stringFrom(
+                logProcessBuilderIssues(new ProcessBuilder("git", "rev-parse", "HEAD").directory(dir), "git log"));
+        ProcessBuilder gitLog2Pb = new ProcessBuilder("git", "log", "-1").directory(dir);
+        String changeID = valueFrom(stringFrom(logProcessBuilderIssues(gitLog2Pb, "git log")), ".+Change-Id:(.+)");
 
-        pb = new ProcessBuilder("ssh", "-p", "29418",
-                "-i", gtPrivateKey,
+        pb = new ProcessBuilder(
+                "ssh",
+                "-p",
+                "29418",
+                "-i",
+                gtPrivateKey,
                 gtGerrituser + "@" + gtHostname,
-                "gerrit", "review", commitID, "--verified 1");
-        assertThat(logProcessBuilderIssues(pb.directory(dir), "gerrit verify").exitValue(),
-                is(equalTo(0)));
+                "gerrit",
+                "review",
+                commitID,
+                "--verified 1");
+        assertThat(logProcessBuilderIssues(pb.directory(dir), "gerrit verify").exitValue(), is(equalTo(0)));
 
-        pb = new ProcessBuilder("ssh", "-p", "29418",
-                "-i", gtPrivateKey,
+        pb = new ProcessBuilder(
+                "ssh",
+                "-p",
+                "29418",
+                "-i",
+                gtPrivateKey,
                 gtGerrituser + "@" + gtHostname,
-                "gerrit", "review", commitID, "--code-review 2");
-        assertThat(logProcessBuilderIssues(pb.directory(dir), "gerrit code review").exitValue(),
-                is(equalTo(0)));
+                "gerrit",
+                "review",
+                commitID,
+                "--code-review 2");
+        assertThat(
+                logProcessBuilderIssues(pb.directory(dir), "gerrit code review").exitValue(), is(equalTo(0)));
 
-        pb = new ProcessBuilder("ssh", "-p", "29418",
-                "-i", gtPrivateKey,
+        pb = new ProcessBuilder(
+                "ssh",
+                "-p",
+                "29418",
+                "-i",
+                gtPrivateKey,
                 gtGerrituser + "@" + gtHostname,
-                "gerrit", "review", commitID, "--submit");
-        assertThat(logProcessBuilderIssues(pb.directory(dir), "gerrit merge").exitValue(),
-                is(equalTo(0)));
+                "gerrit",
+                "review",
+                commitID,
+                "--submit");
+        assertThat(logProcessBuilderIssues(pb.directory(dir), "gerrit merge").exitValue(), is(equalTo(0)));
 
         return changeID;
     }
 
-    private void addComment(String commitId) throws InterruptedException,IOException {
-        assertThat(logProcessBuilderIssues(new ProcessBuilder("ssh", "-p", "29418",
-                "-i", gtPrivateKey,
-                gtGerrituser + "@" + gtHostname, "gerrit", "review", commitId, "--code-review -2"),
-                "ssh gerrit --code-review").exitValue(), is(equalTo(0)));
+    private void addComment(String commitId) throws InterruptedException, IOException {
+        assertThat(
+                logProcessBuilderIssues(
+                                new ProcessBuilder(
+                                        "ssh",
+                                        "-p",
+                                        "29418",
+                                        "-i",
+                                        gtPrivateKey,
+                                        gtGerrituser + "@" + gtHostname,
+                                        "gerrit",
+                                        "review",
+                                        commitId,
+                                        "--code-review -2"),
+                                "ssh gerrit --code-review")
+                        .exitValue(),
+                is(equalTo(0)));
     }
 
     private class GitLogResult {

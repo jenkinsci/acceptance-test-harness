@@ -22,7 +22,5 @@ public class SystemEnvironmentVariables {
         } else {
             return propertyValue;
         }
-
     }
-
 }

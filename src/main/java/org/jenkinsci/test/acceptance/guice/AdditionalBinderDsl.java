@@ -16,8 +16,7 @@ import org.jenkinsci.groovy.binder.BinderClosureScript;
  * @author Kohsuke Kawaguchi
  */
 public abstract class AdditionalBinderDsl extends BinderClosureScript {
-    public AdditionalBinderDsl() {
-    }
+    public AdditionalBinderDsl() {}
 
     public AdditionalBinderDsl(Binding binding) {
         super(binding);
@@ -30,15 +29,13 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
      */
     public SubWorld subworld(final Closure config) {
         final Binder binder = getBinder();
-//        final SubWorldBuilder sub = new SubWorldBuilder(name);
+        //        final SubWorldBuilder sub = new SubWorldBuilder(name);
         try {
             final SubWorld sw = new SubWorld();
 
             World w = World.get();
             sw.injector = Guice.createInjector(
-                    Modules.override(
-                            new ExtensionFinder(w.getClassLoader())
-                    ).with(new AbstractModule() {
+                    Modules.override(new ExtensionFinder(w.getClassLoader())).with(new AbstractModule() {
                         @Override
                         protected void configure() {
                             AdditionalBinderDsl.this.setBinder(binder());
@@ -50,7 +47,7 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
 
             return sw;
         } catch (CreationException e) {
-            throw new RuntimeException("Failed to create a sub-world",e);
+            throw new RuntimeException("Failed to create a sub-world", e);
         } finally {
             setBinder(binder);
         }
@@ -59,7 +56,7 @@ public abstract class AdditionalBinderDsl extends BinderClosureScript {
     @Override
     public void setProperty(String property, Object value) {
         if (value instanceof SubWorld) {
-            ((SubWorld)value).name = property;
+            ((SubWorld) value).name = property;
         }
         super.setProperty(property, value);
     }

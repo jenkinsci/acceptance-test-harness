@@ -75,8 +75,7 @@ public class Script extends CapybaraPortingLayerImpl {
         if (agent != null) {
             try {
                 control("/node").select(agent);
-            }
-            catch (NoSuchElementException ex) {
+            } catch (NoSuchElementException ex) {
                 elasticSleep(1000);
                 visitAction("runScript");
                 control("/node").select(agent);

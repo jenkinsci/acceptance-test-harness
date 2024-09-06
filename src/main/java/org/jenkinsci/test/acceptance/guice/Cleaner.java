@@ -65,6 +65,7 @@ public class Cleaner {
             }
         });
     }
+
     public void performCleanUp() {
         LOGGER.info("Performing cleanup tasks in order: " + tasks);
         for (Statement task : tasks) {

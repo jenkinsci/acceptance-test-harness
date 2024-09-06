@@ -44,10 +44,15 @@ public class JcascManage extends PageObject {
     public void configure(String path) {
         Control control = control("/newSource");
         control.set(path);
-        waitFor().withTimeout(Duration.ofSeconds(5)).ignoring(AssertionError.class).until(() -> {
-            assertThat(control.getFormValidation(), FormValidation.reports(FormValidation.Kind.OK, "The configuration can be applied"));
-            return true;
-        });
+        waitFor()
+                .withTimeout(Duration.ofSeconds(5))
+                .ignoring(AssertionError.class)
+                .until(() -> {
+                    assertThat(
+                            control.getFormValidation(),
+                            FormValidation.reports(FormValidation.Kind.OK, "The configuration can be applied"));
+                    return true;
+                });
 
         clickButton("Apply new configuration");
         verifySuccessfulApplication();

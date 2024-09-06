@@ -50,15 +50,16 @@ public class WinstoneDockerController extends LocalController {
             File war = this.war.getCanonicalFile();
 
             CommandBuilder opts = new CommandBuilder();
-            opts.add("-v", getJenkinsHome()+":/work");
-            opts.add("-v", war.getParent()+":/war");
+            opts.add("-v", getJenkinsHome() + ":/work");
+            opts.add("-v", war.getParent() + ":/war");
 
             // TODO: unify ID and fixture
             DockerImage img;
-            if (dockerImage!=null)
+            if (dockerImage != null) {
                 img = new DockerImage(dockerImage);
-            else
+            } else {
                 img = docker.build(fixtureType);
+            }
 
             container = img.start(fixtureType).withOptions(opts).start();
 
@@ -67,10 +68,10 @@ public class WinstoneDockerController extends LocalController {
             cmds.add("-DJENKINS_HOME=/work");
             cmds.add("-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
             cmds.add("-jar", "/war/" + war.getName());
-            cmds.add("--controlPort=8081","--httpPort=8080");
+            cmds.add("--controlPort=8081", "--httpPort=8080");
             return container.popen(cmds);
         } catch (InterruptedException e) {
-            throw (IOException)new InterruptedIOException("Failed to launch winstone").initCause(e);
+            throw (IOException) new InterruptedIOException("Failed to launch winstone").initCause(e);
         }
     }
 
@@ -79,8 +80,9 @@ public class WinstoneDockerController extends LocalController {
         try {
             super.stopNow();
         } finally {
-            if (container!=null)
+            if (container != null) {
                 container.close();
+            }
         }
     }
 
@@ -91,9 +93,9 @@ public class WinstoneDockerController extends LocalController {
     @Override
     public URL getUrl() {
         try {
-            return new URL("http://"+container.getIpAddress()+":8080/");
+            return new URL("http://" + container.getIpAddress() + ":8080/");
         } catch (IOException e) {
-            throw new AssertionError(String.format("%s failed to report its IP address",container),e);
+            throw new AssertionError(String.format("%s failed to report its IP address", container), e);
         }
     }
 
@@ -111,8 +113,9 @@ public class WinstoneDockerController extends LocalController {
         public WinstoneDockerController create() {
             WinstoneDockerController c = injector.getInstance(WinstoneDockerController.class);
             String img = System.getenv("DOCKER_IMAGE");
-            if (img!=null)
+            if (img != null) {
                 c.setDockerImage(img);
+            }
             return c;
         }
     }

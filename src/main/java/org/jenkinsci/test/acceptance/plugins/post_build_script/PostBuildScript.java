@@ -23,10 +23,20 @@
  */
 package org.jenkinsci.test.acceptance.plugins.post_build_script;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.po.Step;
 import org.openqa.selenium.By;
 
-@Describable({"Execute scripts", "Execute Scripts", "Execute a set of scripts", "[PostBuildScript] - Execute a set of scripts"})
+@Describable({
+    "Execute scripts",
+    "Execute Scripts",
+    "Execute a set of scripts",
+    "[PostBuildScript] - Execute a set of scripts"
+})
 public class PostBuildScript extends AbstractStep implements PostBuildStep {
     private final Control buildResult = control("buildSteps/results");
 
@@ -35,21 +45,30 @@ public class PostBuildScript extends AbstractStep implements PostBuildStep {
     }
 
     public <T extends Step> T addStep(final Class<T> type) {
-        String path = createPageArea("buildSteps/buildSteps",
-                () -> control("/buildSteps/hetero-list-add[postBuild.buildStep.buildSteps]").selectDropdownMenu(type));
+        String path = createPageArea(
+                "buildSteps/buildSteps", () -> control("/buildSteps/hetero-list-add[postBuild.buildStep.buildSteps]")
+                        .selectDropdownMenu(type));
         return newInstance(type, parent, path);
     }
 
     public void runWhenFailed() {
-        if(buildResult.resolve().findElement(By.xpath(".//option[@selected='true']")).getAttribute("value").equals("SUCCESS")) {
-            //unselect default in multiple selection
+        if (buildResult
+                .resolve()
+                .findElement(By.xpath(".//option[@selected='true']"))
+                .getAttribute("value")
+                .equals("SUCCESS")) {
+            // unselect default in multiple selection
             buildResult.select("SUCCESS");
         }
         buildResult.select("FAILURE");
     }
 
     public void runWhenSucceeded() {
-        if(!buildResult.resolve().findElement(By.xpath(".//option[@selected='true']")).getAttribute("value").equals("SUCCESS")) {
+        if (!buildResult
+                .resolve()
+                .findElement(By.xpath(".//option[@selected='true']"))
+                .getAttribute("value")
+                .equals("SUCCESS")) {
             buildResult.select("SUCCESS");
         }
     }

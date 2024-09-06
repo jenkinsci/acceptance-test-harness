@@ -37,8 +37,6 @@ public class EmailExtPluginTest extends AbstractJUnitTest {
 
         Build b = job.startBuild().shouldFail();
 
-        mailhog.assertMail(Pattern.compile("^Modified "),
-                "dev@example.com",
-                Pattern.compile("\nwith amendment$"));
+        mailhog.assertMail(Pattern.compile("^Modified "), "dev@example.com", Pattern.compile("\nwith amendment$"));
     }
 }

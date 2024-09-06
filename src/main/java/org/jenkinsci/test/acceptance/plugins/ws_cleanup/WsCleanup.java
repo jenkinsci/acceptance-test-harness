@@ -23,7 +23,11 @@
  */
 package org.jenkinsci.test.acceptance.plugins.ws_cleanup;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 public class WsCleanup extends PageAreaImpl {
 

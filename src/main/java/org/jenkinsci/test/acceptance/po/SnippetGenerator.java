@@ -17,7 +17,7 @@ public class SnippetGenerator extends PageObject {
      *         job context
      */
     public SnippetGenerator(final WorkflowJob context) {
-        super(context,  context.url(URI));
+        super(context, context.url(URI));
     }
 
     @Override

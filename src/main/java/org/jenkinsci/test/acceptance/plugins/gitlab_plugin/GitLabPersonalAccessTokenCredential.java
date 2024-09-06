@@ -1,12 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.gitlab_plugin;
 
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+
 import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
-
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 @Describable("GitLab Personal Access Token")
 public class GitLabPersonalAccessTokenCredential extends BaseStandardCredentials {

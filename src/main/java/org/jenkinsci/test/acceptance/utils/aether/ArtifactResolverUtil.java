@@ -70,9 +70,8 @@ public class ArtifactResolverUtil {
      * @return artifact resolution result
      */
     public ArtifactResult resolve(DefaultArtifact artifact) {
-        Builder repoBuilder = new RemoteRepository.Builder(
-                "repo.jenkins-ci.org", "default",
-                "https://repo.jenkins-ci.org/public/");
+        Builder repoBuilder =
+                new RemoteRepository.Builder("repo.jenkins-ci.org", "default", "https://repo.jenkins-ci.org/public/");
 
         DefaultSettingsBuildingRequest request = new DefaultSettingsBuildingRequest();
 
@@ -101,9 +100,9 @@ public class ArtifactResolverUtil {
         RemoteRepository repo = repoBuilder.build();
         ArtifactResult r;
         try {
-            r = repoSystem.resolveArtifact(repoSystemSession,new ArtifactRequest(artifact, Arrays.asList(repo), null));
+            r = repoSystem.resolveArtifact(repoSystemSession, new ArtifactRequest(artifact, Arrays.asList(repo), null));
         } catch (ArtifactResolutionException e) {
-            throw new RuntimeException("Could not resolve " + artifact + " from Maven repository",e);
+            throw new RuntimeException("Could not resolve " + artifact + " from Maven repository", e);
         }
         LOGGER.config("Found " + r);
         return r;

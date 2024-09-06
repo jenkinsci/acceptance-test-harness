@@ -24,10 +24,10 @@ public class InteractiveConsole {
     public static void execute(Object caller, Object... args) {
         Console cons = new Console();
         cons.getConfig().setScriptBaseClass(ClosureScript.class.getName());
-        cons.setVariable("delegate",caller);
+        cons.setVariable("delegate", caller);
 
-        for (int i=0; i<args.length; i+=2) {
-            cons.setVariable(args[i].toString(),args[i+1]);
+        for (int i = 0; i < args.length; i += 2) {
+            cons.setVariable(args[i].toString(), args[i + 1]);
         }
 
         cons.run();

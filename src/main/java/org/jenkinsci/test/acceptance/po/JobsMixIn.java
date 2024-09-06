@@ -17,7 +17,7 @@ public class JobsMixIn extends MixIn {
     public JobsMixIn(ContainerPageObject context) {
         super(context);
     }
-    
+
     public WebElement findTypeCaption(Class<?> type) {
         return findCaption(type, getFinder());
     }
@@ -35,7 +35,7 @@ public class JobsMixIn extends MixIn {
             blur(find(By.name("name")));
         } catch (Exception e) {
             // This should rarely fail on modern browsers,
-            // we don't really care if it does since Firefox was 
+            // we don't really care if it does since Firefox was
             // the only one that seemed to exhibit the issue
         }
 
@@ -51,15 +51,14 @@ public class JobsMixIn extends MixIn {
 
         // I'm seeing occasional 404 when trying to access the page right after a job is created.
         // so I'm giving it a bit of time before the job properly appears.
-        waitFor().withTimeout(Duration.ofSeconds(3))
-                .until((Callable<Object>) () -> {
-                    try {
-                        j.getJson();
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                });
+        waitFor().withTimeout(Duration.ofSeconds(3)).until((Callable<Object>) () -> {
+            try {
+                j.getJson();
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        });
 
         return j;
     }
@@ -99,19 +98,21 @@ public class JobsMixIn extends MixIn {
     public void copy(String from, String to) {
         visit("newJob");
         fillIn("from", from);
-        // There is a javascript magic bound to loss of focus on 'from' field that is a pain to duplicate through selenium
+        // There is a javascript magic bound to loss of focus on 'from' field that is a pain to duplicate through
+        // selenium
         // explicitly. Here, it is done so by setting 'to' afterwards.
         fillIn("name", to);
         clickButton("OK");
     }
-    
+
     private final Finder<WebElement> finder = new Finder<>() {
-        @Override protected WebElement find(String caption) {
+        @Override
+        protected WebElement find(String caption) {
             String normalizedCaption = caption.replace('.', '_');
             return outer.find(by.css("li." + normalizedCaption));
         }
     };
-    
+
     private Finder<WebElement> getFinder() {
         return finder;
     }

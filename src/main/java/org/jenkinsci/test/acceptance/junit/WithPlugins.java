@@ -63,7 +63,7 @@ import org.junit.runners.model.Statement;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 @Documented
-@RuleAnnotation(value=WithPlugins.RuleImpl.class, priority=WithPlugins.PRIORITY)
+@RuleAnnotation(value = WithPlugins.RuleImpl.class, priority = WithPlugins.PRIORITY)
 public @interface WithPlugins {
 
     int PRIORITY = 10;
@@ -83,17 +83,19 @@ public @interface WithPlugins {
         @Inject
         Injector injector;
 
-        @Inject @Named("ExercisedPluginReporter")
+        @Inject
+        @Named("ExercisedPluginReporter")
         ExercisedPluginsReporter pluginReporter;
 
         String pluginEvaluationOutcome = System.getProperty("pluginEvaluationOutcome", PRECONFIGURED_MODE_DISABLED);
 
-        @VisibleForTesting static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
+        @VisibleForTesting
+        static List<PluginSpec> combinePlugins(List<WithPlugins> wp) {
             Map<String, PluginSpec> plugins = new LinkedHashMap<>();
             for (WithPlugins withPlugins : wp) {
                 if (withPlugins != null) {
                     // eliminate duplicates and prefer newer versions
-                    for (String spec: withPlugins.value()) {
+                    for (String spec : withPlugins.value()) {
                         PluginSpec candidate = new PluginSpec(spec);
                         PluginSpec existing = plugins.get(candidate.getName());
 
@@ -117,6 +119,7 @@ public @interface WithPlugins {
         public Statement apply(final Statement base, final Description d) {
             return new Statement() {
                 private Jenkins jenkins;
+
                 @Override
                 public void evaluate() throws Throwable {
                     jenkins = injector.getInstance(Jenkins.class);
@@ -133,7 +136,7 @@ public @interface WithPlugins {
                     List<PluginSpec> plugins = combinePlugins(wp);
 
                     // Check if we are in preconfigured plugins mode
-                    if(pluginEvaluationOutcome.equals(PRECONFIGURED_MODE_DISABLED)) {
+                    if (pluginEvaluationOutcome.equals(PRECONFIGURED_MODE_DISABLED)) {
 
                         installPlugins(plugins);
 
@@ -141,11 +144,7 @@ public @interface WithPlugins {
                             Plugin installedPlugin = jenkins.getPlugin(plugin.getName());
                             VersionNumber installedVersion = installedPlugin.getVersion();
                             String version = installedVersion.toString();
-                            pluginReporter.log(
-                                    d.getClassName() + "." + d.getMethodName(),
-                                    plugin.getName(),
-                                    version
-                            );
+                            pluginReporter.log(d.getClassName() + "." + d.getMethodName(), plugin.getName(), version);
                         }
                     } else { // In preconfigured plugins mode, ATH will just validate plugins
                         PluginManager pm = jenkins.getPluginManager();
@@ -182,8 +181,7 @@ public @interface WithPlugins {
 
                     if (install.isEmpty()) {
                         LOGGER.info("All required plugins already installed.");
-                    }
-                    else {
+                    } else {
                         LOGGER.info("Installing plugins for test: " + install);
                         PluginSpec[] installList = install.toArray(new PluginSpec[install.size()]);
                         try {
@@ -197,12 +195,20 @@ public @interface WithPlugins {
             };
         }
 
-        private void handleInvalidState(String pluginEvaluationOutcome, PluginSpec spec, Description d, PluginManager.InstallationStatus status) {
-            String format = String.format("%s plugin is required by test %s but it is not installed in a valid version and ATH is running in preconfigured mode", spec, d.getDisplayName());
+        private void handleInvalidState(
+                String pluginEvaluationOutcome,
+                PluginSpec spec,
+                Description d,
+                PluginManager.InstallationStatus status) {
+            String format = String.format(
+                    "%s plugin is required by test %s but it is not installed in a valid version and ATH is running in preconfigured mode",
+                    spec, d.getDisplayName());
             if (status.equals(PluginManager.InstallationStatus.OUTDATED)) {
                 Jenkins jenkins = injector.getInstance(Jenkins.class);
                 Plugin existingPlugin = jenkins.getPlugin(spec.getName());
-                format = String.format("%s Existing installed version of plugin %s is %s", format, spec.getName(), existingPlugin.getVersion());
+                format = String.format(
+                        "%s Existing installed version of plugin %s is %s",
+                        format, spec.getName(), existingPlugin.getVersion());
             }
 
             if (pluginEvaluationOutcome.equals(FAIL_ON_INVALID)) {

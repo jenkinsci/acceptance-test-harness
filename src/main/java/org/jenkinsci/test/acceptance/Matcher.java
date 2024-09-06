@@ -28,11 +28,13 @@ import org.hamcrest.TypeSafeMatcher;
 
 public abstract class Matcher<T> extends TypeSafeMatcher<T> {
     private final String description;
+
     public Matcher(String format, Object... args) {
         description = String.format(format, args);
     }
 
-    @Override public final void describeTo(Description description) {
+    @Override
+    public final void describeTo(Description description) {
         description.appendText(this.description);
     }
 
@@ -40,9 +42,11 @@ public abstract class Matcher<T> extends TypeSafeMatcher<T> {
         return description;
     }
 
-    @Override public abstract boolean matchesSafely(T item);
+    @Override
+    public abstract boolean matchesSafely(T item);
 
-    @Override public void describeMismatchSafely(T item, Description mismatchDescription) {
+    @Override
+    public void describeMismatchSafely(T item, Description mismatchDescription) {
         super.describeMismatchSafely(item, mismatchDescription);
     }
 }

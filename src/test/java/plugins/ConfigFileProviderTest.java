@@ -24,7 +24,14 @@ import org.junit.Test;
 /**
  * Tests config-file-provider plugin inside a Pipeline.
  */
-@WithPlugins({"config-file-provider", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step", "cloudbees-folder"})
+@WithPlugins({
+    "config-file-provider",
+    "workflow-job",
+    "workflow-cps",
+    "workflow-basic-steps",
+    "workflow-durable-task-step",
+    "cloudbees-folder"
+})
 public class ConfigFileProviderTest extends AbstractJUnitTest {
 
     private static final String CRED_ID = "credId";
@@ -37,7 +44,6 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
     private static final String CUSTOM_CONF_EXTRA_CONTENT = "extra content for custom";
 
     private static final String MANAGED_FILE_NOT_FOUND_ERROR = "not able to provide the file [ManagedFile: id=%s";
-
 
     @Before
     public void setup() {
@@ -61,22 +67,23 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         assertThat(jobLog, containsString(CRED_USR));
     }
 
-
     private MavenSettingsConfig createMavenSettingsConfig(final String serverId, final String credId) {
         final MavenSettingsConfig mvnConfig = new ConfigFileProvider(jenkins).addFile(MavenSettingsConfig.class);
 
-        mvnConfig.content(String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" \n" +
-                "          xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
-                "          xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">\n" +
-                "  \n" +
-                "  <servers>\n" +
-                "    <server>\n" +
-                "      <id>%s</id>\n" +
-                "    </server>\n" +
-                "  </servers>\n" +
-                "\n" +
-                "</settings>", serverId));
+        mvnConfig.content(String.format(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" \n"
+                        + "          xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+                        + "          xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">\n"
+                        + "  \n"
+                        + "  <servers>\n"
+                        + "    <server>\n"
+                        + "      <id>%s</id>\n"
+                        + "    </server>\n"
+                        + "  </servers>\n"
+                        + "\n"
+                        + "</settings>",
+                serverId));
 
         final ServerCredentialMapping serverCred = mvnConfig.addServerCredentialMapping();
         serverCred.serverId(serverId);
@@ -88,14 +95,16 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
     private String createPipelineAndGetConsole(final MavenSettingsConfig mvnConfig) {
         final WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set(String.format("node {\n" +
-                "    configFileProvider(\n" +
-                "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS')]) {\n" +
-                "            \n" +
-                (SystemUtils.IS_OS_WINDOWS ? "        bat 'type %%MAVEN_SETTINGS%% '\n"
-                                           : "        sh 'cat $MAVEN_SETTINGS '\n") +
-                "    }\n" +
-                "}", mvnConfig.id()));
+        job.script.set(String.format(
+                "node {\n" + "    configFileProvider(\n"
+                        + "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS')]) {\n"
+                        + "            \n"
+                        + (SystemUtils.IS_OS_WINDOWS
+                                ? "        bat 'type %%MAVEN_SETTINGS%% '\n"
+                                : "        sh 'cat $MAVEN_SETTINGS '\n")
+                        + "    }\n"
+                        + "}",
+                mvnConfig.id()));
 
         job.save();
 
@@ -122,14 +131,16 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
     private String createPipelineAndGetConsole(final CustomConfig customConfig) {
         final WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set(String.format("node {\n" +
-                "    configFileProvider(\n" +
-                "        [configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n" +
-                "            \n" +
-                (SystemUtils.IS_OS_WINDOWS ? "        bat 'type %%CUSTOM_SETTINGS%% '\n"
-                                          :  "        sh 'cat $CUSTOM_SETTINGS '\n") +
-                "    }\n" +
-                "}", customConfig.id()));
+        job.script.set(String.format(
+                "node {\n" + "    configFileProvider(\n"
+                        + "        [configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n"
+                        + "            \n"
+                        + (SystemUtils.IS_OS_WINDOWS
+                                ? "        bat 'type %%CUSTOM_SETTINGS%% '\n"
+                                : "        sh 'cat $CUSTOM_SETTINGS '\n")
+                        + "    }\n"
+                        + "}",
+                customConfig.id()));
 
         job.save();
 
@@ -143,7 +154,8 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         final Folder f = jenkins.jobs.create(Folder.class);
         final CustomConfig customConf = this.createCustomConfigInFolder(f, CUSTOM_CONF_CONTENT);
-        final WorkflowJob job = createPipelineJobInFolderWithScript(f, scriptForPipelineWithParameters(mvnConfig.id(), customConf.id()));
+        final WorkflowJob job = createPipelineJobInFolderWithScript(
+                f, scriptForPipelineWithParameters(mvnConfig.id(), customConf.id()));
 
         String jobLog = this.buildJobAndGetConsole(job, true);
 
@@ -164,8 +176,9 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         jenkins.visit("configfiles");
         runThenHandleDialog(() -> {
             driver.findElement(
-                by.xpath("//td[.='%s']/parent::tr/td[2]/a[1]", mvnConfig.id()) // this won't age well
-            ).click();
+                            by.xpath("//td[.='%s']/parent::tr/td[2]/a[1]", mvnConfig.id()) // this won't age well
+                            )
+                    .click();
         });
 
         jobLog = this.buildJobAndGetConsole(job, false);
@@ -173,25 +186,28 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         assertThat(jobLog, containsString(String.format(MANAGED_FILE_NOT_FOUND_ERROR, mvnConfig.id())));
     }
 
-    private MavenSettingsConfig createMavenSettingsConfig(final String serverWithCreds, final String serverWithoutCreds, final String credId) {
+    private MavenSettingsConfig createMavenSettingsConfig(
+            final String serverWithCreds, final String serverWithoutCreds, final String credId) {
         final MavenSettingsConfig mvnConfig = new ConfigFileProvider(jenkins).addFile(MavenSettingsConfig.class);
 
         mvnConfig.replaceAll(false);
-        mvnConfig.content(String.format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" \n" +
-                "          xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n" +
-                "          xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">\n" +
-                "  \n" +
-                "  <servers>\n" +
-                "    <server>\n" +
-                "      <id>%s</id>\n" +
-                "    </server>\n" +
-                "    <server>\n" +
-                "      <id>%s</id>\n" +
-                "    </server>\n" +
-                "  </servers>\n" +
-                "\n" +
-                "</settings>", serverWithCreds, serverWithoutCreds));
+        mvnConfig.content(String.format(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                        + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" \n"
+                        + "          xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
+                        + "          xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">\n"
+                        + "  \n"
+                        + "  <servers>\n"
+                        + "    <server>\n"
+                        + "      <id>%s</id>\n"
+                        + "    </server>\n"
+                        + "    <server>\n"
+                        + "      <id>%s</id>\n"
+                        + "    </server>\n"
+                        + "  </servers>\n"
+                        + "\n"
+                        + "</settings>",
+                serverWithCreds, serverWithoutCreds));
 
         final ServerCredentialMapping serverCred = mvnConfig.addServerCredentialMapping();
         serverCred.serverId(serverWithCreds);
@@ -232,26 +248,23 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         customConf.save();
     }
 
-
     public String scriptForPipeline() {
         if (SystemUtils.IS_OS_UNIX) {
-            return "node {\n" +
-                    "    configFileProvider(\n" +
-                    "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),\n" +
-                    "         configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n" +
-                    "        sh 'cat $MAVEN_SETTINGS '\n" +
-                    "        sh 'cat $CUSTOM_SETTINGS '\n" +
-                    "    }\n" +
-                    "}";
+            return "node {\n" + "    configFileProvider(\n"
+                    + "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),\n"
+                    + "         configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n"
+                    + "        sh 'cat $MAVEN_SETTINGS '\n"
+                    + "        sh 'cat $CUSTOM_SETTINGS '\n"
+                    + "    }\n"
+                    + "}";
         } else {
-            return "node {\n" +
-                    "    configFileProvider(\n" +
-                    "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),\n" +
-                    "         configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n" +
-                    "        bat '@type %%MAVEN_SETTINGS%% '\n" +
-                    "        bat '@type %%CUSTOM_SETTINGS%% '\n" +
-                    "    }\n" +
-                    "}";
+            return "node {\n" + "    configFileProvider(\n"
+                    + "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),\n"
+                    + "         configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n"
+                    + "        bat '@type %%MAVEN_SETTINGS%% '\n"
+                    + "        bat '@type %%CUSTOM_SETTINGS%% '\n"
+                    + "    }\n"
+                    + "}";
         }
     }
 
@@ -265,5 +278,4 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         return String.format(script, (Object[]) scriptParameters);
     }
-
 }

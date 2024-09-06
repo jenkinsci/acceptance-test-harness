@@ -14,8 +14,7 @@ public class ShellBuildStep extends AbstractStep implements BuildStep {
     public void command(String command) {
         try {
             new CodeMirror(this, "command").set(command);
-        }
-        catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             control("command").set(command);
         }
     }

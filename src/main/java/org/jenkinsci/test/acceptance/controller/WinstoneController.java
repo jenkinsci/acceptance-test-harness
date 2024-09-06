@@ -34,7 +34,9 @@ public class WinstoneController extends LocalController {
 
     protected static List<String> envVarOpts(String jenkins_opts) {
         String getenv = System.getenv(jenkins_opts);
-        if (getenv == null) return Collections.emptyList();
+        if (getenv == null) {
+            return Collections.emptyList();
+        }
         return Arrays.asList(getenv.split("\\s+"));
     }
 
@@ -71,20 +73,17 @@ public class WinstoneController extends LocalController {
     }
 
     @Override
-    public ProcessInputStream startProcess() throws IOException{
+    public ProcessInputStream startProcess() throws IOException {
         File javaHome = getJavaHome();
-        String java = javaHome == null ? "java" : String.format("%s/bin/java",javaHome.getAbsolutePath());
+        String java = javaHome == null ? "java" : String.format("%s/bin/java", javaHome.getAbsolutePath());
         CommandBuilder cb = new CommandBuilder(java);
         cb.addAll(JENKINS_JAVA_OPTS);
         cb.addAll(JAVA_OPTS);
-        cb.add("-Duser.language=en",
-                "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
+        cb.add("-Duser.language=en", "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
         portFile = File.createTempFile("jenkins-port", ".txt");
         portFile.deleteOnExit();
         cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
-        cb.add("-jar", war,
-                "--httpPort=" + httpPort
-        );
+        cb.add("-jar", war, "--httpPort=" + httpPort);
         cb.addAll(JENKINS_OPTS);
 
         cb.env.putAll(commonLaunchEnv());
@@ -95,7 +94,7 @@ public class WinstoneController extends LocalController {
     @Override
     public URL getUrl() {
         try {
-            return new URL(String.format("http://" + getSutHostName() + ":%s/",httpPort));
+            return new URL(String.format("http://" + getSutHostName() + ":%s/", httpPort));
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
@@ -105,7 +104,7 @@ public class WinstoneController extends LocalController {
     public String getLogId() {
         // as we will generally start with using a port of `0` we can not use the base classes implementation
         // as the logging id will change through the lifecycle and not be initialized from the outset
-        return String.format("master%08d",  System.identityHashCode(this));
+        return String.format("master%08d", System.identityHashCode(this));
     }
 
     @Override
@@ -115,7 +114,8 @@ public class WinstoneController extends LocalController {
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
-        @Inject Injector i;
+        @Inject
+        Injector i;
 
         @Override
         public String getId() {

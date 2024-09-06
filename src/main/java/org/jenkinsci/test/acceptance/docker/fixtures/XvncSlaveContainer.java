@@ -33,7 +33,7 @@ import org.jenkinsci.test.acceptance.po.Slave;
 /**
  * A fixture consisting of a Jenkins slave which can run XVNC.
  */
-@DockerFixture(id="xvnc-slave", ports=22)
+@DockerFixture(id = "xvnc-slave", ports = 22)
 public class XvncSlaveContainer extends JavaContainer {
 
     /**

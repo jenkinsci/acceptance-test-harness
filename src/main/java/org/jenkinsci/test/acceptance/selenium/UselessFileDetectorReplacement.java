@@ -16,7 +16,7 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
     private final FileDetector previous;
     private final RemoteWebDriver remoteDriver;
 
-    /** 
+    /**
      * Create a new instance suitable for use in a try-with-resources block.
      * Example usage is:
      * <pre>
@@ -30,7 +30,7 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
     public UselessFileDetectorReplacement(WebDriver driver) {
         driver = getNonWrappedDriver(driver);
         if (driver.getClass().equals(RemoteWebDriver.class)) {
-            // we test the explicit class not instanceof as the local FirefoxDriver and others 
+            // we test the explicit class not instanceof as the local FirefoxDriver and others
             // are also RemoteWebDriver but can not be configured with a FileDetector
             remoteDriver = (RemoteWebDriver) driver;
             previous = remoteDriver.getFileDetector();
@@ -42,13 +42,13 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
     }
 
     /**
-     * Obtain the underlying driver if the driver is {@link WrapsDriver wrapped} otherwise returns {@code driver}. 
-     * @param driver the {@link WebDriver} to unwrap or return if it is not wrapped. 
+     * Obtain the underlying driver if the driver is {@link WrapsDriver wrapped} otherwise returns {@code driver}.
+     * @param driver the {@link WebDriver} to unwrap or return if it is not wrapped.
      */
     private WebDriver getNonWrappedDriver(WebDriver driver) {
         WebDriver d = driver;
         while (d instanceof WrapsDriver) {
-            d = ((WrapsDriver)d).getWrappedDriver();
+            d = ((WrapsDriver) d).getWrappedDriver();
         }
         return d;
     }

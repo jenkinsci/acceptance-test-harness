@@ -16,5 +16,4 @@ public abstract class WorkflowSharedLibrary extends PageAreaImpl {
     }
 
     public abstract <T extends BranchSource> T selectSCM();
-
 }

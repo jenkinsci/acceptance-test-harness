@@ -40,15 +40,15 @@ public class HarRecorderTest {
     }
 
     private HarRecorder rule(Description desc) {
-        return new HarRecorder(new FailureDiagnostics(new org.jenkinsci.test.acceptance.guice.TestName(desc.getDisplayName())));
+        return new HarRecorder(
+                new FailureDiagnostics(new org.jenkinsci.test.acceptance.guice.TestName(desc.getDisplayName())));
     }
 
     private Description description() {
         return Description.createTestDescription(getClass(), name.getMethodName());
     }
 
-
     private File outputFile(Description desc) {
-        return new File("target/diagnostics/" +desc + "/jenkins.har");
+        return new File("target/diagnostics/" + desc + "/jenkins.har");
     }
 }
