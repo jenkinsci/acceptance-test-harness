@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -109,8 +108,7 @@ public class GitRepo implements Closeable {
                         Charset.defaultCharset());
                 Files.setPosixFilePermissions(
                         ssh.toPath(),
-                        new HashSet<>(
-                                Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
+                        new HashSet<>(List.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
             }
             return createTempDir("git");
         } catch (IOException e) {

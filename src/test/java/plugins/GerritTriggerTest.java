@@ -42,7 +42,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
@@ -158,7 +157,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
                 StandardCharsets.UTF_8);
         Files.setPosixFilePermissions(
                 ssh.toPath(),
-                new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
+                new HashSet<>(List.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
 
         changes = new ArrayList<>();
     }

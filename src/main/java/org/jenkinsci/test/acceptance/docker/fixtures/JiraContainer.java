@@ -12,7 +12,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import javax.xml.rpc.ServiceException;
 import org.apache.commons.io.IOUtils;
@@ -96,7 +95,7 @@ public class JiraContainer extends DockerContainer {
 
     public List<RemoteComment> getComments(String ticket) throws IOException, ServiceException {
         connect();
-        return Arrays.asList(svc.getComments(token, ticket));
+        return List.of(svc.getComments(token, ticket));
     }
 
     public JiraSoapService getSvc() {

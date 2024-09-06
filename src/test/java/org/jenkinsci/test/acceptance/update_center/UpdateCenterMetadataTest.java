@@ -7,8 +7,6 @@ import static org.mockito.Mockito.when;
 
 import hudson.util.VersionNumber;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import org.hamcrest.Matchers;
@@ -20,7 +18,7 @@ import org.junit.Test;
  */
 public class UpdateCenterMetadataTest {
 
-    public static final List<Dependency> NO_DEPS = Collections.emptyList();
+    public static final List<Dependency> NO_DEPS = List.of();
 
     private Jenkins jenkins = mock(Jenkins.class);
 
@@ -37,12 +35,7 @@ public class UpdateCenterMetadataTest {
         plugins.put("provider", new PluginMetadata("provider", "jenkins:provider:1", "1", "1", NO_DEPS));
         plugins.put(
                 "consumer",
-                new PluginMetadata(
-                        "consumer",
-                        "jenkins:consumer:1",
-                        "1",
-                        "1",
-                        Collections.singletonList(new Dependency("provider:1"))));
+                new PluginMetadata("consumer", "jenkins:consumer:1", "1", "1", List.of(new Dependency("provider:1"))));
 
         plugins.put(
                 "complex",
@@ -51,10 +44,10 @@ public class UpdateCenterMetadataTest {
                         "jenkins:complex:1",
                         "1",
                         "1",
-                        Arrays.asList(new Dependency("branchb:1"), new Dependency("brancha:1"))));
+                        List.of(new Dependency("branchb:1"), new Dependency("brancha:1"))));
         plugins.put(
                 "brancha",
-                new PluginMetadata("brancha", "jenkins:brancha:1", "1", "1", Arrays.asList(new Dependency("depa:1"))));
+                new PluginMetadata("brancha", "jenkins:brancha:1", "1", "1", List.of(new Dependency("depa:1"))));
         plugins.put("depa", new PluginMetadata("depa", "jenkins:depa:1", "1", "1", NO_DEPS));
         plugins.put(
                 "branchb",
@@ -63,7 +56,7 @@ public class UpdateCenterMetadataTest {
                         "jenkins:branchb:1",
                         "1",
                         "1",
-                        Arrays.asList(new Dependency("depb0:1"), new Dependency("depb1:1"))));
+                        List.of(new Dependency("depb0:1"), new Dependency("depb1:1"))));
         plugins.put("depb0", new PluginMetadata("depb0", "jenkins:depb0:1", "1", "1", NO_DEPS));
         plugins.put("depb1", new PluginMetadata("depb1", "jenkins:depb1:1", "1", "1", NO_DEPS));
     }

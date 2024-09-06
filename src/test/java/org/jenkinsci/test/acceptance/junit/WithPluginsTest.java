@@ -26,7 +26,6 @@ package org.jenkinsci.test.acceptance.junit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
-import java.util.Arrays;
 import java.util.List;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.Test;
@@ -38,12 +37,12 @@ public class WithPluginsTest {
     @Test
     public void combine_WithPlugins_annotations() throws Exception {
         // TODO test annotation harvesting and test class inheritance
-        List<WithPlugins> annotations = Arrays.asList(
+        List<WithPlugins> annotations = List.of(
                 FakeTestClass.class.getAnnotation(WithPlugins.class),
                 FakeTestClass.class.getMethod("test").getAnnotation(WithPlugins.class));
 
         List<PluginSpec> actual = WithPlugins.RuleImpl.combinePlugins(annotations);
-        List<PluginSpec> expected = Arrays.asList(
+        List<PluginSpec> expected = List.of(
                 new PluginSpec("keep"),
                 new PluginSpec("keepv@1"),
                 new PluginSpec(
