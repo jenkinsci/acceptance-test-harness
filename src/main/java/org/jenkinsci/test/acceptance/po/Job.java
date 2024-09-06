@@ -4,7 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.*;
+import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertTrue;
 
 import com.google.inject.Injector;
@@ -45,6 +45,7 @@ import org.zeroturnaround.zip.ZipUtil;
  * @author Kohsuke Kawaguchi
  */
 public class Job extends TopLevelItem {
+    @Override
     public List<Parameter> getParameters() {
         return parameters;
     }
@@ -54,7 +55,7 @@ public class Job extends TopLevelItem {
      */
     @Inject
     public JenkinsController controller;
-    
+
     private List<Parameter> parameters = new ArrayList<>();
 
     // TODO these controls (and some methods) actually belong in a subclass corresponding to AbstractProject
@@ -70,7 +71,7 @@ public class Job extends TopLevelItem {
     public Job(PageObject context, URL url, String name) {
         super(context, url, name);
     }
-    
+
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
@@ -161,19 +162,19 @@ public class Job extends TopLevelItem {
     @SuppressWarnings("unchecked") // The check is performed in the method
     public <T extends PostBuildStep> T getPublisher(Class<T> type) {
         for (PostBuildStep p : publishers) {
-            if (type.isAssignableFrom(p.getClass()))
+            if (type.isAssignableFrom(p.getClass())) {
                 return (T) p;
+            }
         }
 
         throw new NoSuchElementException();
-
     }
 
     private <T extends Step> T addStep(final Class<T> type, final String section) {
         ensureConfigPage();
 
-        String path = createPageArea('/' + section,
-                () -> control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type));
+        String path = createPageArea('/' + section, () -> control(by.path("/hetero-list-add[%s]", section))
+                .selectDropdownMenu(type));
         return newInstance(type, this, path);
     }
 
@@ -184,7 +185,8 @@ public class Job extends TopLevelItem {
 
         WebElement step = find(by.path(sectionWithStep));
 
-        step.findElement(by.path(String.format("%s/repeatable-delete", sectionWithStep))).click();
+        step.findElement(by.path(String.format("%s/repeatable-delete", sectionWithStep)))
+                .click();
     }
 
     public ShellBuildStep addShellStep(Resource res) {
@@ -228,8 +230,7 @@ public class Job extends TopLevelItem {
     public void copyResource(Resource resource, String fileName) {
         if (SystemUtils.IS_OS_WINDOWS) {
             addBatchStep(copyResourceBatch(resource));
-        }
-        else {
+        } else {
             addShellStep(copyResourceShell(resource, fileName));
         }
     }
@@ -243,7 +244,8 @@ public class Job extends TopLevelItem {
             }
 
             // fileName can include path portion like foo/bar/zot
-            return String.format("(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
+            return String.format(
+                    "(mkdir -p %1$s || true) && rm -r %1$s && base64 --decode << ENDOFFILE | gunzip > %1$s \n%2$s\nENDOFFILE",
                     fileName, new String(Base64.encodeBase64Chunked(out.toByteArray())));
         } catch (IOException e) {
             throw new AssertionError(e);
@@ -278,14 +280,14 @@ public class Job extends TopLevelItem {
             if (SystemUtils.IS_OS_WINDOWS) {
                 if (!(controller instanceof LocalController)) {
                     // TODO: Make it work for RemoteJenkinsController like in Unix (below)
-                    throw new AssumptionViolatedException("Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
+                    throw new AssumptionViolatedException(
+                            "Copying files in Windows is only supported if a LocalController is in use. Test will be skipped.");
                 }
                 addBatchStep(xCopy(file.getAbsolutePath(), "%cd%"));
             } else {
                 addShellStep(String.format(
                         "base64 --decode << ENDOFFILE > archive.zip && unzip -o archive.zip \n%s\nENDOFFILE",
-                        new String(Base64.encodeBase64Chunked(archive))
-                ));
+                        new String(Base64.encodeBase64Chunked(archive))));
             }
         } catch (IOException e) {
             throw new AssertionError(e);
@@ -308,7 +310,7 @@ public class Job extends TopLevelItem {
     public void copyResource(String resourcePath) {
         ensureConfigPage();
         final Resource res = resource(resourcePath);
-        //decide whether to utilize copyResource or copyDir
+        // decide whether to utilize copyResource or copyDir
         if (res.asFile().isDirectory()) {
             copyDir(res);
         } else {
@@ -370,14 +372,21 @@ public class Job extends TopLevelItem {
 
         // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions  for the first
         // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions[n] for subsequent ones
-        // if we have another descriptor inside the descriptor inside the parameterDefinition we select the that instead of the actual parameter. (e.g NodeParameter)
-        // as all browsers do not support matches in xpath 2.0 we need to do this ourselves (find the last match and then extract the correct part even if we match the wrong thing originally
-        String path = last(by.xpath("//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions')]")).getAttribute("path");
+        // if we have another descriptor inside the descriptor inside the parameterDefinition we select the that instead
+        // of the actual parameter. (e.g NodeParameter)
+        // as all browsers do not support matches in xpath 2.0 we need to do this ourselves (find the last match and
+        // then extract the correct part even if we match the wrong thing originally
+        String path = last(by.xpath(
+                        "//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions')]"))
+                .getAttribute("path");
 
-        Pattern pattern = Pattern.compile("^(/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions([^/]*))(/.*)?$");
+        Pattern pattern = Pattern.compile(
+                "^(/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions([^/]*))(/.*)?$");
         Matcher m = pattern.matcher(path);
-        // for some as yet unknown reason the matcher sometimes failed to match throwing an illegalStateException with no information to help diagnose
-        // after I added this I never reproduced the issue - but still having what failed to match will at least help in the future
+        // for some as yet unknown reason the matcher sometimes failed to match throwing an illegalStateException with
+        // no information to help diagnose
+        // after I added this I never reproduced the issue - but still having what failed to match will at least help in
+        // the future
         if (!m.matches()) {
             throw new IllegalStateException("No match for path in regexp : " + path);
         }
@@ -451,6 +460,7 @@ public class Job extends TopLevelItem {
     /**
      * Deletes the current job.
      */
+    @Override
     public void delete() {
         open();
         runThenHandleDialog(() -> clickLink("Delete Project"));
@@ -461,8 +471,7 @@ public class Job extends TopLevelItem {
                 not(hasContent("Build Now")),
                 not(hasContent("Disable Project")),
                 hasContent("Enable"),
-                hasContent("This project is currently disabled")
-        );
+                hasContent("This project is currently disabled"));
     }
 
     private String xCopy(final String source, final String destination) {

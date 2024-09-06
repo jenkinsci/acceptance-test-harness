@@ -23,7 +23,6 @@ import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
-
 /**
  * @author Matthias Karl
  */
@@ -75,7 +74,10 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD}, id = SvnContainer.USER)
+    @WithCredentials(
+            credentialType = WithCredentials.USERNAME_PASSWORD,
+            values = {SvnContainer.USER, SvnContainer.PWD},
+            id = SvnContainer.USER)
     public void run_basic_subversion_build_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
@@ -92,7 +94,10 @@ public class SubversionPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {SvnContainer.USER, SvnContainer.PWD}, id = SvnContainer.USER)
+    @WithCredentials(
+            credentialType = WithCredentials.USERNAME_PASSWORD,
+            values = {SvnContainer.USER, SvnContainer.PWD},
+            id = SvnContainer.USER)
     public void run_basic_subversion_build_svn_userPwd() throws SubversionPluginTestException {
         final SvnContainer svnContainer = svn.get();
 
@@ -163,7 +168,8 @@ public class SubversionPluginTest extends AbstractJUnitTest {
         final FreeStyleJob f = jenkins.jobs.create();
         final SubversionScm subversionScm = f.useScm(SubversionScm.class);
         subversionScm.url.set(svnContainer.getUrlUnauthenticatedRepoAtRevision(1));
-        final SvnRepositoryBrowserWebSvn repositoryBrowserWebSvn = subversionScm.useRepositoryBrowser(SvnRepositoryBrowserWebSvn.class);
+        final SvnRepositoryBrowserWebSvn repositoryBrowserWebSvn =
+                subversionScm.useRepositoryBrowser(SvnRepositoryBrowserWebSvn.class);
         repositoryBrowserWebSvn.url.set(svnContainer.getUrlViewVC());
         f.save();
         f.startBuild().shouldSucceed();

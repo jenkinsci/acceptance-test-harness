@@ -1,7 +1,11 @@
 package org.jenkinsci.test.acceptance.plugins.logparser;
 
 import org.jenkinsci.test.acceptance.junit.Resource;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.AbstractStep;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.Job;
+import org.jenkinsci.test.acceptance.po.PostBuildStep;
 
 /**
  * Helperclass for configuring the logparser plugin.
@@ -13,13 +17,13 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
 
     // The available types of rules of the log-parser
     public enum RuleType {
-        PROJECT("Use project rule"), GLOBAL("Use global rule");
+        PROJECT("Use project rule"),
+        GLOBAL("Use global rule");
         private final String projecttype;
 
         RuleType(String projecttype) {
             this.projecttype = projecttype;
         }
-
         ;
 
         public String getProjecttype() {

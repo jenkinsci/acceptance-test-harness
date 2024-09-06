@@ -31,7 +31,7 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 /**
  * Jenkins agent with various login methods.
  */
-@DockerFixture(id="ssh-agent", ports=22)
+@DockerFixture(id = "ssh-agent", ports = 22)
 public class SshAgentContainer extends JavaContainer {
 
     public String getEncryptedEd25519PrivateKey() {

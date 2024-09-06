@@ -23,7 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.po.CapybaraPortingLayer.by;
 
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -46,10 +46,14 @@ import org.openqa.selenium.WebElement;
  */
 public class FormValidation {
     public enum Kind {
-        OK, WARNING, ERROR;
+        OK,
+        WARNING,
+        ERROR;
 
         public static Kind get(String cls) {
-            if (cls == null || cls.isEmpty()) { // class can be empty as it is handled differently than other attributes by selenium
+            if (cls == null
+                    || cls.isEmpty()) { // class can be empty as it is handled differently than other attributes by
+                // selenium
                 cls = "ok"; // No class means ok without message
             }
             return valueOf(cls.toUpperCase());
@@ -73,7 +77,8 @@ public class FormValidation {
             WebElement spinner = element.findElement(by.xpath("./../../../following-sibling::div[1]"));
             // Wait as long as there is some spinner shown on the page
             control.waitFor().until(() -> !spinner.isDisplayed());
-            // Expand details (are there any) before we get the area element as doing so afterwards would stale the element reference
+            // Expand details (are there any) before we get the area element as doing so afterwards would stale the
+            // element reference
             for (WebElement elem : element.findElements(By.linkText("(show details)"))) {
                 elem.click();
             }
@@ -85,8 +90,9 @@ public class FormValidation {
             // Wait for validation area to stop being <div></div>
             validationArea = control.waitFor().until(() -> {
                 // path to validation area is the parents sibling with class `validation-error-area`
-                String xpath = silent ? "../../div[contains(@class,'validation-error-area')]" :
-                        "../../div[contains(@class,'validation-error-area--visible')]";
+                String xpath = silent
+                        ? "../../div[contains(@class,'validation-error-area')]"
+                        : "../../div[contains(@class,'validation-error-area--visible')]";
 
                 return element.findElement(by.xpath(xpath));
             });
@@ -108,9 +114,7 @@ public class FormValidation {
             return Kind.get(kindClass);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(
-                    "Unknown kind class provided '" + kindClass + "' in " + element.getAttribute("outerHTML"),
-                    ex
-            );
+                    "Unknown kind class provided '" + kindClass + "' in " + element.getAttribute("outerHTML"), ex);
         }
     }
 
@@ -122,7 +126,8 @@ public class FormValidation {
         return message;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return kind + "(" + message + ")";
     }
 
@@ -131,11 +136,13 @@ public class FormValidation {
      */
     public static Matcher<FormValidation> silent() {
         return new Matcher<FormValidation>("No form validation result should be presented") {
-            @Override public boolean matchesSafely(FormValidation item) {
+            @Override
+            public boolean matchesSafely(FormValidation item) {
                 return item.getKind() == Kind.OK && item.getMessage().isEmpty();
             }
 
-            @Override public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
+            @Override
+            public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
                 mismatchDescription.appendText("It is " + item.toString());
             }
         };
@@ -149,11 +156,13 @@ public class FormValidation {
         StringDescription sd = new StringDescription();
         message.describeTo(sd);
         return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd) {
-            @Override public boolean matchesSafely(FormValidation item) {
+            @Override
+            public boolean matchesSafely(FormValidation item) {
                 return item.getKind() == kind && message.matches(item.getMessage());
             }
 
-            @Override public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
+            @Override
+            public void describeMismatchSafely(FormValidation item, Description mismatchDescription) {
                 if (item.getKind() != kind) {
                     mismatchDescription.appendText("It is " + item);
                 } else {

@@ -37,7 +37,9 @@ import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 
-@DockerFixture(id = "mailhog", ports = {1025, 8025})
+@DockerFixture(
+        id = "mailhog",
+        ports = {1025, 8025})
 public class MailhogContainer extends DockerContainer {
     public String getSmtpHost() {
         return ipBound(1025);

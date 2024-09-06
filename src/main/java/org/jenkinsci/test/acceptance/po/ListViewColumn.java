@@ -7,5 +7,4 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @author Fabian Trampusch
  */
-public interface ListViewColumn {
-}
+public interface ListViewColumn {}

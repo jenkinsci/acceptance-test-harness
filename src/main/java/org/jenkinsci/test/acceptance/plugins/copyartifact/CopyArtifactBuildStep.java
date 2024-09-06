@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.plugins.copyartifact;
 
-
 import org.jenkinsci.test.acceptance.po.AbstractStep;
 import org.jenkinsci.test.acceptance.po.BuildStep;
 import org.jenkinsci.test.acceptance.po.Describable;

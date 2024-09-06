@@ -49,10 +49,7 @@ public class PluginSpec {
 
     public PluginSpec(@NonNull String name, String version) {
         this.name = name;
-        this.version = version == null
-                ? null
-                : new VersionNumber(version)
-        ;
+        this.version = version == null ? null : new VersionNumber(version);
     }
 
     public PluginSpec(@NonNull String coordinates) {
@@ -90,12 +87,18 @@ public class PluginSpec {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PluginSpec that = (PluginSpec) o;
 
-        if (!name.equals(that.name)) return false;
+        if (!name.equals(that.name)) {
+            return false;
+        }
         return Objects.equals(version, that.version);
     }
 

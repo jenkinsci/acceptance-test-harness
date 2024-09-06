@@ -23,7 +23,7 @@ public class NestedViewPluginTest extends AbstractJUnitTest {
     @Before
     public void setUp() throws Exception {
         j = jenkins.jobs.create();
-        v = jenkins.views.create(NestedView.class,"Nested");
+        v = jenkins.views.create(NestedView.class, "Nested");
     }
 
     @Test

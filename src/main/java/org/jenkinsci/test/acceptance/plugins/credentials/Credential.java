@@ -41,5 +41,4 @@ public abstract class Credential extends PageAreaImpl {
     public static By submitButton() {
         return by.css(".jenkins-button[data-id='ok']");
     }
-
 }

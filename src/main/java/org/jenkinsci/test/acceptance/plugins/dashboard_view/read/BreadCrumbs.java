@@ -26,7 +26,6 @@ public class BreadCrumbs extends PageAreaImpl {
         super(context, path);
     }
 
-
     /**
      * Get the text of the breadcrumbs from left to right.
      *

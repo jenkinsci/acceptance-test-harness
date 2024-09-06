@@ -33,7 +33,8 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
  * Wire mailhog container with Jenkins through ATH page object.
  */
 public class MailhogProvider extends DockerContainerHolder<MailhogContainer> {
-    @Inject Jenkins jenkins;
+    @Inject
+    Jenkins jenkins;
 
     @Override
     public synchronized MailhogContainer get() {

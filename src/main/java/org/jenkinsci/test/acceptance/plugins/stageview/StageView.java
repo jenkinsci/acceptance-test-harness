@@ -88,7 +88,7 @@ public class StageView extends PageAreaImpl {
         for (StageViewBuild job : jobs) {
             System.out.println(job);
             for (StageViewStage stageViewStage : job.getAllStageViewItem()) {
-                LOG.config("StageviewHeadline "+ stageViewStage);
+                LOG.config("StageviewHeadline " + stageViewStage);
             }
         }
     }
@@ -108,7 +108,9 @@ public class StageView extends PageAreaImpl {
      * @return All stageview Jobs
      */
     public StageViewBuild getFirstBuild() {
-        if (this.jobs.isEmpty()) throw new IllegalStateException("There are no builds loaded");
+        if (this.jobs.isEmpty()) {
+            throw new IllegalStateException("There are no builds loaded");
+        }
         return this.jobs.get(0);
     }
 
@@ -118,7 +120,9 @@ public class StageView extends PageAreaImpl {
      * @return stageview Job
      */
     public StageViewBuild getLatestBuild() {
-        if (this.jobs.isEmpty()) throw new IllegalStateException("There are no builds loaded");
+        if (this.jobs.isEmpty()) {
+            throw new IllegalStateException("There are no builds loaded");
+        }
         return this.jobs.get(jobs.size() - 1);
     }
 
@@ -139,5 +143,4 @@ public class StageView extends PageAreaImpl {
     public WebElement getRootElementName() {
         return super.find(By.id("pipeline-box"));
     }
-
 }

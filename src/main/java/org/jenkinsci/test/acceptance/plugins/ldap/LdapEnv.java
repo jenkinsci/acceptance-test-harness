@@ -55,7 +55,7 @@ public class LdapEnv {
      * @return Existing ldapEnv object or a newly constructed one with given environment variables
      */
     public static LdapEnv getLdapEnv() {
-        if(ldapEnv == null) {
+        if (ldapEnv == null) {
             ldapEnv = new LdapEnv();
         }
         return ldapEnv;
@@ -65,7 +65,7 @@ public class LdapEnv {
      * @return Existing ldapDetails object or a newly constructed one with given environment variables
      */
     public static LdapDetails getLdapDetails() {
-        if(ldapDetails == null) {
+        if (ldapDetails == null) {
             ldapDetails = new LdapEnv().constructLdapDetails();
         }
         return ldapDetails;
@@ -100,17 +100,18 @@ public class LdapEnv {
         int port = parseInteger(System.getenv("ldapPort"), DEFAULT_LDAP_PORT);
 
         LdapDetails ldapDetails = new LdapDetails(
-                host, port,
+                host,
+                port,
                 System.getenv("ldapManagerDn"),
                 System.getenv("ldapManagerPassword"),
-                System.getenv("ldapRootDn")
-        );
+                System.getenv("ldapRootDn"));
         ldapDetails.setHostWithPort(host + ":" + port);
         ldapDetails.setUserSearchBase(System.getenv("ldapUserSearchBase"));
         ldapDetails.setUserSearchFilter(System.getenv("ldapUserSearchFilter"));
         ldapDetails.setGroupSearchBase(System.getenv("ldapGroupSearchBase"));
         ldapDetails.setGroupSearchFilter(System.getenv("ldapGroupSearchFilter"));
-        ldapDetails.setGroupMembershipStrategy(parseGroupMembershipStrategy(System.getenv("ldapGroupMembershipStrategy")));
+        ldapDetails.setGroupMembershipStrategy(
+                parseGroupMembershipStrategy(System.getenv("ldapGroupMembershipStrategy")));
         ldapDetails.setGroupMembershipStrategyParam(System.getenv("ldapGroupMembershipStrategyParam"));
         ldapDetails.setGroupMembershipFilter(System.getenv("ldapGroupMembershipFilter"));
         ldapDetails.setDisplayNameAttributeName(System.getenv("ldapDisplayNameAttributeName"));
@@ -149,13 +150,13 @@ public class LdapEnv {
     private boolean parseBoolean(String booleanString, boolean defaultValue) {
         boolean result = defaultValue;
 
-        if(isEmptyOrNullString(booleanString)) {
+        if (isEmptyOrNullString(booleanString)) {
             return result;
         }
-        if(booleanString.compareToIgnoreCase(TRUE) == 0 || booleanString.compareToIgnoreCase(FALSE) == 0) {
+        if (booleanString.compareToIgnoreCase(TRUE) == 0 || booleanString.compareToIgnoreCase(FALSE) == 0) {
             result = Boolean.parseBoolean(booleanString);
         }
-        return  result;
+        return result;
     }
 
     /**

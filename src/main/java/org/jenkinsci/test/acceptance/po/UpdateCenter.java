@@ -36,28 +36,29 @@ public class UpdateCenter extends ContainerPageObject {
 
         for (JsonNode job : jobs) {
             JsonNode p = job.get("plugin");
-            if (p!=null) {
+            if (p != null) {
                 if (pluginShortName.equals(p.get("name").asText())) {
                     JsonNode errorMessage = p.get("errorMessage");
-                    if (errorMessage!=null) {
+                    if (errorMessage != null) {
                         throw new InstallationFailedException(errorMessage.asText());
                     }
 
                     JsonNode st = job.get("status");
                     if (st.get("success").asBoolean()) {
-                        return true;    // successfully installed
+                        return true; // successfully installed
                     }
                     JsonNode type = st.get("type");
                     if (type.asText().equals("Failure")) {
                         throw new InstallationFailedException("failed, see log");
                     }
 
-                    return false;   // still in progress
+                    return false; // still in progress
                 }
             }
         }
 
-        throw new AssertionError("No record of installation being attempted for " + pluginShortName + "\n" + Arrays.asList(jobs));
+        throw new AssertionError(
+                "No record of installation being attempted for " + pluginShortName + "\n" + Arrays.asList(jobs));
     }
 
     /**
@@ -80,12 +81,15 @@ public class UpdateCenter extends ContainerPageObject {
                     if (i.incrementAndGet() % 30 == 0) { // refresh the page every 15 seconds
                         driver.navigate().refresh();
                     }
-                    return not(Matchers.hasElement(by.xpath("//*[@id='log']//*[contains(.,'Pending') or contains(.,'Installing')]"))).matches(driver);
-        });
+                    return not(Matchers.hasElement(
+                                    by.xpath("//*[@id='log']//*[contains(.,'Pending') or contains(.,'Installing')]")))
+                            .matches(driver);
+                });
 
         String uc = getPageContent(driver);
         // "IOException: Failed to dynamically deploy this plugin" can be reported (by at least some Jenkins versions)
-        // in case update of plugin dependency is needed (and is in fact performed in sibling UC job). Restart should fix that.
+        // in case update of plugin dependency is needed (and is in fact performed in sibling UC job). Restart should
+        // fix that.
         boolean restartRequired = uc.contains("restarted") || uc.contains("Failure");
 
         Jenkins jenkins = getJenkins();
@@ -97,13 +101,13 @@ public class UpdateCenter extends ContainerPageObject {
         for (PluginSpec spec : specs) {
             Plugin plugin = jenkins.getPlugin(spec.getName());
             if (plugin == null) {
-                throw new InstallationFailedException("Plugin " + spec.getName() + " not installed, restarted " + restartRequired);
+                throw new InstallationFailedException(
+                        "Plugin " + spec.getName() + " not installed, restarted " + restartRequired);
             }
 
             if (spec.getVersionNumber() != null && plugin.getVersion().isOlderThan(spec.getVersionNumber())) {
-                throw new InstallationFailedException(
-                        "Plugin " + spec + " not installed in required version, is " + plugin.getVersion() + ", restarted " + true
-                );
+                throw new InstallationFailedException("Plugin " + spec + " not installed in required version, is "
+                        + plugin.getVersion() + ", restarted " + true);
             }
         }
 

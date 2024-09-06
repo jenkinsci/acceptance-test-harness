@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.gradle;
 
-public enum  GradleTask {
-
+public enum GradleTask {
     HELLO("hello", "Hello world!"),
     FIRST("firstTask", "First!"),
     SECOND("secondTask", "Second!"),
@@ -11,11 +10,11 @@ public enum  GradleTask {
     private String name;
     private String println;
 
-    GradleTask(final String name){
+    GradleTask(final String name) {
         this.name = name;
     }
 
-    GradleTask(final String name, final String println){
+    GradleTask(final String name, final String println) {
         this.name = name;
         this.println = println;
     }

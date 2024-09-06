@@ -15,7 +15,11 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.ant.AntBuildStep;
 import org.jenkinsci.test.acceptance.plugins.ant.AntInstallation;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.DumbSlave;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ToolInstallation;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -37,15 +41,16 @@ public class AntPluginTest extends AbstractJUnitTest {
     FreeStyleJob job;
     private AntBuildStep step;
 
-    @Inject private DockerContainerHolder<SshAgentContainer> docker;
+    @Inject
+    private DockerContainerHolder<SshAgentContainer> docker;
 
     private SshAgentContainer sshd;
     private DumbSlave agent;
+
     @Before
     public void setUp() {
         job = jenkins.jobs.create(FreeStyleJob.class);
         sshd = docker.get();
-
     }
 
     private void useCustomAgent() {
@@ -76,19 +81,19 @@ public class AntPluginTest extends AbstractJUnitTest {
     public void autoInstallAnt() {
         AntInstallation.install(jenkins, INSTALL_NAME_1_8, INSTALL_VERSION_1_8);
 
-        buildHelloWorld(INSTALL_NAME_1_8).shouldContainsConsoleOutput(
-            "Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-" + INSTALL_VERSION_1_8 + "-bin.zip"
-        );
+        buildHelloWorld(INSTALL_NAME_1_8)
+                .shouldContainsConsoleOutput("Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-"
+                        + INSTALL_VERSION_1_8 + "-bin.zip");
     }
-    
+
     @Test
     public void autoInstallMultipleAnt() {
         AntInstallation.install(jenkins, INSTALL_NAME_1_8, INSTALL_VERSION_1_8);
         AntInstallation.install(jenkins, INSTALL_NAME_1_10, INSTALL_VERSION_1_10);
 
-        buildHelloWorld(INSTALL_NAME_1_10).shouldContainsConsoleOutput(
-            "Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-" + INSTALL_VERSION_1_10 + "-bin.zip"
-        );
+        buildHelloWorld(INSTALL_NAME_1_10)
+                .shouldContainsConsoleOutput("Unpacking (http|https)://archive.apache.org/dist/ant/binaries/apache-ant-"
+                        + INSTALL_VERSION_1_10 + "-bin.zip");
     }
 
     @Test
@@ -111,11 +116,10 @@ public class AntPluginTest extends AbstractJUnitTest {
     @WithPlugins({"workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step"})
     public void testWithAntPipelineBlock() {
         useCustomAgent();
-        String script_pipeline_ant = "node (\"" + agent.getName() + "\") {\n" +
-                "    withAnt(installation: '" + NATIVE_ANT_NAME + "') {\n" +
-                "       sh \"ant -version\"\n" +
-                "    }\n" +
-                "}";
+        String script_pipeline_ant = "node (\"" + agent.getName() + "\") {\n" + "    withAnt(installation: '"
+                + NATIVE_ANT_NAME + "') {\n" + "       sh \"ant -version\"\n"
+                + "    }\n"
+                + "}";
         String antHome = setUpAntInstallation();
 
         String expectedVersion = "1.10.14"; // this is the version installed in the java container by the ubuntu noble;
@@ -139,7 +143,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         String ok_prop2 = "okPROP2=foo_bar_ok_2";
         String nok_prop1 = "nokPROP1=foo_bar_nok_1";
         String nok_prop2 = "nokPROP2=foo_bar_nok_2";
-        String properties = ok_prop1+"\n"+ok_prop2+"\n"+nok_prop1+"\n"+nok_prop2;
+        String properties = ok_prop1 + "\n" + ok_prop2 + "\n" + nok_prop1 + "\n" + nok_prop2;
 
         useCustomAgent();
         setUpAnt();
@@ -175,15 +179,19 @@ public class AntPluginTest extends AbstractJUnitTest {
         job.startBuild().shouldFail();
 
         String console = job.getLastBuild().getConsole();
-        assertThat(console, Matchers.containsRegexp("ERROR: Unable to find build script at .*/" + fake_build_file, Pattern.MULTILINE));
+        assertThat(
+                console,
+                Matchers.containsRegexp(
+                        "ERROR: Unable to find build script at .*/" + fake_build_file, Pattern.MULTILINE));
     }
 
     private Build buildHelloWorld(final String name) {
         job.configure(() -> {
             job.copyResource(resource("ant/echo-helloworld.xml"), "build.xml");
             AntBuildStep ant = job.addBuildStep(AntBuildStep.class);
-            if (name!=null)
+            if (name != null) {
                 ant.antName.select(name);
+            }
             ant.targets.set("hello");
             return null;
         });
@@ -195,7 +203,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         setUpAntInstallation();
 
         job.configure();
-        job.copyResource(resource("ant/"+BUILD_FILE), BUILD_FILE);
+        job.copyResource(resource("ant/" + BUILD_FILE), BUILD_FILE);
         step = job.addBuildStep(AntBuildStep.class);
         step.antName.select(NATIVE_ANT_NAME);
         step.targets.set("");
@@ -212,9 +220,15 @@ public class AntPluginTest extends AbstractJUnitTest {
 
     private void antBuildStepAdvancedConfiguration(AntBuildStep step, String buildFile, String properties) {
         step.control("advanced-button").click();
-        step.control(By.xpath("(//div[contains(@descriptorid, 'Ant')]/div/div[contains(@class, 'dropdownList-container')]//*[@type = 'button'])[2]")).click();
+        step.control(
+                        By.xpath(
+                                "(//div[contains(@descriptorid, 'Ant')]/div/div[contains(@class, 'dropdownList-container')]//*[@type = 'button'])[2]"))
+                .click();
         step.control("properties").set(StringUtils.defaultString(properties));
-        step.control(By.xpath("(//div[contains(@descriptorid, 'Ant')]/div/div[contains(@class, 'dropdownList-container')]//*[@type = 'button'])[1]")).click();
+        step.control(
+                        By.xpath(
+                                "(//div[contains(@descriptorid, 'Ant')]/div/div[contains(@class, 'dropdownList-container')]//*[@type = 'button'])[1]"))
+                .click();
         step.control("buildFile").set(StringUtils.defaultString(buildFile));
     }
 }

@@ -59,13 +59,16 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     }
 
     public <T extends SshHostKeyVerificationStrategy> void useSshHostKeyVerificationStrategy(final Class<T> type) {
-        Control gitHostKeyVerificationConfiguration = control("/org-jenkinsci-plugins-gitclient-GitHostKeyVerificationConfiguration/");
+        Control gitHostKeyVerificationConfiguration =
+                control("/org-jenkinsci-plugins-gitclient-GitHostKeyVerificationConfiguration/");
         if (gitHostKeyVerificationConfiguration.exists()) {
             T instance;
             try {
                 instance = type.getDeclaredConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                     NoSuchMethodException e) {
+            } catch (InstantiationException
+                    | IllegalAccessException
+                    | InvocationTargetException
+                    | NoSuchMethodException e) {
                 throw new IllegalArgumentException("Can't initiate a new instance of " + type.getName() + " .", e);
             }
             gitHostKeyVerificationConfiguration.select(instance.id());
@@ -81,8 +84,11 @@ public class GlobalSecurityConfig extends ContainerPageObject {
     }
 
     public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {
-        final String path = createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators",
-                () -> control(by.path("/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]")).selectDropdownMenu(type));
+        final String path =
+                createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators", () -> control(
+                                by.path(
+                                        "/jenkins-security-QueueItemAuthenticatorConfiguration/hetero-list-add[authenticators]"))
+                        .selectDropdownMenu(type));
 
         return newInstance(type, this, path);
     }
@@ -112,24 +118,30 @@ public class GlobalSecurityConfig extends ContainerPageObject {
 
     @Override
     public void save() {
-        // saving security will cause the page to go back to /manage however that page may now be access protected so you may get a 403 with a HTML page that does some redirection (not at the HTTP layer)
-        // so the generic save has a race condition as it may be getting the `html` element of the interim page which is then yanked out whilst the `getText` call is made.
+        // saving security will cause the page to go back to /manage however that page may now be access protected so
+        // you may get a 403 with a HTML page that does some redirection (not at the HTTP layer)
+        // so the generic save has a race condition as it may be getting the `html` element of the interim page which is
+        // then yanked out whilst the `getText` call is made.
         // this causes a hard to understand "TypeError: a is null"
 
-        // we do no know if this will happen or not as it depends what options they may have set so we can not waitFor a eleement to be present.
+        // we do no know if this will happen or not as it depends what options they may have set so we can not waitFor a
+        // eleement to be present.
         // instead we make sure that there is no element from the intermediary page.
 
         super.save();
 
-        // saving security will either cause the page to go back to /manage or to be redirected with some HTML (not a 30x) to a login page...
+        // saving security will either cause the page to go back to /manage or to be redirected with some HTML (not a
+        // 30x) to a login page...
         // we know we have a page load here as the submit button is stale - so we need to wait until we are sure
-        // we do not have the script redirect page by looking for the absence of a <meta> tag with attribute "http-equiv='refresh'"
+        // we do not have the script redirect page by looking for the absence of a <meta> tag with attribute
+        // "http-equiv='refresh'"
         try {
             WebElement metaRefresh = findIfNotVisible(by.xpath("/html/head/meta[@http-equiv='refresh']"));
             // we are in the 403 redirect page so wait until that has reloaded.
             waitFor(metaRefresh).until(Control::isStale);
         } catch (NoSuchElementException ignored) {
-            // this is ok the page reload happened quicker that our tests ran, or there was no reload and we are still in /manage
+            // this is ok the page reload happened quicker that our tests ran, or there was no reload and we are still
+            // in /manage
         }
     }
 }

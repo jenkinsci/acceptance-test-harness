@@ -47,7 +47,8 @@ public class XvncJobConfig extends PageAreaImpl {
 
     public static Matcher<Build> runXvnc() {
         return new BuildMatcher("xvnc run during the build") {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 String out = item.getConsole();
                 return out.contains("Starting xvnc") && out.contains("Terminating xvnc");
             }
@@ -56,7 +57,8 @@ public class XvncJobConfig extends PageAreaImpl {
 
     public static Matcher<Build> tookScreenshot() {
         return new BuildMatcher("screenshot was taken") {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 String out = item.getConsole();
                 return out.contains("Taking screenshot");
             }
@@ -65,13 +67,14 @@ public class XvncJobConfig extends PageAreaImpl {
 
     public static Matcher<Build> usedDisplayNumber(final int number) {
         return new BuildMatcher("display number %d was used", number) {
-            @Override public boolean matchesSafely(Build item) {
+            @Override
+            public boolean matchesSafely(Build item) {
                 return item.getConsole().contains(String.format(" :%s ", number));
             }
         };
     }
 
-    private static abstract class BuildMatcher extends Matcher<Build> {
+    private abstract static class BuildMatcher extends Matcher<Build> {
         protected BuildMatcher(String format, Object... args) {
             super(format, args);
         }

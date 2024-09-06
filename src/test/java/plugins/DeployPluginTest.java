@@ -11,7 +11,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.Tomcat10Container;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.Native;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.deploy.DeployPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -31,11 +36,15 @@ public class DeployPluginTest extends AbstractJUnitTest {
 
     @Test
     @Native("bash")
-    @WithCredentials(credentialType = WithCredentials.USERNAME_PASSWORD, values = {"admin", "tomcat"}, id = "tomcat")
+    @WithCredentials(
+            credentialType = WithCredentials.USERNAME_PASSWORD,
+            values = {"admin", "tomcat"},
+            id = "tomcat")
     public void deploy_sample_webapp_to_tomcat10() throws IOException, InterruptedException {
         if (SystemUtils.IS_OS_WINDOWS) {
             // TODO move somewhere else...
-            String path = new CommandBuilder("where.exe", "bash.exe").popen().asText().trim();
+            String path =
+                    new CommandBuilder("where.exe", "bash.exe").popen().asText().trim();
             // where will return all matches and we only want the first.
             path = path.replaceAll("\r\n.*", "");
             JenkinsConfig conf = jenkins.getConfigPage();
@@ -66,7 +75,8 @@ public class DeployPluginTest extends AbstractJUnitTest {
         assertThat(readText(f), containsString("Hello World!"));
 
         j.configure();
-        s.command("cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
+        s.command(
+                "cd my-webapp && echo '<html><body>Hello Jenkins</body></html>' > src/main/webapp/index.jsp && mvn install");
         j.save();
 
         b = j.startBuild().shouldSucceed();

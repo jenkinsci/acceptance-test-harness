@@ -24,7 +24,7 @@ public class UpdateCenterMetadata {
     /**
      * Details of plugins by {@linkplain PluginMetadata#name their name}.
      */
-    public Map<String,PluginMetadata> plugins = new HashMap<>();
+    public Map<String, PluginMetadata> plugins = new HashMap<>();
 
     public String id;
 
@@ -38,9 +38,9 @@ public class UpdateCenterMetadata {
      */
     public static UpdateCenterMetadata parse(File data) throws IOException {
         try (BufferedReader r = new BufferedReader(new FileReader(data))) {
-            r.readLine();   // the first line is preamble
+            r.readLine(); // the first line is preamble
             String json = r.readLine(); // the 2nd line is the actual JSON
-            r.readLine();   // the third line is postamble
+            r.readLine(); // the third line is postamble
 
             ObjectMapper om = new ObjectMapper();
             om.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
@@ -51,7 +51,7 @@ public class UpdateCenterMetadata {
         }
     }
 
-    public static UpdateCenterMetadata get(String id, Map<String,PluginMetadata> plugins) {
+    public static UpdateCenterMetadata get(String id, Map<String, PluginMetadata> plugins) {
         UpdateCenterMetadata ucm = new UpdateCenterMetadata();
         ucm.id = id;
         ucm.plugins.putAll(plugins);
@@ -76,11 +76,12 @@ public class UpdateCenterMetadata {
      * @deprecated Not used when running {@link MockUpdateCenter}.
      */
     @Deprecated
-    public List<PluginMetadata> transitiveDependenciesOf(Jenkins jenkins, Collection<PluginSpec> plugins) throws UnableToResolveDependencies {
+    public List<PluginMetadata> transitiveDependenciesOf(Jenkins jenkins, Collection<PluginSpec> plugins)
+            throws UnableToResolveDependencies {
         List<PluginMetadata> set = new ArrayList<>();
         for (PluginSpec n : plugins) {
             PluginMetadata p = this.plugins.get(n.getName());
-            if (p==null) {
+            if (p == null) {
                 // The plugin explicitly requested is not available in the configured update center
                 // Skipping the test since it can happen for both upstream and downstream update centers
                 throw new AssumptionViolatedException("No such plugin " + n.getName());
@@ -88,8 +89,7 @@ public class UpdateCenterMetadata {
             if (p.requiredCore().isNewerThan(jenkins.getVersion())) {
                 throw new UnableToResolveDependencies(String.format(
                         "Unable to install %s plugin because of core dependency. Required: %s Used: %s",
-                        p, p.requiredCore(), jenkins
-                ));
+                        p, p.requiredCore(), jenkins));
             }
 
             transitiveDependenciesOf(jenkins, p, n.getVersion(), set);
@@ -101,12 +101,13 @@ public class UpdateCenterMetadata {
     @Deprecated
     private void transitiveDependenciesOf(Jenkins jenkins, PluginMetadata p, String v, List<PluginMetadata> result) {
         for (Dependency d : p.getDependencies()) {
-            if (d.optional || !shouldBeIncluded(jenkins, d)) continue;
+            if (d.optional || !shouldBeIncluded(jenkins, d)) {
+                continue;
+            }
             PluginMetadata depMetaData = plugins.get(d.name);
             if (depMetaData == null) {
                 throw new UnableToResolveDependencies(
-                    String.format("Unable to install dependency '%s' for '%s': plugin not found", d, p)
-                );
+                        String.format("Unable to install dependency '%s' for '%s': plugin not found", d, p));
             }
             transitiveDependenciesOf(jenkins, depMetaData, d.version, result);
         }
@@ -123,7 +124,7 @@ public class UpdateCenterMetadata {
 
     /**
      * Assess whether the dependency actually needs to be installed or upgraded.
-     * 
+     *
      * @param jenkins top-level jenkins object
      * @param d the dependency
      * @return true if the dependency should be installed/upgraded. Otherwise, false.
@@ -153,6 +154,5 @@ public class UpdateCenterMetadata {
         public UnableToResolveDependencies(Throwable cause) {
             super(cause);
         }
-
     }
 }

@@ -41,8 +41,9 @@ public class TestRecorderRule extends TestWatcher {
 
     private static final String DEFAULT_MODE = FAILURES;
 
-    static String RECORDER_OPTION = SystemEnvironmentVariables
-            .getPropertyVariableOrEnvironment("RECORDER", DEFAULT_MODE).trim();
+    static String RECORDER_OPTION = SystemEnvironmentVariables.getPropertyVariableOrEnvironment(
+                    "RECORDER", DEFAULT_MODE)
+            .trim();
 
     private boolean headless = false;
     private FailureDiagnostics diagnostics;
@@ -62,8 +63,7 @@ public class TestRecorderRule extends TestWatcher {
 
     private void startRecording(Description des) {
         try {
-            GraphicsConfiguration gc = GraphicsEnvironment
-                    .getLocalGraphicsEnvironment()
+            GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
                     .getDefaultScreenDevice()
                     .getDefaultConfiguration();
 
@@ -75,13 +75,11 @@ public class TestRecorderRule extends TestWatcher {
             float quality = QUALITY_RATIO;
             int screenRate = FRAME_RATE_PER_SEC;
 
-            Format outputFormatForScreenCapture = getOutputFormatForScreenCapture(videoFormatName,
-                    compressorName, outputDimension,
-                    bitDepth, quality, screenRate);
+            Format outputFormatForScreenCapture = getOutputFormatForScreenCapture(
+                    videoFormatName, compressorName, outputDimension, bitDepth, quality, screenRate);
 
-            this.screenRecorder = new JUnitScreenRecorder
-                    (gc, gc.getBounds(), getFileFormat(mimeType),
-                            outputFormatForScreenCapture, null, null, diagnostics);
+            this.screenRecorder = new JUnitScreenRecorder(
+                    gc, gc.getBounds(), getFileFormat(mimeType), outputFormatForScreenCapture, null, null, diagnostics);
             this.screenRecorder.start();
         } catch (HeadlessException e) {
             logger.warning("Test recorder does not work with Headless mode");
@@ -125,7 +123,9 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void stopRecording(boolean waitTime) {
-        if (this.screenRecorder != null && !this.headless && this.screenRecorder.getState() == ScreenRecorder.State.RECORDING) {
+        if (this.screenRecorder != null
+                && !this.headless
+                && this.screenRecorder.getState() == ScreenRecorder.State.RECORDING) {
             try {
                 if (waitTime) {
                     waitUntilLastFramesAreRecorded();
@@ -138,7 +138,7 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void waitUntilLastFramesAreRecorded() throws InterruptedException {
-        //Values below 500 milliseconds result in no recording last frames.
+        // Values below 500 milliseconds result in no recording last frames.
         TimeUnit.MILLISECONDS.sleep(500);
     }
 
@@ -146,17 +146,32 @@ public class TestRecorderRule extends TestWatcher {
         return new Format(FormatKeys.MediaTypeKey, FormatKeys.MediaType.FILE, FormatKeys.MimeTypeKey, mimeType);
     }
 
-    private Format getOutputFormatForScreenCapture(String videoFormatName, String compressorName,
-                                                   Dimension outputDimension, int bitDepth, float quality,
-                                                   int screenRate) {
-        return new Format(FormatKeys.MediaTypeKey, FormatKeys.MediaType.VIDEO, FormatKeys.EncodingKey,
+    private Format getOutputFormatForScreenCapture(
+            String videoFormatName,
+            String compressorName,
+            Dimension outputDimension,
+            int bitDepth,
+            float quality,
+            int screenRate) {
+        return new Format(
+                FormatKeys.MediaTypeKey,
+                FormatKeys.MediaType.VIDEO,
+                FormatKeys.EncodingKey,
                 videoFormatName,
-                VideoFormatKeys.CompressorNameKey, compressorName,
-                VideoFormatKeys.WidthKey, outputDimension.width,
-                VideoFormatKeys.HeightKey, outputDimension.height,
-                VideoFormatKeys.DepthKey, bitDepth, FormatKeys.FrameRateKey, Rational.valueOf(screenRate),
-                VideoFormatKeys.QualityKey, quality,
-                FormatKeys.KeyFrameIntervalKey, screenRate * 5 // one keyframe per 5 seconds
-        );
+                VideoFormatKeys.CompressorNameKey,
+                compressorName,
+                VideoFormatKeys.WidthKey,
+                outputDimension.width,
+                VideoFormatKeys.HeightKey,
+                outputDimension.height,
+                VideoFormatKeys.DepthKey,
+                bitDepth,
+                FormatKeys.FrameRateKey,
+                Rational.valueOf(screenRate),
+                VideoFormatKeys.QualityKey,
+                quality,
+                FormatKeys.KeyFrameIntervalKey,
+                screenRate * 5 // one keyframe per 5 seconds
+                );
     }
 }

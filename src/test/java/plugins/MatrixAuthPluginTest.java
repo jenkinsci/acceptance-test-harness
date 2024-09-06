@@ -89,7 +89,8 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         {
             sc.open();
 
-            ProjectBasedMatrixAuthorizationStrategy mas = sc.useAuthorizationStrategy(ProjectBasedMatrixAuthorizationStrategy.class);
+            ProjectBasedMatrixAuthorizationStrategy mas =
+                    sc.useAuthorizationStrategy(ProjectBasedMatrixAuthorizationStrategy.class);
 
             MatrixRow a = mas.addUser("alice");
             a.admin();

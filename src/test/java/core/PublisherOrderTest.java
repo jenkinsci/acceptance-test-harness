@@ -19,7 +19,7 @@ public class PublisherOrderTest extends AbstractJUnitTest {
         FreeStyleJob upstream = jenkins.jobs.create(FreeStyleJob.class);
         upstream.configure();
         String command = "echo 'hello' > aggregate.txt";
-        if(SystemUtils.IS_OS_UNIX) {
+        if (SystemUtils.IS_OS_UNIX) {
             upstream.addShellStep(command);
         } else {
             upstream.addBatchStep(command);
@@ -40,7 +40,7 @@ public class PublisherOrderTest extends AbstractJUnitTest {
         FreeStyleJob upstream = jenkins.jobs.create(FreeStyleJob.class);
         upstream.configure();
         String command = "echo 'hello' > aggregate.txt";
-        if(SystemUtils.IS_OS_UNIX) {
+        if (SystemUtils.IS_OS_UNIX) {
             upstream.addShellStep(command);
         } else {
             upstream.addBatchStep(command);

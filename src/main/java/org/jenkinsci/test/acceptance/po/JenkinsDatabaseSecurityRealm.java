@@ -43,7 +43,10 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
     }
 
     public User signup(String name) {
-        return signup().password(name).fullname(name).email(name + "@mailinator.com", false).signup(name);
+        return signup().password(name)
+                .fullname(name)
+                .email(name + "@mailinator.com", false)
+                .signup(name);
     }
 
     public User signup(String name, String pwd, String fullName, String email) {
@@ -67,7 +70,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
         }
 
         /**
-         * Configure the users email address 
+         * Configure the users email address
          * @param mail the users email address
          * @param required true if the email address is required (the field dependes on the present of {@code mailer} plugin.
          */

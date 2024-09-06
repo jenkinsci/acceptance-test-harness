@@ -20,11 +20,17 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Adds a new user to this matrix.
      */
     public MatrixRow addUser(String name) {
-        runThenHandleAlert(() -> this.table.resolve().findElement(by.xpath("../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']")).click(),
+        runThenHandleAlert(
+                () -> this.table
+                        .resolve()
+                        .findElement(
+                                by.xpath(
+                                        "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
+                        .click(),
                 a -> {
-            a.sendKeys(name);
-            a.accept();
-        });
+                    a.sendKeys(name);
+                    a.accept();
+                });
         return getUser(name);
     }
 
@@ -32,6 +38,6 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Picks up the existing user in the table.
      */
     public MatrixRow getUser(String name) {
-        return new MatrixRow(this,"data/USER:"+name);
+        return new MatrixRow(this, "data/USER:" + name);
     }
 }

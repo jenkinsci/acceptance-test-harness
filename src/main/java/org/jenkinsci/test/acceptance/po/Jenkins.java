@@ -54,7 +54,7 @@ public class Jenkins extends Node implements Container {
     public final SlavesMixIn slaves;
 
     private Jenkins(Injector injector, URL url) {
-        super(injector,url);
+        super(injector, url);
         waitForStarted();
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);
@@ -76,7 +76,7 @@ public class Jenkins extends Node implements Container {
             controller.start();
             return controller.getUrl();
         } catch (IOException e) {
-            throw new AssertionError("Failed to start JenkinsController",e);
+            throw new AssertionError("Failed to start JenkinsController", e);
         }
     }
 
@@ -96,8 +96,7 @@ public class Jenkins extends Node implements Container {
 
                 String pageText = IOUtils.toString(urlConnection.getInputStream(), StandardCharsets.UTF_8);
                 throw new AssertionError(
-                        "Application running on " + url + " does not seem to be Jenkins:\n" + pageText
-                );
+                        "Application running on " + url + " does not seem to be Jenkins:\n" + pageText);
             }
         } catch (IOException ex) {
             throw new AssertionError("Caught an IOException, Jenkins URL was " + url, ex);
@@ -114,9 +113,10 @@ public class Jenkins extends Node implements Container {
      * Wait for Jenkins to become up and running
      */
     public void waitForStarted() {
-        waitFor().withTimeout(Duration.ofMinutes(1))
-                 .ignoring(AssertionError.class)
-                 .until(() -> getVersionNumber() != null);
+        waitFor()
+                .withTimeout(Duration.ofMinutes(1))
+                .ignoring(AssertionError.class)
+                .until(() -> getVersionNumber() != null);
     }
 
     /**
@@ -129,7 +129,7 @@ public class Jenkins extends Node implements Container {
     /**
      * Visit login page.
      */
-    public Login login(){
+    public Login login() {
         Login login = new Login(this);
         visit(login.url);
         return login;
@@ -138,7 +138,7 @@ public class Jenkins extends Node implements Container {
     /**
      * Visit logout URL.
      */
-    public void logout(){
+    public void logout() {
         visit(new Logout(this).url);
     }
 
@@ -178,29 +178,30 @@ public class Jenkins extends Node implements Container {
         }
     }
 
-    public void waitForLoad(int seconds){
+    public void waitForLoad(int seconds) {
         List<Class<? extends Throwable>> ignoring = new ArrayList<Class<? extends Throwable>>();
         ignoring.add(AssertionError.class);
         ignoring.add(NoSuchElementException.class);
         ignoring.add(WebDriverException.class);
-        //Ignore WebDriverException during restart.
+        // Ignore WebDriverException during restart.
         // Poll until we have the real page
-        waitFor(driver).withTimeout(Duration.ofSeconds(seconds))
+        waitFor(driver)
+                .withTimeout(Duration.ofSeconds(seconds))
                 .ignoreAll(ignoring)
                 .until((Function<WebDriver, Boolean>) driver -> {
                     visit(driver.getCurrentUrl()); // the page sometimes does not reload (fast enough)
-                    getJson("tree=nodeName"); // HudsonIsRestarting will serve a 503 to the index page, and will refuse api/json
+                    getJson("tree=nodeName"); // HudsonIsRestarting will serve a 503 to the index page, and will refuse
+                    // api/json
                     return true;
-                })
-        ;
+                });
     }
 
     public JenkinsLogger getLogger(String name) {
-        return new JenkinsLogger(this,name);
+        return new JenkinsLogger(this, name);
     }
 
-    public JenkinsLogger createLogger(String name, Map<String,Level> levels) {
-        return JenkinsLogger.create(this,name,levels);
+    public JenkinsLogger createLogger(String name, Map<String, Level> levels) {
+        return JenkinsLogger.create(this, name, levels);
     }
 
     public Plugin getPlugin(String name) {
@@ -270,7 +271,8 @@ public class Jenkins extends Node implements Container {
             // Crumb issuer is disabled
             return null;
         } else {
-            throw new IOException("Got status code " + statusCode + " while getting a crumb: " + EntityUtils.toString(getResponse.getEntity()));
+            throw new IOException("Got status code " + statusCode + " while getting a crumb: "
+                    + EntityUtils.toString(getResponse.getEntity()));
         }
     }
 

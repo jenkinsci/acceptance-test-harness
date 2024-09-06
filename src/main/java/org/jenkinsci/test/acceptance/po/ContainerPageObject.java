@@ -28,6 +28,7 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
         }
     }
 
+    @Override
     public URL getConfigUrl() {
         return url("configure");
     }
@@ -72,7 +73,7 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
         } catch (IOException e) {
             throw new NoSuchElementException("Failed to read from " + url, e);
         } finally {
-            if(con != null) {
+            if (con != null) {
                 con.disconnect();
             }
         }
@@ -95,8 +96,7 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
 
         if (!instance.isApplicable(this)) {
             throw new AssertionError(
-                    "Action can not be attached to " + getClass().getCanonicalName()
-            );
+                    "Action can not be attached to " + getClass().getCanonicalName());
         }
 
         return instance;
@@ -121,10 +121,16 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
 
     @Override
     public boolean equals(Object other) {
-        if (other == null) return false;
-        if (this == other) return true;
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
 
-        if (!(other instanceof ContainerPageObject)) return false;
+        if (!(other instanceof ContainerPageObject)) {
+            return false;
+        }
 
         ContainerPageObject rhs = (ContainerPageObject) other;
         return this.url.toExternalForm().equals(rhs.url.toExternalForm());

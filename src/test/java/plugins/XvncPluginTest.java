@@ -26,7 +26,8 @@ import org.jvnet.hudson.test.Issue;
 @WithDocker
 public class XvncPluginTest extends AbstractJUnitTest {
 
-    @Inject DockerContainerHolder<XvncSlaveContainer> containerHolder;
+    @Inject
+    DockerContainerHolder<XvncSlaveContainer> containerHolder;
 
     @Before
     public void setUp() {
@@ -34,7 +35,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
         slave.setLabels("xvnc");
         slave.save();
     }
-    
+
     private FreeStyleJob createJob() {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
         job.configure();
@@ -57,9 +58,7 @@ public class XvncPluginTest extends AbstractJUnitTest {
     @Test
     public void use_specific_display_number() {
         jenkins.configure();
-        new XvncGlobalJobConfig(jenkins.getConfigPage())
-                .useDisplayNumber(42)
-        ;
+        new XvncGlobalJobConfig(jenkins.getConfigPage()).useDisplayNumber(42);
         jenkins.save();
 
         FreeStyleJob job = createJob();
@@ -73,9 +72,11 @@ public class XvncPluginTest extends AbstractJUnitTest {
 
     @WithPlugins({"xvnc", "workflow-aggregator"})
     @Issue("JENKINS-26477")
-    @Test public void workflow() {
+    @Test
+    public void workflow() {
         WorkflowJob job = jenkins.jobs.create(WorkflowJob.class);
-        job.script.set("node('xvnc') {wrap([$class: 'Xvnc', takeScreenshot: true, useXauthority: true]) {sh 'xmessage hello &'}}");
+        job.script.set(
+                "node('xvnc') {wrap([$class: 'Xvnc', takeScreenshot: true, useXauthority: true]) {sh 'xmessage hello &'}}");
         job.sandbox.check();
         job.save();
         Build build = job.startBuild().shouldSucceed();
@@ -84,5 +85,4 @@ public class XvncPluginTest extends AbstractJUnitTest {
         assertThat(build, XvncJobConfig.tookScreenshot());
         build.getArtifact("screenshot.jpg").assertThatExists(true); // TODO should this be moved into tookScreenshot?
     }
-
 }

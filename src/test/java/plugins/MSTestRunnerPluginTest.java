@@ -40,10 +40,10 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 
-@WithPlugins({"mstestrunner","msbuild"})
+@WithPlugins({"mstestrunner", "msbuild"})
 @Native({"MSTest"})
 @WithOS(os = {WithOS.OS.WINDOWS})
-public class MSTestRunnerPluginTest extends AbstractJUnitTest{
+public class MSTestRunnerPluginTest extends AbstractJUnitTest {
 
     private static final String FAILING_TESTS_PROJECT = "/mstestrunner_plugin/BankIncorrect/";
     private static final String SUCCESSFUL_TESTS_PROJECT = "/mstestrunner_plugin/BankCorrect/";
@@ -87,7 +87,8 @@ public class MSTestRunnerPluginTest extends AbstractJUnitTest{
     }
 
     @Test
-    public void runTestsWithCategories() throws URISyntaxException, IOException, InterruptedException, ExecutionException {
+    public void runTestsWithCategories()
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException {
         FreeStyleJob job = msBuildJobWithTests(SUCCESSFUL_TESTS_PROJECT, VALID_TESTS_FILES, "RealTests", "", false);
         Build b = job.scheduleBuild();
         b.shouldSucceed();
@@ -95,7 +96,8 @@ public class MSTestRunnerPluginTest extends AbstractJUnitTest{
     }
 
     @Test
-    public void runTestsWithCmdArguments() throws URISyntaxException, IOException, InterruptedException, ExecutionException {
+    public void runTestsWithCmdArguments()
+            throws URISyntaxException, IOException, InterruptedException, ExecutionException {
         FreeStyleJob job = msBuildJobWithTests(SUCCESSFUL_TESTS_PROJECT, VALID_TESTS_FILES, "", "/usestderr", false);
         Build b = job.scheduleBuild();
         b.shouldSucceed();
@@ -121,7 +123,8 @@ public class MSTestRunnerPluginTest extends AbstractJUnitTest{
      * @param ignoreFailingTests whether to ignore failing tests or not
      * @return the FreeStyle job created
      */
-    private FreeStyleJob msBuildJobWithTests(String workspacePath, String testFiles, String categories, String cmdLineArgs, boolean ignoreFailingTests) {
+    private FreeStyleJob msBuildJobWithTests(
+            String workspacePath, String testFiles, String categories, String cmdLineArgs, boolean ignoreFailingTests) {
         if (workspacePath != null && testFiles != null) {
             FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
             job.copyDir(resource(workspacePath));

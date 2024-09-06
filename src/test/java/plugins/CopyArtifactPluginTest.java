@@ -34,7 +34,11 @@ import java.util.concurrent.ExecutionException;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.copyartifact.CopyArtifactBuildStep;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Artifact;
+import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,9 +48,10 @@ import org.junit.Test;
  * @author <a href="tomas.westling@sonymobile.com">Tomas Westling</a>
  */
 @WithPlugins({"command-launcher", "copyartifact"})
-public class CopyArtifactPluginTest extends AbstractJUnitTest{
+public class CopyArtifactPluginTest extends AbstractJUnitTest {
     @Inject
     private SlaveController slaveController;
+
     private FreeStyleJob job1, job2;
     private Slave slave;
     public static int NO_SMALL_FILES = 100;
@@ -64,13 +69,12 @@ public class CopyArtifactPluginTest extends AbstractJUnitTest{
      */
     @Test
     public void TestCopyFiles() {
-        setupAndRunJobToCopyFrom("#!/bin/bash\n" +
-                "rm ./job1*.txt\n" +
-                "for i in {1.." + NO_SMALL_FILES + "}\n" +
-                "do\n" +
-                "dd if=/dev/zero of=job1-${BUILD_NUMBER}-file-$i.txt bs=1k count=1\n" +
-                "done\n" +
-                "ls -l");
+        setupAndRunJobToCopyFrom("#!/bin/bash\n" + "rm ./job1*.txt\n"
+                + "for i in {1.."
+                + NO_SMALL_FILES + "}\n" + "do\n"
+                + "dd if=/dev/zero of=job1-${BUILD_NUMBER}-file-$i.txt bs=1k count=1\n"
+                + "done\n"
+                + "ls -l");
 
         List<Artifact> artifacts = setupAndRunJobToCopyTo();
 
@@ -78,23 +82,21 @@ public class CopyArtifactPluginTest extends AbstractJUnitTest{
         assertThat(artifacts.size(), is(equalTo(NO_SMALL_FILES)));
     }
 
-
     /**
      * Tests that the file archiving and copying works for very long path names.
      */
     @Test
     public void TestCopyFileLongPathName() {
-        setupAndRunJobToCopyFrom("#!/bin/bash\n" +
-                "rm -r ./job* \n" +
-                "text=abcdefghijklmnopqrstuvwxyz+abcdefghijklmnopqrstuvwxyz\n" +
-                "filename=job-${BUILD_NUMBER}-$text\n" +
-                "for i in {1.." + NO_FILES_LONG_NAME + "}\n" +
-                "do\n" +
-                "mkdir $filename \n" +
-                "cd $filename\n" +
-                "pwd\n" +
-                "dd if=/dev/zero of=$filename-$i.txt bs=1k count=1\n" +
-                "done");
+        setupAndRunJobToCopyFrom("#!/bin/bash\n" + "rm -r ./job* \n"
+                + "text=abcdefghijklmnopqrstuvwxyz+abcdefghijklmnopqrstuvwxyz\n"
+                + "filename=job-${BUILD_NUMBER}-$text\n"
+                + "for i in {1.."
+                + NO_FILES_LONG_NAME + "}\n" + "do\n"
+                + "mkdir $filename \n"
+                + "cd $filename\n"
+                + "pwd\n"
+                + "dd if=/dev/zero of=$filename-$i.txt bs=1k count=1\n"
+                + "done");
 
         List<Artifact> artifacts = setupAndRunJobToCopyTo();
 
@@ -107,7 +109,6 @@ public class CopyArtifactPluginTest extends AbstractJUnitTest{
      *
      * @param shellStep the command to run in the shell step.
      */
-
     private void setupAndRunJobToCopyFrom(String shellStep) {
         job1.configure();
         job1.setLabelExpression(slave.getName());
@@ -123,7 +124,7 @@ public class CopyArtifactPluginTest extends AbstractJUnitTest{
      *
      */
     private List<Artifact> setupAndRunJobToCopyTo() {
-        //Copy the artifacts from the first job, archive them and assert that they are there.
+        // Copy the artifacts from the first job, archive them and assert that they are there.
         job2.configure();
         job2.setLabelExpression(slave.getName());
         CopyArtifactBuildStep copyArtifactBuildStep = job2.addBuildStep(CopyArtifactBuildStep.class);

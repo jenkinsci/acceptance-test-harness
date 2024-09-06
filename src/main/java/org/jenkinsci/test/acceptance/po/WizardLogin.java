@@ -80,12 +80,15 @@ public class WizardLogin extends PageObject {
 
     /**
      * Gets the generated password from the file on disk
-     * 
+     *
      * @return the read password
-     * @throws IOException if there is an IO error 
+     * @throws IOException if there is an IO error
      */
     public String getPassword(JenkinsController controller) throws IOException {
-        Assume.assumeThat("Testing the setup wizard is only supported if a LocalController is in use. Test will be skipped.", controller, instanceOf(LocalController.class));
+        Assume.assumeThat(
+                "Testing the setup wizard is only supported if a LocalController is in use. Test will be skipped.",
+                controller,
+                instanceOf(LocalController.class));
         File passwordFile = new File(((LocalController) controller).getJenkinsHome(), "secrets/initialAdminPassword");
         return FileUtils.readFileToString(passwordFile, StandardCharsets.UTF_8).trim();
     }

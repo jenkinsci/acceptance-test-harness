@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import static org.jenkinsci.test.acceptance.po.PageObject.*;
+import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 
 import hudson.plugins.jira.soap.JiraSoapService;
 import hudson.plugins.jira.soap.RemoteComment;
@@ -24,33 +24,33 @@ import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
 /**
  * @author Kohsuke Kawaguchi
  */
-@DockerFixture(id="jira",ports=2990)
+@DockerFixture(id = "jira", ports = 2990)
 public class JiraContainer extends DockerContainer {
 
     private JiraSoapService svc;
     private String token;
 
     public URL getURL() throws MalformedURLException {
-        return new URL("http://" + ipBound(2990) + ':' +port(2990)+"/jira/");
+        return new URL("http://" + ipBound(2990) + ':' + port(2990) + "/jira/");
     }
 
     /**
      * Wait until JIRA becomes up and running.
      */
     public void waitForReady(CapybaraPortingLayer p) {
-        p.waitFor().withMessage("Waiting for jira to come up")
+        p.waitFor()
+                .withMessage("Waiting for jira to come up")
                 .withTimeout(Duration.ofSeconds(2000)) // [INFO] jira started successfully in 1064s
-                .until( () ->  {
-                        try {
-                            URLConnection connection = getURL().openConnection();
-                            connection.setConnectTimeout(1000); // Prevent waiting too long for connection to timeout
-                            String s = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
-                            return s.contains("System Dashboard");
-                        } catch (SocketException e) {
-                            return null;
-                        }
-
-        });
+                .until(() -> {
+                    try {
+                        URLConnection connection = getURL().openConnection();
+                        connection.setConnectTimeout(1000); // Prevent waiting too long for connection to timeout
+                        String s = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
+                        return s.contains("System Dashboard");
+                    } catch (SocketException e) {
+                        return null;
+                    }
+                });
     }
 
     /**
@@ -67,7 +67,7 @@ public class JiraContainer extends DockerContainer {
     }
 
     public void createProject(String key) throws IOException, ServiceException {
-        createProject(key,createRandomName());
+        createProject(key, createRandomName());
     }
 
     /**
@@ -84,11 +84,11 @@ public class JiraContainer extends DockerContainer {
     }
 
     public void createIssue(String key) throws IOException, ServiceException {
-        createIssue(key,createRandomName(),createRandomName());
+        createIssue(key, createRandomName(), createRandomName());
     }
 
     private void connect() throws IOException, ServiceException {
-        if (svc==null) {
+        if (svc == null) {
             svc = JIRA.connect(getURL());
             token = svc.login("admin", "admin");
         }

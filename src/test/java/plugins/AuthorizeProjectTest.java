@@ -68,10 +68,10 @@ public class AuthorizeProjectTest extends AbstractJUnitTest {
         final GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
         security.open();
 
-        final ProjectDefaultBuildAccessControl control = security.addBuildAccessControl(ProjectDefaultBuildAccessControl.class);
+        final ProjectDefaultBuildAccessControl control =
+                security.addBuildAccessControl(ProjectDefaultBuildAccessControl.class);
         control.runAsSpecificUser(user);
 
         security.save();
     }
-
 }

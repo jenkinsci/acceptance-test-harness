@@ -16,12 +16,12 @@ public class SubWorld {
     /*package*/ Injector injector;
     /*package*/ String name;
 
-    /*package*/ SubWorld() {
-    }
+    /*package*/ SubWorld() {}
 
     public String getName() {
         return name;
     }
+
     public Injector getInjector() {
         return injector;
     }

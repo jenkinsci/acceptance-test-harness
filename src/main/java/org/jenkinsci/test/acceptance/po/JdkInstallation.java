@@ -33,7 +33,8 @@ public class JdkInstallation extends ToolInstallation {
     @Override
     public ToolInstallation installVersion(String version) {
         super.installVersion(version);
-        control("properties/hudson-tools-InstallSourceProperty/installers/acceptLicense").check();
+        control("properties/hudson-tools-InstallSourceProperty/installers/acceptLicense")
+                .check();
         return this;
     }
 

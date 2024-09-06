@@ -50,8 +50,7 @@ public abstract class AbstractJobRelatedTest extends AbstractJUnitTest {
      * @return Created an configured job.
      */
     public <T extends Job> T createJob(Class<T> jobClass) {
-        return createAndConfigureJob(jobClass, job -> {
-        }, jenkins);
+        return createAndConfigureJob(jobClass, job -> {}, jenkins);
     }
 
     /**
@@ -91,12 +90,10 @@ public abstract class AbstractJobRelatedTest extends AbstractJUnitTest {
         return createFreeStyleJob(job -> {
             String resultFileName = "status.xml";
 
-            //TODO: Remove Hack if job can be set unstable directly.
-            //TODO: And Remove @WithPlugins("junit") after that.
-            job.addShellStep(
-                "echo '<testsuite><testcase classname=\"\"><failure>\n" +
-                    "</failure></testcase></testsuite>'>" + resultFileName
-            );
+            // TODO: Remove Hack if job can be set unstable directly.
+            // TODO: And Remove @WithPlugins("junit") after that.
+            job.addShellStep("echo '<testsuite><testcase classname=\"\"><failure>\n"
+                    + "</failure></testcase></testsuite>'>" + resultFileName);
             job.addPublisher(JUnitPublisher.class).testResults.set(resultFileName);
         });
     }
@@ -140,5 +137,4 @@ public abstract class AbstractJobRelatedTest extends AbstractJUnitTest {
     protected Build buildUnstableJob(final Job job) {
         return buildJobAndWait(job).shouldBeUnstable();
     }
-
 }

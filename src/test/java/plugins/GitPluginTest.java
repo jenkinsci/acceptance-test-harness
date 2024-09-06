@@ -28,7 +28,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import jakarta.inject.Inject;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.regex.Matcher;
@@ -36,7 +35,11 @@ import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
-import org.jenkinsci.test.acceptance.junit.*;
+import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
+import org.jenkinsci.test.acceptance.junit.DockerTest;
+import org.jenkinsci.test.acceptance.junit.WithCredentials;
+import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git.GitScm;
 import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.NoVerificationStrategy;
@@ -52,7 +55,9 @@ import org.openqa.selenium.By;
 @WithDocker
 @Category(DockerTest.class)
 @WithPlugins("git")
-@WithCredentials(credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY, values = {"gitplugin", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"})
+@WithCredentials(
+        credentialType = WithCredentials.SSH_USERNAME_PRIVATE_KEY,
+        values = {"gitplugin", "/org/jenkinsci/test/acceptance/docker/fixtures/GitContainer/unsafe"})
 public class GitPluginTest extends AbstractJUnitTest {
 
     private static final String USERNAME = "gitplugin";
@@ -89,12 +94,9 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     @Test
     public void simple_checkout() {
-        buildGitRepo()
-                .transferToDockerContainer(host, port);
+        buildGitRepo().transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME);
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME);
         job.addShellStep("test -f foo");
         job.save();
 
@@ -107,10 +109,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         repo.git("branch", "svn");
         repo.transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .branch("svn");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).branch("svn");
         job.addShellStep("test `git rev-parse origin/svn` = `git rev-parse HEAD`");
         job.save();
 
@@ -119,28 +118,20 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     @Test
     public void name_remote_repo() {
-        buildGitRepo()
-                .transferToDockerContainer(host, port);
+        buildGitRepo().transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .remoteName("custom_origin");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).remoteName("custom_origin");
         job.addShellStep("test -f foo && git remote -v");
         job.save();
 
-        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + Pattern.quote(repoUrl)); 
+        job.startBuild().shouldSucceed().shouldContainsConsoleOutput("custom_origin\\s+" + Pattern.quote(repoUrl));
     }
 
     @Test
     public void checkout_local_branch() {
-        buildGitRepo()
-                .transferToDockerContainer(host, port);
+        buildGitRepo().transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .localBranch("selenium_test_branch");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).localBranch("selenium_test_branch");
         job.addShellStep("test `git rev-parse selenium_test_branch` = `git rev-parse HEAD`");
         job.save();
 
@@ -149,13 +140,9 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     @Test
     public void checkout_to_local_dir() {
-        buildGitRepo()
-                .transferToDockerContainer(host, port);
+        buildGitRepo().transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .localDir("local_dir");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).localDir("local_dir");
         job.addShellStep("cd local_dir && test -f foo");
         job.save();
 
@@ -164,8 +151,7 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     @Test
     public void poll_for_changes() throws MalformedURLException {
-        buildGitRepo()
-                .transferToDockerContainer(host, port);
+        buildGitRepo().transferToDockerContainer(host, port);
 
         job.useScm(GitScm.class) //
                 .url(container.getRepoUrl())
@@ -182,12 +168,9 @@ public class GitPluginTest extends AbstractJUnitTest {
 
     @Test
     public void check_revision() {
-        buildGitRepo()
-                .transferToDockerContainer(host, port);
+        buildGitRepo().transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME);
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME);
         job.save();
         job.startBuild().waitUntilFinished();
 
@@ -202,14 +185,9 @@ public class GitPluginTest extends AbstractJUnitTest {
     @Ignore("Fails on CI for unknown reasons")
     public void update_submodules_recursively() {
         String name = "submodule";
-        buildGitRepo()
-                .addSubmodule(name)
-                .transferToDockerContainer(host, port);
+        buildGitRepo().addSubmodule(name).transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .enableRecursiveSubmoduleProcessing();
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).enableRecursiveSubmoduleProcessing();
 
         job.addShellStep("cd " + name + " && test -f foo");
         job.save();
@@ -227,10 +205,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         repo.changeAndCommitFoo(TEST_COMMIT_MESSAGE);
         repo.transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .calculateChangelog("origin", "testBranch");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).calculateChangelog("origin", "testBranch");
 
         job.save();
 
@@ -238,15 +213,9 @@ public class GitPluginTest extends AbstractJUnitTest {
         b.shouldSucceed();
         changesUrl = b.url("changes");
 
-        assertThat(
-                b.getConsole(),
-                Matchers.containsRegexp("Using 'Changelog to branch' strategy.", Pattern.MULTILINE)
-        );
+        assertThat(b.getConsole(), Matchers.containsRegexp("Using 'Changelog to branch' strategy.", Pattern.MULTILINE));
 
-        assertThat(
-                visit(changesUrl).getPageSource(),
-                Matchers.containsRegexp(TEST_COMMIT_MESSAGE, Pattern.MULTILINE)
-        );
+        assertThat(visit(changesUrl).getPageSource(), Matchers.containsRegexp(TEST_COMMIT_MESSAGE, Pattern.MULTILINE));
     }
 
     @Test
@@ -275,9 +244,7 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         assertThat(
                 b.getConsole(),
-                Matchers.containsRegexp("jenkins-"+job.name +"-1 Jenkins Build #1", Pattern.MULTILINE)
-        );
-
+                Matchers.containsRegexp("jenkins-" + job.name + "-1 Jenkins Build #1", Pattern.MULTILINE));
     }
 
     @Test
@@ -286,10 +253,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         GitRepo repo = buildGitRepo();
         repo.transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .customScmName(SCM_NAME);
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).customScmName(SCM_NAME);
 
         job.save();
         Build b = job.startBuild();
@@ -298,8 +262,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         // Git plugin 4.0 switched from <b> to <strong>. Accept either bold or strong.
         assertThat(
                 visit(b.url("git")).getPageSource(),
-                Matchers.containsRegexp("<[^>]+>SCM:?</[^>]+>:? " + SCM_NAME, Pattern.MULTILINE)
-        );
+                Matchers.containsRegexp("<[^>]+>SCM:?</[^>]+>:? " + SCM_NAME, Pattern.MULTILINE));
     }
 
     @Test
@@ -317,7 +280,8 @@ public class GitPluginTest extends AbstractJUnitTest {
         job.useScm(GitScm.class)
                 .url(repoUrl)
                 .credentials(USERNAME)
-                .sparseCheckout().addPath(SUB_DIR);
+                .sparseCheckout()
+                .addPath(SUB_DIR);
 
         job.addShellStep("test ! -f " + TEST_FILE + " && test -f " + SUB_DIR + "/" + TEST_FILE);
 
@@ -334,10 +298,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         repo.createBranch(BRANCH_NAME);
         repo.transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .chooseBuildStrategy("Inverse");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).chooseBuildStrategy("Inverse");
 
         job.save();
         Build b = job.startBuild();
@@ -346,12 +307,8 @@ public class GitPluginTest extends AbstractJUnitTest {
         assertThat(
                 b.getConsole(),
                 Matchers.containsRegexp(
-                        "Checking out Revision .* \\(origin/"+BRANCH_NAME+"\\)",
-                        Pattern.MULTILINE
-                )
-        );
+                        "Checking out Revision .* \\(origin/" + BRANCH_NAME + "\\)", Pattern.MULTILINE));
     }
-
 
     @Test
     public void merge_before_build_test() {
@@ -387,20 +344,13 @@ public class GitPluginTest extends AbstractJUnitTest {
         assertThat(
                 console,
                 Matchers.containsRegexp(
-                        "Merging Revision .* \\(refs/remotes/origin/master\\) to origin/"+BRANCH_NAME,
-                        Pattern.MULTILINE
-                )
-        );
-        assertThat(
-                console,
-                Matchers.containsRegexp("git merge --ff "+revision, Pattern.MULTILINE)
-        );
+                        "Merging Revision .* \\(refs/remotes/origin/master\\) to origin/" + BRANCH_NAME,
+                        Pattern.MULTILINE));
+        assertThat(console, Matchers.containsRegexp("git merge --ff " + revision, Pattern.MULTILINE));
         assertThat(
                 console,
                 Matchers.containsRegexp(
-                        "Checking out Revision .* \\(origin/master, origin/"+BRANCH_NAME+"\\)", Pattern.MULTILINE
-                )
-        );
+                        "Checking out Revision .* \\(origin/master, origin/" + BRANCH_NAME + "\\)", Pattern.MULTILINE));
     }
 
     @Test
@@ -419,20 +369,14 @@ public class GitPluginTest extends AbstractJUnitTest {
         repo.git("commit", "-m", TEST_COMMIT_MESSAGE, "--author", "New-Author <other-email@example.org>");
         repo.transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .calculateChangelog("origin", BRANCH_NAME);
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).calculateChangelog("origin", BRANCH_NAME);
         job.save();
 
         b = job.startBuild();
         b.shouldSucceed();
         changesUrl = b.url("changes");
 
-        assertThat(
-                visit(changesUrl).getPageSource(),
-                Matchers.containsRegexp("/user/jenkins-ath/", Pattern.MULTILINE)
-        );
+        assertThat(visit(changesUrl).getPageSource(), Matchers.containsRegexp("/user/jenkins-ath/", Pattern.MULTILINE));
 
         job.configure();
         job.useScm(GitScm.class).commitAuthorInChangelog();
@@ -443,10 +387,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         b.shouldSucceed();
         changesUrl = b.url("changes");
 
-        assertThat(
-                visit(changesUrl).getPageSource(),
-                Matchers.containsRegexp("/user/other-email/", Pattern.MULTILINE)
-        );
+        assertThat(visit(changesUrl).getPageSource(), Matchers.containsRegexp("/user/other-email/", Pattern.MULTILINE));
     }
 
     @Test
@@ -461,49 +402,28 @@ public class GitPluginTest extends AbstractJUnitTest {
         repo.changeAndCommitFoo(TEST_COMMIT2_MESSAGE);
         repo.transferToDockerContainer(host, port);
 
-        GitScm gitScm = job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME);
+        GitScm gitScm = job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME);
         job.addShellStep("git log");
         job.save();
 
         b = job.startBuild();
         b.shouldSucceed();
         String console = b.getConsole();
-        assertThat(
-                console,
-                Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)
-        );
-        assertThat(
-                console,
-                Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
-        );
-        assertThat(
-                console,
-                Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
-        );
+        assertThat(console, Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE));
+        assertThat(console, Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE));
+        assertThat(console, Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE));
 
         job.configure();
-        GitScm.AdvancedClone behaviour = gitScm.advancedClone()
-                .checkShallowClone(true)
-                .setNumDepth("2");
+        GitScm.AdvancedClone behaviour =
+                gitScm.advancedClone().checkShallowClone(true).setNumDepth("2");
         job.save();
 
         b = job.startBuild();
         b.shouldSucceed();
         console = b.getConsole();
-        assertThat(
-                console,
-                not(Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE))
-        );
-        assertThat(
-                console,
-                Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)
-        );
-        assertThat(
-                console,
-                Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
-        );
+        assertThat(console, not(Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)));
+        assertThat(console, Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE));
+        assertThat(console, Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE));
 
         job.configure();
         behaviour.setNumDepth("1");
@@ -512,18 +432,9 @@ public class GitPluginTest extends AbstractJUnitTest {
         b = job.startBuild();
         b.shouldSucceed();
         console = b.getConsole();
-        assertThat(
-                console,
-                not(Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE))
-        );
-        assertThat(
-                console,
-                not(Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE))
-        );
-        assertThat(
-                console,
-                Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE)
-        );
+        assertThat(console, not(Matchers.containsRegexp(TEST_INITIAL_COMMIT, Pattern.MULTILINE)));
+        assertThat(console, not(Matchers.containsRegexp(TEST_COMMIT1_MESSAGE, Pattern.MULTILINE)));
+        assertThat(console, Matchers.containsRegexp(TEST_COMMIT2_MESSAGE, Pattern.MULTILINE));
     }
 
     @Test
@@ -536,9 +447,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         repo.changeAndCommitFoo(TEST_COMMIT_MESSAGE);
         repo.transferToDockerContainer(host, port);
 
-        GitScm gitScm = job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME);
+        GitScm gitScm = job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME);
         job.save();
 
         b = job.startBuild();
@@ -547,8 +456,8 @@ public class GitPluginTest extends AbstractJUnitTest {
         String revision = getRevisionFromConsole(console);
         assertThat(
                 console,
-                not(Matchers.containsRegexp("git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, Pattern.MULTILINE))
-        );
+                not(Matchers.containsRegexp(
+                        "git checkout -f " + revision + " # timeout=" + TEST_TIME_OUT, Pattern.MULTILINE)));
 
         job.configure();
         gitScm.advancedCheckout().setTimeOut(TEST_TIME_OUT);
@@ -559,10 +468,9 @@ public class GitPluginTest extends AbstractJUnitTest {
         console = b.getConsole();
         assertThat(
                 console,
-                Matchers.containsRegexp("git checkout -f "+revision+" # timeout="+TEST_TIME_OUT, Pattern.MULTILINE)
-        );
+                Matchers.containsRegexp(
+                        "git checkout -f " + revision + " # timeout=" + TEST_TIME_OUT, Pattern.MULTILINE));
     }
-
 
     @Test
     public void default_strategy_to_choose_build() {
@@ -573,10 +481,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         repo.transferToDockerContainer(host, port);
 
         // Default Strategy for master
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .chooseBuildStrategy("Default");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).chooseBuildStrategy("Default");
 
         job.save();
         Build b = job.startBuild();
@@ -585,15 +490,11 @@ public class GitPluginTest extends AbstractJUnitTest {
         assertThat(
                 b.getConsole(),
                 Matchers.containsRegexp(
-                        "Checking out Revision .* \\(refs/remotes/origin/master\\)",
-                        Pattern.MULTILINE
-                )
-        );
+                        "Checking out Revision .* \\(refs/remotes/origin/master\\)", Pattern.MULTILINE));
 
         // Default Strategy for secondBranch
         job.configure();
-        job.useScm(GitScm.class)
-                .branch(BRANCH_NAME);
+        job.useScm(GitScm.class).branch(BRANCH_NAME);
 
         job.save();
         b = job.startBuild();
@@ -602,15 +503,11 @@ public class GitPluginTest extends AbstractJUnitTest {
         assertThat(
                 b.getConsole(),
                 Matchers.containsRegexp(
-                        "Checking out Revision .* \\(origin/"+BRANCH_NAME+"\\)",
-                        Pattern.MULTILINE
-                )
-        );
+                        "Checking out Revision .* \\(origin/" + BRANCH_NAME + "\\)", Pattern.MULTILINE));
 
         // Default Strategy for any branch
         job.configure();
-        job.useScm(GitScm.class)
-                .branch("");
+        job.useScm(GitScm.class).branch("");
 
         job.save();
         b = job.startBuild();
@@ -619,11 +516,7 @@ public class GitPluginTest extends AbstractJUnitTest {
         // 2 branches discovered
         assertThat(
                 b.getConsole(),
-                Matchers.containsRegexp(
-                        "Checking out Revision .* \\(origin/.*, origin/.*\\)",
-                        Pattern.MULTILINE
-                )
-        );
+                Matchers.containsRegexp("Checking out Revision .* \\(origin/.*, origin/.*\\)", Pattern.MULTILINE));
     }
 
     @Test
@@ -633,30 +526,18 @@ public class GitPluginTest extends AbstractJUnitTest {
         GitRepo repo = buildGitRepo();
         repo.transferToDockerContainer(host, port);
 
-        job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME)
-                .customNameAndMail(USER_NAME, EMAIL);
-        job.addShellStep("touch test.txt &&\n" +
-                "git add test.txt &&\n" +
-                "git commit -m \"Next commit\" &&\n" +
-                "git show");
+        job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME).customNameAndMail(USER_NAME, EMAIL);
+        job.addShellStep(
+                "touch test.txt &&\n" + "git add test.txt &&\n" + "git commit -m \"Next commit\" &&\n" + "git show");
 
         job.save();
         Build b = job.startBuild();
         b.shouldSucceed();
 
         String console = b.getConsole();
-        assertThat(
-                console,
-                Matchers.containsRegexp(USER_NAME, Pattern.MULTILINE)
-        );
-        assertThat(
-                console,
-                Matchers.containsRegexp(EMAIL, Pattern.MULTILINE)
-        );
+        assertThat(console, Matchers.containsRegexp(USER_NAME, Pattern.MULTILINE));
+        assertThat(console, Matchers.containsRegexp(EMAIL, Pattern.MULTILINE));
     }
-
 
     ////////////////////
     // HELPER METHODS //
@@ -686,9 +567,7 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         // configure and build to create untrackedFile.txt
 
-        GitScm git = job.useScm(GitScm.class)
-                .url(repoUrl)
-                .credentials(USERNAME);
+        GitScm git = job.useScm(GitScm.class).url(repoUrl).credentials(USERNAME);
 
         if (before) {
             git.cleanBeforeCheckout();
@@ -710,5 +589,4 @@ public class GitPluginTest extends AbstractJUnitTest {
 
         job.startBuild().shouldSucceed();
     }
-
 }

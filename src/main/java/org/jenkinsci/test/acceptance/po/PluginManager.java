@@ -32,7 +32,6 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
-
 /**
  * Page object for plugin manager.
  *
@@ -77,30 +76,37 @@ public class PluginManager extends ContainerPageObject {
     public void checkForUpdates() {
         visit("index");
         final String current = getCurrentUrl();
-        // The check now button is a form submit (POST) with a redirect to the same page only if the check is successful.
+        // The check now button is a form submit (POST) with a redirect to the same page only if the check is
+        // successful.
         // We use the button itself to detect when the page has changed, which happens after the refresh has been done
         // And we check for the presence of the button again
         WebElement checkButton = find(by.css("#button-refresh, .jenkins-button[href='checkUpdatesServer']"));
         checkButton.click();
         // The wait criteria is: we have left the current page and returned to the same one
-        waitFor(checkButton).withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS)).until(webElement -> {
-            try {
-                // We interact with the element just to detect if it is stale
-                webElement.findElement(by.id("it does not matter"));
-            } catch(StaleElementReferenceException e) {
-                // with this exception we know we've left the original page
-                // we look for an element in the page to check for success
-                if (current.equals(getCurrentUrl())) {
-                    return true;
-                }
-            } catch(NoSuchElementException e) {
-                return false;
-            }
-            return false;
-        });
+        waitFor(checkButton)
+                .withTimeout(java.time.Duration.of(time.seconds(30), ChronoUnit.MILLIS))
+                .until(webElement -> {
+                    try {
+                        // We interact with the element just to detect if it is stale
+                        webElement.findElement(by.id("it does not matter"));
+                    } catch (StaleElementReferenceException e) {
+                        // with this exception we know we've left the original page
+                        // we look for an element in the page to check for success
+                        if (current.equals(getCurrentUrl())) {
+                            return true;
+                        }
+                    } catch (NoSuchElementException e) {
+                        return false;
+                    }
+                    return false;
+                });
     }
 
-    public enum InstallationStatus {NOT_INSTALLED, OUTDATED, UP_TO_DATE}
+    public enum InstallationStatus {
+        NOT_INSTALLED,
+        OUTDATED,
+        UP_TO_DATE
+    }
 
     public InstallationStatus installationStatus(String spec) {
         return installationStatus(new PluginSpec(spec));
@@ -183,23 +189,22 @@ public class PluginManager extends ContainerPageObject {
             if (!someChangeRequired) {
                 return false;
             }
-            List<PluginMetadata> pluginToBeInstalled = ucmd.get(jenkins).transitiveDependenciesOf(jenkins, Arrays.asList(specs));
-            for (PluginMetadata newPlugin: pluginToBeInstalled) {
+            List<PluginMetadata> pluginToBeInstalled =
+                    ucmd.get(jenkins).transitiveDependenciesOf(jenkins, Arrays.asList(specs));
+            for (PluginMetadata newPlugin : pluginToBeInstalled) {
                 final String name = newPlugin.getName();
                 String requiredVersion = candidates.get(name);
                 String availableVersion = newPlugin.getVersion();
                 if (requiredVersion == null) { // a dependency
                     requiredVersion = availableVersion;
                 }
-                final String currentSpec = StringUtils.isNotEmpty(requiredVersion)
-                    ? name + "@" + requiredVersion
-                    : name
-                ;
+                final String currentSpec =
+                        StringUtils.isNotEmpty(requiredVersion) ? name + "@" + requiredVersion : name;
                 InstallationStatus status = installationStatus(currentSpec);
                 if (status != InstallationStatus.UP_TO_DATE) {
                     if (new VersionNumber(requiredVersion).compareTo(new VersionNumber(availableVersion)) > 0) {
-                        throw new AssumptionViolatedException(
-                                name + " has version " + availableVersion + " but " + requiredVersion + " was requested");
+                        throw new AssumptionViolatedException(name + " has version " + availableVersion + " but "
+                                + requiredVersion + " was requested");
                     }
                     try {
                         newPlugin.uploadTo(jenkins, injector, availableVersion);
@@ -215,7 +220,9 @@ public class PluginManager extends ContainerPageObject {
                 driver.manage().timeouts().pageLoadTimeout(time.seconds(240), TimeUnit.MILLISECONDS);
                 visit("available");
             } finally {
-                driver.manage().timeouts().pageLoadTimeout(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
+                driver.manage()
+                        .timeouts()
+                        .pageLoadTimeout(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
             }
             // End JENKINS-50790
 
@@ -227,14 +234,15 @@ public class PluginManager extends ContainerPageObject {
                     case NOT_INSTALLED:
                         tickPluginToInstall(n);
                         somePluginsInstalled = true;
-                    break;
+                        break;
                     case OUTDATED:
                         update.add(n);
-                    break;
+                        break;
                     case UP_TO_DATE:
                         // Nothing to do
-                    break;
-                    default: assert false: "Unreachable";
+                        break;
+                    default:
+                        assert false : "Unreachable";
                 }
             }
             if (somePluginsInstalled) {
@@ -287,8 +295,7 @@ public class PluginManager extends ContainerPageObject {
             if (availableVersion.isOlderThan(requiredVersion)) {
                 throw new AssumptionViolatedException(String.format(
                         "Version '%s' of '%s' is required, but available version is '%s'",
-                        requiredVersion, name, availableVersion
-                ));
+                        requiredVersion, name, availableVersion));
             }
         }
     }
@@ -298,9 +305,11 @@ public class PluginManager extends ContainerPageObject {
         WebElement filterBox = find(By.id("filter-box"));
         filterBox.clear();
         filterBox.sendKeys(pluginName);
-        
-        // DEV MEMO: There is a {@code data-plugin-version} attribute on the {@code tr} tag holding the plugin line entry in the
-        // plugin manager. By selecting the line, we can then retrieve the version directly without having to parse the line's content.
+
+        // DEV MEMO: There is a {@code data-plugin-version} attribute on the {@code tr} tag holding the plugin line
+        // entry in the
+        // plugin manager. By selecting the line, we can then retrieve the version directly without having to parse the
+        // line's content.
         final String xpathToPluginLine = "//input[starts-with(@name,'plugin.%s.')]/ancestor::tr";
 
         // DEV MEMO: To avoid flakiness issues, wait for the text to be entirely written in the search box, and
@@ -314,7 +323,7 @@ public class PluginManager extends ContainerPageObject {
             }
             return true;
         });
-        
+
         String version = find(by.xpath(xpathToPluginLine, pluginName)).getAttribute("data-plugin-version");
         return new VersionNumber(version);
     }
@@ -333,13 +342,15 @@ public class PluginManager extends ContainerPageObject {
         final By xpath = by.xpath("//form//input[@type='file' and @name='name']");
         final WebElement fileUpload = waitFor(xpath);
         control(xpath).set(localFile.getAbsolutePath());
-        // click will trigger this: https://github.com/jenkinsci/jenkins/blob/c5f996a2ee5aa53e47480ebefb5f47899cf1e471/core/src/main/java/hudson/PluginManager.java#L1799
+        // click will trigger this:
+        // https://github.com/jenkinsci/jenkins/blob/c5f996a2ee5aa53e47480ebefb5f47899cf1e471/core/src/main/java/hudson/PluginManager.java#L1799
         // at the end of the method, there is a redirection to '../updateCenter'
         // on this page, a table will display the status of uploaded plugins
         waitFor(by.button("Deploy")).click();
 
         // the table may contain many plugins, the shortName is used to locate the correct table row
-        // this is stolen from: https://github.com/jenkinsci/jenkins/blob/c5f996a2ee5aa53e47480ebefb5f47899cf1e471/core/src/main/java/hudson/PluginManager.java#L1844-L1865
+        // this is stolen from:
+        // https://github.com/jenkinsci/jenkins/blob/c5f996a2ee5aa53e47480ebefb5f47899cf1e471/core/src/main/java/hudson/PluginManager.java#L1844-L1865
         String shortName;
         try (JarFile j = new JarFile(localFile)) {
             String name = j.getManifest().getMainAttributes().getValue("Short-Name");
@@ -353,13 +364,15 @@ public class PluginManager extends ContainerPageObject {
 
         // First, wait for the table row to be loaded
         // this is mandatory because it ensures that the file is uploaded and allows the use of the "wait until" below
-        WebElement pluginRow = waitFor(by.xpath("//*[@id='log']//*[descendant::*[normalize-space(text())='%1$s']]", shortName));
+        WebElement pluginRow =
+                waitFor(by.xpath("//*[@id='log']//*[descendant::*[normalize-space(text())='%1$s']]", shortName));
         // Then wait until the plugin is loaded
         waitFor()
                 .withMessage("All plugins should be installed")
                 .withTimeout(Duration.ofMinutes(5))
                 .until(() -> {
-                    List<WebElement> elements = pluginRow.findElements(by.xpath("descendant::*[contains(.,'Pending') or contains(.,'Installing')]"));
+                    List<WebElement> elements = pluginRow.findElements(
+                            by.xpath("descendant::*[contains(.,'Pending') or contains(.,'Installing')]"));
                     return elements.isEmpty();
                 });
     }

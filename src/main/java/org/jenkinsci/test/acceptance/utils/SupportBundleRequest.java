@@ -31,7 +31,6 @@ public class SupportBundleRequest {
         private final String name;
         private final boolean selected;
 
-
         public Selection(String name, boolean selected) {
             this.name = name;
             this.selected = selected;
@@ -46,7 +45,7 @@ public class SupportBundleRequest {
         }
     }
 
-    public static class Payload{
+    public static class Payload {
         private final List<Selection> components;
 
         public Payload(List<Selection> components) {
@@ -81,7 +80,8 @@ public class SupportBundleRequest {
         }
 
         public Builder includeDefaultComponents() {
-            return includeComponents("AgentsConfigFile",
+            return includeComponents(
+                    "AgentsConfigFile",
                     "ConfigFileComponent",
                     "OtherConfigFilesComponent",
                     "AboutBrowser",

@@ -33,7 +33,10 @@ import org.jenkinsci.test.acceptance.plugins.gradle.GradleInstallation;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleStep;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleTask;
 import org.jenkinsci.test.acceptance.plugins.gradle.GradleWrapper;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.StringParameter;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 
 @WithPlugins("gradle")
@@ -68,7 +71,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
      * Verify the execution of gradle build script as gradle wrapper localized divergent to default folder.
      */
     @Test
-    public void run_gradle_wrapper(){
+    public void run_gradle_wrapper() {
         GradleInstallation.installGradle(jenkins);
         final FreeStyleJob job = jenkins.jobs.create();
         job.copyResource(resource(GRADLE_SCRIPT), "build.gradle");
@@ -86,7 +89,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void run_gradle_job_parameters_as_project_properties(){
+    public void run_gradle_job_parameters_as_project_properties() {
         GradleInstallation.installGradle(jenkins);
 
         final FreeStyleJob job = jenkins.jobs.create();
@@ -112,7 +115,8 @@ public class GradlePluginTest extends AbstractJUnitTest {
     /**
      * Runs a pipeline gradle build and verifies the build was executed successfully
      */
-    @Test @WithPlugins("workflow-aggregator")
+    @Test
+    @WithPlugins("workflow-aggregator")
     public void run_gradle_pipeline_basic() {
         final Build build = setUpAndRunPipelineBuild("/gradle_plugin/pipeline_test_multiple_tasks.txt", GRADLE_SCRIPT);
         assertThat(build.getConsole(), containsString(GradleTask.SECOND.getPrintln()));
@@ -131,18 +135,16 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
 
         String copyResourceStep = workflowJob.copyResourceStep(gradleScript);
-        String test = "" +
-            "pipeline {\n" +
-                "agent any\n" +
-                "stages {\n" +
-                    "stage ('prepare_build') {\n" +
-                        "steps {\n" +
-                            copyResourceStep +
-                        "}\n" +
-                    "}\n"
-                    + resource(jenkinsFile).asText() +
-                "}\n" +
-            "}";
+        String test = "" + "pipeline {\n"
+                + "agent any\n"
+                + "stages {\n"
+                + "stage ('prepare_build') {\n"
+                + "steps {\n"
+                + copyResourceStep
+                + "}\n"
+                + "}\n"
+                + resource(jenkinsFile).asText() + "}\n"
+                + "}";
         test = test.replaceAll("script.gradle", "build.gradle");
 
         workflowJob.script.set(test);

@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 @WithPlugins({
-        "matrix-project", // JENKINS-37545
-        "postbuildscript"
+    "matrix-project", // JENKINS-37545
+    "postbuildscript"
 })
 public class PostBuildScriptPluginTest extends AbstractJUnitTest {
 

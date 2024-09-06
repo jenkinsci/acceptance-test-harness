@@ -24,7 +24,7 @@
 package plugins;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.*;
+import static org.junit.Assume.assumeNotNull;
 
 import com.google.inject.Inject;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -72,7 +72,9 @@ public class DockerBuildStepTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create();
         job.configure();
         job.copyDir(resource("/docker_build_step/context.dir"));
-        command(job, DockerCommand.CreateImage.class).contextFolder("$WORKSPACE").tag("my_image");
+        command(job, DockerCommand.CreateImage.class)
+                .contextFolder("$WORKSPACE")
+                .tag("my_image");
         command(job, DockerCommand.CreateContainer.class).name("my_image");
         command(job, DockerCommand.StartContainers.class).containerIds("$DOCKER_CONTAINER_IDS");
         command(job, DockerCommand.RemoveContainers.class).containerIds("$DOCKER_CONTAINER_IDS");
@@ -90,7 +92,9 @@ public class DockerBuildStepTest extends AbstractJUnitTest {
         job.configure();
         job.setLabelExpression(slave.getName());
         job.copyDir(resource("/docker_build_step/context.dir"));
-        command(job, DockerCommand.CreateImage.class).contextFolder("$WORKSPACE").tag("my_image");
+        command(job, DockerCommand.CreateImage.class)
+                .contextFolder("$WORKSPACE")
+                .tag("my_image");
         job.save();
 
         Build build = job.startBuild().waitUntilFinished();

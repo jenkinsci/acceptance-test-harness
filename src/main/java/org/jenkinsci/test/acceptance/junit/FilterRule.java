@@ -63,7 +63,7 @@ public class FilterRule implements TestRule {
         };
     }
 
-    public static abstract class Filter {
+    public abstract static class Filter {
         /**
          * @return null if test should be run, the reason why not otherwise.
          */

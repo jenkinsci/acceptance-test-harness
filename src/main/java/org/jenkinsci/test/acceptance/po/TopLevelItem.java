@@ -9,7 +9,7 @@ import java.util.List;
 import org.openqa.selenium.WebElement;
 
 /**
- * Super class for top level items. 
+ * Super class for top level items.
  * Top level items include {@link Job}s and other non-buildable items such as {@link Folder}s.
  * Use {@link Describable} annotation to register an implementation.
  */
@@ -48,10 +48,9 @@ public abstract class TopLevelItem extends ContainerPageObject {
         control(by.name("newName")).set(newName);
         renameButton.click();
         try {
-            return (T) newInstance(getClass(),
-                    injector, new URL(url.toExternalForm().replace(oldName, newName)), newName);
-        }
-        catch (MalformedURLException e) {
+            return (T) newInstance(
+                    getClass(), injector, new URL(url.toExternalForm().replace(oldName, newName)), newName);
+        } catch (MalformedURLException e) {
             throw new AssertionError("Not a valid url: " + newName, e);
         }
     }
@@ -111,11 +110,17 @@ public abstract class TopLevelItem extends ContainerPageObject {
 
     @Override
     public boolean equals(Object other) {
-        if (other == null) return false;
-        if (this == other) return true;
+        if (other == null) {
+            return false;
+        }
+        if (this == other) {
+            return true;
+        }
 
-        if (!(other instanceof TopLevelItem)) return false;
-        
+        if (!(other instanceof TopLevelItem)) {
+            return false;
+        }
+
         // Equals and hashCode must be consistent with each other.
         // We use URL only as the concrete class may not be detected, e.g. when obtaining a job
         // from a BuildHistory

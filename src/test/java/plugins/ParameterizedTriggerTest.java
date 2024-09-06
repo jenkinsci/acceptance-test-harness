@@ -39,7 +39,9 @@ import org.jvnet.hudson.test.Issue;
 @WithPlugins("parameterized-trigger")
 public class ParameterizedTriggerTest extends AbstractJUnitTest {
 
-    @Test @WithPlugins({"compress-artifacts", "matrix-project" /*JENKINS-33910*/ }) @Issue("JENKINS-28980")
+    @Test
+    @WithPlugins({"compress-artifacts", "matrix-project" /*JENKINS-33910*/})
+    @Issue("JENKINS-28980")
     public void triggerWithNonStandardArchiver() {
         CompressingArtifactManager.setup(jenkins);
 

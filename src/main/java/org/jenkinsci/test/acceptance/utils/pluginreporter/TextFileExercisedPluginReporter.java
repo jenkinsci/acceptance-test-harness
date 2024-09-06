@@ -57,25 +57,26 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
         }
         try {
             FileUtils.touch(file);
-         } catch (IOException e) {
-             LOGGER.severe(e.getMessage());
+        } catch (IOException e) {
+            LOGGER.severe(e.getMessage());
         }
-
     }
+
     public static TextFileExercisedPluginReporter getInstance() {
         if (instance == null) {
             instance = new TextFileExercisedPluginReporter();
         }
         return instance;
     }
+
     @Override
     public void log(String testName, String pluginName, String pluginVersion) {
 
         PropertiesConfiguration config;
         try {
-            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
-                    new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
-                            .configure(new Parameters().properties().setFile(file));
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>(
+                            PropertiesConfiguration.class)
+                    .configure(new Parameters().properties().setFile(file));
             config = builder.getConfiguration();
         } catch (ConfigurationException e) {
             LOGGER.severe(e.getMessage());
@@ -84,9 +85,9 @@ public class TextFileExercisedPluginReporter implements ExercisedPluginsReporter
 
         config.setProperty(testName + "$" + pluginName, pluginVersion);
         try {
-            FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
-                    new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
-                            .configure(new Parameters().properties().setFile(file));
+            FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>(
+                            PropertiesConfiguration.class)
+                    .configure(new Parameters().properties().setFile(file));
             builder.save();
         } catch (ConfigurationException e) {
             LOGGER.severe(e.getMessage());

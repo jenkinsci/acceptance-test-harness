@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
@@ -10,9 +9,9 @@
 
   <artifactId>acceptance-test-harness</artifactId>
   <version>${changelist}</version>
-
   <name>Acceptance Test Harness</name>
   <url>https://github.com/jenkinsci/acceptance-test-harness</url>
+
   <licenses>
     <license>
       <name>MIT License</name>
@@ -23,8 +22,8 @@
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}.git</developerConnection>
-    <url>https://github.com/jenkinsci/${project.artifactId}</url>
     <tag>${scmTag}</tag>
+    <url>https://github.com/jenkinsci/${project.artifactId}</url>
   </scm>
 
   <properties>
@@ -32,32 +31,89 @@
     <spotbugs.skip>true</spotbugs.skip>
     <jenkins.version>2.475</jenkins.version>
     <selenium.version>4.24.0</selenium.version>
-    <guava.version>33.3.0-jre</guava.version> <!-- aligned with selenium -->
+    <!-- aligned with selenium -->
+    <guava.version>33.3.0-jre</guava.version>
     <maven.version>3.8.1</maven.version>
     <maven-resolver.version>1.6.2</maven-resolver.version>
     <groovy.version>3.0.22</groovy.version>
     <jffi.version>1.3.13</jffi.version>
+    <spotless.check.skip>false</spotless.check.skip>
   </properties>
 
-  <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.17.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <!-- upper bounds conflict -->
+        <groupId>io.netty</groupId>
+        <artifactId>netty-bom</artifactId>
+        <version>4.1.113.Final</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-bom</artifactId>
+        <version>2.0.16</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.16.1</version>
+      </dependency>
+      <!-- RequireUpperBoundDeps between Mockito and Selenium -->
+      <dependency>
+        <groupId>net.bytebuddy</groupId>
+        <artifactId>byte-buddy</artifactId>
+        <version>1.15.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>1.12.0</version>
+        <!--
+        commons config is only used by org/jenkinsci/test/acceptance/utils/pluginreporter/TextFileExercisedPluginReporter
+        should be possible to rewrite without the need for commons-config but for later
+Require upper bound dependencies error for org.apache.commons:commons-text:1.9 paths to dependency are:
++-org.jenkins-ci:acceptance-test-harness:999999-SNAPSHOT
+  +-org.apache.commons:commons-configuration2:2.8.0
+    +-org.apache.commons:commons-text:1.9
+and
++-org.jenkins-ci:acceptance-test-harness:999999-SNAPSHOT
+  +-org.seleniumhq.selenium:htmlunit-driver:4.6.0
+    +-net.sourceforge.htmlunit:htmlunit:2.66.0
+      +-org.apache.commons:commons-text:1.10.0
+]
+        -->
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.14</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpcore</artifactId>
+        <version>4.4.16</version>
+      </dependency>
+      <!-- RequireUpperBoundDeps between jersey (via GitLab API) and browserup -->
+      <dependency>
+        <groupId>org.javassist</groupId>
+        <artifactId>javassist</artifactId>
+        <version>3.30.2-GA</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>org.gitlab4j</groupId>
-      <artifactId>gitlab4j-api</artifactId>
-      <version>5.6.0</version>
-    </dependency>
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
@@ -211,6 +267,11 @@
       <version>${groovy.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.gitlab4j</groupId>
+      <artifactId>gitlab4j-api</artifactId>
+      <version>5.6.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
     </dependency>
@@ -304,90 +365,30 @@
       <version>1.17</version>
     </dependency>
     <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>jakarta.mail</groupId>
       <artifactId>jakarta.mail-api</artifactId>
       <version>2.1.3</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.fasterxml.jackson</groupId>
-        <artifactId>jackson-bom</artifactId>
-        <version>2.17.2</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <!-- upper bounds conflict -->
-        <groupId>io.netty</groupId>
-        <artifactId>netty-bom</artifactId>
-        <version>4.1.113.Final</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-bom</artifactId>
-        <version>2.0.16</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-        <version>2.16.1</version>
-      </dependency>
-      <!-- RequireUpperBoundDeps between Mockito and Selenium -->
-      <dependency>
-        <groupId>net.bytebuddy</groupId>
-        <artifactId>byte-buddy</artifactId>
-        <version>1.15.1</version>
-      </dependency>
-      <!-- RequireUpperBoundDeps between jersey (via GitLab API) and browserup -->
-      <dependency>
-        <groupId>org.javassist</groupId>
-        <artifactId>javassist</artifactId>
-        <version>3.30.2-GA</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-text</artifactId>
-        <version>1.12.0</version>
-        <!-- 
-        commons config is only used by org/jenkinsci/test/acceptance/utils/pluginreporter/TextFileExercisedPluginReporter
-        should be possible to rewrite without the need for commons-config but for later
-Require upper bound dependencies error for org.apache.commons:commons-text:1.9 paths to dependency are:
-+-org.jenkins-ci:acceptance-test-harness:999999-SNAPSHOT
-  +-org.apache.commons:commons-configuration2:2.8.0
-    +-org.apache.commons:commons-text:1.9
-and
-+-org.jenkins-ci:acceptance-test-harness:999999-SNAPSHOT
-  +-org.seleniumhq.selenium:htmlunit-driver:4.6.0
-    +-net.sourceforge.htmlunit:htmlunit:2.66.0
-      +-org.apache.commons:commons-text:1.10.0
-]
-        -->
-      </dependency>
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>4.5.14</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpcore</artifactId>
-        <version>4.4.16</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <defaultGoal>test</defaultGoal>
@@ -425,14 +426,6 @@ and
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>appassembler-maven-plugin</artifactId>
         <version>2.1.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>assemble</goal>
-            </goals>
-          </execution>
-        </executions>
         <configuration>
           <programs>
             <program>
@@ -441,6 +434,14 @@ and
             </program>
           </programs>
         </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
@@ -457,15 +458,15 @@ and
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
-            <phase>generate-resources</phase>
-            <configuration>
-              <target>
-                <zip destfile="target/classes/tool_installers.zip" basedir="${project.basedir}/src/main/tool_installers" />
-              </target>
-            </configuration>
             <goals>
               <goal>run</goal>
             </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <target>
+                <zip basedir="${project.basedir}/src/main/tool_installers" destfile="target/classes/tool_installers.zip" />
+              </target>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -638,7 +639,7 @@ and
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <environmentVariables>
-                  <RECORDER>${RECORDER}</RECORDER>
+                <RECORDER>${RECORDER}</RECORDER>
               </environmentVariables>
             </configuration>
           </plugin>
@@ -658,7 +659,7 @@ and
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
               <environmentVariables>
-                  <BROWSER_DISPLAY>${BROWSER_DISPLAY}</BROWSER_DISPLAY>
+                <BROWSER_DISPLAY>${BROWSER_DISPLAY}</BROWSER_DISPLAY>
               </environmentVariables>
             </configuration>
           </plugin>

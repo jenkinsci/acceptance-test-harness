@@ -13,7 +13,7 @@ public class MatrixBuild extends Build {
     }
 
     public MatrixProject getJob() {
-        return (MatrixProject)job;
+        return (MatrixProject) job;
     }
 
     public List<MatrixRun> getConfigurations() {

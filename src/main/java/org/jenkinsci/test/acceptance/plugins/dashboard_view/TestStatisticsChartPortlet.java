@@ -52,5 +52,4 @@ public class TestStatisticsChartPortlet extends AbstractDashboardViewPortlet {
         URL imageUrl = new URL(getChart().getAttribute("src"));
         return ImageIO.read(imageUrl);
     }
-
 }

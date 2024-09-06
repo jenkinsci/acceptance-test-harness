@@ -46,7 +46,8 @@ public class Matchers {
 
             @Override
             public void describeMismatchSafely(WebDriver item, Description mismatchDescription) {
-                mismatchDescription.appendText("was ")
+                mismatchDescription
+                        .appendText("was ")
                         .appendValue(item.getCurrentUrl())
                         .appendText("\n")
                         .appendValue(pageText);
@@ -99,7 +100,10 @@ public class Matchers {
             public boolean matchesSafely(PageObject po) {
                 try {
                     po.open();
-                    po.find(by.xpath("//div[@id='tasks']/div/span/a/span[text()='%s'] | //div[@id='tasks']/div/a[text()='%s']", displayName, displayName)).getText();
+                    po.find(by.xpath(
+                                    "//div[@id='tasks']/div/span/a/span[text()='%s'] | //div[@id='tasks']/div/a[text()='%s']",
+                                    displayName, displayName))
+                            .getText();
                     return true;
                 } catch (NoSuchElementException ignored) {
                     return false;
@@ -154,6 +158,7 @@ public class Matchers {
     public static Matcher<PageObject> pageObjectExists() {
         return new Matcher<PageObject>("Page object exists") {
             private @CheckForNull HttpURLConnection conn; // Store for later defect localization
+
             @Override
             public void describeMismatchSafely(PageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does not exist");
@@ -175,6 +180,7 @@ public class Matchers {
     public static Matcher<PageObject> pageObjectDoesNotExist() {
         return new Matcher<PageObject>("Page object does not exist") {
             private @CheckForNull HttpURLConnection conn; // Store for later defect localization
+
             @Override
             public void describeMismatchSafely(PageObject item, Description desc) {
                 desc.appendText(item.url.toString()).appendText(" does exist");
@@ -198,7 +204,9 @@ public class Matchers {
             public boolean matchesSafely(final Jenkins jenkins) {
                 final User currentUser = jenkins.getCurrentUser();
                 // if the user is not logged, currentUser can be not null with a null id
-                return currentUser != null && currentUser.id() != null && currentUser.id().equals(user);
+                return currentUser != null
+                        && currentUser.id() != null
+                        && currentUser.id().equals(user);
             }
 
             @Override
@@ -214,7 +222,9 @@ public class Matchers {
             public boolean matchesSafely(final Login login) {
                 final User currentUser = login.getJenkins().getCurrentUser();
                 // if the user is not logged, currentUser can be not null with a null id
-                return currentUser != null && currentUser.id() != null && currentUser.id().equals(user);
+                return currentUser != null
+                        && currentUser.id() != null
+                        && currentUser.id().equals(user);
             }
 
             @Override

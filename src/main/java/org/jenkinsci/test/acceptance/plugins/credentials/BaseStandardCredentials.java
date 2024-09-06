@@ -30,9 +30,9 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 
 public abstract class BaseStandardCredentials extends Credential {
 
-    //public final Control description = control("description");
-    //public final Control scope = control("scope");
-    private final Control delete = control("repeatable-delete"); //TO REMOVE - no longer possible
+    // public final Control description = control("description");
+    // public final Control scope = control("scope");
+    private final Control delete = control("repeatable-delete"); // TO REMOVE - no longer possible
 
     public final Control description = control(by.name("_.description"));
     public final Control scope = control(by.name("_.scope"));
@@ -46,8 +46,7 @@ public abstract class BaseStandardCredentials extends Credential {
     }
 
     public void setId(String id) {
-        //control("advanced-button").click();
+        // control("advanced-button").click();
         control(by.name("_.id")).set(id);
     }
-
 }

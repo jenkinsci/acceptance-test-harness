@@ -38,14 +38,14 @@ import org.junit.Test;
 @WithPlugins({"secure-requester-whitelist"})
 public class SecureRequesterWhitelistTest extends AbstractJUnitTest {
 
-    private final static String DESCRIPTOR_COMMON_PATH = "/org-jenkinsci-plugins-secure_requester_whitelist-Whitelist";
-    private final static String ALLOW_NO_REFERER_PATH = DESCRIPTOR_COMMON_PATH + "/allowNoReferer";
-    private final static String DOMAINS_PATH = DESCRIPTOR_COMMON_PATH + "/domains";
+    private static final String DESCRIPTOR_COMMON_PATH = "/org-jenkinsci-plugins-secure_requester_whitelist-Whitelist";
+    private static final String ALLOW_NO_REFERER_PATH = DESCRIPTOR_COMMON_PATH + "/allowNoReferer";
+    private static final String DOMAINS_PATH = DESCRIPTOR_COMMON_PATH + "/domains";
 
-    private final static boolean CHECKED = true;
-    private final static boolean NOT_CHECKED = false;
-    private final static String EMPTY_DOMAINS = "";
-    private final static String MOCK_DOMAINS = "domain1 domain2";
+    private static final boolean CHECKED = true;
+    private static final boolean NOT_CHECKED = false;
+    private static final String EMPTY_DOMAINS = "";
+    private static final String MOCK_DOMAINS = "domain1 domain2";
 
     private GlobalSecurityConfig security;
 
@@ -100,5 +100,4 @@ public class SecureRequesterWhitelistTest extends AbstractJUnitTest {
         security.save();
         security.configure();
     }
-
 }

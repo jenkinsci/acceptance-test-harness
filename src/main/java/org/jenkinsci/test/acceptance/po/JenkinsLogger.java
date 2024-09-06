@@ -12,6 +12,7 @@ import org.openqa.selenium.WebElement;
  */
 public class JenkinsLogger extends PageObject {
     public final String name;
+
     public JenkinsLogger(Jenkins jenkins, String name) {
         super(jenkins, jenkins.url("log/" + name));
         this.name = name;
@@ -29,23 +30,25 @@ public class JenkinsLogger extends PageObject {
             j.clickButton("Add");
             j.elasticSleep(1000);
             j.last(by.input("_.name")).sendKeys(e.getKey());
-            WebElement o = j.last(by.input("level"))
-                    .findElement(by.option(e.getValue().getName()));
+            WebElement o =
+                    j.last(by.input("level")).findElement(by.option(e.getValue().getName()));
             j.check(o);
         }
         j.clickButton("Save");
-        return new JenkinsLogger(j,name);
+        return new JenkinsLogger(j, name);
     }
 
     public boolean isEmpty() {
         open();
-        return getElement(by.css("#main-panel pre"))==null;
+        return getElement(by.css("#main-panel pre")) == null;
     }
 
     public boolean hasLogged(Pattern pattern) {
         open();
         for (WebElement e : all(by.css("#main-panel pre"))) {
-            if (pattern.matcher(e.getText()).matches()) return true;
+            if (pattern.matcher(e.getText()).matches()) {
+                return true;
+            }
         }
 
         return false;
@@ -56,7 +59,8 @@ public class JenkinsLogger extends PageObject {
     }
 
     public void waitForLogged(final Pattern pattern, final int timeout) {
-        waitFor().withMessage("%s to be logged", pattern)
+        waitFor()
+                .withMessage("%s to be logged", pattern)
                 .withTimeout(Duration.ofSeconds(timeout))
                 .until(() -> hasLogged(pattern));
     }

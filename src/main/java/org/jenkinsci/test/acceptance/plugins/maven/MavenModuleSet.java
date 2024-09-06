@@ -59,7 +59,9 @@ public class MavenModuleSet extends Job {
     }
 
     private void ensureAdvanced() {
-        if (advancedButton == null) return;
+        if (advancedButton == null) {
+            return;
+        }
 
         advancedButton.click();
         advancedButton = null;
@@ -97,7 +99,8 @@ public class MavenModuleSet extends Job {
      */
     public <T extends PostBuildStep> T addBuildSettings(Class<T> type) {
         WebElement checkbox = findCaption(type, new Finder<WebElement>() {
-            @Override protected WebElement find(String caption) {
+            @Override
+            protected WebElement find(String caption) {
                 return outer.find(by.checkbox(caption));
             }
         });
@@ -142,12 +145,12 @@ public class MavenModuleSet extends Job {
 
     @Override
     public MavenBuild build(int buildNumber) {
-        return new MavenBuild(this,buildNumber);
+        return new MavenBuild(this, buildNumber);
     }
 
     @Override
     public MavenBuild getLastBuild() {
-        return new MavenBuild(this,"lastBuild");
+        return new MavenBuild(this, "lastBuild");
     }
 
     /**

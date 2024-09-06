@@ -43,8 +43,11 @@ import org.openqa.selenium.By;
 @WithPlugins({"ssh-credentials", "credentials"})
 public class SSHCredentialsTest extends AbstractCredentialsTest {
 
-    private static final String CHECK_PERSONAL_CREDENTIAL_STRING = "println(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey.class, Jenkins.instance, hudson.model.User.current().impersonate(), null).find {it.id == \"%s\" }.privateKey);";
-    private static final String CHECK_CREDENTIAL_STRING = "println(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey.class, Jenkins.instance, null, null).find {it.id == \"%s\" }.privateKey);";
+    private static final String CHECK_PERSONAL_CREDENTIAL_STRING =
+            "println(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey.class, Jenkins.instance, hudson.model.User.current().impersonate(), null).find {it.id == \"%s\" }.privateKey);";
+    private static final String CHECK_CREDENTIAL_STRING =
+            "println(com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(com.cloudbees.jenkins.plugins.sshcredentials.impl.BasicSSHUserPrivateKey.class, Jenkins.instance, null, null).find {it.id == \"%s\" }.privateKey);";
+
     @Test
     public void manageSystemScopedSSHCredentialsTest() throws MalformedURLException {
         createUpdateDeleteSSHCredentialsTest(false, SYSTEM_SCOPE);
@@ -61,8 +64,8 @@ public class SSHCredentialsTest extends AbstractCredentialsTest {
         createUpdateDeleteSSHCredentialsTest(true, null);
     }
 
-
-    private void createUpdateDeleteSSHCredentialsTest(boolean userCredentials, String systemScope) throws MalformedURLException {
+    private void createUpdateDeleteSSHCredentialsTest(boolean userCredentials, String systemScope)
+            throws MalformedURLException {
         CredentialsPage cp = createCredentialsPage(userCredentials);
         SshPrivateKeyCredential sshc = createCredentials(SshPrivateKeyCredential.class, cp, systemScope);
         prepareForVerify(cp, CRED_DSCR);
@@ -98,7 +101,8 @@ public class SSHCredentialsTest extends AbstractCredentialsTest {
         dp.save();
 
         CredentialsPage cp = createCredentialsPage(false);
-        final SshPrivateKeyCredential credInDomain = (SshPrivateKeyCredential) createCredentials(SshPrivateKeyCredential.class, cp, SYSTEM_SCOPE);
+        final SshPrivateKeyCredential credInDomain =
+                (SshPrivateKeyCredential) createCredentials(SshPrivateKeyCredential.class, cp, SYSTEM_SCOPE);
 
         prepareForVerify(cp, CRED_DSCR);
         verifyValueForCredential(cp, credInDomain.username, CRED_USER);
@@ -119,12 +123,13 @@ public class SSHCredentialsTest extends AbstractCredentialsTest {
         verifyCredentialNotPresent(false, domainName, CRED_DSCR);
     }
 
-    private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) throws MalformedURLException {
+    private void verifyValueForCredential(CredentialsPage cp, Control element, String expected)
+            throws MalformedURLException {
         cp.configure();
-        assert(element.exists());
+        assert (element.exists());
         assertThat(element.resolve().getAttribute("value"), containsString(expected));
     }
-    
+
     private void verifyCredentialNotPresent(boolean userCredentials, String domain, String credDescription) {
         String url;
         ManagedCredentials mc;
@@ -141,14 +146,16 @@ public class SSHCredentialsTest extends AbstractCredentialsTest {
         Control cred = mc.checkIfCredentialsExist(credDescription);
         assertFalse(cred.exists());
     }
-    
+
     private void prepareForVerify(CredentialsPage c, String credDscr) throws MalformedURLException {
         c.setConfigUrl(new ManagedCredentials(jenkins).credentialById(credDscr));
     }
 
-    private void verifyValueForCredentialKey(SshPrivateKeyCredential cred, String expected, boolean personalCredential) {
+    private void verifyValueForCredentialKey(
+            SshPrivateKeyCredential cred, String expected, boolean personalCredential) {
         String id = cred.control(By.name("_.id")).resolve().getAttribute("value");
-        String script = String.format(personalCredential ? CHECK_PERSONAL_CREDENTIAL_STRING : CHECK_CREDENTIAL_STRING, id);
+        String script =
+                String.format(personalCredential ? CHECK_PERSONAL_CREDENTIAL_STRING : CHECK_CREDENTIAL_STRING, id);
         assertEquals("Expected private key and real one do not match", expected, jenkins.runScript(script));
     }
 }

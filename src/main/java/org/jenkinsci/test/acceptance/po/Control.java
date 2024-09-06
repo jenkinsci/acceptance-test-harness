@@ -3,15 +3,12 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -59,8 +56,7 @@ public class Control extends CapybaraPortingLayerImpl {
         for (String p : relativePaths) {
             try {
                 return find(parent.path(p));
-            }
-            catch (NoSuchElementException e) {
+            } catch (NoSuchElementException e) {
                 problem = e;
             }
         }
@@ -92,15 +88,17 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void click() {
         WebElement we = resolve();
-        // button may be obscured by say the "Save Apply" screen so we wait as Selenium will do a scroll but the CSS 
+        // button may be obscured by say the "Save Apply" screen so we wait as Selenium will do a scroll but the CSS
         // can take a while to update the layout \o/
-        waitFor(we).
-               withTimeout(Duration.ofSeconds(1)).
-               pollingEvery(Duration.ofMillis(100)).
-               ignoring(ElementClickInterceptedException.class).
-               until(() -> {we.click(); return true;});
+        waitFor(we)
+                .withTimeout(Duration.ofSeconds(1))
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(ElementClickInterceptedException.class)
+                .until(() -> {
+                    we.click();
+                    return true;
+                });
     }
-
 
     /**
      * like click but will block for up to 30 seconds until the underlying web element has become stale.
@@ -122,7 +120,6 @@ public class Control extends CapybaraPortingLayerImpl {
         waitFor(webElement).withTimeout(timeout).until(Control::isHiddenOrStale);
     }
 
-
     /**
      * The existing {@link Control#set(String)}
      * method has shortcomings regarding large strings because it utilizes
@@ -137,11 +134,10 @@ public class Control extends CapybaraPortingLayerImpl {
      *
      * @param text the large string to be entered
      */
-
-    public void setAtOnce(String text){
+    public void setAtOnce(String text) {
         WebElement e = resolve();
         e.clear();
-        ((JavascriptExecutor)driver).executeScript("arguments[0].value = arguments[1];", e, text);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].value = arguments[1];", e, text);
     }
 
     /**
@@ -159,10 +155,10 @@ public class Control extends CapybaraPortingLayerImpl {
      * Any existing value gets cleared.
      */
     public void set(@Nullable String text) {
-        //if the text is longer than 255 characters, use the high throughput variant
-        if (text!=null && text.length() > 255)
+        // if the text is longer than 255 characters, use the high throughput variant
+        if (text != null && text.length() > 255) {
             setAtOnce(text);
-        else {
+        } else {
             WebElement e = resolve();
             e.clear();
             e.sendKeys(StringUtils.defaultString(text));
@@ -181,22 +177,34 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void selectDropdownMenu(Class<?> type) {
         click();
-        WebElement we = findCaption(type,findDropDownMenuItem);
+        WebElement we = findCaption(type, findDropDownMenuItem);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
+        waitFor(we)
+                .pollingEvery(Duration.ofMillis(100))
+                .withTimeout(Duration.ofSeconds(1))
+                .until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(10)).until(Control::isHiddenOrStale);
+        waitFor(we)
+                .pollingEvery(Duration.ofMillis(100))
+                .withTimeout(Duration.ofSeconds(10))
+                .until(Control::isHiddenOrStale);
     }
 
     public void selectDropdownMenu(String displayName) {
         click();
         WebElement we = findDropDownMenuItem.find(displayName);
         // the element may not yet be visible so wait for it to become shown after the click above
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(we::isDisplayed);
+        waitFor(we)
+                .pollingEvery(Duration.ofMillis(100))
+                .withTimeout(Duration.ofSeconds(1))
+                .until(we::isDisplayed);
         we.click();
         // wait until the menu is hidden
-        waitFor(we).pollingEvery(Duration.ofMillis(100)).withTimeout(Duration.ofSeconds(1)).until(Control::isHiddenOrStale);
+        waitFor(we)
+                .pollingEvery(Duration.ofMillis(100))
+                .withTimeout(Duration.ofSeconds(1))
+                .until(Control::isHiddenOrStale);
     }
 
     /**
@@ -214,17 +222,16 @@ public class Control extends CapybaraPortingLayerImpl {
                 // With enough implementations registered the one we are looking for might
                 // require scrolling in menu to become visible. This dirty hack stretch
                 // yui menu so that all the items are visible.
-                executeScript("" +
-                        "YAHOO.util.Dom.batch(" +
-                        "    document.querySelector('.yui-menu-body-scrolled')," +
-                        "    function (el) {" +
-                        "        el.style.height = 'auto';" +
-                        "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
-                        "    }" +
-                        ");"
-                );
+                executeScript("" + "YAHOO.util.Dom.batch("
+                        + "    document.querySelector('.yui-menu-body-scrolled'),"
+                        + "    function (el) {"
+                        + "        el.style.height = 'auto';"
+                        + "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');"
+                        + "    }"
+                        + ");");
                 // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
-                WebElement menu = findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
+                WebElement menu =
+                        findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
                 return findElement(menu, by.link(caption));
             }
         }
@@ -234,7 +241,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * For alternative use when the 'yui-menu-button' doesn't exist.
      */
     public void selectDropdownMenuAlt(Class<?> type) {
-        findCaption(type,findDropDownMenuItemBySelector);
+        findCaption(type, findDropDownMenuItemBySelector);
         elasticSleep(1000);
     }
 
@@ -246,23 +253,20 @@ public class Control extends CapybaraPortingLayerImpl {
             // With enough implementations registered the one we are looking for might
             // require scrolling in menu to become visible. This dirty hack stretch
             // yui menu so that all the items are visible.
-            executeScript("" +
-                    "YAHOO.util.Dom.batch(" +
-                    "    document.querySelector('.yui-menu-body-scrolled')," +
-                    "    function (el) {" +
-                    "        el.style.height = 'auto';" +
-                    "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');" +
-                    "    }" +
-                    ");"
-            );
+            executeScript("" + "YAHOO.util.Dom.batch("
+                    + "    document.querySelector('.yui-menu-body-scrolled'),"
+                    + "    function (el) {"
+                    + "        el.style.height = 'auto';"
+                    + "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');"
+                    + "    }"
+                    + ");");
 
-            Select context = new Select(findElement(menuButton, by.xpath(
-                    "ancestor-or-self::*[contains(@class,'setting-input dropdownList')] | " +
-                            "ancestor-or-self::*[contains(@class,'jenkins-select__input dropdownList')]"
-            )));
+            Select context = new Select(findElement(
+                    menuButton,
+                    by.xpath("ancestor-or-self::*[contains(@class,'setting-input dropdownList')] | "
+                            + "ancestor-or-self::*[contains(@class,'jenkins-select__input dropdownList')]")));
             context.selectByVisibleText(caption);
             return context.getFirstSelectedOption();
-
         }
     };
 
@@ -288,9 +292,7 @@ public class Control extends CapybaraPortingLayerImpl {
         String element = findCaption(describable, new Finder<String>() {
             @Override
             protected String find(String caption) {
-                return Control.this.getElement(by.option(caption)) != null
-                        ? caption : null
-                ;
+                return Control.this.getElement(by.option(caption)) != null ? caption : null;
             }
         });
 
@@ -329,13 +331,11 @@ public class Control extends CapybaraPortingLayerImpl {
      * Determines whether an object is existing on the current page
      * @return TRUE if it exists
      */
-    public boolean exists(){
-        try{
+    public boolean exists() {
+        try {
             this.resolve();
             return true;
-        }
-        catch (NoSuchElementException e)
-        {
+        } catch (NoSuchElementException e) {
             return false;
         }
     }
@@ -346,5 +346,4 @@ public class Control extends CapybaraPortingLayerImpl {
          */
         By path(String rel);
     }
-
 }

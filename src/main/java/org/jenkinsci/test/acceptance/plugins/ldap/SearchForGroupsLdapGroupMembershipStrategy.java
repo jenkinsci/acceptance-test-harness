@@ -1,6 +1,8 @@
 package org.jenkinsci.test.acceptance.plugins.ldap;
 
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Control;
+import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 
 /**
  * @author Michael Prankl
@@ -20,5 +22,4 @@ public class SearchForGroupsLdapGroupMembershipStrategy extends LdapGroupMembers
             groupMembershipFilter.set(strategyParam);
         }
     }
-
 }

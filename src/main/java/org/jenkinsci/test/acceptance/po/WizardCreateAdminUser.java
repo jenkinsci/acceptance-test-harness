@@ -69,17 +69,18 @@ public class WizardCreateAdminUser extends PageObject {
         return this;
     }
 
-
     public void shouldCreateTheUserSuccessfully() {
         waitFor(hasContent("Jenkins is ready!"));
     }
 
-    public void confirmURLSettings(){
+    public void confirmURLSettings() {
         By confirmJenkinsUrl = by.css(".btn-primary.save-configure-instance");
-        waitFor(driver).withTimeout(Duration.ofSeconds(time.seconds(2)))
+        waitFor(driver)
+                .withTimeout(Duration.ofSeconds(time.seconds(2)))
                 .withMessage("Unable to locate the save button to configure jenkins url")
                 .until(ExpectedConditions.presenceOfElementLocated(confirmJenkinsUrl));
-        waitFor(driver).withTimeout(Duration.ofSeconds(time.seconds(2)))
+        waitFor(driver)
+                .withTimeout(Duration.ofSeconds(time.seconds(2)))
                 .withMessage("Unable to click the save button to configure jenkins url")
                 .until(ExpectedConditions.elementToBeClickable(confirmJenkinsUrl));
         Control control = control(confirmJenkinsUrl);
@@ -96,5 +97,4 @@ public class WizardCreateAdminUser extends PageObject {
         control(installDoneButtonSelector).click();
         waitFor(driver, hasContent("Welcome to Jenkins!"), 30);
     }
-
 }

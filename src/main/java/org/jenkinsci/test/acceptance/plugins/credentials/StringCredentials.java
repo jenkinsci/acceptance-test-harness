@@ -9,11 +9,11 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 public class StringCredentials extends BaseStandardCredentials {
 
     public Control secret = control("secret");
-    
+
     public StringCredentials(PageObject context, String path) {
         super(context, path);
     }
-    
+
     public StringCredentials(PageAreaImpl area, String relativePath) {
         super(area, relativePath);
     }

@@ -58,8 +58,9 @@ public class LogWatcher implements LogListener {
 
         @Override
         public void processClose(Exception t) {
-            if (t==null)
+            if (t == null) {
                 t = new IOException("Regular termination");
+            }
             failed(t);
         }
     }

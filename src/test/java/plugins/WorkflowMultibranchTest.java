@@ -24,7 +24,14 @@ import org.junit.Test;
 /**
  * Tests a multibranch pipeline flow
  */
-@WithPlugins({"git", "javadoc", "workflow-basic-steps", "workflow-durable-task-step", "workflow-multibranch", "github-branch-source"})
+@WithPlugins({
+    "git",
+    "javadoc",
+    "workflow-basic-steps",
+    "workflow-durable-task-step",
+    "workflow-multibranch",
+    "github-branch-source"
+})
 public class WorkflowMultibranchTest extends AbstractJUnitTest {
 
     @Before
@@ -82,5 +89,4 @@ public class WorkflowMultibranchTest extends AbstractJUnitTest {
         assertEquals(job.getNextBuildNumber(), 2);
         assertEquals(job.build(1).getResult(), expectedResult.name());
     }
-
 }

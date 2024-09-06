@@ -15,5 +15,4 @@ import java.io.Closeable;
  * @see TestCleaner
  * @author Kohsuke Kawaguchi
  */
-public interface AutoCleaned extends Closeable {
-}
+public interface AutoCleaned extends Closeable {}

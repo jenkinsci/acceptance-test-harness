@@ -23,9 +23,10 @@ public class SauceLabsConnection {
     private String password;
 
     public SauceLabsConnection() throws IOException {
-        File conf = new File(System.getProperty("user.home"),".sauce-ondemand");
-        if (!conf.exists())
-            throw new IOException("SauceLabs connection file is missing: "+conf);
+        File conf = new File(System.getProperty("user.home"), ".sauce-ondemand");
+        if (!conf.exists()) {
+            throw new IOException("SauceLabs connection file is missing: " + conf);
+        }
 
         Properties props = new Properties();
         try (InputStream is = Files.newInputStream(conf.toPath())) {
@@ -34,12 +35,13 @@ public class SauceLabsConnection {
         username = props.getProperty("username");
         password = props.getProperty("key");
 
-        if (username==null || password==null)
-            throw new IOException("Missing username/key entries in "+conf);
+        if (username == null || password == null) {
+            throw new IOException("Missing username/key entries in " + conf);
+        }
     }
 
     public WebDriver createWebDriver(Capabilities caps) throws IOException {
-        return new RemoteWebDriver(new URL(
-                String.format("http://%s:%s@ondemand.saucelabs.com/wd/hub",username,password)),caps);
+        return new RemoteWebDriver(
+                new URL(String.format("http://%s:%s@ondemand.saucelabs.com/wd/hub", username, password)), caps);
     }
 }

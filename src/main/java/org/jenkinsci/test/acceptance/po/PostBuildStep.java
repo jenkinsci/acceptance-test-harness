@@ -7,5 +7,4 @@ package org.jenkinsci.test.acceptance.po;
  *
  * @author christian.fritz
  */
-public interface PostBuildStep extends Step {
-}
+public interface PostBuildStep extends Step {}

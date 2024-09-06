@@ -27,7 +27,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.ToolInstallationPageObject;
 
-@ToolInstallationPageObject(name="Ant", installer="hudson.tasks.Ant.AntInstaller")
+@ToolInstallationPageObject(name = "Ant", installer = "hudson.tasks.Ant.AntInstaller")
 public class AntInstallation extends ToolInstallation {
 
     public static void install(Jenkins jenkins, String name, String version) {

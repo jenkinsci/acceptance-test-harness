@@ -31,8 +31,9 @@ public class BuildTimeoutPluginTest extends AbstractJUnitTest {
         j.addShellStep("sleep 1");
         j.save();
 
-        for (int i=0; i<3; i++)
+        for (int i = 0; i < 3; i++) {
             j.startBuild().shouldSucceed();
+        }
 
         j.configure();
         {

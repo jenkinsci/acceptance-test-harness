@@ -44,6 +44,7 @@ import org.junit.Test;
 public class SlaveTest extends AbstractJUnitTest {
     @Inject
     SlaveController agentController;
+
     Slave agent;
 
     @Before
@@ -55,21 +56,21 @@ public class SlaveTest extends AbstractJUnitTest {
     @Test
     public void slave_offline_online() {
         agent.markOffline("Test - slave goes offline.");
-        assert(agent.isOffline());
+        assert (agent.isOffline());
         agent.markOnline();
-        assert(agent.isOnline());
+        assert (agent.isOnline());
     }
 
     /** Disconnect a slave, logout - login and then reconnect the slave. */
     @Test
     public void slave_disconnect_reconnect() throws ExecutionException, InterruptedException {
         agent.disconnect("Test - slave is disconnected");
-        assert(agent.isOffline());
+        assert (agent.isOffline());
         jenkins.logout();
         jenkins.login();
         agent.launch();
         agent.waitUntilOnline();
-        assert(agent.isOnline());
+        assert (agent.isOnline());
     }
 
     @Test

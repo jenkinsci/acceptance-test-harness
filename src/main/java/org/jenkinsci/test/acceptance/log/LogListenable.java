@@ -12,5 +12,6 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
  */
 public interface LogListenable {
     void addLogListener(LogListener l);
+
     void removeLogListener(LogListener l);
 }

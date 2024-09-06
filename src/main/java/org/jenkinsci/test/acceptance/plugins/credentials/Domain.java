@@ -15,7 +15,7 @@ public class Domain extends PageAreaImpl {
 
     public Domain(ManagedCredentials context, String path) {
         super(context, path);
-    } //TO REMOVE
+    } // TO REMOVE
 
     public Domain(DomainPage context, String path) {
         super(context, path);

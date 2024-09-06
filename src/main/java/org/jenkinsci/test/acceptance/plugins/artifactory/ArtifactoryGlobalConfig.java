@@ -43,7 +43,7 @@ public class ArtifactoryGlobalConfig extends PageAreaImpl {
         public final Control url = control("platformUrl");
         public final Control username = control("deployerCredentialsConfig/username");
         public final Control password = control("deployerCredentialsConfig/password");
-        public final Control testConnectionButton =  control("validate-button");
+        public final Control testConnectionButton = control("validate-button");
         public final Control goodConnectionFeedback = control("div.ok");
         public final Control errorConnectionFeedback = control("div.error");
 

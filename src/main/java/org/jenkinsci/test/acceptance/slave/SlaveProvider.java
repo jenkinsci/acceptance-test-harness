@@ -28,5 +28,4 @@ public abstract class SlaveProvider implements Provider<SlaveController>, com.go
      * Actual SPI for {@link #get()} method that subtypes need to implement.
      */
     protected abstract SlaveController create();
-
 }

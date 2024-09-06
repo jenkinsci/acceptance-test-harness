@@ -11,12 +11,11 @@ public interface IPasswordDockerContainer {
      *
      * @return password
      */
-    String getPassword() ;
+    String getPassword();
     /**
      * Gets the username for a service on the docker server
      *
      * @return username
      */
-    String getUsername() ;
-
+    String getUsername();
 }

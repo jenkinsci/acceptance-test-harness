@@ -12,7 +12,8 @@ import org.junit.runner.Description;
 public class SupportBundle extends TestWatcher {
     private static final Logger LOGGER = Logger.getLogger(SupportBundle.class.getName());
 
-    private static Boolean CAPTURE_SUPPORT_BUNDLE = Boolean.parseBoolean(SystemEnvironmentVariables.getPropertyVariableOrEnvironment("CAPTURE_SUPPORT_BUNDLE", "true"));
+    private static Boolean CAPTURE_SUPPORT_BUNDLE = Boolean.parseBoolean(
+            SystemEnvironmentVariables.getPropertyVariableOrEnvironment("CAPTURE_SUPPORT_BUNDLE", "true"));
 
     private static class SupportBundleSpec {
         private Jenkins instance;

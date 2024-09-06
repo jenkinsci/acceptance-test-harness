@@ -28,20 +28,20 @@ public class ExistingJenkinsController extends JenkinsController {
         this(i, url, null, false);
     }
 
-    public ExistingJenkinsController(Injector i, String url, @CheckForNull Credentials initialCredentials, boolean skipCheck) {
+    public ExistingJenkinsController(
+            Injector i, String url, @CheckForNull Credentials initialCredentials, boolean skipCheck) {
         super(i);
         try {
             this.url = new URL(url);
             this.initialCredentials = initialCredentials;
             this.skipCheck = skipCheck;
         } catch (IOException e) {
-            throw new AssertionError("Invalid URL: "+url,e);
+            throw new AssertionError("Invalid URL: " + url, e);
         }
     }
 
     @Override
-    public void startNow() {
-    }
+    public void startNow() {}
 
     @Override
     public void stopNow() {
@@ -65,12 +65,12 @@ public class ExistingJenkinsController extends JenkinsController {
     }
 
     @Override
-    public void tearDown() {
-    }
+    public void tearDown() {}
 
     @Extension
     public static class FactoryImpl implements JenkinsControllerFactory {
-        @Inject Injector i;
+        @Inject
+        Injector i;
 
         @Override
         public String getId() {
@@ -86,7 +86,9 @@ public class ExistingJenkinsController extends JenkinsController {
             if (username != null && password != null) {
                 initialCredentials = new UsernamePasswordCredentials(username, password);
             }
-            if (url==null)  url = "http://localhost:8080/";
+            if (url == null) {
+                url = "http://localhost:8080/";
+            }
 
             return new ExistingJenkinsController(i, url, initialCredentials, false);
         }

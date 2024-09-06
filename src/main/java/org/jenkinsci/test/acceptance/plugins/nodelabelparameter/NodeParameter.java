@@ -19,7 +19,8 @@ public class NodeParameter extends Parameter {
     public final Control runAllCases = control(by.checkbox("Run next build regardless of build result"));
 
     public final Control allowMultiple = control(by.checkbox("Allow multi node selection for concurrent builds"));
-    public final Control disallowMultiple = control(by.checkbox("Disallow multi node selection when triggering build manually"));
+    public final Control disallowMultiple =
+            control(by.checkbox("Disallow multi node selection when triggering build manually"));
 
     public final Control defaultNodes = control("defaultSlaves");
     public final Control allowedNodes = control("allowedSlaves");
@@ -43,7 +44,7 @@ public class NodeParameter extends Parameter {
 
     public List<String> applicableNodes() {
         List<String> nodes = new ArrayList<>();
-        for (WebElement slave: control("value").resolve().findElements(by.tagName("option"))) {
+        for (WebElement slave : control("value").resolve().findElements(by.tagName("option"))) {
             nodes.add(slave.getText());
         }
         return nodes;

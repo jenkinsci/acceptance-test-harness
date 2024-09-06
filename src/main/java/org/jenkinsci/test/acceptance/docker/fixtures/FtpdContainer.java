@@ -16,7 +16,10 @@ import org.jenkinsci.test.acceptance.docker.DockerFixture;
  *
  * @author Tobias Meyer
  */
-@DockerFixture(id = "ftpd", matchHostPorts = true, ports = {21, 9050, 9051, 9052, 9053, 9054, 9055})
+@DockerFixture(
+        id = "ftpd",
+        matchHostPorts = true,
+        ports = {21, 9050, 9051, 9052, 9053, 9054, 9055})
 public class FtpdContainer extends DockerContainer implements IPasswordDockerContainer {
     private FTPClient ftpClient;
 
@@ -33,6 +36,7 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      *
      * @return ftp password
      */
+    @Override
     public String getPassword() {
         return password;
     }
@@ -61,8 +65,9 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
             ftpClient.enterLocalPassiveMode();
             ftpClient.setRemoteVerificationEnabled(false);
 
-            if (!ftpClient.login(username, password))
+            if (!ftpClient.login(username, password)) {
                 return false;
+            }
 
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
         } catch (IOException ex) {
@@ -77,10 +82,10 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      *
      * @return ftp username
      */
+    @Override
     public String getUsername() {
         return username;
     }
-
 
     /**
      * Connects to the ftp server and uploads one File from the localPath to the remote Path.
@@ -91,16 +96,18 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      */
     public void uploadBinary(String localPath, String remotePath) throws IOException {
         FileInputStream fis = null;
-        if (!ftpConnect())
+        if (!ftpConnect()) {
             throw new IOException("Connection to ftp Failed!");
+        }
         try {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE, FTP.BINARY_FILE_TYPE);
             ftpClient.setFileTransferMode(FTP.BINARY_FILE_TYPE);
             fis = new FileInputStream(localPath);
             ftpClient.storeFile(remotePath, fis);
         } finally {
-            if (fis != null)
+            if (fis != null) {
                 fis.close();
+            }
             ftpDisconnect();
         }
     }
@@ -112,11 +119,11 @@ public class FtpdContainer extends DockerContainer implements IPasswordDockerCon
      * @return true if the Path exist, else false
      */
     public Boolean pathExist(String Path) throws IOException {
-        if (!ftpConnect())
+        if (!ftpConnect()) {
             throw new IOException("Connection to ftp Failed!");
+        }
         FTPFile[] files = ftpClient.listFiles(Path);
         ftpDisconnect();
         return files.length > 0;
     }
-
 }

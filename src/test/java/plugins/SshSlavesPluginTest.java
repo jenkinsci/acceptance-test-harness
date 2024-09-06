@@ -59,7 +59,8 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     public static final String REMOTE_FS = "/tmp";
 
-    @Inject private DockerContainerHolder<SshAgentContainer> docker;
+    @Inject
+    private DockerContainerHolder<SshAgentContainer> docker;
 
     private SshAgentContainer sshd;
     private DumbSlave slave;
@@ -86,13 +87,13 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
             String description = "Ssh key";
 
             l.host.set("127.0.0.1");
-            l.credentialsId.resolve();  // make sure this exists
+            l.credentialsId.resolve(); // make sure this exists
 
             try {
                 l.credentialsId.select(String.format("%s (%s)", username, description));
                 fail();
             } catch (NoSuchElementException e) {
-                //ignore
+                // ignore
             }
 
             SshCredentialDialog f = l.addCredential();
@@ -125,7 +126,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
         c.create();
 
-        //now verify
+        // now verify
         ManagedCredentials mc = new ManagedCredentials(jenkins);
         String href = mc.credentialById("ssh_creds");
         c.setConfigUrl(href);
@@ -149,62 +150,68 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {
         cp.configure();
-        assert(element.exists());
+        assert (element.exists());
         assertThat(element.resolve().getAttribute("value"), containsString(expected));
     }
 
-    private void verifyUnexpectedValueForCredential(String message, CredentialsPage cp, Control element, String notExpected) {
+    private void verifyUnexpectedValueForCredential(
+            String message, CredentialsPage cp, Control element, String notExpected) {
         cp.configure();
-        assert(element.exists());
+        assert (element.exists());
         assertThat(message, element.resolve().getAttribute("value"), not(containsString(notExpected)));
     }
 
-    @Test public void connectWithPassword() {
+    @Test
+    public void connectWithPassword() {
         setUp();
-        configureDefaultSSHSlaveLauncher()
-            .pwdCredentials("test", "test");
+        configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
         slave.save();
 
         verify();
     }
 
-    @Test public void connectWithKey() {
+    @Test
+    public void connectWithKey() {
         setUp();
-        configureDefaultSSHSlaveLauncher()
-            .keyCredentials("test", sshd.getPrivateKeyString(), null);
+        configureDefaultSSHSlaveLauncher().keyCredentials("test", sshd.getPrivateKeyString(), null);
         slave.save();
 
         verify();
     }
 
     @Issue("JENKINS-46754")
-    @Test public void connectWithEd25519EncKey() {
+    @Test
+    public void connectWithEd25519EncKey() {
         setUp();
         configureDefaultSSHSlaveLauncher()
-            .keyCredentials("test", sshd.getEncryptedEd25519PrivateKey(), sshd.getEncryptedEd25519PrivateKeyPassphrase());
+                .keyCredentials(
+                        "test", sshd.getEncryptedEd25519PrivateKey(), sshd.getEncryptedEd25519PrivateKeyPassphrase());
         slave.save();
         verify();
     }
 
-    @Test public void unableToConnectWrongPort() {
+    @Test
+    public void unableToConnectWrongPort() {
         setUp();
         configureSSHSlaveLauncher(sshd.ipBound(22), 1234).pwdCredentials("test", "test");
         slave.save();
-        
+
         // Wait for connection attempt to fail
         waitForLogMessage("Connection refused");
     }
-    
-    @Test public void unableToConnectWrongCredentials() {
+
+    @Test
+    public void unableToConnectWrongCredentials() {
         setUp();
         configureDefaultSSHSlaveLauncher().pwdCredentials("unexsisting", "unexsisting");
         slave.save();
-        
+
         // Wait for connection attempt to fail
         waitForLogMessage("Authentication failed");
     }
-    
-    @Test public void customJavaPath() {
+
+    @Test
+    public void customJavaPath() {
         setUp();
         SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
 
@@ -214,37 +221,38 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         }
         launcher.setJavaPath(javaPath);
         slave.save();
-    
+
         verify();
         verifyLog("java-17-openjdk");
     }
-    
-    @Test public void jvmOptions() {
+
+    @Test
+    public void jvmOptions() {
         String option = "-XX:-PrintGC";
 
         setUp();
         SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
-        
+
         launcher.jvmOptions.set(option);
         slave.save();
-        
+
         verify();
         verifyLog(option);
     }
-    
-    @Test public void customStartup() {
+
+    @Test
+    public void customStartup() {
         setUp();
         SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
-        
+
         launcher.prefixCmd.set("sh -c \"");
         launcher.suffixCmd.set("\"");
         slave.save();
-        
-        
+
         verify();
         verifyLog("sh -c \"");
     }
-        
+
     private void verify() {
         slave.waitUntilOnline();
         assertTrue(slave.isOnline());
@@ -257,7 +265,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         job.save();
         job.startBuild().shouldSucceed();
     }
-    
+
     private void waitForLogMessage(final String message) {
         waitFor().withTimeout(Duration.ofSeconds(5)).until(new Callable<Boolean>() {
             @Override
@@ -265,19 +273,21 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
                 return slave.getLog().contains(message);
             }
 
-            @Override public String toString() {
+            @Override
+            public String toString() {
                 return "slave log to contain '" + message + "':\n" + slave.getLog();
             }
         });
     }
+
     private void verifyLog(String message) {
         assertThat(slave.getLog(), containsString(message));
     }
-    
+
     private SshSlaveLauncher configureDefaultSSHSlaveLauncher() {
         return configureSSHSlaveLauncher(sshd.ipBound(22), sshd.port(22));
     }
-    
+
     private SshSlaveLauncher configureSSHSlaveLauncher(String host, int port) {
         SshSlaveLauncher launcher = slave.setLauncher(SshSlaveLauncher.class);
         launcher.host.set(host);

@@ -46,7 +46,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     private static final String FULL_NAME = "Full Name";
     private static final String PWD = "4242";
     private static final String NAME = "jenkins-acceptance-tests-user";
-    
+
     private JenkinsDatabaseSecurityRealm realm;
 
     @Before
@@ -62,7 +62,8 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     @Category(SmokeTest.class)
     public void login_and_logout() {
 
-        User user = realm.signup().fullname(FULL_NAME).email(EMAIL).password(PWD).signup(NAME);
+        User user =
+                realm.signup().fullname(FULL_NAME).email(EMAIL).password(PWD).signup(NAME);
 
         jenkins.login().doLogin(user.id(), PWD);
 
@@ -76,7 +77,8 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     @Test
     public void create_update_delete() {
 
-        User user = realm.signup().fullname(FULL_NAME).password(PWD).email(EMAIL).signup(NAME);
+        User user =
+                realm.signup().fullname(FULL_NAME).password(PWD).email(EMAIL).signup(NAME);
         assertThat(user.id(), equalTo(NAME));
         assertThat(user.fullName(), equalTo(FULL_NAME));
         jenkins.logout();
@@ -94,7 +96,8 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
         try {
             assertThat(user, Matchers.pageObjectDoesNotExist());
         } catch (AssertionError ex) {
-            // Old Jenkins creates new users transparently. Verifying it is the new one and not the old by default fullName assigned
+            // Old Jenkins creates new users transparently. Verifying it is the new one and not the old by default
+            // fullName assigned
             assertThat(user.fullName(), equalTo(NAME));
         }
     }

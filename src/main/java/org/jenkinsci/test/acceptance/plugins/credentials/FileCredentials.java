@@ -9,7 +9,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 public class FileCredentials extends BaseStandardCredentials {
 
     public Control file = control("file");
-    
+
     public FileCredentials(PageObject context, String path) {
         super(context, path);
     }

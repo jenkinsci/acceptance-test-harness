@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
@@ -14,7 +13,9 @@ import org.jenkinsci.test.acceptance.plugins.ldap.LdapDetails;
  *
  * @author Michael Prankl
  */
-@DockerFixture(id = "ldap", ports = { 389, 636 })
+@DockerFixture(
+        id = "ldap",
+        ports = {389, 636})
 public class LdapContainer extends DockerContainer {
 
     public String getHost() {
@@ -40,11 +41,11 @@ public class LdapContainer extends DockerContainer {
     /**
      * @return default ldap connection details from current running docker
      *         LdapContainer.
-     * @throws MalformedURLException 
+     * @throws MalformedURLException
      */
     public LdapDetails createDefault() throws MalformedURLException {
-        return new LdapDetails(addBracketsIfNeeded(getHost()), getPort(), getManagerDn(), getManagerPassword(),
-                getRootDn());
+        return new LdapDetails(
+                addBracketsIfNeeded(getHost()), getPort(), getManagerDn(), getManagerPassword(), getRootDn());
     }
 
     public static String addBracketsIfNeeded(String host) throws MalformedURLException {

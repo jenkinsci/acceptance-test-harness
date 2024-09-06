@@ -24,7 +24,7 @@
 
 package plugins;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 import java.util.Collections;
 import java.util.logging.Level;
@@ -38,9 +38,9 @@ import org.jvnet.hudson.test.Issue;
 public class SupportCorePluginTest extends AbstractJUnitTest {
 
     @Issue("JENKINS-27669")
-    @Test public void emptyLogger() throws Exception {
+    @Test
+    public void emptyLogger() throws Exception {
         JenkinsLogger logger = jenkins.createLogger("test", Collections.singletonMap("", Level.ALL));
         assertFalse(logger.isEmpty());
     }
-
 }

@@ -30,7 +30,5 @@ public class LocalSlaveController extends SlaveController {
     }
 
     @Override
-    public void close() throws IOException {
-
-    }
+    public void close() throws IOException {}
 }

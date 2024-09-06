@@ -45,7 +45,11 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Folder;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.ListView;
+import org.jenkinsci.test.acceptance.po.TopLevelItem;
+import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Test;
 import org.openqa.selenium.NoSuchElementException;
 
@@ -60,16 +64,19 @@ public class FolderPluginTest extends AbstractJUnitTest {
     private static final String F02 = "F02";
     /** Test view names. */
     private static final String ALL_VIEW = "All";
+
     private static final String MY_VIEW = "MyView";
     /** Test job names. */
     private static final String JOB1 = "job1";
+
     private static final String JOB2 = "job2";
     /** Credential data. */
-    private final static String CRED_ID = "mycreds";
-    private final static String CRED_USER = "myUser";
-    private final static String CRED_PASS = "myPass";
-    private final static String CRED_INJECTED_MESSAGE = "credentials have been injected";
-    
+    private static final String CRED_ID = "mycreds";
+
+    private static final String CRED_USER = "myUser";
+    private static final String CRED_PASS = "myPass";
+    private static final String CRED_INJECTED_MESSAGE = "credentials have been injected";
+
     /**
      * Checks that a folder exists and has the provided name.
      */
@@ -81,7 +88,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
     private Folder createFolder(final String name) {
         return jenkins.jobs.create(Folder.class, name);
     }
-    
+
     /**
      * First simple test scenario: Folder creation (JENKINS-31648).
      * <ol>
@@ -96,7 +103,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
         jenkins.open();
         checkFolder(folder, F01);
     }
-    
+
     /**
      * Simple folder hierarchy test scenario: Folder creation (JENKINS-31648).
      * <ol>
@@ -153,7 +160,14 @@ public class FolderPluginTest extends AbstractJUnitTest {
      * Test scenario to validate credentials scoped in folders.
      */
     @Test
-    @WithPlugins({ "credentials", "credentials-binding", "workflow-job", "workflow-cps", "workflow-basic-steps", "workflow-durable-task-step" })
+    @WithPlugins({
+        "credentials",
+        "credentials-binding",
+        "workflow-job",
+        "workflow-cps",
+        "workflow-basic-steps",
+        "workflow-durable-task-step"
+    })
     public void folderScopedCredentialsTest() {
         final Folder folder = jenkins.jobs.create(Folder.class, F01);
         final FreeStyleJob job1 = folder.getJobs().create(FreeStyleJob.class, JOB1);
@@ -177,17 +191,17 @@ public class FolderPluginTest extends AbstractJUnitTest {
         waitFor(folder, pageObjectDoesNotExist(), 1000);
     }
 
-    private final static String FOLDER1_NAME = "folder1";
-    private final static String FOLDER2_NAME = "folder2";
-    private final static String FOLDER3_NAME = "folder3";
+    private static final String FOLDER1_NAME = "folder1";
+    private static final String FOLDER2_NAME = "folder2";
+    private static final String FOLDER3_NAME = "folder3";
 
-    private final static String JOB1_NAME = "job1";
-    private final static String JOB2_NAME = "job2";
-    private final static String JOB3_NAME = "job3";
-    private final static String JOB4_NAME = "job4";
+    private static final String JOB1_NAME = "job1";
+    private static final String JOB2_NAME = "job2";
+    private static final String JOB3_NAME = "job3";
+    private static final String JOB4_NAME = "job4";
 
     @Test
-    public void basicOperationsTest()  {
+    public void basicOperationsTest() {
         final Folder originalFolder = this.createFolder(FOLDER1_NAME);
 
         this.checkItemExists(originalFolder, true);
@@ -206,7 +220,7 @@ public class FolderPluginTest extends AbstractJUnitTest {
 
     @Test
     @WithPlugins("workflow-job")
-    public void nestedOperationsTest()  {
+    public void nestedOperationsTest() {
         final Folder folder1 = this.createFolder(FOLDER1_NAME);
         final FreeStyleJob job1 = folder1.getJobs().create(FreeStyleJob.class, JOB1_NAME);
 
@@ -283,10 +297,11 @@ public class FolderPluginTest extends AbstractJUnitTest {
 
         f3f2.getJobs().copy("/" + folder1.name + "/" + job1.name, job1.name);
 
-        assertThat(driver, hasContent("A job already exists with the name ‘" +  job1.name + "’"));
+        assertThat(driver, hasContent("A job already exists with the name ‘" + job1.name + "’"));
     }
 
-    private void checkItemNameAndUrl(final TopLevelItem item, final String itemName, final TopLevelItem... parentItems) {
+    private void checkItemNameAndUrl(
+            final TopLevelItem item, final String itemName, final TopLevelItem... parentItems) {
         item.open();
         assertThat("Item name is not displayed", driver, hasContent(itemName));
 
@@ -344,11 +359,12 @@ public class FolderPluginTest extends AbstractJUnitTest {
     private WorkflowJob createWorkflowJob(final Folder f) {
         this.createCredentials(f);
 
-        final String script = String.format("node {\n" +
-                "    withCredentials([usernamePassword(credentialsId: '%s', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {\n" +
-                "        sh '[ \"$USERNAME\" = \"%s\" ] && [ \"$PASSWORD\" = \"%s\" ] && echo \"%s\"'\n" +
-                "    }\n" +
-                "}",
+        final String script = String.format(
+                "node {\n"
+                        + "    withCredentials([usernamePassword(credentialsId: '%s', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {\n"
+                        + "        sh '[ \"$USERNAME\" = \"%s\" ] && [ \"$PASSWORD\" = \"%s\" ] && echo \"%s\"'\n"
+                        + "    }\n"
+                        + "}",
                 CRED_ID, CRED_USER, CRED_PASS, CRED_INJECTED_MESSAGE);
 
         final WorkflowJob job = f.getJobs().create(WorkflowJob.class, JOB2);

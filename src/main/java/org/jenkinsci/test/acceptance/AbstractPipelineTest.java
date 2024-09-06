@@ -58,7 +58,8 @@ public class AbstractPipelineTest extends AbstractJUnitTest {
         return String.format(script, (Object[]) scriptParameters);
     }
 
-    public String scriptForPipelineFromResourceWithParameters(final String resourceName, final String... scriptParameters) throws IOException {
+    public String scriptForPipelineFromResourceWithParameters(
+            final String resourceName, final String... scriptParameters) throws IOException {
         final String script = PipelineTestUtils.scriptForPipelineFromResource(this.getClass(), resourceName);
         PipelineTestUtils.checkScript(script);
 

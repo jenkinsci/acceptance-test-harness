@@ -27,12 +27,12 @@ import org.junit.runners.model.Statement;
 @Documented
 @RuleAnnotation(value = WithDocker.RuleImpl.class, priority = -10) // Run before Jenkins startup
 public @interface WithDocker {
-    
+
     /**
-     * Set to true if the test requires the docker deamon to be running locally. 
+     * Set to true if the test requires the docker deamon to be running locally.
      */
     boolean localOnly() default false;
-    
+
     class RuleImpl implements TestRule {
         @Inject
         Docker docker;
@@ -48,7 +48,9 @@ public @interface WithDocker {
                 }
 
                 private void hasDocker(WithDocker n) throws UnknownHostException {
-                    if (n==null) return;
+                    if (n == null) {
+                        return;
+                    }
 
                     if (!docker.isAvailable()) {
                         throw new AssumptionViolatedException("Docker is needed for the test");
@@ -56,7 +58,8 @@ public @interface WithDocker {
                     if (n.localOnly()) {
                         String host = DockerImage.getDockerHost();
                         if (!InetAddress.getByName(host).isLoopbackAddress()) {
-                            throw new AssumptionViolatedException("Docker is needed locally for the test but is running on " + host);
+                            throw new AssumptionViolatedException(
+                                    "Docker is needed locally for the test but is running on " + host);
                         }
                     }
                 }

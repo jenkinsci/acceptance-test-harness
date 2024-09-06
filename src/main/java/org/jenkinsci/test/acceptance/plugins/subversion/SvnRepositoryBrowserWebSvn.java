@@ -15,7 +15,6 @@ public class SvnRepositoryBrowserWebSvn extends SvnRepositoryBrowser {
 
     public Control url = control("/scm[1]/browser/url");
 
-
     public SvnRepositoryBrowserWebSvn(Scm area, URL path) {
         super(area, path);
     }

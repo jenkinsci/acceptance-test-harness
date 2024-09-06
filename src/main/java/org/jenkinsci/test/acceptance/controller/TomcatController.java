@@ -33,40 +33,41 @@ public class TomcatController extends LocalController {
     }
 
     @Override
-    public ProcessInputStream startProcess() throws IOException{
+    public ProcessInputStream startProcess() throws IOException {
         try {
-            File jenkinsDeploymentDir = new File(catalinaHome,"webapps/jenkins");
-            if(jenkinsDeploymentDir.exists()){
+            File jenkinsDeploymentDir = new File(catalinaHome, "webapps/jenkins");
+            if (jenkinsDeploymentDir.exists()) {
                 FileUtils.forceDelete(jenkinsDeploymentDir);
             }
 
-            File jenkinsWarDeploymentPath = new File(catalinaHome,"webapps/jenkins.war");
-            if(jenkinsWarDeploymentPath.exists()){
+            File jenkinsWarDeploymentPath = new File(catalinaHome, "webapps/jenkins.war");
+            if (jenkinsWarDeploymentPath.exists()) {
                 FileUtils.forceDelete(jenkinsWarDeploymentPath);
             }
 
             FileUtils.copyFile(war, jenkinsWarDeploymentPath);
 
-            File tomcatLog = new File(catalinaHome,"logs/catalina.out");
-            if(tomcatLog.exists()){
+            File tomcatLog = new File(catalinaHome, "logs/catalina.out");
+            if (tomcatLog.exists()) {
                 FileUtils.forceDelete(tomcatLog);
             }
 
-            File context =  new File(catalinaHome,"conf/context.xml");
-            if(context.exists()){
+            File context = new File(catalinaHome, "conf/context.xml");
+            if (context.exists()) {
                 FileUtils.forceDelete(context);
             }
-            FileUtils.write(context, "<Context>\n" +
-                    "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n" +
-                    "</Context>", StandardCharsets.UTF_8);
+            FileUtils.write(
+                    context,
+                    "<Context>\n"
+                            + "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n"
+                            + "</Context>",
+                    StandardCharsets.UTF_8);
 
-
-
-            CommandBuilder cb = new CommandBuilder(catalinaHome+"/bin/startup.sh");
+            CommandBuilder cb = new CommandBuilder(catalinaHome + "/bin/startup.sh");
             cb.env.putAll(commonLaunchEnv());
             int status = cb.system();
-            if(status != 0){
-                throw new RuntimeException("Failed during Tomcat startup: "+ cb);
+            if (status != 0) {
+                throw new RuntimeException("Failed during Tomcat startup: " + cb);
             }
             CommandBuilder tail = new CommandBuilder("tail").add("-f", tomcatLog);
             return tail.popen();
@@ -76,12 +77,12 @@ public class TomcatController extends LocalController {
     }
 
     @Override
-    public void stopNow() throws IOException{
+    public void stopNow() throws IOException {
         System.out.println("    Stopping a temporary Jenkins/Tomcat instance\n");
-        CommandBuilder cb = new CommandBuilder(catalinaHome+"/bin/shutdown.sh");
+        CommandBuilder cb = new CommandBuilder(catalinaHome + "/bin/shutdown.sh");
         try {
             int status = cb.system();
-            if(status != 0){
+            if (status != 0) {
                 throw new RuntimeException("Cannot stop Tomcat");
             }
         } catch (InterruptedException e) {
@@ -100,7 +101,8 @@ public class TomcatController extends LocalController {
 
     @Extension
     public static class FactoryImpl extends LocalFactoryImpl {
-        @Inject Injector i;
+        @Inject
+        Injector i;
 
         @Override
         public String getId() {
@@ -114,22 +116,23 @@ public class TomcatController extends LocalController {
 
         public static final class ModuleImpl extends AbstractModule {
 
-            @Provides @Named("tomcatHome")
+            @Provides
+            @Named("tomcatHome")
             public File tomcatHome(@Named("jenkins.war") File warFile) {
                 try {
-                    return IOUtil.firstExisting(true,
+                    return IOUtil.firstExisting(
+                            true,
                             System.getenv("CATALINA_HOME"),
                             new File(warFile.getParentFile(), "tomcat").getAbsolutePath(),
-                            "./tomcat"
-                    );
+                            "./tomcat");
                 } catch (IOException ex) {
-                    throw new AssertionError("Cannot find Tomcat home, maybe you forgot to set CATALINA_HOME env var?", ex);
+                    throw new AssertionError(
+                            "Cannot find Tomcat home, maybe you forgot to set CATALINA_HOME env var?", ex);
                 }
             }
 
             @Override
-            protected void configure() {
-            }
+            protected void configure() {}
         }
     }
 }

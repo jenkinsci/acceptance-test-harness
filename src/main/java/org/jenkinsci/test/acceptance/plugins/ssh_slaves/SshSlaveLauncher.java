@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.time.Duration;
@@ -49,6 +49,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
             javaPath.set(jvmPath);
         }
     }
+
     public SshSlaveLauncher port(int port) {
         ensureAdvancedOpen();
         control("port").set(port);
@@ -71,7 +72,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
         final UserPwdCredential cred = dia.select(UserPwdCredential.class);
         cred.username.set(username);
         cred.password.set(password);
-        //credentials are identified by their id. Set username as id so it can be found by it
+        // credentials are identified by their id. Set username as id so it can be found by it
         cred.setId(username);
         cred.add();
         waitForCredentialVisible(username);
@@ -91,7 +92,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
         final UserPwdCredential cred = dia.select(UserPwdCredential.class);
         cred.username.set(username);
         cred.password.set(password);
-        //credentials are identified by their id.
+        // credentials are identified by their id.
         cred.setId(id);
         cred.add();
         waitForCredentialVisible(username);
@@ -123,9 +124,9 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * to check whether it has already been rendered in the dropdown.
      */
     private void waitForCredentialVisible(final String credUsername) {
-        assertTrue(waitFor().withTimeout(Duration.ofSeconds(5)).until(() ->
-                credentialsId.resolve().getText().contains(credUsername))
-        );
+        assertTrue(waitFor()
+                .withTimeout(Duration.ofSeconds(5))
+                .until(() -> credentialsId.resolve().getText().contains(credUsername)));
         // Select the new credentials. Control.selectDropdownMenu seems to be YUI-only.
         selectCredentials(credUsername);
     }
@@ -147,7 +148,6 @@ public class SshSlaveLauncher extends ComputerLauncher {
         } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException(type.getName() + " is missing a default constructor.", e);
         }
-
     }
 
     public abstract static class SshHostKeyVerificationStrategy {

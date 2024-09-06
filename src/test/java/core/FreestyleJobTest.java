@@ -59,7 +59,8 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         Build automaticallyStartedBuild = main.build(1);
         automaticallyStartedBuild.waitUntilFinished();
 
-        assertThat(automaticallyStartedBuild.getConsole(),
+        assertThat(
+                automaticallyStartedBuild.getConsole(),
                 containsString("Started by upstream project \"%s\"", trigger.name));
     }
 
@@ -93,7 +94,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         job.open();
         WebElement link = job.find(By.partialLinkText("Last build (#1)"));
         String expectedUrl = link.getAttribute("href");
-        
+
         Build b = new Build(job, "lastBuild");
         b.open();
         assertThat("Permalink link is current URL", driver.getCurrentUrl(), is(expectedUrl));
@@ -102,7 +103,8 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         assertThat("Build is success", b.getResult(), is(Build.Result.SUCCESS.name()));
     }
 
-    @Test @Issue("JENKINS-38928")
+    @Test
+    @Issue("JENKINS-38928")
     public void apply_then_save() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
         assertThat(j, pageObjectExists());
@@ -154,7 +156,10 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
         j.addParameter(StringParameter.class).setName("text").setDefault("foo").setDescription("Bar");
-        j.addParameter(PasswordParameter.class).setName("password").setDefault("foopass").setDescription("apass");
+        j.addParameter(PasswordParameter.class)
+                .setName("password")
+                .setDefault("foopass")
+                .setDescription("apass");
         j.addShellStep("echo \">$text<\"");
         j.save();
 
@@ -246,8 +251,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         Build first = j.build(1);
         new Wait<>(first)
                 .withTimeout(Duration.ofSeconds(70)) // Wall-clock time
-                .until(pageObjectExists())
-        ;
+                .until(pageObjectExists());
         assertThat(first.getConsole(), containsString("Started by timer"));
 
         assertThat(j.build(3), pageObjectDoesNotExist());
@@ -286,7 +290,8 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         j.build(2).waitUntilStarted().shouldSucceed();
     }
 
-    @Test @Issue({"JENKINS-21457", "JENKINS-20772", "JENKINS-21478"})
+    @Test
+    @Issue({"JENKINS-21457", "JENKINS-20772", "JENKINS-21478"})
     public void showErrorSavingConfig() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
@@ -295,7 +300,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         clickButton("Apply");
 
         By error = by.css(".validation-error-area .error");
-        
+
         assertThat(waitFor(error).getText(), containsString("Invalid input: \"not_a_time\""));
         closeDialog();
 
@@ -320,7 +325,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         j.delete();
 
         elasticSleep(1000); // wait for delete to complete.
-        assertThat(j,pageObjectDoesNotExist());
+        assertThat(j, pageObjectDoesNotExist());
     }
 
     @Test

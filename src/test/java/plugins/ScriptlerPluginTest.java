@@ -40,7 +40,6 @@ import org.jenkinsci.test.acceptance.plugins.scriptler.Scriptler;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 @WithPlugins("scriptler")

@@ -106,12 +106,13 @@ public class FailureDiagnostics extends TestWatcher {
             try {
                 Files.walk(dir.toPath()).forEach(p -> {
                     if (Files.isRegularFile(p)) {
-                        //https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
+                        // https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
                         System.out.printf((JUNIT_ATTACHMENT) + "%n", p.toAbsolutePath());
                     }
                 });
             } catch (IOException x) {
-                Logger.getLogger(FailureDiagnostics.class.getName()).log(Level.WARNING, "failed to search " + dir + " for attachments", x);
+                Logger.getLogger(FailureDiagnostics.class.getName())
+                        .log(Level.WARNING, "failed to search " + dir + " for attachments", x);
             }
         }
     }

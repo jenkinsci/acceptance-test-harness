@@ -1,7 +1,9 @@
 package plugins;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +14,9 @@ import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserGlobalConfig;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserOutputPage;
 import org.jenkinsci.test.acceptance.plugins.logparser.LogParserPublisher;
-import org.jenkinsci.test.acceptance.po.*;
+import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,7 +58,7 @@ public class LogParserTest extends AbstractJUnitTest {
 
         assertThat(outputPage.getFragmentOfContentFrame("Error", 1), is("ERROR1"));
 
-        assertThat(outputPage.getColor("Error",1), is("red"));
+        assertThat(outputPage.getColor("Error", 1), is("red"));
     }
 
     /**
@@ -116,11 +120,10 @@ public class LogParserTest extends AbstractJUnitTest {
         assertThat(output.getText(), containsString("ERROR: Failed to parse console log"));
     }
 
-
-    private WebElement findLogParserSummary(WebElement buildSummary){
-        for(WebElement element : buildSummary.findElements(By.tagName("tr"))){
+    private WebElement findLogParserSummary(WebElement buildSummary) {
+        for (WebElement element : buildSummary.findElements(By.tagName("tr"))) {
             List<WebElement> icons = element.findElements(By.xpath("td[1]/img | td[1]/span/img"));
-            if(!icons.isEmpty() && icons.get(0).getAttribute("src").contains("graph")){
+            if (!icons.isEmpty() && icons.get(0).getAttribute("src").contains("graph")) {
                 return element;
             }
         }

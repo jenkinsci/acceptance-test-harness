@@ -15,10 +15,10 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 /**
- * 
+ *
  * Indicates that the test and Jenkins instance will run with the specified
  * java options. These options are set as an array of pairs <i>property=vale</i>.
- * 
+ *
  * <p>
  * The options can be set only when the test are being run with a {@link WinstoneController}.
  * This annotation is a way to extend JENKINS_JAVA_OPTS and JENKINS_OPTS at test level
@@ -43,7 +43,8 @@ public @interface WithJavaOptions {
                 @Override
                 public void evaluate() throws Throwable {
                     if (!(controller instanceof WinstoneController)) {
-                        throw new AssumptionViolatedException("Test skipped. WithSystemProperties should be used with a winstone controller.");
+                        throw new AssumptionViolatedException(
+                                "Test skipped. WithSystemProperties should be used with a winstone controller.");
                     }
 
                     Class<?> testSuite = d.getTestClass();
