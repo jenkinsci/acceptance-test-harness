@@ -282,7 +282,7 @@ public class FallbackConfig extends AbstractModule {
         // if we are running maven locally but the browser elsewhere (e.g. docker) using the "127.0.0.1"
         // address will not work for the browser
         String name = System.getenv("SELENIUM_PROXY_HOSTNAME");
-        InetAddress proxyAddr = null;
+        InetAddress proxyAddr;
         if (name != null) {
             proxyAddr = InetAddress.getByName(name);
         } else {

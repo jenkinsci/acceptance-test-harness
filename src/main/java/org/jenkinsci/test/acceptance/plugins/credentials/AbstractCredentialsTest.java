@@ -67,7 +67,7 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
     }
 
     protected CredentialsPage createCredentialsPage(Boolean userCredentials, String domain) {
-        CredentialsPage cp = null;
+        CredentialsPage cp;
         if (userCredentials) {
             cp = new CredentialsPage(jenkins, domain, CREATED_USER);
             // Make sure we are not going to have a 404, we got some issues like that
