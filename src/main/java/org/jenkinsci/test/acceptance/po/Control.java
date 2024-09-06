@@ -211,7 +211,7 @@ public class Control extends CapybaraPortingLayerImpl {
      * Given a menu button that shows a list of build steps, select the right item from the menu
      * to insert the said build step.
      */
-    private final Finder<WebElement> findDropDownMenuItem = new Finder<WebElement>() {
+    private final Finder<WebElement> findDropDownMenuItem = new Finder<>() {
         @Override
         protected WebElement find(String caption) {
             WebElement menuButton = resolve();
@@ -245,7 +245,7 @@ public class Control extends CapybaraPortingLayerImpl {
         elasticSleep(1000);
     }
 
-    private final Finder<WebElement> findDropDownMenuItemBySelector = new Finder<WebElement>() {
+    private final Finder<WebElement> findDropDownMenuItemBySelector = new Finder<>() {
         @Override
         protected WebElement find(String caption) {
             WebElement menuButton = resolve();
@@ -289,7 +289,7 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     public void select(Class<?> describable) {
-        String element = findCaption(describable, new Finder<String>() {
+        String element = findCaption(describable, new Finder<>() {
             @Override
             protected String find(String caption) {
                 return Control.this.getElement(by.option(caption)) != null ? caption : null;
@@ -300,7 +300,7 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     public void choose(Class<?> describable) {
-        String element = findCaption(describable, new Finder<String>() {
+        String element = findCaption(describable, new Finder<>() {
             @Override
             protected String find(String caption) {
                 final By xpath = by.xpath("//input[@type = 'radio' and @value = '%s']", caption);

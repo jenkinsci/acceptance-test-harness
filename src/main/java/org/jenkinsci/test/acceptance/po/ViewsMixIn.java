@@ -20,7 +20,7 @@ public class ViewsMixIn extends MixIn {
 
     public <T extends View> T create(final Class<T> type, String name) {
 
-        final Finder<WebElement> finder = new Finder<WebElement>() {
+        final Finder<WebElement> finder = new Finder<>() {
             @Override
             protected WebElement find(String caption) {
                 return outer.find(by.radioButton(caption));

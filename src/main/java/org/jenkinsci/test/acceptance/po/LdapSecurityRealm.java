@@ -58,7 +58,7 @@ public class LdapSecurityRealm<T extends LdapGroupMembershipStrategy> extends Se
     }
 
     private T useGroupMembershipStrategy(Class<T> type) {
-        WebElement radio = findCaption(type, new Finder<WebElement>() {
+        WebElement radio = findCaption(type, new Finder<>() {
             @Override
             protected WebElement find(String caption) {
                 return getElement(by.radioButton(caption));

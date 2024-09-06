@@ -37,7 +37,7 @@ public class Workspace extends PageObject {
     }
 
     public static Matcher<Job> workspaceContains(final String file) {
-        return new Matcher<Job>("%s in job workspace", file) {
+        return new Matcher<>("%s in job workspace", file) {
             @Override
             public boolean matchesSafely(Job job) {
                 job.getWorkspace().open();

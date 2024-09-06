@@ -14,7 +14,7 @@ import org.junit.runner.notification.RunListener;
  * @author Ullrich Hafner
  */
 public class JUnitProgressReporter extends RunListener {
-    private final Set<String> results = new CopyOnWriteArraySet<String>();
+    private final Set<String> results = new CopyOnWriteArraySet<>();
 
     @Override
     public void testStarted(final Description description) throws Exception {

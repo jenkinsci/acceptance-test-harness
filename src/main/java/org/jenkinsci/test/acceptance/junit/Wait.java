@@ -117,7 +117,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     // For convenience as we have quite a lot of Callables historically
     public <Return> Return until(final Callable<Return> isTrue) {
-        return super.until(new Function<Subject, Return>() {
+        return super.until(new Function<>() {
             @Override
             public Return apply(Subject input) {
                 try {
@@ -153,7 +153,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
     }
 
     public <Return> Return until(final Wait.Predicate<Return> isTrue) {
-        Function<Subject, Return> fun = new Function<Subject, Return>() {
+        Function<Subject, Return> fun = new Function<>() {
             @Override
             public Return apply(Subject input) {
                 try {

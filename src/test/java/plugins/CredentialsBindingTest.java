@@ -245,7 +245,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     private void waitForLogToBeFullyLoaded(final Build b, String text) {
         waitFor(
                 driver,
-                new Matcher<WebDriver>("Console log is not fully loaded") {
+                new Matcher<>("Console log is not fully loaded") {
                     @Override
                     public boolean matchesSafely(WebDriver item) {
                         String pageText = CapybaraPortingLayerImpl.getPageContent(visit(b.getConsoleUrl()));

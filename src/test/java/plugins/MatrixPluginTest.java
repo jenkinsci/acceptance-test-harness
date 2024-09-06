@@ -264,7 +264,7 @@ public class MatrixPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<? super MatrixRun> built() {
-        return new Matcher<MatrixRun>("Matrix run exists") {
+        return new Matcher<>("Matrix run exists") {
             @Override
             public boolean matchesSafely(MatrixRun item) {
                 return item.exists();

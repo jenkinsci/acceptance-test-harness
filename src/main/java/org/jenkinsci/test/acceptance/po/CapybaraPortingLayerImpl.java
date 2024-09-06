@@ -181,7 +181,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     @Override
     public WebElement find(final By selector) {
         try {
-            return waitFor().withTimeout(Duration.ofMillis(time.seconds(1))).until(new Callable<WebElement>() {
+            return waitFor().withTimeout(Duration.ofMillis(time.seconds(1))).until(new Callable<>() {
                 @Override
                 public WebElement call() {
                     for (WebElement element : driver.findElements(selector)) {
@@ -508,7 +508,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     }
 
     protected <T> T findCaption(Class<?> type, Function<String, T> finder) {
-        return findCaption(type, new Finder<T>() {
+        return findCaption(type, new Finder<>() {
             @Override
             protected T find(String caption) {
                 return finder.apply(caption);

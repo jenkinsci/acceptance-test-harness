@@ -281,7 +281,7 @@ public class LdapDetails<T extends LdapGroupMembershipStrategy> {
 
     public void addEnvironmentVariable(LdapEnvironmentVariable environmentVariable) {
         if (this.environmentVariables == null) {
-            this.environmentVariables = new LinkedList<LdapEnvironmentVariable>();
+            this.environmentVariables = new LinkedList<>();
         }
         this.environmentVariables.add(environmentVariable);
     }

@@ -135,7 +135,7 @@ public class FormValidation {
      * When either there is no validation or empty OK was returned (there is no way to tell that apart).
      */
     public static Matcher<FormValidation> silent() {
-        return new Matcher<FormValidation>("No form validation result should be presented") {
+        return new Matcher<>("No form validation result should be presented") {
             @Override
             public boolean matchesSafely(FormValidation item) {
                 return item.getKind() == Kind.OK && item.getMessage().isEmpty();
@@ -155,7 +155,7 @@ public class FormValidation {
     public static Matcher<FormValidation> reports(final Kind kind, final org.hamcrest.Matcher<String> message) {
         StringDescription sd = new StringDescription();
         message.describeTo(sd);
-        return new Matcher<FormValidation>("Validation reporting " + kind + " with message: " + sd) {
+        return new Matcher<>("Validation reporting " + kind + " with message: " + sd) {
             @Override
             public boolean matchesSafely(FormValidation item) {
                 return item.getKind() == kind && message.matches(item.getMessage());

@@ -71,7 +71,7 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsJob(final Job needle) {
-        return new Matcher<View>("Contains job " + needle.name) {
+        return new Matcher<>("Contains job " + needle.name) {
             @Override
             public boolean matchesSafely(View view) {
                 for (JsonNode job : view.getJson().get("jobs")) {
@@ -131,7 +131,7 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsColumnHeaderTooltip(String tooltip) {
-        return new Matcher<View>("Contains ToolTip " + tooltip) {
+        return new Matcher<>("Contains ToolTip " + tooltip) {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(By.xpath("//th[contains(@tooltip, '" + tooltip + "')]"));
@@ -141,7 +141,7 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsColumnHeader(String headerName) {
-        return new Matcher<View>("Contains ToolTip " + headerName) {
+        return new Matcher<>("Contains ToolTip " + headerName) {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(By.xpath("//th/a[text() = '" + headerName + "']"));
@@ -151,7 +151,7 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsImage(String imageName) {
-        return new Matcher<View>("Contains image " + imageName) {
+        return new Matcher<>("Contains image " + imageName) {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(By.xpath("//img[contains(@src, '" + imageName + "')]"));
@@ -161,7 +161,7 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsSvgWithText(String text) {
-        return new Matcher<View>("Contains svg with text " + text) {
+        return new Matcher<>("Contains svg with text " + text) {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(
@@ -172,7 +172,7 @@ public abstract class View extends ContainerPageObject {
     }
 
     public static Matcher<View> containsLinkWithTooltip(String text) {
-        return new Matcher<View>("Contains link with tooltip " + text) {
+        return new Matcher<>("Contains link with tooltip " + text) {
             @Override
             public boolean matchesSafely(View item) {
                 WebElement webElement = item.getElement(By.cssSelector(String.format("a[tooltip='%s']", text)));

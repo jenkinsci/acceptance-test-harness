@@ -117,7 +117,7 @@ public class FallbackConfig extends AbstractModule {
             case "chrome-container":
                 return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.24.0", new ChromeOptions());
             case "chrome":
-                Map<String, String> prefs = new HashMap<String, String>();
+                Map<String, String> prefs = new HashMap<>();
                 prefs.put(LANGUAGE_SELECTOR, "en");
                 ChromeOptions options = new ChromeOptions();
                 options.setExperimentalOption("prefs", prefs);

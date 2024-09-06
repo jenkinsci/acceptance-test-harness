@@ -34,7 +34,7 @@ public class Matchers {
     }
 
     public static Matcher<WebDriver> hasContent(final Pattern pattern) {
-        return new Matcher<WebDriver>("Text matching %s", pattern) {
+        return new Matcher<>("Text matching %s", pattern) {
             // text captured the time matchesSafely was executed
             private String pageText;
 
@@ -59,7 +59,7 @@ public class Matchers {
      * Matches that matches {@link WebDriver} when it has an element that matches to the given selector.
      */
     public static Matcher<WebDriver> hasElement(final By selector) {
-        return new Matcher<WebDriver>("contains element that matches %s", selector) {
+        return new Matcher<>("contains element that matches %s", selector) {
             @Override
             public boolean matchesSafely(WebDriver item) {
                 try {
@@ -78,7 +78,7 @@ public class Matchers {
     }
 
     public static Matcher<WebDriver> hasURL(final URL url) {
-        return new Matcher<WebDriver>("URL matching %s", url) {
+        return new Matcher<>("URL matching %s", url) {
             @Override
             public boolean matchesSafely(WebDriver item) {
                 return item.getCurrentUrl().equals(url.toString());
@@ -95,7 +95,7 @@ public class Matchers {
      * For asserting that a {@link PageObject}'s top page has an action of the given name.
      */
     public static Matcher<PageObject> hasAction(final String displayName) {
-        return new Matcher<PageObject>("contains action titled %s", displayName) {
+        return new Matcher<>("contains action titled %s", displayName) {
             @Override
             public boolean matchesSafely(PageObject po) {
                 try {
@@ -147,7 +147,7 @@ public class Matchers {
      * Matches if a string contains a portion that matches to the regular expression.
      */
     public static Matcher<String> containsRegexp(final Pattern re) {
-        return new Matcher<String>("Matches regexp %s", re.toString()) {
+        return new Matcher<>("Matches regexp %s", re.toString()) {
             @Override
             public boolean matchesSafely(String item) {
                 return re.matcher(item).find();
@@ -156,7 +156,7 @@ public class Matchers {
     }
 
     public static Matcher<PageObject> pageObjectExists() {
-        return new Matcher<PageObject>("Page object exists") {
+        return new Matcher<>("Page object exists") {
             private @CheckForNull HttpURLConnection conn; // Store for later defect localization
 
             @Override
@@ -178,7 +178,7 @@ public class Matchers {
     }
 
     public static Matcher<PageObject> pageObjectDoesNotExist() {
-        return new Matcher<PageObject>("Page object does not exist") {
+        return new Matcher<>("Page object does not exist") {
             private @CheckForNull HttpURLConnection conn; // Store for later defect localization
 
             @Override
@@ -199,7 +199,7 @@ public class Matchers {
     }
 
     public static Matcher<Jenkins> hasLoggedInUser(final String user) {
-        return new Matcher<Jenkins>("has logged in user %s", user) {
+        return new Matcher<>("has logged in user %s", user) {
             @Override
             public boolean matchesSafely(final Jenkins jenkins) {
                 final User currentUser = jenkins.getCurrentUser();
@@ -217,7 +217,7 @@ public class Matchers {
     }
 
     public static Matcher<Login> loggedInAs(final String user) {
-        return new Matcher<Login>("has logged in user %s", user) {
+        return new Matcher<>("has logged in user %s", user) {
             @Override
             public boolean matchesSafely(final Login login) {
                 final User currentUser = login.getJenkins().getCurrentUser();
@@ -235,7 +235,7 @@ public class Matchers {
     }
 
     public static Matcher<Login> hasInvalidLoginInformation() {
-        return new Matcher<Login>("has invalid login information message") {
+        return new Matcher<>("has invalid login information message") {
             @Override
             public boolean matchesSafely(final Login login) {
                 try {
@@ -254,7 +254,7 @@ public class Matchers {
     }
 
     public static Matcher<User> isMemberOf(final String group) {
-        return new Matcher<User>(" is member of group %s", group) {
+        return new Matcher<>(" is member of group %s", group) {
             @Override
             public boolean matchesSafely(final User user) {
                 user.open();
@@ -279,7 +279,7 @@ public class Matchers {
     }
 
     public static Matcher<User> fullNameIs(final String fullName) {
-        return new Matcher<User>(" full name is %s", fullName) {
+        return new Matcher<>(" full name is %s", fullName) {
             @Override
             public boolean matchesSafely(final User user) {
                 if (user.fullName() != null) {
@@ -296,7 +296,7 @@ public class Matchers {
     }
 
     public static Matcher<User> mailAddressIs(final String mail) {
-        return new Matcher<User>(" mail address is %s", mail) {
+        return new Matcher<>(" mail address is %s", mail) {
             @Override
             public boolean matchesSafely(final User user) {
                 if (user.mail() != null) {
@@ -313,7 +313,7 @@ public class Matchers {
     }
 
     public static Matcher<File> existingFile() {
-        return new Matcher<File>("an existing file") {
+        return new Matcher<>("an existing file") {
             @Override
             public boolean matchesSafely(final File item) {
                 return item.exists() && item.isFile();

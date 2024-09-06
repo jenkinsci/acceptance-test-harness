@@ -130,7 +130,7 @@ public class CompressArtifactsPluginTest extends AbstractJUnitTest {
     }
 
     private Matcher<Build> hasCompressedArtifacts() {
-        return new Matcher<Build>("Build has compressed artifacts") {
+        return new Matcher<>("Build has compressed artifacts") {
             @Override
             public boolean matchesSafely(Build build) {
                 final String script = "!Jenkins.instance.rootPath.child('jobs/%s/builds/%s/archive/').exists()";

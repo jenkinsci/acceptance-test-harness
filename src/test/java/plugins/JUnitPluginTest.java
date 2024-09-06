@@ -80,7 +80,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
         // Given that there may be several tests with the same name, we assert
         // that at least one of the pages have the requested content
         final List<WebElement> elements = all(by.xpath("//a[text()='%s']", test));
-        final List<String> testPages = new ArrayList<String>(elements.size());
+        final List<String> testPages = new ArrayList<>(elements.size());
         for (WebElement e : elements) {
             testPages.add(e.getAttribute("href"));
         }

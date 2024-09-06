@@ -70,7 +70,7 @@ public class FilterRule implements TestRule {
         public abstract String whySkip(Statement base, Description description);
 
         public static <T extends Annotation> Set<T> getAnnotations(Description description, Class<T> type) {
-            Set<T> annotations = new HashSet<T>();
+            Set<T> annotations = new HashSet<>();
             annotations.add(description.getAnnotation(type));
             annotations.add(description.getTestClass().getAnnotation(type));
             annotations.remove(null);
@@ -78,7 +78,7 @@ public class FilterRule implements TestRule {
         }
 
         public static Set<Annotation> getAnnotations(Description description) {
-            Set<Annotation> annotations = new HashSet<Annotation>();
+            Set<Annotation> annotations = new HashSet<>();
             annotations.addAll(description.getAnnotations());
             annotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
             return annotations;

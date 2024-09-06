@@ -98,7 +98,7 @@ public class MavenModuleSet extends Job {
      * @see #getPublisher(Class)
      */
     public <T extends PostBuildStep> T addBuildSettings(Class<T> type) {
-        WebElement checkbox = findCaption(type, new Finder<WebElement>() {
+        WebElement checkbox = findCaption(type, new Finder<>() {
             @Override
             protected WebElement find(String caption) {
                 return outer.find(by.checkbox(caption));
