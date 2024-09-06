@@ -8,5 +8,5 @@ package org.jenkinsci.test.acceptance.plugins.job_dsl;
 public enum JobDslRemovedJobAction {
     IGNORE,
     DISABLE,
-    DELETE;
+    DELETE
 }

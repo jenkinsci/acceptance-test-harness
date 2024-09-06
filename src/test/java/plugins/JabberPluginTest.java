@@ -64,7 +64,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
             ec.jabberPassword.set(jabberPasswordString);
             // sleep(10000);
         }
-        ;
 
         MUCConfig mc = ec.addMUCConfig();
         {
