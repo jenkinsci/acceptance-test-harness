@@ -55,7 +55,7 @@ public class ColumnsArea extends PageAreaImpl {
         By xpath = By.xpath("//div[@name='columns' and not(contains(.,'" + Column.LAST_STABLE.getText()
                 + "'))]//button[@title='Delete']");
         List<WebElement> columns = control(form).resolve().findElements(xpath);
-        columns.stream().forEach(WebElement::click);
+        columns.forEach(WebElement::click);
     }
 
     /**
