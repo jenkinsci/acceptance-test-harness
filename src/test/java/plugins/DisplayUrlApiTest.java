@@ -150,14 +150,10 @@ public class DisplayUrlApiTest extends AbstractPipelineTest {
     }
 
     private void assertRedirect(String s) throws IOException {
-        CloseableHttpResponse response = null;
         HttpGet get = new HttpGet(s.trim());
-        try {
-            response = (CloseableHttpResponse) client.execute(get);
+        try (CloseableHttpResponse response = (CloseableHttpResponse) client.execute(get)) {
             int responseCode = response.getStatusLine().getStatusCode();
             assertEquals(String.format("URL %s is not reachable", s.trim()), 200, responseCode);
-        } finally {
-            response.close();
         }
     }
 }

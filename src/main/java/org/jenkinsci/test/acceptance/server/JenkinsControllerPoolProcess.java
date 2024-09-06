@@ -160,7 +160,7 @@ public class JenkinsControllerPoolProcess {
      */
     private void processConnection(UnixSocketChannel c, JenkinsController j) {
         try {
-            try {
+            try (c) {
                 try (InputStream in = ChannelStream.in(c);
                         OutputStream out = ChannelStream.out(c)) {
 
@@ -176,7 +176,6 @@ public class JenkinsControllerPoolProcess {
                 System.out.println("done");
                 j.stop();
                 j.tearDown();
-                c.close();
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
