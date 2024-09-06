@@ -164,8 +164,7 @@ public class GitScm extends Scm {
      * @return behaviour, to access .addPath() method
      */
     public SparseCheckoutPaths sparseCheckout() {
-        SparseCheckoutPaths behaviour = addBehaviour(SparseCheckoutPaths.class);
-        return behaviour;
+        return addBehaviour(SparseCheckoutPaths.class);
     }
 
     /**
