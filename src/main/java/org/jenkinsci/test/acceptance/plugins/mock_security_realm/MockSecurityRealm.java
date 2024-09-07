@@ -1,6 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.mock_security_realm;
 
-import org.codehaus.plexus.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
@@ -56,8 +57,8 @@ public class TomcatController extends LocalController {
             if (context.exists()) {
                 FileUtils.forceDelete(context);
             }
-            FileUtils.write(
-                    context,
+            Files.writeString(
+                    context.toPath(),
                     "<Context>\n"
                             + "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n"
                             + "</Context>",

@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import org.codehaus.plexus.util.FileUtils;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.junit.rules.TestWatcher;

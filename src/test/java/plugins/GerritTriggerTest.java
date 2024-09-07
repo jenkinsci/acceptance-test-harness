@@ -50,7 +50,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.TestActivation;
@@ -151,8 +150,8 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         ssh = File.createTempFile("jenkins", "ssh");
         ssh.deleteOnExit();
 
-        FileUtils.writeStringToFile(
-                ssh,
+        Files.writeString(
+                ssh.toPath(),
                 "#!/bin/sh\n" + "exec ssh -o StrictHostKeyChecking=no -i " + gtPrivateKey + " \"$@\"",
                 StandardCharsets.UTF_8);
         Files.setPosixFilePermissions(
