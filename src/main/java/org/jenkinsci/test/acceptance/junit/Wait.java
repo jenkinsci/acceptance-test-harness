@@ -23,12 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
-import com.google.common.base.Function;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;

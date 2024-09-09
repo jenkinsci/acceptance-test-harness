@@ -18,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.plexus.util.Expand;
-import org.codehaus.plexus.util.StringUtils;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
@@ -148,7 +148,7 @@ public abstract class LocalController extends JenkinsController implements LogLi
             }
             File template = File.createTempFile("template", ".dat");
             try {
-                FileUtils.writeByteArrayToFile(template, _template);
+                Files.write(template.toPath(), _template);
                 Expand expand = new Expand();
                 expand.setSrc(template);
                 expand.setOverwrite(true);

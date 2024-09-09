@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.plugins.docker_build_step;
 
-import com.google.common.base.Joiner;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
@@ -85,7 +84,7 @@ public abstract class DockerCommand extends PageAreaImpl {
         }
 
         public RemoveContainers containerIds(String... ids) {
-            control("containerIds").set(Joiner.on(',').join(ids));
+            control("containerIds").set(String.join(",", ids));
             return this;
         }
     }

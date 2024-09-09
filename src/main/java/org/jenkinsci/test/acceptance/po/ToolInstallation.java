@@ -26,9 +26,9 @@ package org.jenkinsci.test.acceptance.po;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.util.concurrent.Callable;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.openqa.selenium.NoSuchElementException;
@@ -166,7 +166,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
                 final String code = String.format("#!/bin/sh\nexport %s=\nexec %s \"$@\"\n", homeEnvName, path);
 
                 final File command = new File(home, "bin/" + binary);
-                FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
+                Files.writeString(command.toPath(), code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
             } else {
                 String path =
@@ -175,7 +175,7 @@ public abstract class ToolInstallation extends PageAreaImpl {
                 path = path.replaceAll("\r\n.*", "");
                 final String code = String.format("set %s=\r\ncall %s %%*\r\n", homeEnvName, path);
                 final File command = new File(home, "bin/" + binary + ".cmd");
-                FileUtils.writeStringToFile(command, code, StandardCharsets.UTF_8);
+                Files.writeString(command.toPath(), code, StandardCharsets.UTF_8);
                 command.setExecutable(true);
             }
             return home.getAbsolutePath();

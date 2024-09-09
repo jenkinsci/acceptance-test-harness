@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.inject.Injector;
 import hudson.util.VersionNumber;
 import java.io.FileOutputStream;
@@ -15,6 +14,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Level;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;

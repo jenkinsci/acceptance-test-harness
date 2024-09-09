@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -14,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.TeeInputStream;
 import org.jenkinsci.test.acceptance.log.LogListenable;
 import org.jenkinsci.test.acceptance.log.LogListener;
@@ -110,7 +110,7 @@ public class JenkinsLogWatcher implements LogListenable, Closeable {
         msg += "\nprocess is " + (reader.isAlive() ? "alive" : "dead");
         msg += "\nnow = " + new Date();
         try {
-            msg += "\n" + FileUtils.readFileToString(logFile, StandardCharsets.UTF_8);
+            msg += "\n" + Files.readString(logFile.toPath(), StandardCharsets.UTF_8);
         } catch (IOException ignored) {
             // ignore
         }

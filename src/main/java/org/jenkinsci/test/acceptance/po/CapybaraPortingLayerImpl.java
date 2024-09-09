@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.common.base.Joiner;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import jakarta.inject.Inject;
@@ -518,8 +517,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     protected <T> T findCaption(Class<?> type, Finder<T> call) {
         String[] captions = type.getAnnotation(Describable.class).value();
 
-        RuntimeException cause = new NoSuchElementException(
-                "None of the captions exists: " + Joiner.on(", ").join(captions));
+        RuntimeException cause =
+                new NoSuchElementException("None of the captions exists: " + String.join(", ", captions));
         for (String caption : captions) {
             try {
                 T out = call.find(caption);

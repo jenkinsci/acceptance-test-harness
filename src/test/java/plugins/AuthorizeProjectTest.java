@@ -4,7 +4,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
-import com.google.common.base.Joiner;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.authorize_project.ProjectDefaultBuildAccessControl;
@@ -61,7 +60,7 @@ public class AuthorizeProjectTest extends AbstractJUnitTest {
 
     private void setupUsers(final GlobalSecurityConfig security, final String... users) {
         final MockSecurityRealm realm = security.useRealm(MockSecurityRealm.class);
-        realm.configure(Joiner.on("\n").join(users));
+        realm.configure(String.join("\n", users));
     }
 
     private void authorizeUserToLaunchProject(final String user) {

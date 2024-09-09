@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -60,7 +60,7 @@ public class WinstoneController extends LocalController {
     @Override
     protected void onReady() throws IOException {
         if (this.httpPort == 0 && portFile != null) {
-            String s = FileUtils.readFileToString(portFile, StandardCharsets.UTF_8);
+            String s = Files.readString(portFile.toPath(), StandardCharsets.UTF_8);
             try {
                 this.httpPort = Integer.parseInt(s);
             } catch (NumberFormatException e) {
