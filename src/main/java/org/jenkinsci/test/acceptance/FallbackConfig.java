@@ -18,7 +18,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -107,7 +106,7 @@ public class FallbackConfig extends AbstractModule {
                 setDriverPropertyIfMissing("geckodriver", GeckoDriverService.GECKO_DRIVER_EXE_PROPERTY);
                 GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
                 if (display != null) {
-                    builder.withEnvironment(Collections.singletonMap("DISPLAY", display));
+                    builder.withEnvironment(Map.of("DISPLAY", display));
                 }
                 GeckoDriverService service = builder.build();
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));
@@ -117,7 +116,7 @@ public class FallbackConfig extends AbstractModule {
             case "chrome-container":
                 return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.24.0", new ChromeOptions());
             case "chrome":
-                Map<String, String> prefs = new HashMap<String, String>();
+                Map<String, String> prefs = new HashMap<>();
                 prefs.put(LANGUAGE_SELECTOR, "en");
                 ChromeOptions options = new ChromeOptions();
                 options.setExperimentalOption("prefs", prefs);
@@ -283,7 +282,7 @@ public class FallbackConfig extends AbstractModule {
         // if we are running maven locally but the browser elsewhere (e.g. docker) using the "127.0.0.1"
         // address will not work for the browser
         String name = System.getenv("SELENIUM_PROXY_HOSTNAME");
-        InetAddress proxyAddr = null;
+        InetAddress proxyAddr;
         if (name != null) {
             proxyAddr = InetAddress.getByName(name);
         } else {

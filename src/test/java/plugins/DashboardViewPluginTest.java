@@ -9,7 +9,6 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertEquals;
 
 import jakarta.inject.Inject;
-import java.util.Arrays;
 import java.util.List;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.BuildStatisticsPortlet;
@@ -231,13 +230,13 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         view.open();
 
         final List<String> jobIDs = view.projectStatus.getJobIDs();
-        assertEquals(Arrays.asList("a", "aa", "b"), jobIDs);
+        assertEquals(List.of("a", "aa", "b"), jobIDs);
 
         view.configure(() -> view.jobFilters.setIncludeRegex("a*"));
         view.open();
 
         final List<String> jobIDsFiltered = view.projectStatus.getJobIDs();
-        assertEquals(Arrays.asList("a", "aa"), jobIDsFiltered);
+        assertEquals(List.of("a", "aa"), jobIDsFiltered);
     }
 
     @Test
@@ -251,17 +250,13 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         FreeStyleJob job = jenkins.jobs.create();
 
         DashboardView v = createDashboardView();
-        v.configure(() -> {
-            v.mainArea.setFilterBuildExecutors(filterBuildExecutors);
-        });
+        v.configure(() -> v.mainArea.setFilterBuildExecutors(filterBuildExecutors));
         v.open();
 
         final List<WebElement> headers = v.buildExecutorStatus.getHeaders();
         assertThat(headers.size(), is(2));
 
-        job.configure(() -> {
-            job.setLabelExpression("test");
-        });
+        job.configure(() -> job.setLabelExpression("test"));
         v.open();
 
         final List<WebElement> headers2 = v.buildExecutorStatus.getHeaders();
@@ -273,9 +268,7 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
     public void configureDashboardFilterOnlyActivatedJobs() {
         DashboardView v = createDashboardView();
         BuildStatisticsPortlet stats = v.addBottomPortlet(BuildStatisticsPortlet.class);
-        v.configure(() -> {
-            v.jobFilters.setStatusFilter(JobFiltersArea.StatusFilter.ENABLED);
-        });
+        v.configure(() -> v.jobFilters.setStatusFilter(JobFiltersArea.StatusFilter.ENABLED));
 
         final FreeStyleJob active = createFreeStyleJob();
         final FreeStyleJob disabled = createFreeStyleJob();

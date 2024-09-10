@@ -143,9 +143,10 @@ public class SshSlaveLauncher extends ComputerLauncher {
 
     public void setSshHostKeyVerificationStrategy(Class<? extends SshHostKeyVerificationStrategy> type) {
         try {
-            SshHostKeyVerificationStrategy strategy = type.newInstance();
+            SshHostKeyVerificationStrategy strategy =
+                    type.getDeclaredConstructor().newInstance();
             hostKeyVerificationStrategy.select(strategy.id());
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (ReflectiveOperationException e) {
             throw new IllegalArgumentException(type.getName() + " is missing a default constructor.", e);
         }
     }

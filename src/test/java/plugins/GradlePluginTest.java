@@ -135,7 +135,7 @@ public class GradlePluginTest extends AbstractJUnitTest {
         final WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
 
         String copyResourceStep = workflowJob.copyResourceStep(gradleScript);
-        String test = "" + "pipeline {\n"
+        String test = "pipeline {\n"
                 + "agent any\n"
                 + "stages {\n"
                 + "stage ('prepare_build') {\n"

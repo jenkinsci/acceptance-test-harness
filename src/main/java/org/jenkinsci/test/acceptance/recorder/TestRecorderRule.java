@@ -71,12 +71,9 @@ public class TestRecorderRule extends TestWatcher {
             String videoFormatName = VideoFormatKeys.ENCODING_QUICKTIME_ANIMATION;
             String compressorName = VideoFormatKeys.COMPRESSOR_NAME_QUICKTIME_ANIMATION;
             Dimension outputDimension = gc.getBounds().getSize();
-            int bitDepth = BIT_DEPTH;
-            float quality = QUALITY_RATIO;
-            int screenRate = FRAME_RATE_PER_SEC;
 
             Format outputFormatForScreenCapture = getOutputFormatForScreenCapture(
-                    videoFormatName, compressorName, outputDimension, bitDepth, quality, screenRate);
+                    videoFormatName, compressorName, outputDimension, BIT_DEPTH, QUALITY_RATIO, FRAME_RATE_PER_SEC);
 
             this.screenRecorder = new JUnitScreenRecorder(
                     gc, gc.getBounds(), getFileFormat(mimeType), outputFormatForScreenCapture, null, null, diagnostics);

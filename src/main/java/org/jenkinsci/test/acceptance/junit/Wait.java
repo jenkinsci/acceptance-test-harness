@@ -23,12 +23,12 @@
  */
 package org.jenkinsci.test.acceptance.junit;
 
-import com.google.common.base.Function;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.utils.ElasticTime;
@@ -117,7 +117,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
 
     // For convenience as we have quite a lot of Callables historically
     public <Return> Return until(final Callable<Return> isTrue) {
-        return super.until(new Function<Subject, Return>() {
+        return super.until(new Function<>() {
             @Override
             public Return apply(Subject input) {
                 try {
@@ -153,7 +153,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
     }
 
     public <Return> Return until(final Wait.Predicate<Return> isTrue) {
-        Function<Subject, Return> fun = new Function<Subject, Return>() {
+        Function<Subject, Return> fun = new Function<>() {
             @Override
             public Return apply(Subject input) {
                 try {
@@ -183,7 +183,7 @@ public class Wait<Subject> extends FluentWait<Subject> {
     protected RuntimeException timeoutException(String message, Throwable lastException) {
         if (predicate != null) {
             String diagnosis = predicate.diagnose(lastException, message);
-            if (diagnosis != null && !diagnosis.equals("")) {
+            if (diagnosis != null && !diagnosis.isEmpty()) {
                 message += ". " + diagnosis;
             }
         }

@@ -234,7 +234,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
 
         final WorkflowJob job = PipelineTestUtils.createPipelineJobWithScript(jenkins.jobs, jobScript);
         Build b = job.startBuild();
-        assertBuild(b, false, String.format("Could not find credentials entry with ID \'%s\'", CRED_ID));
+        assertBuild(b, false, String.format("Could not find credentials entry with ID '%s'", CRED_ID));
 
         this.authorizeUserToLaunchProject();
 
@@ -245,7 +245,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
     private void waitForLogToBeFullyLoaded(final Build b, String text) {
         waitFor(
                 driver,
-                new Matcher<WebDriver>("Console log is not fully loaded") {
+                new Matcher<>("Console log is not fully loaded") {
                     @Override
                     public boolean matchesSafely(WebDriver item) {
                         String pageText = CapybaraPortingLayerImpl.getPageContent(visit(b.getConsoleUrl()));

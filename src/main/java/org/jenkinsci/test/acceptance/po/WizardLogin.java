@@ -32,7 +32,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.io.FileUtils;
+import java.nio.file.Files;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.junit.Assume;
@@ -90,6 +90,6 @@ public class WizardLogin extends PageObject {
                 controller,
                 instanceOf(LocalController.class));
         File passwordFile = new File(((LocalController) controller).getJenkinsHome(), "secrets/initialAdminPassword");
-        return FileUtils.readFileToString(passwordFile, StandardCharsets.UTF_8).trim();
+        return Files.readString(passwordFile.toPath(), StandardCharsets.UTF_8).trim();
     }
 }

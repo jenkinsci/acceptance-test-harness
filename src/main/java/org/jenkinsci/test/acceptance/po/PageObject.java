@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -12,6 +11,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import org.kohsuke.randname.RandomNameGenerator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
@@ -146,7 +146,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
         final int existingSize = existing.size();
         action.run();
 
-        return waitFor().withTimeout(Duration.ofSeconds(10)).until(new Function<CapybaraPortingLayer, String>() {
+        return waitFor().withTimeout(Duration.ofSeconds(10)).until(new Function<>() {
             @Nullable
             @Override
             public String apply(@Nullable CapybaraPortingLayer input) {

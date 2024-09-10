@@ -73,7 +73,7 @@ public class JobFiltersArea extends PageAreaImpl {
      *
      * @author peter-mueller
      */
-    public static enum StatusFilter {
+    public enum StatusFilter {
         /**
          * Only show enabled jobs.
          */

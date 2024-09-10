@@ -117,7 +117,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
             return true;
         }
 
-        if (!(other instanceof TopLevelItem)) {
+        if (!(other instanceof TopLevelItem rhs)) {
             return false;
         }
 
@@ -125,7 +125,6 @@ public abstract class TopLevelItem extends ContainerPageObject {
         // We use URL only as the concrete class may not be detected, e.g. when obtaining a job
         // from a BuildHistory
         // TODO: equality checking in the presence of views.
-        TopLevelItem rhs = (TopLevelItem) other;
         return url.toExternalForm().equals(rhs.url.toExternalForm());
     }
 

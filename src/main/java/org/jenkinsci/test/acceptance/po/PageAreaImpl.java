@@ -57,7 +57,7 @@ public abstract class PageAreaImpl extends CapybaraPortingLayerImpl implements P
 
     @Override
     public String getPath(String rel) {
-        if (rel.length() == 0) {
+        if (rel.isEmpty()) {
             return path;
         }
 

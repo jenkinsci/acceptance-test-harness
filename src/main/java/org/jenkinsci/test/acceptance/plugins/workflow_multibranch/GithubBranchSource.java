@@ -46,7 +46,7 @@ public class GithubBranchSource extends BranchSource {
     public GithubBranchSource selectRepository(final String repoName) {
         waitFor().withTimeout(Duration.ofSeconds(10)).until((Callable<Object>) () -> {
             final Select select = new Select(repository.resolve());
-            return select.getOptions().size() > 0;
+            return !select.getOptions().isEmpty();
         });
 
         this.repository.select(repoName);

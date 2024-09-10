@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.codehaus.plexus.util.FileUtils;
+import java.util.stream.Stream;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.junit.rules.TestWatcher;
@@ -103,8 +105,8 @@ public class FailureDiagnostics extends TestWatcher {
     @Override
     public void failed(Throwable e, Description description) {
         if (dir.exists()) {
-            try {
-                Files.walk(dir.toPath()).forEach(p -> {
+            try (Stream<Path> stream = Files.walk(dir.toPath())) {
+                stream.forEach(p -> {
                     if (Files.isRegularFile(p)) {
                         // https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
                         System.out.printf((JUNIT_ATTACHMENT) + "%n", p.toAbsolutePath());

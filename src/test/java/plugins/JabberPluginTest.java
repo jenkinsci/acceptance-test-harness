@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import org.apache.commons.io.FileUtils;
+import java.nio.file.Files;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.JabberContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
@@ -64,7 +64,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
             ec.jabberPassword.set(jabberPasswordString);
             // sleep(10000);
         }
-        ;
 
         MUCConfig mc = ec.addMUCConfig();
         {
@@ -96,6 +95,6 @@ public class JabberPluginTest extends AbstractJUnitTest {
         j.startBuild().shouldSucceed();
         sleep(20000);
         File logfile = jabber.getLogbotLogFile();
-        assertThat(FileUtils.readFileToString(logfile, StandardCharsets.UTF_8), containsString("SUCCESS"));
+        assertThat(Files.readString(logfile.toPath(), StandardCharsets.UTF_8), containsString("SUCCESS"));
     }
 }

@@ -75,7 +75,7 @@ public class Job extends TopLevelItem {
     public <T extends Scm> T useScm(Class<T> type) {
         ensureConfigPage();
 
-        WebElement radio = findCaption(type, new Finder<WebElement>() {
+        WebElement radio = findCaption(type, new Finder<>() {
             @Override
             protected WebElement find(String caption) {
                 return outer.find(by.radioButton(caption));

@@ -12,9 +12,9 @@ import java.util.Formatter;
  * Creates SHA1 sums of a file
  */
 public class SHA1Sum {
-    private byte[] sha1 = null;
-    private String sha1String = null;
-    private File inFile = null;
+    private byte[] sha1;
+    private String sha1String;
+    private File inFile;
 
     public SHA1Sum(File inFile) {
         if (inFile.isFile()) {

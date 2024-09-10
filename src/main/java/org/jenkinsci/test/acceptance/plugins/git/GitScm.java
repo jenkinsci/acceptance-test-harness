@@ -164,8 +164,7 @@ public class GitScm extends Scm {
      * @return behaviour, to access .addPath() method
      */
     public SparseCheckoutPaths sparseCheckout() {
-        SparseCheckoutPaths behaviour = addBehaviour(SparseCheckoutPaths.class);
-        return behaviour;
+        return addBehaviour(SparseCheckoutPaths.class);
     }
 
     /**
@@ -208,7 +207,7 @@ public class GitScm extends Scm {
         StrategyToChooseBuild behaviour = addBehaviour(StrategyToChooseBuild.class);
         new Select(behaviour.selStrategy.resolve()).selectByVisibleText(strategy);
 
-        if (strategy == "Ancestry") {
+        if (strategy.equals("Ancestry")) {
             behaviour.numMaxAge.set(age);
             behaviour.txtAncestorCommit.set(ancestor);
         }

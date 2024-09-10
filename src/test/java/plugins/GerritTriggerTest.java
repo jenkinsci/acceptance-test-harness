@@ -42,7 +42,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
@@ -51,7 +50,6 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.TestActivation;
@@ -108,7 +106,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
     private String gtPrivateKey;
 
     // List of changes to abandon
-    private List<String> changes = new ArrayList<String>();
+    private List<String> changes = new ArrayList<>();
     private File ssh;
 
     @After
@@ -152,15 +150,15 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         ssh = File.createTempFile("jenkins", "ssh");
         ssh.deleteOnExit();
 
-        FileUtils.writeStringToFile(
-                ssh,
+        Files.writeString(
+                ssh.toPath(),
                 "#!/bin/sh\n" + "exec ssh -o StrictHostKeyChecking=no -i " + gtPrivateKey + " \"$@\"",
                 StandardCharsets.UTF_8);
         Files.setPosixFilePermissions(
                 ssh.toPath(),
-                new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
+                new HashSet<>(List.of(PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_EXECUTE)));
 
-        changes = new ArrayList<String>();
+        changes = new ArrayList<>();
     }
 
     @BeforeClass
@@ -307,9 +305,7 @@ public class GerritTriggerTest extends AbstractJUnitTest {
         assertThat(p.waitFor(), is(equalTo(0)));
         StringWriter writer = new StringWriter();
         IOUtils.copy(p.getInputStream(), writer, StandardCharsets.UTF_8);
-        String string = writer.toString()
-                .replaceAll(System.getProperty("line.separator"), "")
-                .replaceAll(" ", "");
+        String string = writer.toString().replaceAll(System.lineSeparator(), "").replaceAll(" ", "");
         writer.close();
         return string;
     }

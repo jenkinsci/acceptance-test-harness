@@ -26,7 +26,7 @@ package plugins;
 
 import static org.junit.Assert.assertFalse;
 
-import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -40,7 +40,7 @@ public class SupportCorePluginTest extends AbstractJUnitTest {
     @Issue("JENKINS-27669")
     @Test
     public void emptyLogger() throws Exception {
-        JenkinsLogger logger = jenkins.createLogger("test", Collections.singletonMap("", Level.ALL));
+        JenkinsLogger logger = jenkins.createLogger("test", Map.of("", Level.ALL));
         assertFalse(logger.isEmpty());
     }
 }

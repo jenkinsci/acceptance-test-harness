@@ -8,6 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
@@ -76,7 +77,7 @@ public @interface WithOS {
                     String errorMsg =
                             "Test and Jenkins instance must be running on any of the following operating systems: "
                                     + Arrays.toString(withos.os());
-                    if (!Arrays.asList(withos.os()).contains(currentOS())) {
+                    if (!List.of(withos.os()).contains(currentOS())) {
                         throw new AssumptionViolatedException(errorMsg);
                     }
                 }

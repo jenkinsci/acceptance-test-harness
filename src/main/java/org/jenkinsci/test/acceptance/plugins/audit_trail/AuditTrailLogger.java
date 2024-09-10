@@ -84,7 +84,7 @@ public abstract class AuditTrailLogger extends JenkinsLogger {
         public List<String> getEvents() {
             try {
                 List<String> events = new ArrayList<>();
-                for (String line : (List<String>) IOUtils.readLines(url.openStream(), StandardCharsets.UTF_8)) {
+                for (String line : IOUtils.readLines(url.openStream(), StandardCharsets.UTF_8)) {
                     Matcher m = LOG_PATTERN.matcher(line);
                     m.find();
                     events.add(m.group(1));

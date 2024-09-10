@@ -25,8 +25,8 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.jenkinsci.test.acceptance.guice.World;
 import org.junit.Assume;
@@ -70,7 +70,7 @@ public class FilterRule implements TestRule {
         public abstract String whySkip(Statement base, Description description);
 
         public static <T extends Annotation> Set<T> getAnnotations(Description description, Class<T> type) {
-            Set<T> annotations = new HashSet<T>();
+            Set<T> annotations = new HashSet<>();
             annotations.add(description.getAnnotation(type));
             annotations.add(description.getTestClass().getAnnotation(type));
             annotations.remove(null);
@@ -78,9 +78,9 @@ public class FilterRule implements TestRule {
         }
 
         public static Set<Annotation> getAnnotations(Description description) {
-            Set<Annotation> annotations = new HashSet<Annotation>();
+            Set<Annotation> annotations = new HashSet<>();
             annotations.addAll(description.getAnnotations());
-            annotations.addAll(Arrays.asList(description.getTestClass().getAnnotations()));
+            annotations.addAll(List.of(description.getTestClass().getAnnotations()));
             return annotations;
         }
     }

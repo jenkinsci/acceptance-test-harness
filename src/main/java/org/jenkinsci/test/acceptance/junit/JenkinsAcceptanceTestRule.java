@@ -90,7 +90,7 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
                 collectGlobalRules(rules);
 
                 // Make sure Jenkins is started between -1 and 0
-                rules.computeIfAbsent(0, k -> new LinkedHashSet<TestRule>());
+                rules.computeIfAbsent(0, k -> new LinkedHashSet<>());
                 rules.get(0).add(jenkinsBoot(rules));
 
                 for (Set<TestRule> rulesGroup : rules.values()) {

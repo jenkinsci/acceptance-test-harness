@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view.read;
 
-import java.util.Arrays;
 import java.util.List;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
@@ -34,6 +33,6 @@ public class BreadCrumbs extends PageAreaImpl {
     public List<String> getBreadCrumbs() {
         final WebElement webElement = find(nameCrumb);
         final String[] crumbs = webElement.getText().split("\n");
-        return Arrays.asList(crumbs);
+        return List.of(crumbs);
     }
 }

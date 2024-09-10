@@ -89,8 +89,7 @@ public class GitLabContainer extends DockerContainer {
                     .header("PRIVATE-TOKEN", token)
                     .POST(HttpRequest.BodyPublishers.ofString("{ \"name\": \"" + repoName + "\" }"))
                     .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response;
+            return client.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

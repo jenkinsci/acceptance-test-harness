@@ -11,7 +11,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import org.codehaus.plexus.util.FileUtils;
+import java.nio.file.Files;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.utils.IOUtil;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
@@ -62,8 +63,8 @@ public class JBossController extends LocalController {
         if (context.exists()) {
             org.apache.commons.io.FileUtils.forceDelete(context);
         }
-        org.apache.commons.io.FileUtils.write(
-                context,
+        Files.writeString(
+                context.toPath(),
                 "<Context>\n"
                         + "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n"
                         + "</Context>",
