@@ -23,6 +23,7 @@ IF NOT DEFINED IP (
 
 @echo on
 set SELENIUM_PROXY_HOSTNAME=%IP%
+set TESTCONTAINERS_HOST_OVERRIDE=%IP%
 set JENKINS_LOCAL_HOSTNAME=%IP%
 @echo.
 @echo To start the remote firefox container run the following command:
