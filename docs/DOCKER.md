@@ -71,3 +71,10 @@ It's best explained with an example:
 # Using a custom docker network
 
 If you are using a custom network for the container that executes the testing you may instruct the docker-fixtures to use the same one by setting the env variable `DOCKER_FIXTURES_NETWORK`to specify the network you want your fixtures to connect to. 
+
+# Using Testcontainers with a remote webdriver
+
+If you are using a containerized webdriver (or any other remote webdriver) then any containers launched will not be reachable from the remote web browser.
+This will be an issue for some tests that require the browser interact with the container (e.g. for authentication).
+If this is the case then the `TESTCONTAINERS_HOST_OVERRIDE` should be set to `host.docker.internal` or if the remote browser is non local the IP adddress of your machine.
+

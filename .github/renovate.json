@@ -81,7 +81,14 @@
       "matchStrings": ["ARG DOCKER_VERSION=(?<currentValue>.*?)\n"],
       "depNameTemplate": "docker",
       "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["src/test/java/plugins/OicAuthPluginTest.java"],
+      "matchStrings": [".* KEYCLOAK_IMAGE =\n\\s*\"(?<repo>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:.*?)\";\n"],
+      "depNameTemplate": "{{{repo}}}",
+      "datasourceTemplate": "docker"
     }
+
   ],
   "customDatasources": {
     "firefox": {

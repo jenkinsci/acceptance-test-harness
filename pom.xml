@@ -69,6 +69,16 @@
         <artifactId>commons-io</artifactId>
         <version>2.16.1</version>
       </dependency>
+      <!--
+      Version needed for keycloak testcontainer.
+      As that dependency is test scope, the version used is the one coming from org.gitlab4j:gitlab4j-api, which is
+      older
+      -->
+      <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>3.1.0</version>
+      </dependency>
       <!-- RequireUpperBoundDeps between Mockito and Selenium -->
       <dependency>
         <groupId>net.bytebuddy</groupId>
@@ -211,6 +221,11 @@ and
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
       <version>3.11.1</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>3.0.1</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -363,6 +378,23 @@ and
       <groupId>org.zeroturnaround</groupId>
       <artifactId>zt-zip</artifactId>
       <version>1.17</version>
+    </dependency>
+    <!--
+    testcontainers
+    keycloak testcontainer
+    libraries needed for keycloak client
+    -->
+    <dependency>
+      <groupId>com.github.dasniko</groupId>
+      <artifactId>testcontainers-keycloak</artifactId>
+      <version>3.4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.annotation</groupId>
+      <artifactId>jakarta.annotation-api</artifactId>
+      <version>2.1.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.mail</groupId>

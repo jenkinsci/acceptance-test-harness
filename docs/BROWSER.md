@@ -69,6 +69,8 @@ If the host running maven is different to the host running Selenium (e.g. `remot
 If this is the case you can specify the address to use using:
     `SELENIUM_PROXY_HOSTNAME=ip.address.of.host mvn install`
 **Important**: this could exposed the proxy wider beyond your machine and expose other internal services, so this should only be used on private or internal networks to prevent any information leak.
+The same issue will also impact any other containers started that the tests that the Browser (rather than Jenkins) needs to access.
+For [Testcontainers](https://testcontainers.com/) you can additionally set `TESTCONTAINERS_HOST_OVERRIDE=ip.address.of.host`
 
 ## Avoid focus steal with Xvnc on Linux
 If you select a real GUI browser, such as Firefox,
