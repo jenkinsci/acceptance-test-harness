@@ -84,7 +84,7 @@
     },
     {
       "fileMatch": ["src/test/java/plugins/OicAuthPluginTest.java"],
-      "matchStrings": [".* KEYCLOAK_IMAGE=\"(?<repo>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:.*?)\";\n"],
+      "matchStrings": [".* KEYCLOAK_IMAGE =\n\\s*\"(?<repo>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:.*?)\";\n"],
       "depNameTemplate": "{{{repo}}}",
       "datasourceTemplate": "docker"
     }
