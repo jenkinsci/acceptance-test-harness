@@ -18,6 +18,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.LoggedInAuthorizationStrategy;
+import org.jenkinsci.test.acceptance.po.OicAuthConfigurationMode;
 import org.jenkinsci.test.acceptance.po.OicAuthSecurityRealm;
 import org.jenkinsci.test.acceptance.po.WhoAmI;
 import org.jenkinsci.test.acceptance.utils.keycloack.KeycloakUtils;
@@ -206,8 +207,9 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         sc.open();
         OicAuthSecurityRealm securityRealm = sc.useRealm(OicAuthSecurityRealm.class);
         securityRealm.configureClient(CLIENT, CLIENT);
-        securityRealm.setWellKnownEndpoint(
-                String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
+        // Configuration mode
+        OicAuthConfigurationMode.WellKnownEndpoint configurationMode = securityRealm.useConfigurationMode(OicAuthConfigurationMode.WellKnownEndpoint.class);
+        configurationMode.wellKnownEndpoint.set(String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
         securityRealm.setLogoutFromOpenidProvider(true);
         securityRealm.setPostLogoutUrl(jenkins.url("OicLogout").toExternalForm());
         securityRealm.setUserFields(null, null, null, "groups");
