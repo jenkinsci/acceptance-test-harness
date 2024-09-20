@@ -21,5 +21,4 @@ public abstract class OicAuthConfigurationMode extends PageAreaImpl {
             super(realm);
         }
     }
-
 }

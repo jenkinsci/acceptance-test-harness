@@ -208,8 +208,10 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         OicAuthSecurityRealm securityRealm = sc.useRealm(OicAuthSecurityRealm.class);
         securityRealm.configureClient(CLIENT, CLIENT);
         // Configuration mode
-        OicAuthConfigurationMode.WellKnownEndpoint configurationMode = securityRealm.useConfigurationMode(OicAuthConfigurationMode.WellKnownEndpoint.class);
-        configurationMode.wellKnownEndpoint.set(String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
+        OicAuthConfigurationMode.WellKnownEndpoint configurationMode =
+                securityRealm.useConfigurationMode(OicAuthConfigurationMode.WellKnownEndpoint.class);
+        configurationMode.wellKnownEndpoint.set(
+                String.format("%s/realms/%s/.well-known/openid-configuration", keycloakUrl, REALM));
         securityRealm.setLogoutFromOpenidProvider(true);
         securityRealm.setPostLogoutUrl(jenkins.url("OicLogout").toExternalForm());
         securityRealm.setUserFields(null, null, null, "groups");
