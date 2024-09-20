@@ -15,9 +15,9 @@ public class OicAuthSecurityRealm extends SecurityRealm {
         control("clientSecret").set(clientSecret);
     }
 
-    public void setAutomaticConfiguration(String wellKnownEndpoint) {
-        control(by.radioButton("Automatic configuration")).click();
-        control("wellKnownOpenIDConfigurationUrl").set(wellKnownEndpoint);
+    public void setWellKnownEndpoint(String wellKnownEndpoint) {
+        control("").select("Discovery via well-known endpoint"); // Select doesn't have the relative path, directly path=/securityRealm/
+        control("serverConfiguration/wellKnownOpenIDConfigurationUrl").set(wellKnownEndpoint);
     }
 
     public void setLogoutFromOpenidProvider(boolean logout) {
