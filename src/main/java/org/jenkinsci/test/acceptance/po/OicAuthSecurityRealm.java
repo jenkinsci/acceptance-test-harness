@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import org.openqa.selenium.WebElement;
+
 /**
  * Security Realm provided by oic-auth plugin
  */
@@ -15,9 +17,10 @@ public class OicAuthSecurityRealm extends SecurityRealm {
         control("clientSecret").set(clientSecret);
     }
 
-    public void setAutomaticConfiguration(String wellKnownEndpoint) {
-        control(by.radioButton("Automatic configuration")).click();
-        control("wellKnownOpenIDConfigurationUrl").set(wellKnownEndpoint);
+    public <T extends OicAuthConfigurationMode> T useConfigurationMode(Class<T> type) {
+        WebElement option = findCaption(type, caption -> getElement(by.option(caption)));
+        option.click();
+        return newInstance(type, this);
     }
 
     public void setLogoutFromOpenidProvider(boolean logout) {
