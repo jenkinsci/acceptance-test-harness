@@ -37,8 +37,14 @@ public class AetherModule extends AbstractModule implements ExtensionModule {
     @Override
     protected void configure() {
         ClassSpace space = new URLClassSpace(RepositorySystem.class.getClassLoader());
-        BeanLocator beanLocator = Guice.createInjector(new WireModule(new SpaceModule(space, BeanScanning.INDEX, false)).with(SisuExtensions.local(space))).getInstance(MutableBeanLocator.class);
-        repositorySystem = beanLocator.locate(Key.get(RepositorySystem.class)).iterator().next().getValue();
+        BeanLocator beanLocator = Guice.createInjector(new WireModule(new SpaceModule(space, BeanScanning.INDEX, false))
+                        .with(SisuExtensions.local(space)))
+                .getInstance(MutableBeanLocator.class);
+        repositorySystem = beanLocator
+                .locate(Key.get(RepositorySystem.class))
+                .iterator()
+                .next()
+                .getValue();
     }
 
     @Provides
