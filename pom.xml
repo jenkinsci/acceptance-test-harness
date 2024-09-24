@@ -33,6 +33,7 @@
     <selenium.version>4.25.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.3.1-jre</guava.version>
+
     <!-- Keep them aligned to Maven version -->
     <maven.version>3.9.6</maven.version>
     <maven-sisu.version>0.9.0.M3</maven-sisu.version>
