@@ -9,13 +9,16 @@ import jakarta.inject.Named;
 import jakarta.inject.Singleton;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import org.apache.maven.model.building.DefaultModelBuilderFactory;
 import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.repository.internal.DefaultArtifactDescriptorReader;
+import org.apache.maven.repository.internal.DefaultModelCacheFactory;
 import org.apache.maven.repository.internal.DefaultVersionRangeResolver;
 import org.apache.maven.repository.internal.DefaultVersionResolver;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
+import org.apache.maven.repository.internal.ModelCacheFactory;
 import org.apache.maven.repository.internal.SnapshotMetadataGeneratorFactory;
 import org.apache.maven.repository.internal.VersionsMetadataGeneratorFactory;
 import org.eclipse.aether.DefaultRepositorySystemSession;
@@ -31,6 +34,7 @@ import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transfer.TransferEvent;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
+import org.eclipse.aether.transport.http.ChecksumExtractor;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.jenkinsci.test.acceptance.utils.MavenLocalRepository;
 
@@ -98,6 +102,15 @@ public class AetherModule extends AbstractModule implements ExtensionModule {
     }
 
     /**
+     * Checksum extractors (none).
+     */
+    @Provides
+    @Singleton
+    Map<String, ChecksumExtractor> provideChecksumExtractors() {
+        return Collections.emptyMap();
+    }
+
+    /**
      * Repository system connectors (needed for remote transport).
      */
     @Provides
@@ -142,5 +155,10 @@ public class AetherModule extends AbstractModule implements ExtensionModule {
     @Provides
     ModelBuilder provideModelBuilder() {
         return new DefaultModelBuilderFactory().newInstance();
+    }
+
+    @Provides
+    ModelCacheFactory provideModelCacheFactory() {
+        return new DefaultModelCacheFactory();
     }
 }
