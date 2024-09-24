@@ -33,8 +33,8 @@
     <selenium.version>4.25.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.3.0-jre</guava.version>
-    <maven.version>3.8.1</maven.version>
-    <maven-resolver.version>1.6.2</maven-resolver.version>
+    <maven.version>3.9.6</maven.version>
+    <maven-resolver.version>1.9.18</maven-resolver.version>
     <groovy.version>3.0.22</groovy.version>
     <jffi.version>1.3.13</jffi.version>
     <spotless.check.skip>false</spotless.check.skip>
