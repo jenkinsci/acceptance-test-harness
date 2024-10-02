@@ -45,6 +45,10 @@ import org.openqa.selenium.WebElement;
  * @author ogondza.
  */
 public abstract class ConfigurablePageObject extends PageObject {
+
+    private static final By SAVE_BUTTON = By.xpath(
+            "//div[contains(@class, 'bottom-sticker-inner')]//input[@type='submit'] | //div[contains(@class, 'bottom-sticker-inner')]//button[contains(@name, 'Submit')]");
+
     protected ConfigurablePageObject(PageObject context, URL url) {
         super(context, url);
     }
@@ -109,19 +113,11 @@ public abstract class ConfigurablePageObject extends PageObject {
             visit(getConfigUrl());
         }
         waitFor(By.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
-        waitFor(
-                By.xpath(
-                        "//div[contains(@class, 'bottom-sticker-inner')]//input[@type='submit'] | //div[contains(@class, 'bottom-sticker-inner')]//button[contains(text(), '"
-                                + getSubmitButtonText() + "')]"),
-                5);
+        waitFor(SAVE_BUTTON, 5);
     }
 
     public String getFormName() {
         return "config";
-    }
-
-    public String getSubmitButtonText() {
-        return "Save";
     }
 
     /**
@@ -135,7 +131,7 @@ public abstract class ConfigurablePageObject extends PageObject {
     public abstract URL getConfigUrl();
 
     public void save() {
-        WebElement e = find(by.button("Save"));
+        WebElement e = find(SAVE_BUTTON);
         e.click();
         waitFor(e).until(CapybaraPortingLayerImpl::isStale);
     }
