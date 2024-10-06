@@ -12,6 +12,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
+import org.openqa.selenium.By;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -33,14 +34,22 @@ public class SshSlaveLauncher extends ComputerLauncher {
     }
 
     public SshCredentialDialog addCredential() {
-
         find(by.button("Add")).click();
 
-        String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
-                + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
-                + "/span[contains(@class,'yuimenuitemlabel') and contains(@tooltip, 'Jenkins Credentials Provider')]";
+        if (getElement(By.cssSelector(".credentials-add-menu-items")) != null) {
+            // This condition is for backwards compatability, can be removed in the future
+            String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
+                    + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
+                    + "/span[contains(@class,'yuimenuitemlabel') and contains(@tooltip, 'Jenkins Credentials Provider')]";
+            waitFor(by.xpath(providerXpathExpr)).click();
+        } else {
+            // Can be changed to 'find(...)' when https://github.com/jenkinsci/jenkins/pull/9835 is merged
+            all(by.css(".jenkins-dropdown"))
+                    .get(1)
+                    .findElement(by.button("Jenkins Credentials Provider"))
+                    .click();
+        }
 
-        waitFor(by.xpath(providerXpathExpr)).click();
         return new SshCredentialDialog(getPage(), "/credentials");
     }
 
