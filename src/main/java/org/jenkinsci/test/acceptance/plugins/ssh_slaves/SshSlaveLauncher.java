@@ -33,14 +33,11 @@ public class SshSlaveLauncher extends ComputerLauncher {
     }
 
     public SshCredentialDialog addCredential() {
-
         find(by.button("Add")).click();
 
-        String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
-                + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
-                + "/span[contains(@class,'yuimenuitemlabel') and contains(@tooltip, 'Jenkins Credentials Provider')]";
+        find(by.css(".jenkins-dropdown"))
+                .findElement(by.button("Jenkins Credentials Provider")).click();
 
-        waitFor(by.xpath(providerXpathExpr)).click();
         return new SshCredentialDialog(getPage(), "/credentials");
     }
 
