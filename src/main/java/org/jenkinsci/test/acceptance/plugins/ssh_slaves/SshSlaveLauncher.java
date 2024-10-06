@@ -35,7 +35,8 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public SshCredentialDialog addCredential() {
         find(by.button("Add")).click();
 
-        find(by.css(".jenkins-dropdown"))
+        // Can be changed to 'find(...)' when https://github.com/jenkinsci/jenkins/pull/9835 is merged
+        all(by.css(".jenkins-dropdown")).get(1)
                 .findElement(by.button("Jenkins Credentials Provider")).click();
 
         return new SshCredentialDialog(getPage(), "/credentials");
