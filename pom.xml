@@ -57,14 +57,14 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.113.Final</version>
+        <version>4.1.114.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-bom</artifactId>
-        <version>9.7</version>
+        <version>9.7.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -167,7 +167,7 @@ and
     <dependency>
       <groupId>com.cloudbees</groupId>
       <artifactId>extensibility</artifactId>
-      <version>1.7</version>
+      <version>1.8</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
