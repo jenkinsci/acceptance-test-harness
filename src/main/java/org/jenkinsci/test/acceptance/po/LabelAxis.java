@@ -17,9 +17,9 @@ public class LabelAxis extends Axis {
                 find(by.path(getPath())).findElement(by.xpath(".//input[@name='values' and @json='%s']", name));
         if (!checkBox.isDisplayed()) {
             // unfold the labels and slaves sub-nodes
-            find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel1']//a"))
+            find(by.xpath("(//button[@class='jenkins-button mp-label-axis__button'])[1]"))
                     .click();
-            find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel2']//a"))
+            find(by.xpath("(//button[@class='jenkins-button mp-label-axis__button'])[2]"))
                     .click();
 
             waitFor().withTimeout(Duration.ofSeconds(3)).until(checkBox::isDisplayed);
