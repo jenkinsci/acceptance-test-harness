@@ -491,6 +491,9 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <LOCAL_JARS>target/ldap.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -804,6 +807,12 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins</groupId>
+                      <artifactId>ldap</artifactId>
+                      <version>759.vef7f616475df</version>
+                      <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
