@@ -60,12 +60,6 @@ public abstract class View extends ContainerPageObject {
         runThenHandleDialog(() -> clickLink("Delete View"));
     }
 
-    @Override
-    public void save() {
-        clickButton("OK");
-        assertThat(driver, not(hasContent("This page expects a form submission")));
-    }
-
     public BuildHistory getBuildHistory() {
         return new BuildHistory(this);
     }
@@ -112,11 +106,6 @@ public abstract class View extends ContainerPageObject {
     @Override
     public String getFormName() {
         return "viewConfig";
-    }
-
-    @Override
-    public String getSubmitButtonText() {
-        return "OK";
     }
 
     public static Matcher<View> hasDescription(String description) {
