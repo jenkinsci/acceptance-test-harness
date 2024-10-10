@@ -498,7 +498,7 @@ and
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
           <environmentVariables>
             <!-- Use local version of the plugin over the released one ATH would otherwise use -->
-            <LOCAL_JARS>target/job-config-history-plugin.hpi</LOCAL_JARS>
+            <LOCAL_JARS>target/jobConfigHistory.hpi</LOCAL_JARS>
           </environmentVariables>
         </configuration>
       </plugin>
