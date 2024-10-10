@@ -496,6 +496,10 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <!-- Use local version of the plugin over the released one ATH would otherwise use -->
+            <LOCAL_JARS>target/workflow-job.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -810,6 +814,13 @@ and
                       <version>${jenkins.version}</version>
                       <type>war</type>
                     </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins.workflow</groupId>
+                      <artifactId>workflow-job</artifactId>
+                      <version>1456.v68d1c2efde74</version>
+                        <type>hpi</type>
+                    </artifactItem>
+
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
                   <stripVersion>true</stripVersion>
