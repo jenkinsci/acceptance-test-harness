@@ -1,9 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import java.net.URL;
