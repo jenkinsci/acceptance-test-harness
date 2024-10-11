@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.plugins.ssh_slaves;
 import static org.junit.Assert.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
+import hudson.util.VersionNumber;
 import java.time.Duration;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
@@ -12,6 +13,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
+import org.openqa.selenium.By;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -33,14 +35,32 @@ public class SshSlaveLauncher extends ComputerLauncher {
     }
 
     public SshCredentialDialog addCredential() {
-
         find(by.button("Add")).click();
 
-        String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
-                + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
-                + "/span[contains(@class,'yuimenuitemlabel') and contains(@tooltip, 'Jenkins Credentials Provider')]";
+        if (getElement(By.cssSelector(".credentials-add-menu-items")) != null) {
+            /*
+             * This condition is for backwards compatibility and can be removed when we drop support for Credentials
+             * 1381 and earlier.
+             */
+            String providerXpathExpr = "//div[contains(@class,'credentials-add-menu-items')]"
+                    + "/div[@class='bd']/ul[@class='first-of-type']/li[contains(@class, 'yuimenuitem')]"
+                    + "/span[contains(@class,'yuimenuitemlabel') and contains(@tooltip, 'Jenkins Credentials Provider')]";
+            waitFor(by.xpath(providerXpathExpr)).click();
+        } else if (getPage().getJenkins().getVersion().isOlderThan(new VersionNumber("2.480"))) {
+            /*
+             * This condition is for backwards compatibility and can be removed when we drop support for 2.479 and
+             * earlier.
+             */
+            all(by.css(".jenkins-dropdown"))
+                    .get(1)
+                    .findElement(by.button("Jenkins Credentials Provider"))
+                    .click();
+        } else {
+            find(by.css(".jenkins-dropdown"))
+                    .findElement(by.button("Jenkins Credentials Provider"))
+                    .click();
+        }
 
-        waitFor(by.xpath(providerXpathExpr)).click();
         return new SshCredentialDialog(getPage(), "/credentials");
     }
 
