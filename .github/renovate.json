@@ -1,9 +1,9 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
+    "config:recommended",
     ":semanticCommitsDisabled",
-    "schedule:earlyMondays"
+    "schedule:daily"
   ],
   "ignorePaths": [
     "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/FtpdContainer/Dockerfile",
@@ -24,12 +24,16 @@
   "packageRules": [
     {
       "allowedVersions": "<7.0.0",
-      "matchPackageNames": ["com.google.inject:guice"],
-      "description": "We focus on Guice 6 until core adapts 7"
+      "matchPackageNames": [
+        "com.google.inject:guice"
+      ],
+      "description": "We focus on Guice 6 until core adopts 7"
     },
     {
-      "matchPackagePatterns": ["selenium"],
-      "groupName": "Selenium"
+      "groupName": "Selenium",
+      "matchPackageNames": [
+        "/selenium/"
+      ]
     },
     {
       "matchDepNames": [
@@ -48,51 +52,85 @@
   "labels": [
     "dependencies"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java"],
-      "matchStrings": ["selenium/standalone-(firefox|chrome):(?<currentValue>.*?)\""],
+      "customType": "regex",
+      "fileMatch": [
+        "src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java"
+      ],
+      "matchStrings": [
+        "selenium/standalone-(firefox|chrome):(?<currentValue>.*?)\""
+      ],
       "depNameTemplate": "org.seleniumhq.selenium:selenium-java",
       "datasourceTemplate": "maven"
     },
     {
-      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
-      "matchStrings": ["ARG FIREFOX_VERSION=(?<currentValue>.*?)\n"],
+      "customType": "regex",
+      "fileMatch": [
+        "src/main/resources/ath-container/Dockerfile"
+      ],
+      "matchStrings": [
+        "ARG FIREFOX_VERSION=(?<currentValue>.*?)\n"
+      ],
       "depNameTemplate": "firefox",
       "versioningTemplate": "semver-coerced",
       "datasourceTemplate": "custom.firefox"
     },
     {
-      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
-      "matchStrings": ["ARG GECKODRIVER_VERSION=(?<currentValue>.*?)\n"],
+      "customType": "regex",
+      "fileMatch": [
+        "src/main/resources/ath-container/Dockerfile"
+      ],
+      "matchStrings": [
+        "ARG GECKODRIVER_VERSION=(?<currentValue>.*?)\n"
+      ],
       "depNameTemplate": "mozilla/geckodriver",
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
-      "matchStrings": ["ARG MAVEN_VERSION=(?<currentValue>.*?)\n"],
+      "customType": "regex",
+      "fileMatch": [
+        "src/main/resources/ath-container/Dockerfile"
+      ],
+      "matchStrings": [
+        "ARG MAVEN_VERSION=(?<currentValue>.*?)\n"
+      ],
       "depNameTemplate": "org.apache.maven:maven-core",
       "datasourceTemplate": "maven"
     },
     {
-      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
-      "matchStrings": ["ARG DOCKER_BUILDX_VERSION=(?<currentValue>.*?)\n"],
+      "customType": "regex",
+      "fileMatch": [
+        "src/main/resources/ath-container/Dockerfile"
+      ],
+      "matchStrings": [
+        "ARG DOCKER_BUILDX_VERSION=(?<currentValue>.*?)\n"
+      ],
       "depNameTemplate": "docker/buildx",
       "datasourceTemplate": "github-releases"
     },
     {
-      "fileMatch": ["src/main/resources/ath-container/Dockerfile"],
-      "matchStrings": ["ARG DOCKER_VERSION=(?<currentValue>.*?)\n"],
+      "customType": "regex",
+      "fileMatch": [
+        "src/main/resources/ath-container/Dockerfile"
+      ],
+      "matchStrings": [
+        "ARG DOCKER_VERSION=(?<currentValue>.*?)\n"
+      ],
       "depNameTemplate": "docker",
       "datasourceTemplate": "docker"
     },
     {
-      "fileMatch": ["src/test/java/plugins/OicAuthPluginTest.java"],
-      "matchStrings": [".* KEYCLOAK_IMAGE =\n\\s*\"(?<repo>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:.*?)\";\n"],
+      "customType": "regex",
+      "fileMatch": [
+        "src/test/java/plugins/OicAuthPluginTest.java"
+      ],
+      "matchStrings": [
+        ".* KEYCLOAK_IMAGE =\n\\s*\"(?<repo>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:.*?)\";\n"
+      ],
       "depNameTemplate": "{{{repo}}}",
       "datasourceTemplate": "docker"
     }
-
   ],
   "customDatasources": {
     "firefox": {

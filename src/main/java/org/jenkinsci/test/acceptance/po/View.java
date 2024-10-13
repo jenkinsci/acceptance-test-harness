@@ -1,9 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import java.net.URL;
@@ -60,12 +56,6 @@ public abstract class View extends ContainerPageObject {
         runThenHandleDialog(() -> clickLink("Delete View"));
     }
 
-    @Override
-    public void save() {
-        clickButton("OK");
-        assertThat(driver, not(hasContent("This page expects a form submission")));
-    }
-
     public BuildHistory getBuildHistory() {
         return new BuildHistory(this);
     }
@@ -112,11 +102,6 @@ public abstract class View extends ContainerPageObject {
     @Override
     public String getFormName() {
         return "viewConfig";
-    }
-
-    @Override
-    public String getSubmitButtonText() {
-        return "OK";
     }
 
     public static Matcher<View> hasDescription(String description) {
