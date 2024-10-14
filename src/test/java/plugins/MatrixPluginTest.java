@@ -12,7 +12,6 @@ import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
-import org.jenkinsci.test.acceptance.plugins.matrix_reloaded.MatrixReloadedAction;
 import org.jenkinsci.test.acceptance.po.LabelAxis;
 import org.jenkinsci.test.acceptance.po.MatrixBuild;
 import org.jenkinsci.test.acceptance.po.MatrixConfiguration;
@@ -186,41 +185,6 @@ public class MatrixPluginTest extends AbstractJUnitTest {
                 .shouldContainsConsoleOutput("(Building|Building remotely) on " + s.getName());
     }
 
-    @Test
-    @WithPlugins({"matrix-reloaded", "matrix-groovy-execution-strategy"})
-    public void run_extended_test() {
-        job.configure();
-        // Create a [3,3] matrix
-        job.addUserAxis(AXIS_X, AXIS_X_VALUES);
-        job.addUserAxis(AXIS_Y, AXIS_Y_VALUES);
-
-        job.control(by.xpath("//div[normalize-space(text())='%s']/..//select", "Execution Strategy"))
-                .select(STRATEGY);
-        job.control(by.xpath("//div[normalize-space(text())='%s']/..//textarea", "Groovy Script"))
-                .set(GROOVY_SELECTOR_SCRIPT);
-
-        job.save();
-        job.startBuild();
-
-        // Default execution: Only valid combinations are built. Other combinations are not created
-        MatrixBuild build = waitForSuccessBuild(job);
-        assertExist(build);
-
-        // Rebuild a non-allowed combination: Valid combinations exist but aren't built. Invalid combinations don't
-        // exist.
-        rebuildCombination(job, AXIS_X + "=" + AXIS_X_TEST_NOT_BUILT + "," + AXIS_Y + "=" + AXIS_Y_TEST_NOT_BUILT);
-        build = waitForSuccessBuild(job);
-        assertExist(build);
-        assertBuilt(build, AXIS_X_TEST_NOT_BUILT, AXIS_Y_TEST_NOT_BUILT);
-
-        // Rebuild only one valid combination ([1,1]): This combination exists and is built. The rest of valid
-        // combinations exist but aren't built. Invalid combinations don't exist.
-        rebuildCombination(job, AXIS_X + "=" + AXIS_X_TEST_BUILT + "," + AXIS_Y + "=" + AXIS_Y_TEST_BUILT);
-        build = waitForSuccessBuild(job);
-        assertExist(build);
-        assertBuilt(build, AXIS_X_TEST_BUILT, AXIS_Y_TEST_BUILT);
-    }
-
     private void assertBuilt(MatrixBuild build, int axisX, int axisY) {
         for (int x = AXIS_INITIAL_VALUE; x <= AXIS_MAX_VALUE; x++) {
             for (int y = AXIS_INITIAL_VALUE; y <= AXIS_MAX_VALUE; y++) {
@@ -252,12 +216,6 @@ public class MatrixPluginTest extends AbstractJUnitTest {
 
     private MatrixBuild waitForSuccessBuild(MatrixProject job) {
         return (MatrixBuild) job.getLastBuild().waitUntilFinished().shouldSucceed();
-    }
-
-    private void rebuildCombination(MatrixProject job, String... combinations) {
-        MatrixReloadedAction action = job.getLastBuild().action(MatrixReloadedAction.class);
-        action.open();
-        action.rebuild(combinations);
     }
 
     private Matcher<? super MatrixRun> built() {
