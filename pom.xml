@@ -496,6 +496,10 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <!-- Use local version of the plugin over the released one ATH would otherwise use -->
+            <LOCAL_JARS>target/echarts-api.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -809,6 +813,13 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
+                    </artifactItem>
+                    <!-- TODO: https://github.com/jenkinsci/echarts-api-plugin/pull/357 -->
+                    <artifactItem>
+                      <groupId>io.jenkins.plugins</groupId>
+                      <artifactId>echarts-api</artifactId>
+                      <version>5.5.1-2-rc999.d542ca_5d130a_</version>
+                      <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
