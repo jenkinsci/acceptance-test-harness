@@ -361,7 +361,7 @@ and
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3261.v9c670a_4748a_9</version>
+      <version>3270.v9e0d174083ed</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
