@@ -496,6 +496,10 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <!-- Use local version of the plugin over the released one ATH would otherwise use -->
+            <LOCAL_JARS>target/junit.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -810,6 +814,11 @@ and
                       <version>${jenkins.version}</version>
                       <type>war</type>
                     </artifactItem>
+                    <!-- TODO: https://github.com/jenkinsci/junit-plugin/pull/658 -->
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>junit</artifactId>
+                    <version>1307.v59e521123397</version>
+                    <type>hpi</type>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
                   <stripVersion>true</stripVersion>
