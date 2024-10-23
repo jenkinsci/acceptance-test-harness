@@ -424,6 +424,31 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
     }
 
+    /**
+     * Executes the runnable, then attempts to write {@code input} in a dialog's input field and click the button with the specified label {@code buttonLabel}.
+     * If an alert appears, instead the runnable is re-run, the input written to the alert, then the alert is submitted.
+     *
+     * @param runnable the runnable to run that causes a dialog to appear
+     * @param input the text to input into the dialog or alert
+     * @param buttonLabel the button of the dialog to click
+     */
+    public void runThenHandleInputDialog(Runnable runnable, String input, String buttonLabel) {
+        try {
+            runnable.run();
+            waitFor(by.button(buttonLabel));
+            find(by.css("dialog input")).sendKeys(input);
+            clickButton(buttonLabel);
+        } catch (UnhandledAlertException uae) {
+            runThenHandleAlert(
+                    runnable,
+                    a -> {
+                        a.sendKeys(input);
+                        a.accept();
+                    },
+                    2);
+        }
+    }
+
     public void handleAlert(Consumer<Alert> action) {
         runThenHandleAlert(null, action);
     }

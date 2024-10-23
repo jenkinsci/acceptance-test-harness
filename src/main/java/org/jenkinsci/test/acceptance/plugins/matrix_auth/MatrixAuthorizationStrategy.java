@@ -4,7 +4,6 @@ import org.jenkinsci.test.acceptance.po.AuthorizationStrategy;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
-import org.openqa.selenium.UnhandledAlertException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -21,32 +20,15 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Adds a new user to this matrix.
      */
     public MatrixRow addUser(String name) {
-        try {
-            // 3.2.3 and later
-            this.table
-                    .resolve()
-                    .findElement(
-                            by.xpath(
-                                    "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
-                    .click();
-            getPage().find(by.css("dialog input")).sendKeys(name);
-            getPage().find(by.css("dialog .jenkins-button--primary")).click();
-        } catch (UnhandledAlertException ex) {
-            // 3.2.2 and earlier
-            runThenHandleAlert(
-                    () -> {
-                        this.table
-                                .resolve()
-                                .findElement(
-                                        by.xpath(
-                                                "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
-                                .click();
-                    },
-                    a -> {
-                        a.sendKeys(name);
-                        a.accept();
-                    });
-        }
+        runThenHandleInputDialog(
+                () -> this.table
+                        .resolve()
+                        .findElement(
+                                by.xpath(
+                                        "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
+                        .click(),
+                name,
+                "OK");
         return getUser(name);
     }
 

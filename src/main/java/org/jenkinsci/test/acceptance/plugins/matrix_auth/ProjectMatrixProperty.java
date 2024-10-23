@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
-import org.openqa.selenium.UnhandledAlertException;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -22,32 +21,15 @@ public class ProjectMatrixProperty extends PageAreaImpl {
      * Adds a new user/group to this matrix.
      */
     public MatrixRow addUser(String name) {
-        try {
-            // 3.2.3 and later
-            this.table
-                    .resolve()
-                    .findElement(
-                            by.xpath(
-                                    "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
-                    .click();
-            getPage().find(by.css("dialog input")).sendKeys(name);
-            getPage().find(by.css("dialog .jenkins-button--primary")).click();
-        } catch (UnhandledAlertException ex) {
-            // 3.2.2 and earlier
-            runThenHandleAlert(
-                    () -> {
-                        this.table
-                                .resolve()
-                                .findElement(
-                                        by.xpath(
-                                                "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
-                                .click();
-                    },
-                    a -> {
-                        a.sendKeys(name);
-                        a.accept();
-                    });
-        }
+        runThenHandleInputDialog(
+                () -> this.table
+                        .resolve()
+                        .findElement(
+                                by.xpath(
+                                        "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
+                        .click(),
+                name,
+                "OK");
         return getUser(name);
     }
 
