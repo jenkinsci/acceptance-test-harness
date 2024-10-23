@@ -36,6 +36,7 @@ import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 @WithPlugins("oic-auth")
 public class OicAuthPluginTest extends AbstractJUnitTest {
@@ -234,7 +235,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
                 new KeycloakUtils.User(userJohnKeycloakId, "john", "john@jenkins-ath.test", "John", "Smith");
         jenkins.open();
 
-        jenkins.clickLink("log in");
+        getLogin().click();
         keycloakUtils.login(bob.getUserName());
         assertLoggedUser(bob, "jenkinsAdmin");
 
@@ -246,7 +247,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
         // so the login page will appear again
         jenkins.open();
 
-        clickLink("log in");
+        getLogin().click();
         keycloakUtils.login(john.getUserName());
         assertLoggedUser(john, "jenkinsRead");
     }
@@ -268,7 +269,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
 
         keycloakUtils.login(bob.getUserName());
         jenkins.open();
-        jenkins.clickLink("log in"); // won't request a login, but log in directly with user from
+        getLogin().click(); // won't request a login, but log in directly with user from
 
         assertLoggedUser(bob, "jenkinsAdmin");
 
@@ -279,9 +280,13 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
 
         // Once logged out, we can change the user
         jenkins.open();
-        jenkins.clickLink("log in");
+        getLogin().click();
         keycloakUtils.login(john.getUserName());
         assertLoggedUser(john, "jenkinsRead");
+    }
+
+    private WebElement getLogin() {
+        return getElement(by.href("/securityRealm/commenceLogin?from=%2F"));
     }
 
     private void assertLoggedOut() {
