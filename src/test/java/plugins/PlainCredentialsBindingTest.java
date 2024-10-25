@@ -46,6 +46,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ShellBuildStep;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 /**
  * Tests the plain-credentials and credentials-binding plugins together.
@@ -69,11 +70,27 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
     @Test
     public void systemSecretFileCredentialTest() throws URISyntaxException {
         createAndUseCredential(SYSTEM_SCOPE, FileCredentials.class);
+
+        /*
+         * Navigate back to the dashboard first to dismiss the alert so that CspRule can check for violations (see
+         * FormValidationTest).
+         */
+        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a"))
+                .click());
+        sleep(1000);
     }
 
     @Test
     public void systemSecretTextCredentialTest() throws URISyntaxException {
         createAndUseCredential(SYSTEM_SCOPE, StringCredentials.class);
+
+        /*
+         * Navigate back to the dashboard first to dismiss the alert so that CspRule can check for violations (see
+         * FormValidationTest).
+         */
+        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a"))
+                .click());
+        sleep(1000);
     }
 
     @Test

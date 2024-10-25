@@ -132,5 +132,9 @@ public class MatrixAuthPluginTest extends AbstractJUnitTest {
         jenkins.login().doLogin("bob");
 
         assertTrue(j.open().getTitle().contains(j.name));
+
+        // Switch back to an admin user so that CspRule can check for violations.
+        jenkins.logout();
+        jenkins.login().doLogin("alice");
     }
 }
