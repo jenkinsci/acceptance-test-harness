@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import java.util.List;
+import org.jenkinsci.test.acceptance.plugins.csp.ContentSecurityPolicyReport;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.update_center.PluginSpec;
@@ -20,11 +22,9 @@ public final class CspRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                if (isEnabled()
-                        && d.getAnnotation(WithInstallWizard.class) == null
-                        && d.getTestClass().getAnnotation(WithInstallWizard.class) == null) {
-                    Jenkins jenkins = injector.getInstance(Jenkins.class);
+                Jenkins jenkins = injector.getInstance(Jenkins.class);
 
+                if (isEnabled() && !isSkipped()) {
                     PluginSpec plugin = new PluginSpec("csp");
                     jenkins.getPluginManager().installPlugins(plugin);
 
@@ -33,7 +33,28 @@ public final class CspRule implements TestRule {
                     security.disableCspReportOnly();
                     security.save();
                 }
-                base.evaluate();
+                try {
+                    base.evaluate();
+                } finally {
+                    // TODO enable for ArtifactoryPluginTest when JENKINS-74047 is resolved
+                    // TODO enable for SubversionPluginTest when JENKINS-73900 is resolved
+                    if (isEnabled()
+                            && !isSkipped()
+                            && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")
+                            && !d.getTestClass().getName().equals("plugins.SubversionPluginTest")) {
+                        ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
+                        csp.open();
+                        List<String> lines = csp.getReport();
+                        if (lines.size() > 2) {
+                            throw new AssertionError(String.join("\n", lines));
+                        }
+                    }
+                }
+            }
+
+            private boolean isSkipped() {
+                return d.getAnnotation(WithInstallWizard.class) != null
+                        || d.getTestClass().getAnnotation(WithInstallWizard.class) != null;
             }
 
             private static boolean isEnabled() {

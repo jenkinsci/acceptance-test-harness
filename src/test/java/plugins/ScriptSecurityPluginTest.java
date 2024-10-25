@@ -114,6 +114,10 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
             sa.find(job.name).approve();
         }
         shouldSucceed(job); // Script approved
+
+        // Switch back to an admin user so that CspRule can check for violations.
+        jenkins.logout();
+        login(ADMIN);
     }
 
     @Test
@@ -127,6 +131,10 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
             sa.findSignature("getProperties").approve();
         }
         shouldSucceed(job); // Script approved
+
+        // Switch back to an admin user so that CspRule can check for violations.
+        jenkins.logout();
+        login(ADMIN);
     }
 
     @Test
@@ -140,6 +148,10 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
             sa.find(job.name).approve();
         }
         shouldSucceed(job); // Script approved
+
+        // Switch back to an admin user so that CspRule can check for violations.
+        jenkins.logout();
+        login(ADMIN);
     }
 
     @Test
@@ -153,5 +165,9 @@ public class ScriptSecurityPluginTest extends AbstractJUnitTest {
             sa.findSignature("getProperty").approve();
         }
         shouldSucceed(job); // Script approved
+
+        // Switch back to an admin user so that CspRule can check for violations.
+        jenkins.logout();
+        login(ADMIN);
     }
 }

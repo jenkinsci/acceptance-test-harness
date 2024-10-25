@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.Fingerprint;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 @WithPlugins("junit")
 public class PublisherOrderTest extends AbstractJUnitTest {
@@ -59,5 +60,13 @@ public class PublisherOrderTest extends AbstractJUnitTest {
         archiver.includes("another.txt");
         JUnitPublisher junit = upstream.addPublisher(JUnitPublisher.class);
         fingerprint.targets.set("yetanother");
+
+        /*
+         * Navigate back to the dashboard first to dismiss the alert so that CspRule can check for violations (see
+         * FormValidationTest).
+         */
+        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a"))
+                .click());
+        sleep(1000);
     }
 }
