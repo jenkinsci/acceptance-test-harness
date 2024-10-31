@@ -40,8 +40,7 @@ public final class CspRule implements TestRule {
                     // TODO enable for SubversionPluginTest when JENKINS-73900 is resolved
                     if (isEnabled()
                             && !isSkipped()
-                            && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")
-                            && !d.getTestClass().getName().equals("plugins.SubversionPluginTest")) {
+                            && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")) {
                         ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
                         csp.open();
                         List<String> lines = csp.getReport();
