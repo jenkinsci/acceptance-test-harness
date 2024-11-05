@@ -29,7 +29,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.483</jenkins.version>
+    <jenkins.version>2.484</jenkins.version>
     <selenium.version>4.26.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.3.1-jre</guava.version>
@@ -94,7 +94,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.15.7</version>
+        <version>1.15.10</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -361,7 +361,7 @@ and
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3273.v4cfe589b_fd83</version>
+      <version>3283.v92c105e0f819</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
