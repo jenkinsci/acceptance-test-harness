@@ -37,7 +37,6 @@ public final class CspRule implements TestRule {
                     base.evaluate();
                 } finally {
                     // TODO enable for ArtifactoryPluginTest when JENKINS-74047 is resolved
-                    // TODO enable for SubversionPluginTest when JENKINS-73900 is resolved
                     if (isEnabled()
                             && !isSkipped()
                             && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")) {
