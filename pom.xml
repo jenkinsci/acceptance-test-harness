@@ -496,6 +496,10 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <!-- Use local version of the plugin over the released one ATH would otherwise use -->
+            <LOCAL_JARS>target/cloudbees-folder.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -809,6 +813,13 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
+                    </artifactItem>
+                    <!-- TODO https://github.com/jenkinsci/cloudbees-folder-plugin/pull/444 -->
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins</groupId>
+                      <artifactId>cloudbees-folder</artifactId>
+                      <version>6.962.v72a_9b_3b_d9746</version>
+                      <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
