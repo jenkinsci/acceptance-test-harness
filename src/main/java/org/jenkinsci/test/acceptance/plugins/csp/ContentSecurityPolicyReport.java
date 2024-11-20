@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.csp;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
@@ -14,7 +15,16 @@ public class ContentSecurityPolicyReport extends PageObject {
 
     public List<String> getReport() {
         List<String> lines = new ArrayList<>();
-        WebElement table = find(By.className("bigtable"));
+        WebElement table = getElement(By.className("jenkins-table"));
+        if (table == null) {
+            String text = find(By.className("jenkins-notice")).getText();
+            if (text.contains("No reports")) {
+                return Collections.emptyList();
+            } else {
+                throw new AssertionError("Couldn't find any results or the no results message");
+            }
+        }
+
         List<WebElement> headers = table.findElements(By.tagName("th"));
         StringBuilder sb = new StringBuilder();
         for (WebElement header : headers) {
