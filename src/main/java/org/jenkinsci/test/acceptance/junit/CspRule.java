@@ -24,7 +24,8 @@ public final class CspRule implements TestRule {
             public void evaluate() throws Throwable {
                 Jenkins jenkins = injector.getInstance(Jenkins.class);
 
-                if (isEnabled() && !isSkipped()) {
+                // TODO enable for LogParserTest when JENKINS-74890 is resolved
+                if (isEnabled() && !isSkipped() && !d.getTestClass().getName().equals("plugins.LogParserTest")) {
                     PluginSpec plugin = new PluginSpec("csp");
                     jenkins.getPluginManager().installPlugins(plugin);
 
