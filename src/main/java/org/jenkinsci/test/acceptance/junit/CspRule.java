@@ -37,9 +37,11 @@ public final class CspRule implements TestRule {
                     base.evaluate();
                 } finally {
                     // TODO enable for ArtifactoryPluginTest when JENKINS-74047 is resolved
+                    // TODO enable for LogParserTest when JENKINS-74890 is resolved
                     if (isEnabled()
                             && !isSkipped()
-                            && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")) {
+                            && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")
+                            && !d.getTestClass().getName().equals("plugins.LogParserTest")) {
                         ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
                         csp.open();
                         List<String> lines = csp.getReport();
