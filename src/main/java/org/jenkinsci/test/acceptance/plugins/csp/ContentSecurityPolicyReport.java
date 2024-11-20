@@ -17,7 +17,12 @@ public class ContentSecurityPolicyReport extends PageObject {
         List<String> lines = new ArrayList<>();
         WebElement table = getElement(By.className("jenkins-table"));
         if (table == null) {
-            return Collections.emptyList();
+            String text = find(By.className("jenkins-notice")).getText();
+            if (text.contains("No reports")) {
+                return Collections.emptyList();
+            } else {
+                throw new AssertionError("Couldn't find any results or the no results message");
+            }
         }
 
         List<WebElement> headers = table.findElements(By.tagName("th"));
