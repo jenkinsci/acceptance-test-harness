@@ -62,7 +62,7 @@ public class Script extends CapybaraPortingLayerImpl {
     }
 
     public ScriptResult runOnAllAgents() {
-        return runOn(null, "(all slaves)");
+        return runOn(null, "(all agents)");
     }
 
     public ScriptResult runOnAllNodes() {
