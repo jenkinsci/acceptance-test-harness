@@ -25,6 +25,7 @@ package org.jenkinsci.test.acceptance.plugins.scriptler;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Node;
 
 public class ScriptResult {
@@ -35,7 +36,11 @@ public class ScriptResult {
     }
 
     public String output(Node node) {
-        return output(node.getName());
+        String name = node.getName();
+        if (node instanceof Jenkins && "(master)".equals(name)) {
+            name = "(controller)";
+        }
+        return output(name);
     }
 
     private String output(String node) {
