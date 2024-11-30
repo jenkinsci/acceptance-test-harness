@@ -328,7 +328,7 @@ and
     <dependency>
       <groupId>org.gitlab4j</groupId>
       <artifactId>gitlab4j-api</artifactId>
-      <version>5.7.0</version>
+      <version>5.8.0</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
