@@ -1,10 +1,9 @@
 package org.jenkinsci.test.acceptance.junit;
 
 import jakarta.inject.Inject;
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.junit.rules.TestWatcher;
@@ -44,10 +43,9 @@ public class DiagnosticRule extends TestWatcher {
 
     private void takeScreenshot() {
         try {
-            File file = diagnostics.touch("screenshot.png");
-            File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.copyFile(screenshot, file);
-
+            Files.write(
+                    diagnostics.touch("screenshot.png").toPath(),
+                    ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
         } catch (IOException e) {
             logger.warning("An error occurred when taking screenshot");
             throw new Error(e);
