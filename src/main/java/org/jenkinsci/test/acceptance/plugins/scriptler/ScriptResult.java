@@ -23,12 +23,15 @@
  */
 package org.jenkinsci.test.acceptance.plugins.scriptler;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Node;
 
 public class ScriptResult {
+    private static final List<String> BUILT_IN_NODE_NAMES = List.of("built-in", "controller", "master");
     private final String result;
 
     public ScriptResult(String result) {
@@ -37,8 +40,15 @@ public class ScriptResult {
 
     public String output(Node node) {
         String name = node.getName();
-        if (node instanceof Jenkins && "(master)".equals(name)) {
-            name = "(controller)";
+        if (node instanceof Jenkins) {
+            // TODO: use the below code once Scriptler versions 390 and up are the only ones tested
+            // return "(" + node + ")";
+            return BUILT_IN_NODE_NAMES.stream()
+                    .map(nodeName -> "(" + nodeName + ")")
+                    .map(this::output)
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .orElse(null);
         }
         return output(name);
     }
