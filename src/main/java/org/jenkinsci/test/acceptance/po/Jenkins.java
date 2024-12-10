@@ -216,7 +216,7 @@ public class Jenkins extends Node implements Container {
 
     @Override
     public String getName() {
-        return "(master)";
+        return "built-in";
     }
 
     @Override
