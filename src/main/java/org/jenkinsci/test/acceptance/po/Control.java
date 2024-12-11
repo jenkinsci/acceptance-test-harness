@@ -215,25 +215,8 @@ public class Control extends CapybaraPortingLayerImpl {
         @Override
         protected WebElement find(String caption) {
             WebElement menuButton = resolve();
-            try {
-                WebElement menu = findElement(menuButton, by.xpath(".."));
-                return findElement(menu, by.button(caption));
-            } catch (NoSuchElementException e) {
-                // With enough implementations registered the one we are looking for might
-                // require scrolling in menu to become visible. This dirty hack stretch
-                // yui menu so that all the items are visible.
-                executeScript("YAHOO.util.Dom.batch("
-                        + "    document.querySelector('.yui-menu-body-scrolled'),"
-                        + "    function (el) {"
-                        + "        el.style.height = 'auto';"
-                        + "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');"
-                        + "    }"
-                        + ");");
-                // we can not use `Select` as these are YUI menus and we need to wait for it to be visible
-                WebElement menu =
-                        findElement(menuButton, by.xpath("ancestor::*[contains(@class,'yui-menu-button')]/.."));
-                return findElement(menu, by.link(caption));
-            }
+            WebElement menu = findElement(menuButton, by.xpath(".."));
+            return findElement(menu, by.button(caption));
         }
     };
 
@@ -249,17 +232,6 @@ public class Control extends CapybaraPortingLayerImpl {
         @Override
         protected WebElement find(String caption) {
             WebElement menuButton = resolve();
-
-            // With enough implementations registered the one we are looking for might
-            // require scrolling in menu to become visible. This dirty hack stretch
-            // yui menu so that all the items are visible.
-            executeScript("YAHOO.util.Dom.batch("
-                    + "    document.querySelector('.yui-menu-body-scrolled'),"
-                    + "    function (el) {"
-                    + "        el.style.height = 'auto';"
-                    + "        YAHOO.util.Dom.removeClass(el, 'yui-menu-body-scrolled');"
-                    + "    }"
-                    + ");");
 
             Select context = new Select(findElement(
                     menuButton,
