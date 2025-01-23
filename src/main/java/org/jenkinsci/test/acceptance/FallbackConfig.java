@@ -112,9 +112,9 @@ public class FallbackConfig extends AbstractModule {
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));
             case "firefox-container":
                 return createContainerWebDriver(
-                        cleaner, "selenium/standalone-firefox:4.28.0", buildFirefoxOptions(testName));
+                        cleaner, "selenium/standalone-firefox:4.28.1", buildFirefoxOptions(testName));
             case "chrome-container":
-                return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.28.0", new ChromeOptions());
+                return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.28.1", new ChromeOptions());
             case "chrome":
                 Map<String, String> prefs = new HashMap<>();
                 prefs.put(LANGUAGE_SELECTOR, "en");
