@@ -144,8 +144,11 @@ for (int i = 0; i < splits.size(); i++) {
                     ) {
                       sh """
                           set-java.sh ${jdk}
+                          JAVA_HOME="$(dirname "$(dirname "$(update-alternatives --list java | grep 17-openjdk)")")"
+                          export JAVA_HOME
                           eval \$(vnc.sh)
                           java -version
+                          mvn -v
                           run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -Dcsp.rule=${cspRule} -DforkCount=1 -B
                           cp --verbose target/surefire-reports/TEST-*.xml /reports
                           """
