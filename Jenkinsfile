@@ -144,8 +144,8 @@ for (int i = 0; i < splits.size(); i++) {
                     ) {
                       sh """
                           set-java.sh ${jdk}
-                          JAVA_HOME="\$(dirname "\$(dirname "\$(update-alternatives --list java | grep ${jdk}-openjdk)")")"
-                          export JAVA_HOME
+                          # Ensure that Jenkins node setup does not influence the container java setup
+                          unset JAVA_HOME
                           eval \$(vnc.sh)
                           java -version
                           mvn -v
