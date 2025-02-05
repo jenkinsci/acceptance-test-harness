@@ -109,8 +109,6 @@ for (int i = 0; i < splits.size(); i++) {
     if (jdk != 21 && jenkinsVersion == 'latest') {
       return
     }
-    // TODO enable on LTS line when it is based on 2.480 or later
-    def cspRule = jenkinsVersion == 'latest'
     def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
     branches[name] = {
       stage(name) {
@@ -149,7 +147,7 @@ for (int i = 0; i < splits.size(); i++) {
                           eval \$(vnc.sh)
                           java -version
                           mvn -v
-                          run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -Dcsp.rule=${cspRule} -DforkCount=1 -B
+                          run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -Dcsp.rule -DforkCount=1 -B
                           cp --verbose target/surefire-reports/TEST-*.xml /reports
                           """
                     }

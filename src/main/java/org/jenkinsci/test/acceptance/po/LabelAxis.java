@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import java.time.Duration;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -17,25 +16,11 @@ public class LabelAxis extends Axis {
         WebElement checkBox =
                 find(by.path(getPath())).findElement(by.xpath(".//input[@name='values' and @json='%s']", name));
         if (!checkBox.isDisplayed()) {
-            try {
-                // unfold the labels and slaves sub-nodes
-                find(by.xpath("(//button[@class='jenkins-button mp-label-axis__button'])[1]"))
-                        .click();
-                find(by.xpath("(//button[@class='jenkins-button mp-label-axis__button'])[2]"))
-                        .click();
-            } catch (NoSuchElementException e) {
-                // forward compatibility
-            }
-
-            try {
-                // unfold the labels and slaves sub-nodes
-                find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel1']//a"))
-                        .click();
-                find(by.xpath("//div[@class='yahooTree labelAxis-tree']//table[@id='ygtvtableel2']//a"))
-                        .click();
-            } catch (NoSuchElementException e) {
-                // backward compatibility
-            }
+            // unfold the labels and slaves sub-nodes
+            find(by.xpath("(//button[@class='jenkins-button mp-label-axis__button'])[1]"))
+                    .click();
+            find(by.xpath("(//button[@class='jenkins-button mp-label-axis__button'])[2]"))
+                    .click();
 
             waitFor().withTimeout(Duration.ofSeconds(3)).until(checkBox::isDisplayed);
         }
