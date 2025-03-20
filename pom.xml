@@ -29,7 +29,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.496</jenkins.version>
+    <jenkins.version>2.497</jenkins.version>
     <selenium.version>4.28.1</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.4.0-jre</guava.version>
@@ -57,7 +57,7 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.117.Final</version>
+        <version>4.1.118.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -94,7 +94,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.16.1</version>
+        <version>1.17.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -226,13 +226,13 @@ and
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.17.2</version>
+      <version>1.18.0</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
       <!--  to match upper bounds -->
-      <version>1.3.4</version>
+      <version>1.3.5</version>
     </dependency>
     <dependency>
       <groupId>commons-net</groupId>
