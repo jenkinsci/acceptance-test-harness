@@ -19,7 +19,7 @@ import org.monte.media.av.Format;
 import org.monte.media.av.FormatKeys;
 import org.monte.media.av.codec.video.VideoFormatKeys;
 import org.monte.media.math.Rational;
-import org.monte.media.screenrecorder.ScreenRecorder;
+import org.monte.media.screenrecorder.State;
 
 /**
  * JUnit Rule that before executing a test it starts a recording current screen
@@ -120,9 +120,7 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void stopRecording(boolean waitTime) {
-        if (this.screenRecorder != null
-                && !this.headless
-                && this.screenRecorder.getState() == ScreenRecorder.State.RECORDING) {
+        if (this.screenRecorder != null && !this.headless && this.screenRecorder.getState() == State.RECORDING) {
             try {
                 if (waitTime) {
                     waitUntilLastFramesAreRecorded();
