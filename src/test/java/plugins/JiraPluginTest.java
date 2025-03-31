@@ -20,6 +20,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 
@@ -59,6 +60,8 @@ public class JiraPluginTest extends AbstractJUnitTest {
             credentialType = WithCredentials.USERNAME_PASSWORD,
             values = {USERNAME, PASSWORD},
             id = CREDENTIALS_ID)
+    @Ignore("Jira 6.3 no longer installs in the test container"
+            + " https://github.com/jenkinsci/acceptance-test-harness/issues/1910")
     public void jira_ticket_gets_updated_with_a_build_link() throws Exception {
         JiraContainer jira = docker.get();
         jira.waitForReady(this);
