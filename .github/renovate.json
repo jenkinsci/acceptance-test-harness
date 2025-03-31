@@ -8,7 +8,6 @@
   "automerge": true,
   "ignorePaths": [
     "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/FtpdContainer/Dockerfile",
-    "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/JabberContainer/Dockerfile",
     "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/SMBContainer/Dockerfile"
   ],
   "ignoreDeps": [
