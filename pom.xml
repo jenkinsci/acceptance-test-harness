@@ -29,7 +29,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.497</jenkins.version>
+    <jenkins.version>2.503</jenkins.version>
     <selenium.version>4.28.1</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.4.0-jre</guava.version>
@@ -94,7 +94,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.17.0</version>
+        <version>1.17.5</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -823,7 +823,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.492.1</jenkins.version>
+        <jenkins.version>2.492.2</jenkins.version>
       </properties>
     </profile>
   </profiles>
