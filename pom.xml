@@ -57,7 +57,7 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.118.Final</version>
+        <version>4.1.119.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
