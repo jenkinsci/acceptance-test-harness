@@ -1,5 +1,5 @@
 # Sets up
-FROM debian:bullseye
+FROM debian:bookworm
 
 # Viewvc is not part of bullseye repos anymore but oldstable https://github.com/viewvc/viewvc/issues/310
 RUN echo 'deb http://security.debian.org/debian-security buster/updates main' > /etc/apt/sources.list.d/oldstable.list
