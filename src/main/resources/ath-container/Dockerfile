@@ -52,7 +52,7 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && rm -rf /var/lib/apt/lists/*
 
 # Selenium needs a geckodriver in order to work properly
-ARG GECKODRIVER_VERSION=0.35.0
+ARG GECKODRIVER_VERSION=0.36.0
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
   then \
