@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.128</version>
+    <version>1.130</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -29,17 +29,17 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.503</jenkins.version>
-    <selenium.version>4.28.1</selenium.version>
+    <jenkins.version>2.504</jenkins.version>
+    <selenium.version>4.31.0</selenium.version>
     <!-- aligned with selenium -->
-    <guava.version>33.4.0-jre</guava.version>
+    <guava.version>33.4.6-jre</guava.version>
 
     <!-- Keep them aligned to Maven version -->
     <maven.version>3.9.6</maven.version>
     <maven-sisu.version>0.9.0.M3</maven-sisu.version>
     <maven-resolver.version>1.9.18</maven-resolver.version>
 
-    <groovy.version>3.0.23</groovy.version>
+    <groovy.version>3.0.24</groovy.version>
     <jffi.version>1.3.13</jffi.version>
     <spotless.check.skip>false</spotless.check.skip>
   </properties>
@@ -49,7 +49,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.18.2</version>
+        <version>2.18.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -57,21 +57,21 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.1.118.Final</version>
+        <version>4.2.0.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-bom</artifactId>
-        <version>9.7.1</version>
+        <version>9.8</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-bom</artifactId>
-        <version>2.0.16</version>
+        <version>2.0.17</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -361,7 +361,7 @@ and
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3283.v92c105e0f819</version>
+      <version>3301.v4363ddcca_4e7</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
@@ -823,7 +823,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.492.2</jenkins.version>
+        <jenkins.version>2.492.3</jenkins.version>
       </properties>
     </profile>
   </profiles>
