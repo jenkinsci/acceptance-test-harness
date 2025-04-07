@@ -26,7 +26,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Install a fixed firefox version that is known to work with the current selenium version, copied from https://support.mozilla.org/en-US/kb/install-firefox-linux
-ARG FIREFOX_VERSION=134.0.2
+ARG FIREFOX_VERSION=136.0.4
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg -o /etc/apt/keyrings/packages.mozilla.org.asc \
   && printf 'deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main\n' > /etc/apt/sources.list.d/mozilla.list \
@@ -38,8 +38,8 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && rm -rf /var/lib/apt/lists/*
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
-ARG DOCKER_BUILDX_VERSION=0.19.3
-ARG DOCKER_VERSION=27.5.1
+ARG DOCKER_BUILDX_VERSION=0.22.0
+ARG DOCKER_VERSION=28.0.4
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
   && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
@@ -52,7 +52,7 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && rm -rf /var/lib/apt/lists/*
 
 # Selenium needs a geckodriver in order to work properly
-ARG GECKODRIVER_VERSION=0.35.0
+ARG GECKODRIVER_VERSION=0.36.0
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/) && \
   if [ "$arch" = "arm64" ] ; \
   then \
