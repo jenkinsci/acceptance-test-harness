@@ -19,7 +19,8 @@ import org.monte.media.av.Format;
 import org.monte.media.av.FormatKeys;
 import org.monte.media.av.codec.video.VideoFormatKeys;
 import org.monte.media.math.Rational;
-import org.monte.media.screenrecorder.ScreenRecorder;
+import org.monte.media.screenrecorder.MouseConfigs;
+import org.monte.media.screenrecorder.State;
 
 /**
  * JUnit Rule that before executing a test it starts a recording current screen
@@ -75,8 +76,20 @@ public class TestRecorderRule extends TestWatcher {
             Format outputFormatForScreenCapture = getOutputFormatForScreenCapture(
                     videoFormatName, compressorName, outputDimension, BIT_DEPTH, QUALITY_RATIO, FRAME_RATE_PER_SEC);
 
+            Format mouseFormat = new Format(
+                    FormatKeys.FrameRateKey,
+                    Rational.valueOf(FRAME_RATE_PER_SEC),
+                    FormatKeys.EncodingKey,
+                    MouseConfigs.ENCODING_BLACK_CURSOR);
+
             this.screenRecorder = new JUnitScreenRecorder(
-                    gc, gc.getBounds(), getFileFormat(mimeType), outputFormatForScreenCapture, null, null, diagnostics);
+                    gc,
+                    gc.getBounds(),
+                    getFileFormat(mimeType),
+                    outputFormatForScreenCapture,
+                    mouseFormat,
+                    null,
+                    diagnostics);
             this.screenRecorder.start();
         } catch (HeadlessException e) {
             logger.warning("Test recorder does not work with Headless mode");
@@ -120,9 +133,7 @@ public class TestRecorderRule extends TestWatcher {
     }
 
     private void stopRecording(boolean waitTime) {
-        if (this.screenRecorder != null
-                && !this.headless
-                && this.screenRecorder.getState() == ScreenRecorder.State.RECORDING) {
+        if (this.screenRecorder != null && !this.headless && this.screenRecorder.getState() == State.RECORDING) {
             try {
                 if (waitTime) {
                     waitUntilLastFramesAreRecorded();

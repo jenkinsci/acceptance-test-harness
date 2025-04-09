@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.130</version>
+    <version>1.131</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -32,7 +32,7 @@
     <jenkins.version>2.505-rc36753.b_39590e126a_1</jenkins.version>
     <selenium.version>4.31.0</selenium.version>
     <!-- aligned with selenium -->
-    <guava.version>33.4.6-jre</guava.version>
+    <guava.version>33.4.7-jre</guava.version>
 
     <!-- Keep them aligned to Maven version -->
     <maven.version>3.9.6</maven.version>
@@ -143,7 +143,7 @@ and
     <dependency>
       <groupId>ch.randelshofer</groupId>
       <artifactId>org.monte.media.screenrecorder</artifactId>
-      <version>17.1</version>
+      <version>17.2.1</version>
     </dependency>
     <dependency>
       <groupId>com.browserup</groupId>
