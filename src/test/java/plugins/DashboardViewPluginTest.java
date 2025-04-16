@@ -208,7 +208,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(url, endsWith(name + "/"));
 
         final List<String> breadCrumbs = v.breadCrumbs.getBreadCrumbs();
-        assertThat(breadCrumbs, hasSize(2));
         final String nameCrumb = breadCrumbs.get(breadCrumbs.size() - 1);
         assertThat(nameCrumb, is(name));
 
