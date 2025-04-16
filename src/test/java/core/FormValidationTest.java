@@ -75,7 +75,7 @@ public class FormValidationTest extends AbstractJUnitTest {
     }
 
     private void navigateAway() {
-        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a"))
+        jenkins.runThenConfirmAlert(() -> driver.findElement(By.id("jenkins-head-icon"))
                 .click());
         sleep(1000); // Needed for some reason
     }
