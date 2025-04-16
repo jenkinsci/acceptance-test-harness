@@ -47,8 +47,8 @@ public class MailerPluginTest extends AbstractJUnitTest {
          * Navigate back to the dashboard first to dismiss the alert so that CspRule can check for violations (see
          * FormValidationTest).
          */
-        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a"))
-                .click());
+        jenkins.runThenConfirmAlert(
+                () -> driver.findElement(By.id("jenkins-head-icon")).click());
         sleep(1000);
     }
 
