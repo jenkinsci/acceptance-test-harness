@@ -3,7 +3,6 @@ package plugins;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertEquals;
