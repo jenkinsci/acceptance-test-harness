@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.po;
 
+import static org.junit.Assert.assertEquals;
+
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import jakarta.inject.Inject;
@@ -24,6 +26,9 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.bidi.browsingcontext.BrowsingContext;
+import org.openqa.selenium.bidi.browsingcontext.UserPromptType;
+import org.openqa.selenium.bidi.module.BrowsingContextInspector;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
@@ -470,6 +475,18 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             action.accept(alert);
         } finally {
             driver.switchTo().window(oldWindow);
+        }
+    }
+
+    public void runThenHandleUserPrompt(Runnable runnable) {
+        try (BrowsingContextInspector inspector = new BrowsingContextInspector(driver)) {
+            BrowsingContext context = new BrowsingContext(driver, driver.getWindowHandle());
+            inspector.onUserPromptOpened(userPromptOpened -> {
+                assertEquals(context.getId(), userPromptOpened.getBrowsingContextId());
+                assertEquals(UserPromptType.BEFORE_UNLOAD, userPromptOpened.getType());
+                context.handleUserPrompt();
+            });
+            runnable.run();
         }
     }
 

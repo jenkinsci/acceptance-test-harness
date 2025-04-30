@@ -50,7 +50,6 @@ import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 
 @WithPlugins({"ssh-slaves", "credentials", "ssh-credentials"})
@@ -147,14 +146,6 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         l.host.set("127.0.0.1");
 
         l.credentialsId.select(String.format("%s (%s)", username, description));
-
-        /*
-         * Navigate back to the dashboard first to dismiss the alert so that CspRule can check for violations (see
-         * FormValidationTest).
-         */
-        jenkins.runThenConfirmAlert(
-                () -> driver.findElement(By.id("jenkins-head-icon")).click());
-        sleep(1000);
     }
 
     private void verifyValueForCredential(CredentialsPage cp, Control element, String expected) {

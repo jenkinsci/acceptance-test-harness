@@ -41,7 +41,7 @@ public final class CspRule implements TestRule {
                             && !isSkipped()
                             && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")) {
                         ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
-                        csp.open();
+                        jenkins.runThenHandleUserPrompt(() -> csp.open());
                         List<String> lines = csp.getReport();
                         if (lines.size() > 2) {
                             throw new AssertionError(String.join("\n", lines));
