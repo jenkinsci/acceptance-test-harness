@@ -32,7 +32,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
 
 /**
  * Checks the successful integration of Artifactory plugin.
@@ -66,14 +65,6 @@ public class ArtifactoryPluginTest extends AbstractJUnitTest {
                 hasContent(
                         Pattern.compile(
                                 "Error occurred while requesting version information: Connection( to http://localhost:4898)* refused")));
-
-        /*
-         * Navigate back to the dashboard first to dismiss the alert so that CspRule can check for violations (see
-         * FormValidationTest).
-         */
-        jenkins.runThenConfirmAlert(
-                () -> driver.findElement(By.id("jenkins-head-icon")).click());
-        sleep(1000);
     }
 
     @Test
