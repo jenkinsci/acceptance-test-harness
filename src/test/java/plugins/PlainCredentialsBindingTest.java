@@ -76,7 +76,7 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
          * FormValidationTest).
          */
         jenkins.runThenConfirmAlert(
-                () -> driver.findElement(By.id("jenkins-head-icon")).click());
+                () -> driver.findElement(By.xpath("//a[@href='/']")).click());
         sleep(1000);
     }
 
@@ -89,7 +89,7 @@ public class PlainCredentialsBindingTest extends AbstractCredentialsTest {
          * FormValidationTest).
          */
         jenkins.runThenConfirmAlert(
-                () -> driver.findElement(By.id("jenkins-head-icon")).click());
+                () -> driver.findElement(By.xpath("//a[@href='/']")).click());
         sleep(1000);
     }
 
