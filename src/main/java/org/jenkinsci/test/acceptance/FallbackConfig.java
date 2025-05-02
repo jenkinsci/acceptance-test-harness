@@ -87,6 +87,7 @@ public class FallbackConfig extends AbstractModule {
 
     public static final String DOM_MAX_SCRIPT_RUN_TIME = "dom.max_script_run_time";
     public static final String DOM_MAX_CHROME_SCRIPT_RUN_TIME = "dom.max_chrome_script_run_time";
+    public static final String DEVTOOLS_JSONVIEW_ENABLED = "devtools.jsonview.enabled";
     public static final int PAGE_LOAD_TIMEOUT = 30;
     public static final int IMPLICIT_WAIT_TIMEOUT = 1;
 
@@ -183,6 +184,7 @@ public class FallbackConfig extends AbstractModule {
                 DOM_MAX_SCRIPT_RUN_TIME, (int) getElasticTime().seconds(600));
         firefoxOptions.addPreference(
                 DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int) getElasticTime().seconds(600));
+        firefoxOptions.addPreference(DEVTOOLS_JSONVIEW_ENABLED, false); // For MetricsTest
         firefoxOptions.enableBiDi();
         if (HarRecorder.isCaptureHarEnabled()) {
             firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
