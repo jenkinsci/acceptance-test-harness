@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
-import org.apache.commons.exec.OS;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
@@ -112,9 +111,9 @@ public class FallbackConfig extends AbstractModule {
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));
             case "firefox-container":
                 return createContainerWebDriver(
-                        cleaner, "selenium/standalone-firefox:4.31.0", buildFirefoxOptions(testName));
+                        cleaner, "selenium/standalone-firefox:4.32.0", buildFirefoxOptions(testName));
             case "chrome-container":
-                return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.31.0", new ChromeOptions());
+                return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.32.0", new ChromeOptions());
             case "chrome":
                 Map<String, String> prefs = new HashMap<>();
                 prefs.put(LANGUAGE_SELECTOR, "en");
@@ -304,8 +303,13 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
+    private boolean isWindows() {
+        // Same as hudson.Functions.isWindows()
+        return File.pathSeparatorChar == ';';
+    }
+
     private String locateDriver(final String name) {
-        String command = OS.isFamilyWindows() ? "where" : "which";
+        String command = isWindows() ? "where" : "which";
         try (ProcessInputStream pis = new CommandBuilder(command, name).popen()) {
             return pis.asText().trim();
         } catch (IOException | InterruptedException exception) {
