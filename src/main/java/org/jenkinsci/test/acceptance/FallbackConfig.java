@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;
@@ -303,13 +304,8 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private boolean isWindows() {
-        // Same as hudson.Functions.isWindows()
-        return File.pathSeparatorChar == ';';
-    }
-
     private String locateDriver(final String name) {
-        String command = isWindows() ? "where" : "which";
+        String command = SystemUtils.IS_OS_WINDOWS ? "where" : "which";
         try (ProcessInputStream pis = new CommandBuilder(command, name).popen()) {
             return pis.asText().trim();
         } catch (IOException | InterruptedException exception) {
