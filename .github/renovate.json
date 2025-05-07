@@ -55,8 +55,8 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java"
+      "managerFilePatterns": [
+        "/src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java/"
       ],
       "matchStrings": [
         "selenium/standalone-(firefox|chrome):(?<currentValue>.*?)\""
@@ -66,8 +66,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG FIREFOX_VERSION=(?<currentValue>.*?)\n"
@@ -78,8 +78,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG GECKODRIVER_VERSION=(?<currentValue>.*?)\n"
@@ -89,8 +89,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG MAVEN_VERSION=(?<currentValue>.*?)\n"
@@ -100,8 +100,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG DOCKER_BUILDX_VERSION=(?<currentValue>.*?)\n"
@@ -111,8 +111,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG DOCKER_VERSION=(?<currentValue>.*?)\n"
@@ -122,8 +122,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/test/java/plugins/OicAuthPluginTest.java"
+      "managerFilePatterns": [
+        "/src/test/java/plugins/OicAuthPluginTest.java/"
       ],
       "matchStrings": [
         ".* KEYCLOAK_IMAGE =\n\\s*\"(?<repo>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:.*?)\";\n"
