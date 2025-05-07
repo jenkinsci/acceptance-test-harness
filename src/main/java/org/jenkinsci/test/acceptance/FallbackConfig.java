@@ -64,6 +64,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
+import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -155,7 +156,7 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private RemoteWebDriver buildRemoteWebDriver(Capabilities options) throws MalformedURLException {
+    private WebDriver buildRemoteWebDriver(Capabilities options) throws MalformedURLException {
         String u = System.getenv("REMOTE_WEBDRIVER_URL");
         if (StringUtils.isBlank(u)) {
             throw new Error("remote-webdriver type browsers require REMOTE_WEBDRIVER_URL to be set");
@@ -164,7 +165,7 @@ public class FallbackConfig extends AbstractModule {
                 new URL(u), // http://192.168.99.100:4444/wd/hub
                 options);
         driver.setFileDetector(new LocalFileDetector());
-        return driver;
+        return new Augmenter().augment(driver);
     }
 
     private String getBrowser() {
@@ -264,7 +265,7 @@ public class FallbackConfig extends AbstractModule {
                 RemoteWebDriver remoteWebDriver =
                         new RemoteWebDriver(new URL("http://127.0.0.1:" + controlPort + "/wd/hub"), capabilities);
                 cleaner.addTask(cleanContainer);
-                return remoteWebDriver;
+                return new Augmenter().augment(remoteWebDriver);
             } catch (RuntimeException e) {
                 cleanContainer.close();
                 throw e;
