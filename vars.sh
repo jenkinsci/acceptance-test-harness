@@ -16,7 +16,7 @@ export INTERACTIVE=false
 export BROWSER=remote-webdriver-firefox
 export REMOTE_WEBDRIVER_URL=http://127.0.0.1:4444/wd/hub
 export JENKINS_JAVA_OPTS=-Xmx1280m
-if [ -f /usr/share/java/jenkins.war ]; then
+if [ -z "${JENKINS_WAR}" ] && [ -f /usr/share/java/jenkins.war ]; then
 	export JENKINS_WAR=/usr/share/java/jenkins.war
 fi
 
