@@ -16,7 +16,9 @@ export INTERACTIVE=false
 export BROWSER=remote-webdriver-firefox
 export REMOTE_WEBDRIVER_URL=http://127.0.0.1:4444/wd/hub
 export JENKINS_JAVA_OPTS=-Xmx1280m
-export JENKINS_WAR=/usr/share/java/jenkins.war
+if [ -f /usr/share/java/jenkins.war ]; then
+	export JENKINS_WAR=/usr/share/java/jenkins.war
+fi
 
 IP=$(ip addr show docker0 2>/dev/null | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1) ||
 	die "failed to retrieve IP address of Docker interface"
