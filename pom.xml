@@ -496,6 +496,7 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <runOrder>alphabetical</runOrder>
         </configuration>
       </plugin>
       <plugin>
