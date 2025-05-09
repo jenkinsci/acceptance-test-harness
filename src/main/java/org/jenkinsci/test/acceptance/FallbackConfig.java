@@ -51,7 +51,6 @@ import org.jenkinsci.test.acceptance.utils.pluginreporter.TextFileExercisedPlugi
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.Statement;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.MutableCapabilities;
@@ -70,7 +69,6 @@ import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.events.EventFiringDecorator;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * The default configuration for running tests.
@@ -357,20 +355,6 @@ public class FallbackConfig extends AbstractModule {
         cleaner.addTask(new Statement() {
             @Override
             public void evaluate() {
-                switch (getBrowser()) {
-                    case "firefox":
-                    case "saucelabs-firefox":
-                    case "remote-webdriver-firefox":
-                        // https://github.com/mozilla/geckodriver/issues/1151
-                        // https://bugzilla.mozilla.org/show_bug.cgi?id=1264259
-                        // https://bugzilla.mozilla.org/show_bug.cgi?id=1434872
-                        d.navigate().to("about:mozilla");
-                        Alert alert = ExpectedConditions.alertIsPresent().apply(d);
-                        if (alert != null) {
-                            alert.accept();
-                            d.navigate().refresh();
-                        }
-                }
                 d.quit();
             }
 
