@@ -1,7 +1,5 @@
 package org.jenkinsci.test.acceptance;
 
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.client.ClientUtil;
 import com.cloudbees.sdk.extensibility.ExtensionList;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -11,10 +9,8 @@ import jakarta.inject.Named;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -35,7 +31,6 @@ import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
@@ -54,7 +49,6 @@ import org.junit.runners.model.Statement;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.MutableCapabilities;
-import org.openqa.selenium.Proxy;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -64,7 +58,6 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.remote.Augmenter;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
@@ -119,10 +112,6 @@ public class FallbackConfig extends AbstractModule {
                 prefs.put(LANGUAGE_SELECTOR, "en");
                 ChromeOptions options = new ChromeOptions();
                 options.setExperimentalOption("prefs", prefs);
-                if (HarRecorder.isCaptureHarEnabled()) {
-                    options.setAcceptInsecureCerts(true);
-                    options.setProxy(createSeleniumProxy(testName.get()));
-                }
 
                 setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
                 return new ChromeDriver(options);
@@ -134,9 +123,6 @@ public class FallbackConfig extends AbstractModule {
                 caps.setCapability("version", "29");
                 caps.setCapability("platform", "Windows 7");
                 caps.setCapability("name", testName.get());
-                if (HarRecorder.isCaptureHarEnabled()) {
-                    caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
-                }
 
                 // if running inside Jenkins, expose build ID
                 String tag = System.getenv("BUILD_TAG");
@@ -185,9 +171,6 @@ public class FallbackConfig extends AbstractModule {
                 DOM_MAX_CHROME_SCRIPT_RUN_TIME, (int) getElasticTime().seconds(600));
         firefoxOptions.addPreference(DEVTOOLS_JSONVIEW_ENABLED, false); // For MetricsTest
         firefoxOptions.enableBiDi();
-        if (HarRecorder.isCaptureHarEnabled()) {
-            firefoxOptions.setProxy(createSeleniumProxy(testName.get()));
-        }
         if (System.getenv("FIREFOX_BIN") != null) {
             firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
         }
@@ -196,9 +179,6 @@ public class FallbackConfig extends AbstractModule {
 
     private ChromeOptions buildChromeOptions(TestName testName) throws IOException {
         ChromeOptions chromeOptions = new ChromeOptions();
-        if (HarRecorder.isCaptureHarEnabled()) {
-            chromeOptions.setProxy(createSeleniumProxy(testName.get()));
-        }
         return chromeOptions;
     }
 
@@ -274,21 +254,6 @@ public class FallbackConfig extends AbstractModule {
         } catch (InterruptedException e) {
             throw new Error(e);
         }
-    }
-
-    private Proxy createSeleniumProxy(String testName) throws UnknownHostException {
-        // if we are running maven locally but the browser elsewhere (e.g. docker) using the "127.0.0.1"
-        // address will not work for the browser
-        String name = System.getenv("SELENIUM_PROXY_HOSTNAME");
-        InetAddress proxyAddr;
-        if (name != null) {
-            proxyAddr = InetAddress.getByName(name);
-        } else {
-            // bind to the loopback to prevent exposing the proxy to the world.
-            proxyAddr = InetAddress.getLoopbackAddress();
-        }
-        BrowserUpProxy proxy = HarRecorder.getProxy(proxyAddr, testName);
-        return ClientUtil.createSeleniumProxy(proxy, proxyAddr);
     }
 
     private void setDriverPropertyIfMissing(final String driverCommand, final String property) {

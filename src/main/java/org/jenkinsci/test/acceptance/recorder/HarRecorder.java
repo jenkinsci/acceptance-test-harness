@@ -1,20 +1,19 @@
 package org.jenkinsci.test.acceptance.recorder;
 
-import com.browserup.bup.BrowserUpProxy;
-import com.browserup.bup.BrowserUpProxyServer;
-import com.browserup.bup.proxy.CaptureType;
-import com.browserup.harreader.model.Har;
 import jakarta.inject.Inject;
-import java.io.File;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.junit.GlobalRule;
+import org.jenkinsci.test.acceptance.recorder.har.BiDiHARRecorder;
 import org.jenkinsci.test.acceptance.utils.SystemEnvironmentVariables;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasCapabilities;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.bidi.HasBiDi;
+import org.openqa.selenium.bidi.module.Network;
+import org.openqa.selenium.devtools.HasDevTools;
 
 /**
  * The system property RECORD_BROWSER_TRAFFIC can be set to either off, failuresOnly or always to control when browser
@@ -71,37 +70,12 @@ public class HarRecorder extends TestWatcher {
     static State CAPTURE_HAR = State.value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment(
             "RECORD_BROWSER_TRAFFIC", State.OFF.getValue()));
 
-    private static BrowserUpProxy proxy;
-
-    /**
-     * Create a proxy to record the HAR listening on the specified address
-     * @param networkAddress the specific address to bind to, or {@code null} to bind on all addresses
-     */
-    public static BrowserUpProxy getProxy(InetAddress networkAddress, String testName) {
-        LOGGER.log(Level.INFO, "Obtaining proxy for {0}...", testName);
-        if (proxy == null) {
-            LOGGER.log(Level.INFO, "Creating new Proxy for {0}...", testName);
-            // start the proxy
-            proxy = new BrowserUpProxyServer();
-            // enable more detailed HAR capture, if desired (see CaptureType for the complete list)
-            proxy.enableHarCaptureTypes(
-                    CaptureType.REQUEST_HEADERS,
-                    CaptureType.REQUEST_CONTENT,
-                    CaptureType.RESPONSE_HEADERS,
-                    CaptureType.RESPONSE_CONTENT);
-            proxy.setTrustAllServers(true);
-            proxy.setMitmDisabled(true);
-            proxy.start(0, networkAddress);
-            LOGGER.log(Level.INFO, "Proxy Created and listening on port {0}", proxy.getPort());
-        } else {
-            LOGGER.log(Level.INFO, "Existing Proxy for {0} returned using port {1}", new Object[] {
-                testName, proxy.getPort()
-            });
-        }
-        return proxy;
-    }
+    @Inject
+    protected WebDriver driver;
 
     private FailureDiagnostics diagnostics;
+    private Network network;
+    private BiDiHARRecorder harRecorder;
 
     @Inject
     public HarRecorder(FailureDiagnostics diagnostics) {
@@ -128,25 +102,43 @@ public class HarRecorder extends TestWatcher {
 
     @Override
     protected void starting(Description description) {
+        if (!CAPTURE_HAR.isRecordingEnabled()) {
+            return;
+        } 
         initializeHarForTest(description.getDisplayName());
     }
 
     private void initializeHarForTest(String name) {
-        if (proxy != null) {
-            proxy.newHar(name);
+        if (!(driver instanceof HasBiDi)) {
+            LOGGER.warning("configured driver does not support BiDi, HAR recording will not be available");
+            return;
         }
+        if (driver instanceof HasDevTools) {
+            // selenium removed support for DevTools for firefox
+            LOGGER.fine("configured driver supports DevTools!");
+        }
+
+        
+        if (driver instanceof HasCapabilities) {
+            Capabilities caps = ((HasCapabilities) driver).getCapabilities();
+            harRecorder = new BiDiHARRecorder(name, caps.getBrowserName(), caps.getBrowserVersion());
+        } else {
+            harRecorder = new BiDiHARRecorder(name);
+        }
+        
+        network = new Network(driver);
+        network.onBeforeRequestSent(harRecorder::onBeforeRequestSent);
+        network.onResponseCompleted(harRecorder::onResponseCompleted);
     }
 
     private void recordHar() {
-        if (proxy != null) {
-            Har har = proxy.getHar(true);
-            File file = diagnostics.touch("jenkins.har");
-            try {
-                har.writeTo(file);
-            } catch (IOException e) {
-                System.err.println("Unable to write HAR file to " + file);
-                e.printStackTrace(System.err);
-            }
+        try {
+            
+        } finally {
+            // TODO do we need to close this or is it closed when the driver is closed?
+            // we also do not close if we do not write the HAR file, so if we need to close it we would leak
+            network.close();
         }
     }
+    
 }

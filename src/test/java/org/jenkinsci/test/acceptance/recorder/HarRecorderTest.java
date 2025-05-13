@@ -4,9 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.existingFile;
 
-import com.browserup.bup.BrowserUpProxy;
 import java.io.File;
-import java.net.InetAddress;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,9 +22,8 @@ public class HarRecorderTest {
             Description desc = description();
             HarRecorder harRecorder = rule(desc);
             HarRecorder.CAPTURE_HAR = HarRecorder.State.FAILURES_ONLY;
-            BrowserUpProxy proxy = HarRecorder.getProxy(InetAddress.getLoopbackAddress(), "anything-here");
-            proxy.newHar("jenkins");
 
+            
             System.out.println("Good Bye World");
             harRecorder.failed(new Exception(), desc);
 
