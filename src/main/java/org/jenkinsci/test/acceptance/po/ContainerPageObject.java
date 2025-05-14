@@ -21,6 +21,7 @@ import org.openqa.selenium.WebElement;
  * @author Kohsuke Kawaguchi
  */
 public abstract class ContainerPageObject extends ConfigurablePageObject {
+    @Deprecated
     protected ContainerPageObject(Injector injector, URL url) {
         super(injector, url);
         if (!url.toExternalForm().endsWith("/")) {
