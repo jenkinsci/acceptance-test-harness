@@ -17,7 +17,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Encapsulates a model in Jenkins and wraps interactions with it.
@@ -47,7 +46,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     private PageObject context;
 
     private static final RandomNameGenerator RND = new RandomNameGenerator();
-    
+
     /**
      * @deprecated Use {@link #PageObject(PageObject, URL)} instead to preserve per-test context.
      * Classes extending PageObject should pass the parent context to maintain proper test context.
@@ -57,7 +56,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
         super(injector);
         this.url = url;
     }
-    
+
     /**
      * Creates a page object within an existing context (preserves the correct injector and metadata).
      */
@@ -69,7 +68,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     /**
      * Helper constructor for migrating from injector-based initialization.
      * Creates a page object using Jenkins as context.
-     * 
+     *
      * @param injector The injector to use
      * @param url The URL of the page
      * @param jenkins The Jenkins instance to use as context
@@ -78,7 +77,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
         this(injector, url);
         this.context = jenkins;
     }
-    
+
     /**
      * Factory method to help migrate from injector-based initialization.
      * This should be used in place of direct constructor calls when a proper context is available.
@@ -95,6 +94,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
             throw new RuntimeException("Failed to create page object using context-based constructor", e);
         }
     }
+
     public static String createRandomName() {
         return RND.next();
     }
