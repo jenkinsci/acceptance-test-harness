@@ -8,8 +8,10 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import jakarta.inject.Singleton;
+import java.util.List;
 import org.jenkinsci.test.acceptance.Config;
 import org.jenkinsci.test.acceptance.FallbackConfig;
+import org.junit.runners.model.MultipleFailureException;
 
 /**
  * Holder of the Guice world for running tests. Singleton.
@@ -62,14 +64,16 @@ public class World extends AbstractModule {
         i.getInstance(TestName.class).testName = testName;
     }
 
-    public void endTestScope() {
-        injector.getInstance(TestCleaner.class).performCleanUp();
+    public void endTestScope() throws Exception {
+        List<Throwable> errors = injector.getInstance(TestCleaner.class).performCleanUp();
         injector.getInstance(TestLifecycle.class).endTestScope();
 
         for (SubWorld sw : subworlds.list(injector)) {
-            sw.injector.getInstance(TestCleaner.class).performCleanUp();
+            errors.addAll(sw.injector.getInstance(TestCleaner.class).performCleanUp());
             sw.injector.getInstance(TestLifecycle.class).endTestScope();
         }
+
+        MultipleFailureException.assertEmpty(errors);
     }
 
     @Override
