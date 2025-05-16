@@ -47,14 +47,52 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     private static final RandomNameGenerator RND = new RandomNameGenerator();
 
+    /**
+     * @deprecated Use {@link #PageObject(PageObject, URL)} instead to preserve per-test context.
+     * Classes extending PageObject should pass the parent context to maintain proper test context.
+     */
+    @Deprecated
     public PageObject(Injector injector, URL url) {
         super(injector);
         this.url = url;
     }
 
+    /**
+     * Creates a page object within an existing context (preserves the correct injector and metadata).
+     */
     protected PageObject(PageObject context, URL url) {
         this(context.injector, url);
         this.context = context;
+    }
+
+    /**
+     * Helper constructor for migrating from injector-based initialization.
+     * Creates a page object using Jenkins as context.
+     *
+     * @param injector The injector to use
+     * @param url The URL of the page
+     * @param jenkins The Jenkins instance to use as context
+     */
+    protected PageObject(Injector injector, URL url, Jenkins jenkins) {
+        this(injector, url);
+        this.context = jenkins;
+    }
+
+    /**
+     * Factory method to help migrate from injector-based initialization.
+     * This should be used in place of direct constructor calls when a proper context is available.
+     *
+     * @param injector The injector
+     * @param url The URL of the page
+     * @return A PageObject with Jenkins as context
+     */
+    public static <T extends PageObject> T create(Class<T> type, Injector injector, URL url) {
+        Jenkins jenkins = injector.getInstance(Jenkins.class);
+        try {
+            return type.getConstructor(PageObject.class, URL.class).newInstance(jenkins, url);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Failed to create page object using context-based constructor", e);
+        }
     }
 
     public static String createRandomName() {
