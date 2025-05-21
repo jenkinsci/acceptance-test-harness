@@ -2,7 +2,6 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Injector;
 import hudson.util.VersionNumber;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,8 +52,8 @@ public class Jenkins extends Node implements Container {
     public final ViewsMixIn views;
     public final SlavesMixIn slaves;
 
-    private Jenkins(Injector injector, URL url) {
-        super((PageObject) injector, url);
+    private Jenkins(PageObject context, URL url) {
+        super(context, url);
         waitForStarted();
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);
@@ -66,8 +65,8 @@ public class Jenkins extends Node implements Container {
         return this;
     }
 
-    public Jenkins(Injector injector, JenkinsController controller) {
-        this(injector, startAndGetUrl(controller));
+    public Jenkins(PageObject context, JenkinsController controller) {
+        this(context, startAndGetUrl(controller));
         this.controller = controller;
     }
 
