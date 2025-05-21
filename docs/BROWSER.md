@@ -85,7 +85,7 @@ There is a script to run VNC server and propagate the display number to the test
 
 Untested pseudo bash example
 
-    docker run --shm-size=256m -d -P selenium/standalone-firefox-debug > containerId.txt
+    docker run --shm-size=2g -d -P selenium/standalone-firefox-debug > containerId.txt
     export WEBDRIVER_CONTAINER_ID=$(cat containerId.txt)
     export BROWSER=remote-webdriver-firefox
     export REMOTE_WEBDRIVER_URL=http://$(docker port $WEBDRIVER_CONTAINER_ID 4444)/wd/hub
