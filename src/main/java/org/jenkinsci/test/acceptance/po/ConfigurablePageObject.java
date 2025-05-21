@@ -52,7 +52,7 @@ public abstract class ConfigurablePageObject extends PageObject {
     protected ConfigurablePageObject(PageObject context, URL url) {
         super(context, url);
     }
-    
+
     /**
      * @deprecated Use {@link #ConfigurablePageObject(PageObject, URL)} instead to properly maintain context hierarchy.
      *             This constructor will be removed in a future version.

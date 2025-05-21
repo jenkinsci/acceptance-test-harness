@@ -54,7 +54,7 @@ public class Jenkins extends Node implements Container {
     public final SlavesMixIn slaves;
 
     private Jenkins(Injector injector, URL url) {
-        super(injector, url);
+        super((Jenkins) injector, url);
         waitForStarted();
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);

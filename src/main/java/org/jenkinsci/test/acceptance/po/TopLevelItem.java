@@ -21,7 +21,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
     }
 
     private List<Parameter> parameters = new ArrayList<>();
-    
+
     @Deprecated
     public TopLevelItem(Injector injector, URL url, String name) {
         super(injector, url);

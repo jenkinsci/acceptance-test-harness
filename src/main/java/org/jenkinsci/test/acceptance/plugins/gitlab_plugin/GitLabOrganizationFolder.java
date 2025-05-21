@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.gitlab_plugin;
 
-import com.google.inject.Injector;
 import java.net.URL;
 import java.time.Duration;
 import org.jenkinsci.test.acceptance.po.Describable;
