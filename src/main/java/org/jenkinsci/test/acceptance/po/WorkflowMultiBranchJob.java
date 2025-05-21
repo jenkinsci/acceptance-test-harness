@@ -17,8 +17,8 @@ import org.openqa.selenium.WebElement;
 @Describable("org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject")
 public class WorkflowMultiBranchJob extends Folder {
 
-    public WorkflowMultiBranchJob(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public WorkflowMultiBranchJob(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 
     public <T extends BranchSource> T addBranchSource(final Class<T> type) {

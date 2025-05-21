@@ -27,14 +27,8 @@ import com.google.inject.Injector;
 import java.net.URL;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.jenkinsci.test.acceptance.po.BatchCommandBuildStep;
-import org.jenkinsci.test.acceptance.po.BuildStep;
-import org.jenkinsci.test.acceptance.po.Control;
-import org.jenkinsci.test.acceptance.po.Describable;
-import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.Job;
-import org.jenkinsci.test.acceptance.po.PostBuildStep;
-import org.jenkinsci.test.acceptance.po.ShellBuildStep;
+
+import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
 @Describable("hudson.maven.MavenModuleSet")
@@ -44,8 +38,8 @@ public class MavenModuleSet extends Job {
 
     private Control advancedButton = control("/advanced-button[1]");
 
-    public MavenModuleSet(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public MavenModuleSet(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 
     public MavenModuleSet options(String options) {

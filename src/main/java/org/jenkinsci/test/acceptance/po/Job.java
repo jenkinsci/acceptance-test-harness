@@ -64,6 +64,7 @@ public class Job extends TopLevelItem {
     private final Control hasSlaveAffinity = control("/hasSlaveAffinity");
     private final Control assignedLabel = control("/hasSlaveAffinity/assignedLabelString", "/label");
 
+    @Deprecated
     public Job(Injector injector, URL url, String name) {
         super(injector, url, name);
     }
