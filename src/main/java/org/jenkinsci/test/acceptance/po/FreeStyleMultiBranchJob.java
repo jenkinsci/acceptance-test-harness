@@ -11,8 +11,8 @@ import org.openqa.selenium.WebElement;
  */
 @Describable("com.github.mjdetullio.jenkins.plugins.multibranch.FreeStyleMultiBranchProject")
 public class FreeStyleMultiBranchJob extends Job {
-    public FreeStyleMultiBranchJob(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public FreeStyleMultiBranchJob(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 
     @Override
