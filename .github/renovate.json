@@ -56,7 +56,8 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java/"
+        "/src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java/",
+        "/vars.sh/"
       ],
       "matchStrings": [
         "selenium/standalone-(firefox|chrome):(?<currentValue>.*?)\""
