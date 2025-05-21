@@ -31,7 +31,7 @@ import org.jenkinsci.test.acceptance.po.PluginPageObject;
 @PluginPageObject("disk-usage")
 public class DiskUsage extends PageObject {
 
-    public DiskUsage(Injector i, URL url) {
+    public DiskUsage(PageObject i, URL url) {
         super(i, url);
     }
 
