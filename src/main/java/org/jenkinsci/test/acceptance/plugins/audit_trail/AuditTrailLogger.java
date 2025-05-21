@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.JenkinsLogger;
+import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
 
 public abstract class AuditTrailLogger extends JenkinsLogger {
 
@@ -64,7 +65,9 @@ public abstract class AuditTrailLogger extends JenkinsLogger {
             AuditTrailGlobalConfiguration area = new AuditTrailGlobalConfiguration(jenkins.getConfigPage());
             area.addLogger.selectDropdownMenu("Log file");
 
-            area.control("loggers/log").set(logfile);
+            try (UselessFileDetectorReplacement ufd = new UselessFileDetectorReplacement(driver)) {
+                area.control("loggers/log").set(logfile);
+            }
             area.control("loggers/limit").set(10);
             area.control("loggers/count").set(1);
             jenkins.save();
