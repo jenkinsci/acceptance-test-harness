@@ -53,7 +53,7 @@ public class Jenkins extends Node implements Container {
     public final SlavesMixIn slaves;
 
     private Jenkins(PageObject context, URL url) {
-        super(context, url);
+        super((Jenkins) context, url);
         waitForStarted();
         jobs = new JobsMixIn(this);
         views = new ViewsMixIn(this);
