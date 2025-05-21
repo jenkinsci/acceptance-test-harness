@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.plugins.disk_usage;
 
-import com.google.inject.Injector;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PluginPageObject;

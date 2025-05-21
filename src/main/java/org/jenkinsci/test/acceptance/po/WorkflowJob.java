@@ -24,7 +24,6 @@
 
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
 import java.time.Duration;

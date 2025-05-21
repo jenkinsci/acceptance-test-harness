@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import java.net.URL;
 import org.openqa.selenium.NoSuchElementException;
 
@@ -37,7 +36,7 @@ public abstract class Node extends ContainerPageObject {
         super(j, url);
     }
 
-    protected Node(Injector i, URL url) {
+    protected Node(PageObject i, URL url) {
         super(i, url);
     }
 

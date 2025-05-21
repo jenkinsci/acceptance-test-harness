@@ -23,11 +23,9 @@
  */
 package org.jenkinsci.test.acceptance.plugins.maven;
 
-import com.google.inject.Injector;
 import java.net.URL;
 import java.util.Objects;
 import java.util.function.Consumer;
-
 import org.jenkinsci.test.acceptance.po.*;
 import org.openqa.selenium.WebElement;
 
