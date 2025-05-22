@@ -72,15 +72,6 @@ If this is the case you can specify the address to use using:
 The same issue will also impact any other containers started that the tests that the Browser (rather than Jenkins) needs to access.
 For [Testcontainers](https://testcontainers.com/) you can additionally set `TESTCONTAINERS_HOST_OVERRIDE=ip.address.of.host`
 
-## Avoid focus steal with Xvnc on Linux
-If you select a real GUI browser, such as Firefox,
-a browser window will pop up left and right during tests,
-making it practically unusable for you to use your computer.
-There is a script to run VNC server and propagate the display number to the test suite using the dedicated variable `BROWSER_DISPLAY`.
-
-    $ eval "$(./vnc.sh)"
-    $ mvn test
-
 ## Example using remote web driver
 
 Untested pseudo bash example

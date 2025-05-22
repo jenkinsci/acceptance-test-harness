@@ -1,0 +1,63 @@
+---
+services:
+  firefox:
+    container_name: firefox
+    environment:
+      - SE_JAVA_OPTS=-Xmx256m -XX:+HeapDumpOnOutOfMemoryError -XX:+TieredCompilation -XX:TieredStopAtLevel=1
+      - SE_NODE_GRID_URL=http://firefox:4444  # Selenium needs to know where to advertise itself (e.g. BiDi)
+      - SE_SCREEN_HEIGHT=1090
+      - SE_SCREEN_WIDTH=1680
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: selenium/standalone-firefox:4.32.0@sha256:47d0b132a1ec4b976756349885a31bd484b4a40f9dd7839da270823d31d6cdcb
+    networks:
+      - ath-network
+    ports:
+      - 4444:4444  # Selenium Grid port
+      - 5900:5900  # VNC port
+    shm_size: 2g
+    volumes:
+      - shared_tmp:/tmp
+  mvn:
+    build:
+      context: src/main/resources/ath-container
+      dockerfile: Dockerfile
+      cache_from:
+        - jenkins/ath:latest
+    container_name: mvn
+    depends_on:
+      - firefox
+    environment:
+      - DISPLAY=firefox:99.0
+      - DOCKER_FIXTURES_NETWORK=ath-network
+      - JENKINS_LOCAL_HOSTNAME=mvn
+      - REMOTE_WEBDRIVER_URL=http://firefox:4444/wd/hub
+      - SELENIUM_PROXY_HOSTNAME=mvn
+      - SHARED_DOCKER_SERVICE=true
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    group_add:
+      - ${DOCKER_GID}
+    image: jenkins/ath:latest
+    networks:
+      - ath-network
+    ports:
+      - 5005:5005  # Maven debug port
+    shm_size: 2g
+    user: ath-user
+    volumes:
+      - ${PWD}:/home/ath-user/sources
+      - shared_tmp:/tmp
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /home/ath-user/sources
+networks:
+  ath-network:
+    name: ath-network
+    attachable: true
+volumes:
+  shared_tmp:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs

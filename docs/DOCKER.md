@@ -9,7 +9,6 @@ To enable this, set the environment variable SHARED_DOCKER_SERVICE=true, and the
 Interactive shell:
 ```
 harry@devbox $ ./ath-container.sh
-ath-user@0b968f00a942:~$ eval $(vnc.sh)
 ath-user@0b968f00a942:~$ run.sh firefox latest -Dmaven.test.failure.ignore=true -DforkCount=1 -B -Dtest=...
 ```
 
@@ -21,7 +20,7 @@ See the repository `Jenkinsfile` for inspiration.
 If you need to debug the tests running in a Docker container, run the tests with:
 
 ```bash
-run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -Dtest=...
+run.sh remote-webdriver-firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -Dtest=...
 ```
 
 With this instruction, the tests will stop until you connect a remote debugger.
@@ -41,11 +40,7 @@ It's best explained with an example:
    harry@devbox:~/acceptance-test-harness$ ./ath-container.sh
    ```
 
-1. In the container shell, set up the VNC server and run the tests with debugging:
-
-   ```bash
-   ath-user@1803848e337f:~/ath-sources$ eval $(vnc.sh)
-   ```
+1. In the container shell, run the tests with debugging:
 
    ```bash
    ath-user@1803848e337f:~/ath-sources$ run.sh firefox latest -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=*:5005 -Xnoagent -Djava.compiler=NONE" -DrunSmokeTests

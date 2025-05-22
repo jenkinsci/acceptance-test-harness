@@ -30,22 +30,16 @@
       "description": "We focus on Guice 6 until core adopts 7"
     },
     {
+      "allowedVersions": "<100.0.0",
+      "matchPackageNames": [
+        "/selenium/"
+      ],
+      "description": "Confusing dual versioning scheme"
+    },
+    {
       "groupName": "Selenium",
       "matchPackageNames": [
         "/selenium/"
-      ]
-    },
-    {
-      "matchDepNames": [
-        "docker",
-        "docker/buildx",
-        "firefox",
-        "mozilla/geckodriver",
-        "org.apache.maven:maven-core"
-      ],
-      "labels": [
-        "dependencies",
-        "build-image"
       ]
     }
   ],
@@ -64,29 +58,6 @@
       ],
       "depNameTemplate": "org.seleniumhq.selenium:selenium-java",
       "datasourceTemplate": "maven"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/src/main/resources/ath-container/Dockerfile/"
-      ],
-      "matchStrings": [
-        "ARG FIREFOX_VERSION=(?<currentValue>.*?)\n"
-      ],
-      "depNameTemplate": "firefox",
-      "versioningTemplate": "semver-coerced",
-      "datasourceTemplate": "custom.firefox"
-    },
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/src/main/resources/ath-container/Dockerfile/"
-      ],
-      "matchStrings": [
-        "ARG GECKODRIVER_VERSION=(?<currentValue>.*?)\n"
-      ],
-      "depNameTemplate": "mozilla/geckodriver",
-      "datasourceTemplate": "github-releases"
     },
     {
       "customType": "regex",
@@ -133,13 +104,5 @@
       "datasourceTemplate": "docker"
     }
   ],
-  "customDatasources": {
-    "firefox": {
-      "defaultRegistryUrlTemplate": "https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json",
-      "transformTemplates": [
-        "{\"releases\": $map($keys($), function($v) { {\"version\": $v} })}"
-      ]
-    }
-  },
   "rebaseWhen": "conflicted"
 }
