@@ -314,17 +314,9 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Get display number to run browser on.
-     * <p>
-     * Custom property {@code BROWSER_DISPLAY} has the preference. If not provided {@code DISPLAY} is used.
      */
     public static @CheckForNull String getBrowserDisplay() {
-        String d = System.getenv("BROWSER_DISPLAY");
-        if (d != null) {
-            return d;
-        }
-
-        d = System.getenv("DISPLAY");
-        return d;
+        return System.getenv("DISPLAY");
     }
 
     /**

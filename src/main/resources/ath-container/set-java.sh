@@ -30,9 +30,7 @@ javac -version
 echo
 echo Start running tests with...
 echo
-echo 'eval $(vnc.sh)'
-echo
-echo run.sh firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=...
+echo run.sh remote-webdriver-firefox latest -DforkCount=1 -Dmaven.test.failure.ignore=true -B -Dtest=...
 echo
 echo ------------------ END INFORMATION ------------------
 echo
