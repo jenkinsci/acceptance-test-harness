@@ -195,6 +195,9 @@ public class FallbackConfig extends AbstractModule {
             chromeOptions.setProxy(createSeleniumProxy(testName.get()));
         }
         setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
+        chromeOptions.setCapability("se:name", testName.get());
+        chromeOptions.setCapability(
+                "se:recordVideo", TestRecorderRule.isRecorderEnabled() && System.getenv("VIDEO_FOLDER") != null);
         return chromeOptions;
     }
 
