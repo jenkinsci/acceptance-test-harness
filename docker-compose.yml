@@ -1,5 +1,11 @@
 ---
 services:
+  init_video:
+    image: ubuntu:noble
+    command: >
+      sh -c "mkdir -p /tmp/videos && chmod 0777 /tmp/videos"
+    volumes:
+      - shared_tmp:/tmp
   firefox:
     container_name: firefox
     environment:
@@ -18,6 +24,24 @@ services:
     shm_size: 2g
     volumes:
       - shared_tmp:/tmp
+  video:
+    container_name: video
+    depends_on:
+      - firefox
+      - init_video
+    environment:
+      - DISPLAY_CONTAINER_NAME=firefox
+      - SE_NODE_GRID_URL=http://firefox:4444
+      - SE_NODE_PORT=4444
+      - SE_VIDEO_FILE_NAME=auto
+      - SE_VIDEO_FILE_NAME_SUFFIX=false
+      - SE_VIDEO_RECORD_STANDALONE=true
+      - VIDEO_FOLDER=/tmp2/videos
+    image: selenium/video:ffmpeg-7.1-20250515@sha256:5e283b26b1bb14cabb03b31aaf7d88348e93e92d82b0e1704780611bef129964
+    networks:
+      - ath-network
+    volumes:
+      - shared_tmp:/tmp2  # Avoid conflict with supervisord
   mvn:
     build:
       context: src/main/resources/ath-container
@@ -27,6 +51,7 @@ services:
     container_name: mvn
     depends_on:
       - firefox
+      - video
     environment:
       - DISPLAY=firefox:99.0
       - DOCKER_FIXTURES_NETWORK=ath-network
@@ -35,6 +60,7 @@ services:
       - SELENIUM_PROXY_HOSTNAME=mvn
       - SHARED_DOCKER_SERVICE=true
       - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+      - VIDEO_FOLDER=/tmp/videos
     extra_hosts:
       - host.docker.internal:host-gateway
     group_add:
