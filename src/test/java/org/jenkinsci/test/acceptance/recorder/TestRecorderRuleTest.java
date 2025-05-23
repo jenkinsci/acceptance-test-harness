@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.existingFile;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import org.jenkinsci.test.acceptance.guice.TestName;
@@ -15,6 +16,7 @@ public class TestRecorderRuleTest {
 
     @Test
     public void shouldNotRecordSuccessTestExecutionByDefault() {
+        assumeTrue(System.getenv("VIDEO_FOLDER") == null);
 
         final String oldMode = updateRecorderToDefaultOption();
 
@@ -40,6 +42,7 @@ public class TestRecorderRuleTest {
 
     @Test
     public void shouldRecordFailingTestExecutionByDefault() {
+        assumeTrue(System.getenv("VIDEO_FOLDER") == null);
 
         final String oldValue = updateRecorderToDefaultOption();
 
@@ -65,6 +68,7 @@ public class TestRecorderRuleTest {
 
     @Test
     public void shouldRecordSuccessTestExecutionWhenSaveAll() {
+        assumeTrue(System.getenv("VIDEO_FOLDER") == null);
 
         final String oldValue = updateRecorderToDefaultOption();
         try {
@@ -92,6 +96,7 @@ public class TestRecorderRuleTest {
 
     @Test
     public void shouldNotRecordWhenRecorderIsDisabled() {
+        assumeTrue(System.getenv("VIDEO_FOLDER") == null);
 
         try {
             // Since configured recorder option is static we need to set it manually in each test.

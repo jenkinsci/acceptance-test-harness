@@ -11,15 +11,9 @@ if [[ -z ${DOCKER_GID:-} ]]; then
 	export DOCKER_GID
 fi
 
-RECORDER=failuresOnly
-if ((jdk == 17)); then
-	# Crashes Monte when used with a remote X11 display
-	RECORDER=off
-fi
-
 trap 'docker-compose kill && docker-compose down' EXIT
 
-docker-compose run -e "MAVEN_ARGS=${MAVEN_ARGS}" -e "RECORDER=${RECORDER}" --name mvn -T --rm -v "${MAVEN_SETTINGS}:${MAVEN_SETTINGS}" mvn bash -s <<-INSIDE
+docker-compose run -e "MAVEN_ARGS=${MAVEN_ARGS}" --name mvn -T --rm -v "${MAVEN_SETTINGS}:${MAVEN_SETTINGS}" mvn bash -s <<-INSIDE
 	set-java.sh ${jdk}
 
 	# Ensure that Jenkins node setup does not influence the container Java setup
