@@ -12,13 +12,10 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -63,7 +60,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -113,19 +109,10 @@ public class FallbackConfig extends AbstractModule {
                 return createContainerWebDriver(
                         cleaner, "selenium/standalone-firefox:4.32.0", buildFirefoxOptions(testName));
             case "chrome-container":
-                return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.32.0", new ChromeOptions());
+                return createContainerWebDriver(
+                        cleaner, "selenium/standalone-chrome:4.32.0", buildChromeOptions(testName));
             case "chrome":
-                Map<String, String> prefs = new HashMap<>();
-                prefs.put(LANGUAGE_SELECTOR, "en");
-                ChromeOptions options = new ChromeOptions();
-                options.setExperimentalOption("prefs", prefs);
-                if (HarRecorder.isCaptureHarEnabled()) {
-                    options.setAcceptInsecureCerts(true);
-                    options.setProxy(createSeleniumProxy(testName.get()));
-                }
-
-                setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
-                return new ChromeDriver(options);
+                return new ChromeDriver(buildChromeOptions(testName));
             case "safari":
                 return new SafariDriver();
             case "saucelabs":
@@ -154,16 +141,16 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private WebDriver buildRemoteWebDriver(Capabilities options) throws MalformedURLException {
+    private WebDriver buildRemoteWebDriver(Capabilities options) {
         String u = System.getenv("REMOTE_WEBDRIVER_URL");
         if (StringUtils.isBlank(u)) {
             throw new Error("remote-webdriver type browsers require REMOTE_WEBDRIVER_URL to be set");
         }
-        RemoteWebDriver driver = new RemoteWebDriver(
-                new URL(u), // http://192.168.99.100:4444/wd/hub
-                options);
-        driver.setFileDetector(new LocalFileDetector());
-        return new Augmenter().augment(driver);
+        // http://192.168.99.100:4444/wd/hub
+        WebDriver driver =
+                RemoteWebDriver.builder().address(u).addAlternative(options).build();
+        ((RemoteWebDriver) driver).setFileDetector(new LocalFileDetector());
+        return driver;
     }
 
     private String getBrowser() {
@@ -196,9 +183,12 @@ public class FallbackConfig extends AbstractModule {
 
     private ChromeOptions buildChromeOptions(TestName testName) throws IOException {
         ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.setExperimentalOption("prefs", Map.of(LANGUAGE_SELECTOR, "en"));
+        chromeOptions.enableBiDi();
         if (HarRecorder.isCaptureHarEnabled()) {
             chromeOptions.setProxy(createSeleniumProxy(testName.get()));
         }
+        setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
         return chromeOptions;
     }
 
@@ -260,10 +250,12 @@ public class FallbackConfig extends AbstractModule {
             Thread.sleep(3000); // Give the container and selenium some time to spawn
 
             try {
-                RemoteWebDriver remoteWebDriver =
-                        new RemoteWebDriver(new URL("http://127.0.0.1:" + controlPort + "/wd/hub"), capabilities);
+                WebDriver driver = RemoteWebDriver.builder()
+                        .address("http://127.0.0.1:" + controlPort + "/wd/hub")
+                        .addAlternative(capabilities)
+                        .build();
                 cleaner.addTask(cleanContainer);
-                return new Augmenter().augment(remoteWebDriver);
+                return driver;
             } catch (RuntimeException e) {
                 cleanContainer.close();
                 throw e;
