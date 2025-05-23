@@ -375,6 +375,7 @@ public class FallbackConfig extends AbstractModule {
                         error.addSuppressed(t);
                     }
                 }
+
                 if (error != null) {
                     throw error;
                 }
@@ -386,48 +387,59 @@ public class FallbackConfig extends AbstractModule {
                     return;
                 }
 
-                // https://github.com/SeleniumHQ/docker-selenium/blob/cabae69a6e7542b2527072d677020a34fb1fce70/Video/video_nodeQuery.sh#L43-L44
-                String normalized = testNameStr.replace(' ', '_');
-                normalized = normalized.replaceAll("[^a-zA-Z0-9_-]", "");
-                normalized = normalized.substring(0, Math.min(251, normalized.length()));
-                normalized += ".mp4";
-
+                String normalized = normalize(testNameStr);
                 Path src = Paths.get(videoFolder).resolve(normalized);
                 if (!Files.exists(src)) {
                     return;
                 }
 
                 /*
-                 * FailureDiagnostics will have deleted this directory if the test passed, which is our clue as to
-                 * whether to retain or delete the video in the common case where we only retain the video if the test
-                 * failed. When the test passed and we want to save all videos, the directory won't exist, so we create
-                 * it.
+                 * FailureDiagnostics will have deleted this directory if the test passed, which is our clue whether to
+                 * retain or delete the video in the common case where we only retain the video if the test failed. When
+                 * the test passed and we want to retain all videos, the directory won't exist, so we create it.
                  */
                 Path diagnostics = Paths.get("target").resolve("diagnostics").resolve(testNameStr);
                 if (TestRecorderRule.saveAllExecutions()) {
                     Files.createDirectories(diagnostics);
                 }
                 if (Files.isDirectory(diagnostics)) {
-                    // Wait up to 5 seconds for the video container to finish writing out the last few frames of video.
-                    long lastSize = Files.size(src);
-                    long lastChangeTime = System.nanoTime();
-                    while (true) {
-                        Thread.sleep(1000);
-                        long currentSize = Files.size(src);
-                        long currentTime = System.nanoTime();
-                        if (currentSize != lastSize) {
-                            lastSize = currentSize;
-                            lastChangeTime = currentTime;
-                        } else if (currentTime - lastChangeTime >= 5_000_000_000L) {
-                            break;
-                        }
-                    }
-
+                    waitUntilLastFramesAreRecorded(src);
                     Path dest = diagnostics.resolve("ui-recording.mp4");
                     Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
                     System.out.printf("[[ATTACHMENT|%s]]%n", dest.toAbsolutePath());
                 } else {
                     Files.delete(src);
+                }
+            }
+
+            /**
+             * Normalize the video file name
+             */
+            private static String normalize(String testName) {
+                // https://github.com/SeleniumHQ/docker-selenium/blob/cabae69a6e7542b2527072d677020a34fb1fce70/Video/video_nodeQuery.sh#L43-L44
+                String normalized = testName.replace(' ', '_');
+                normalized = normalized.replaceAll("[^a-zA-Z0-9_-]", "");
+                normalized = normalized.substring(0, Math.min(251, normalized.length()));
+                normalized += ".mp4";
+                return normalized;
+            }
+
+            /**
+             * Wait up to 500 milliseconds for the video container to finish writing out the last few frames of video.
+             */
+            private static void waitUntilLastFramesAreRecorded(Path src) throws IOException, InterruptedException {
+                long lastSize = Files.size(src);
+                long lastChangeTime = System.nanoTime();
+                while (true) {
+                    Thread.sleep(100);
+                    long currentSize = Files.size(src);
+                    long currentTime = System.nanoTime();
+                    if (currentSize != lastSize) {
+                        lastSize = currentSize;
+                        lastChangeTime = currentTime;
+                    } else if (currentTime - lastChangeTime >= 500_000_000L) {
+                        break;
+                    }
                 }
             }
 
