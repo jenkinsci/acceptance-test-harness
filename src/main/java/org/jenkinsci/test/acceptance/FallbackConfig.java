@@ -355,6 +355,7 @@ public class FallbackConfig extends AbstractModule {
             @Override
             public void evaluate() throws Throwable {
                 Throwable error = null;
+
                 try {
                     d.quit();
                 } catch (Throwable t) {
@@ -387,8 +388,7 @@ public class FallbackConfig extends AbstractModule {
                     return;
                 }
 
-                String normalized = normalize(testNameStr);
-                Path src = Paths.get(videoFolder).resolve(normalized);
+                Path src = Paths.get(videoFolder).resolve(normalize(testNameStr));
                 if (!Files.exists(src)) {
                     return;
                 }
