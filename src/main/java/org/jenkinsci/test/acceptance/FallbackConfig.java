@@ -34,7 +34,6 @@ import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
@@ -487,11 +486,11 @@ public class FallbackConfig extends AbstractModule {
 
     @Provides
     @TestScope
-    public Jenkins createJenkins(PageObject context, JenkinsController controller) {
+    public Jenkins createJenkins(Injector injector, JenkinsController controller) {
         if (!controller.isRunning()) {
             return null;
         }
-        return new Jenkins(context, controller);
+        return new Jenkins(injector, controller);
     }
 
     /**
