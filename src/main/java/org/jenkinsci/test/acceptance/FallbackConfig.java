@@ -110,10 +110,10 @@ public class FallbackConfig extends AbstractModule {
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));
             case "firefox-container":
                 return createContainerWebDriver(
-                        cleaner, "selenium/standalone-firefox:4.32.0", buildFirefoxOptions(testName));
+                        cleaner, "selenium/standalone-firefox:4.33.0", buildFirefoxOptions(testName));
             case "chrome-container":
                 return createContainerWebDriver(
-                        cleaner, "selenium/standalone-chrome:4.32.0", buildChromeOptions(testName));
+                        cleaner, "selenium/standalone-chrome:4.33.0", buildChromeOptions(testName));
             case "chrome":
                 return new ChromeDriver(buildChromeOptions(testName));
             case "safari":
