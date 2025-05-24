@@ -41,8 +41,12 @@ RUN install -m 0755 -d /etc/apt/keyrings \
 # Maven in repo is not new enough for ATH
 ARG MAVEN_VERSION=3.9.9
 RUN curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+    curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512" && \
+    echo "$(cat apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512)  apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum --check --strict && \
     tar -xvzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz" -C /opt/ && \
-    mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven
+    mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven && \
+    rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+    rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512"
 ENV PATH "$PATH:/opt/maven/bin"
 
 COPY run.sh /usr/bin
