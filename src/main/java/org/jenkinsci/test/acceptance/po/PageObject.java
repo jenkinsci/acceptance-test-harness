@@ -47,6 +47,7 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     private static final RandomNameGenerator RND = new RandomNameGenerator();
 
+    @Deprecated
     public PageObject(Injector injector, URL url) {
         super(injector);
         this.url = url;
