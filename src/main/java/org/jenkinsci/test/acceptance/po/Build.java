@@ -38,7 +38,7 @@ public class Build extends ContainerPageObject {
     private boolean success;
 
     public Build(Job job, int buildNumber) {
-        super(job.injector, job.url("%d/", buildNumber));
+        super(job, job.url("%d/", buildNumber));
         this.job = job;
     }
 
