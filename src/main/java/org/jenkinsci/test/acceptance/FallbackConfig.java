@@ -432,7 +432,7 @@ public class FallbackConfig extends AbstractModule {
                     if (currentSize != lastSize) {
                         lastSize = currentSize;
                         lastChangeTime = currentTime;
-                    } else if (currentTime - lastChangeTime >= 500_000_000L) {
+                    } else if (currentTime - lastChangeTime >= 1_000_000_000L) {
                         break;
                     }
                 }
