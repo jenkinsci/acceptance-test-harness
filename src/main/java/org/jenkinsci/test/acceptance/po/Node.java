@@ -37,7 +37,6 @@ public abstract class Node extends ContainerPageObject {
         super(j, url);
     }
 
-    @Deprecated
     protected Node(Injector i, URL url) {
         super(i, url);
     }
