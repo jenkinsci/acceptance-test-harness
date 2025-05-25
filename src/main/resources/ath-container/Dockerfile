@@ -4,7 +4,7 @@
 
 FROM ubuntu:noble
 
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3008
@@ -47,7 +47,7 @@ RUN curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binarie
     mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven && \
     rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
     rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512"
-ENV PATH "$PATH:/opt/maven/bin"
+ENV PATH="$PATH:/opt/maven/bin"
 
 COPY run.sh /usr/bin
 COPY set-java.sh /usr/bin
@@ -64,5 +64,5 @@ RUN deluser --remove-home ubuntu \
 RUN chmod u+s "$(which update-alternatives)"
 
 USER ath-user
-ENV USER ath-user
+ENV USER=ath-user
 WORKDIR /home/ath-user
