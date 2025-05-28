@@ -57,6 +57,10 @@ public class TestRecorderRule extends TestWatcher {
 
     @Override
     protected void starting(Description description) {
+        if (System.getenv("VIDEO_FOLDER") != null) {
+            // Handled by Selenium in FallbackConfig
+            return;
+        }
         if (isRecorderEnabled()) {
             startRecording(description);
         }
@@ -101,6 +105,10 @@ public class TestRecorderRule extends TestWatcher {
 
     @Override
     protected void succeeded(Description description) {
+        if (System.getenv("VIDEO_FOLDER") != null) {
+            // Handled by Selenium in FallbackConfig
+            return;
+        }
         if (this.screenRecorder != null && !this.headless) {
             if (saveAllExecutions()) {
                 stopRecordingWithFinalWaiting();
@@ -113,14 +121,18 @@ public class TestRecorderRule extends TestWatcher {
 
     @Override
     protected void finished(Description description) {
+        if (System.getenv("VIDEO_FOLDER") != null) {
+            // Handled by Selenium in FallbackConfig
+            return;
+        }
         stopRecordingWithFinalWaiting();
     }
 
-    private boolean isRecorderEnabled() {
+    public static boolean isRecorderEnabled() {
         return !OFF.equals(RECORDER_OPTION);
     }
 
-    private boolean saveAllExecutions() {
+    public static boolean saveAllExecutions() {
         return ALWAYS.equals(RECORDER_OPTION);
     }
 

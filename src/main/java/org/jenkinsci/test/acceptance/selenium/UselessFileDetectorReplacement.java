@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.FileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.remote.UselessFileDetector;
@@ -29,9 +31,8 @@ public class UselessFileDetectorReplacement implements AutoCloseable {
      */
     public UselessFileDetectorReplacement(WebDriver driver) {
         driver = getNonWrappedDriver(driver);
-        if (driver.getClass().equals(RemoteWebDriver.class)) {
-            // we test the explicit class not instanceof as the local FirefoxDriver and others
-            // are also RemoteWebDriver but can not be configured with a FileDetector
+        if (driver instanceof RemoteWebDriver && !(driver instanceof FirefoxDriver || driver instanceof ChromeDriver)) {
+            // The local FirefoxDriver and others are also RemoteWebDriver but cannot be configured with a FileDetector.
             remoteDriver = (RemoteWebDriver) driver;
             previous = remoteDriver.getFileDetector();
             remoteDriver.setFileDetector(new UselessFileDetector());

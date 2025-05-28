@@ -53,14 +53,28 @@ public class JenkinsAcceptanceTestRule implements MethodRule { // TODO should us
 
                 injector.injectMembers(this);
 
+                Throwable throwable = null;
                 try {
                     decorateWithRules(base).evaluate();
                 } catch (AssumptionViolatedException e) {
                     System.out.printf("Skipping %s%n", description.getDisplayName());
                     e.printStackTrace();
-                    throw e;
+                    throwable = e;
+                } catch (Throwable t) {
+                    throwable = t;
                 } finally {
-                    world.endTestScope();
+                    try {
+                        world.endTestScope();
+                    } catch (Throwable t) {
+                        if (throwable == null) {
+                            throwable = t;
+                        } else {
+                            throwable.addSuppressed(t);
+                        }
+                    }
+                    if (throwable != null) {
+                        throw throwable;
+                    }
                 }
             }
 

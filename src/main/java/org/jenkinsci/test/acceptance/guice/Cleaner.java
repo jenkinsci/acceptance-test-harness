@@ -2,7 +2,9 @@ package org.jenkinsci.test.acceptance.guice;
 
 import java.io.Closeable;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -66,15 +68,18 @@ public class Cleaner {
         });
     }
 
-    public void performCleanUp() {
+    public List<Throwable> performCleanUp() {
         LOGGER.info("Performing cleanup tasks in order: " + tasks);
+        List<Throwable> errors = new ArrayList<>();
         for (Statement task : tasks) {
             try {
                 task.evaluate();
             } catch (Throwable t) {
                 LOGGER.log(Level.SEVERE, task + " failed", t);
+                errors.add(t);
             }
         }
         tasks.clear();
+        return errors;
     }
 }

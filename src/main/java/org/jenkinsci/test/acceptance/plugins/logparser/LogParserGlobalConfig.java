@@ -4,6 +4,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
 
 /**
  * Helper class for configuring global settings of LogParser.
@@ -37,7 +38,9 @@ public class LogParserGlobalConfig extends PageAreaImpl {
         String rulePath = createPageArea(rulePrefix, addButton::click);
         Rule rule = new Rule(getPage(), rulePath);
         rule.description.set(description);
-        rule.path.set(path);
+        try (UselessFileDetectorReplacement ufd = new UselessFileDetectorReplacement(driver)) {
+            rule.path.set(path);
+        }
     }
 
     /**

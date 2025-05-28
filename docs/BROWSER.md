@@ -13,12 +13,12 @@ The following values are available:
         _(Requires `REMOTE_WEBDRIVER_URL` to be set to the url of the remote,
           for example `http://0.0.0.0:32779/wd/hub`
           when using something like
-          [selenium/standalone-firefox-debug](https://hub.docker.com/r/selenium/standalone-firefox-debug/))_
+          [selenium/standalone-firefox](https://hub.docker.com/r/selenium/standalone-firefox/))_
  * `remote-webdriver-chrome`
         _(Requires `REMOTE_WEBDRIVER_URL` to be set to the url of the remote,
           for example `http://0.0.0.0:32779/wd/hub`
           when using something like
-          [selenium/standalone-chrome-debug](https://hub.docker.com/r/selenium/standalone-chrome-debug/))_
+          [selenium/standalone-chrome](https://hub.docker.com/r/selenium/standalone-chrome/))_
  * `firefox-container` and `chrome-container`
         Running the browser inside selenium provided per-test container.
 
@@ -72,20 +72,11 @@ If this is the case you can specify the address to use using:
 The same issue will also impact any other containers started that the tests that the Browser (rather than Jenkins) needs to access.
 For [Testcontainers](https://testcontainers.com/) you can additionally set `TESTCONTAINERS_HOST_OVERRIDE=ip.address.of.host`
 
-## Avoid focus steal with Xvnc on Linux
-If you select a real GUI browser, such as Firefox,
-a browser window will pop up left and right during tests,
-making it practically unusable for you to use your computer.
-There is a script to run VNC server and propagate the display number to the test suite using the dedicated variable `BROWSER_DISPLAY`.
-
-    $ eval "$(./vnc.sh)"
-    $ mvn test
-
 ## Example using remote web driver
 
 Untested pseudo bash example
 
-    docker run --shm-size=256m -d -P selenium/standalone-firefox-debug > containerId.txt
+    docker run --shm-size=2g -d -P selenium/standalone-firefox > containerId.txt
     export WEBDRIVER_CONTAINER_ID=$(cat containerId.txt)
     export BROWSER=remote-webdriver-firefox
     export REMOTE_WEBDRIVER_URL=http://$(docker port $WEBDRIVER_CONTAINER_ID 4444)/wd/hub

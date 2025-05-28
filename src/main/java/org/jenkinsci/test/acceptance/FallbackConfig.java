@@ -12,13 +12,12 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -36,6 +35,7 @@ import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
+import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
@@ -63,7 +63,6 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
-import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -111,21 +110,12 @@ public class FallbackConfig extends AbstractModule {
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));
             case "firefox-container":
                 return createContainerWebDriver(
-                        cleaner, "selenium/standalone-firefox:4.32.0", buildFirefoxOptions(testName));
+                        cleaner, "selenium/standalone-firefox:4.33.0", buildFirefoxOptions(testName));
             case "chrome-container":
-                return createContainerWebDriver(cleaner, "selenium/standalone-chrome:4.32.0", new ChromeOptions());
+                return createContainerWebDriver(
+                        cleaner, "selenium/standalone-chrome:4.33.0", buildChromeOptions(testName));
             case "chrome":
-                Map<String, String> prefs = new HashMap<>();
-                prefs.put(LANGUAGE_SELECTOR, "en");
-                ChromeOptions options = new ChromeOptions();
-                options.setExperimentalOption("prefs", prefs);
-                if (HarRecorder.isCaptureHarEnabled()) {
-                    options.setAcceptInsecureCerts(true);
-                    options.setProxy(createSeleniumProxy(testName.get()));
-                }
-
-                setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
-                return new ChromeDriver(options);
+                return new ChromeDriver(buildChromeOptions(testName));
             case "safari":
                 return new SafariDriver();
             case "saucelabs":
@@ -154,16 +144,16 @@ public class FallbackConfig extends AbstractModule {
         }
     }
 
-    private WebDriver buildRemoteWebDriver(Capabilities options) throws MalformedURLException {
+    private WebDriver buildRemoteWebDriver(Capabilities options) {
         String u = System.getenv("REMOTE_WEBDRIVER_URL");
         if (StringUtils.isBlank(u)) {
             throw new Error("remote-webdriver type browsers require REMOTE_WEBDRIVER_URL to be set");
         }
-        RemoteWebDriver driver = new RemoteWebDriver(
-                new URL(u), // http://192.168.99.100:4444/wd/hub
-                options);
-        driver.setFileDetector(new LocalFileDetector());
-        return new Augmenter().augment(driver);
+        // http://192.168.99.100:4444/wd/hub
+        WebDriver driver =
+                RemoteWebDriver.builder().address(u).addAlternative(options).build();
+        ((RemoteWebDriver) driver).setFileDetector(new LocalFileDetector());
+        return driver;
     }
 
     private String getBrowser() {
@@ -191,14 +181,23 @@ public class FallbackConfig extends AbstractModule {
         if (System.getenv("FIREFOX_BIN") != null) {
             firefoxOptions.setBinary(System.getenv("FIREFOX_BIN"));
         }
+        firefoxOptions.setCapability("se:name", testName.get());
+        firefoxOptions.setCapability(
+                "se:recordVideo", TestRecorderRule.isRecorderEnabled() && System.getenv("VIDEO_FOLDER") != null);
         return firefoxOptions;
     }
 
     private ChromeOptions buildChromeOptions(TestName testName) throws IOException {
         ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.setExperimentalOption("prefs", Map.of(LANGUAGE_SELECTOR, "en"));
+        chromeOptions.enableBiDi();
         if (HarRecorder.isCaptureHarEnabled()) {
             chromeOptions.setProxy(createSeleniumProxy(testName.get()));
         }
+        setDriverPropertyIfMissing("chromedriver", ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY);
+        chromeOptions.setCapability("se:name", testName.get());
+        chromeOptions.setCapability(
+                "se:recordVideo", TestRecorderRule.isRecorderEnabled() && System.getenv("VIDEO_FOLDER") != null);
         return chromeOptions;
     }
 
@@ -260,10 +259,12 @@ public class FallbackConfig extends AbstractModule {
             Thread.sleep(3000); // Give the container and selenium some time to spawn
 
             try {
-                RemoteWebDriver remoteWebDriver =
-                        new RemoteWebDriver(new URL("http://127.0.0.1:" + controlPort + "/wd/hub"), capabilities);
+                WebDriver driver = RemoteWebDriver.builder()
+                        .address("http://127.0.0.1:" + controlPort + "/wd/hub")
+                        .addAlternative(capabilities)
+                        .build();
                 cleaner.addTask(cleanContainer);
-                return new Augmenter().augment(remoteWebDriver);
+                return driver;
             } catch (RuntimeException e) {
                 cleanContainer.close();
                 throw e;
@@ -314,17 +315,9 @@ public class FallbackConfig extends AbstractModule {
 
     /**
      * Get display number to run browser on.
-     * <p>
-     * Custom property {@code BROWSER_DISPLAY} has the preference. If not provided {@code DISPLAY} is used.
      */
     public static @CheckForNull String getBrowserDisplay() {
-        String d = System.getenv("BROWSER_DISPLAY");
-        if (d != null) {
-            return d;
-        }
-
-        d = System.getenv("DISPLAY");
-        return d;
+        return System.getenv("DISPLAY");
     }
 
     /**
@@ -338,8 +331,8 @@ public class FallbackConfig extends AbstractModule {
         // Make sure the window has minimal resolution set, even when out of the visible screen.
         // Note - not maximizing here any more because that doesn't do anything.
         Dimension oldSize = base.manage().window().getSize();
-        if (oldSize.height < 1050 || oldSize.width < 1680) {
-            base.manage().window().setSize(new Dimension(1680, 1050));
+        if (oldSize.height < 1090 || oldSize.width < 1680) {
+            base.manage().window().setSize(new Dimension(1680, 1090));
         }
         Scroller scroller = new Scroller(base);
         final EventFiringDecorator<WebDriver> decorator = new EventFiringDecorator<>(scroller);
@@ -352,10 +345,97 @@ public class FallbackConfig extends AbstractModule {
             // sauce labs RemoteWebDriver doesn't support this
             LOGGER.info(base + " doesn't support page load timeout");
         }
+        String testNameStr = testName.get();
         cleaner.addTask(new Statement() {
             @Override
-            public void evaluate() {
-                d.quit();
+            public void evaluate() throws Throwable {
+                Throwable error = null;
+
+                try {
+                    d.quit();
+                } catch (Throwable t) {
+                    error = t;
+                }
+
+                /*
+                 * Quitting the driver writes out the recording, so only after this is done can we process the
+                 * recording. Unfortunately, this is after FailureDiagnostics has finished its job, so we have to
+                 * duplicate some of its logic here.
+                 */
+                try {
+                    processRecording();
+                } catch (Throwable t) {
+                    if (error == null) {
+                        error = t;
+                    } else {
+                        error.addSuppressed(t);
+                    }
+                }
+
+                if (error != null) {
+                    throw error;
+                }
+            }
+
+            private void processRecording() throws IOException, InterruptedException {
+                String videoFolder = System.getenv("VIDEO_FOLDER");
+                if (videoFolder == null) {
+                    return;
+                }
+
+                Path src = Paths.get(videoFolder).resolve(normalize(testNameStr));
+                if (!Files.exists(src)) {
+                    return;
+                }
+
+                /*
+                 * FailureDiagnostics will have deleted this directory if the test passed, which is our clue whether to
+                 * retain or delete the video in the common case where we only retain the video if the test failed. When
+                 * the test passed and we want to retain all videos, the directory won't exist, so we create it.
+                 */
+                Path diagnostics = Paths.get("target").resolve("diagnostics").resolve(testNameStr);
+                if (TestRecorderRule.saveAllExecutions()) {
+                    Files.createDirectories(diagnostics);
+                }
+                if (Files.isDirectory(diagnostics)) {
+                    waitUntilLastFramesAreRecorded(src);
+                    Path dest = diagnostics.resolve("ui-recording.mp4");
+                    Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
+                    System.out.printf("[[ATTACHMENT|%s]]%n", dest.toAbsolutePath());
+                } else {
+                    Files.delete(src);
+                }
+            }
+
+            /**
+             * Normalize the video file name
+             */
+            private static String normalize(String testName) {
+                // https://github.com/SeleniumHQ/docker-selenium/blob/cabae69a6e7542b2527072d677020a34fb1fce70/Video/video_nodeQuery.sh#L43-L44
+                String normalized = testName.replace(' ', '_');
+                normalized = normalized.replaceAll("[^a-zA-Z0-9_-]", "");
+                normalized = normalized.substring(0, Math.min(251, normalized.length()));
+                normalized += ".mp4";
+                return normalized;
+            }
+
+            /**
+             * Wait up to 500 milliseconds for the video container to finish writing out the last few frames of video.
+             */
+            private static void waitUntilLastFramesAreRecorded(Path src) throws IOException, InterruptedException {
+                long lastSize = Files.size(src);
+                long lastChangeTime = System.nanoTime();
+                while (true) {
+                    Thread.sleep(100);
+                    long currentSize = Files.size(src);
+                    long currentTime = System.nanoTime();
+                    if (currentSize != lastSize) {
+                        lastSize = currentSize;
+                        lastChangeTime = currentTime;
+                    } else if (currentTime - lastChangeTime >= 1_000_000_000L) {
+                        break;
+                    }
+                }
             }
 
             @Override

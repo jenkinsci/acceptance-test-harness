@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.guice;
 
 import com.google.inject.Inject;
+import java.util.List;
 
 /**
  * {@link Cleaner} at the end of each {@link TestScope}.
@@ -15,18 +16,19 @@ public class TestCleaner extends Cleaner {
     TestLifecycle lifecycle;
 
     @Override
-    public void performCleanUp() {
-        super.performCleanUp();
+    public List<Throwable> performCleanUp() {
+        List<Throwable> errors = super.performCleanUp();
         for (Object o : lifecycle.getInstances()) {
             if (o instanceof AutoCleaned) {
                 try {
                     ((AutoCleaned) o).close();
                 } catch (Throwable t) {
-                    // just log and move on so that other cleaners can run
                     System.out.println(o + " clean up failed");
                     t.printStackTrace();
+                    errors.add(t);
                 }
             }
         }
+        return errors;
     }
 }

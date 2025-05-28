@@ -27,4 +27,4 @@ export TESTCONTAINERS_HOST_OVERRIDE="${IP}"
 export JENKINS_LOCAL_HOSTNAME="${IP}"
 
 echo "To start the remote Firefox container, run the following command:"
-echo "docker run --shm-size=256m -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e no_proxy=localhost -e SCREEN_WIDTH=1680 -e SCREEN_HEIGHT=1090 selenium/standalone-firefox:4.32.0"
+echo "docker run --shm-size=2g -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e no_proxy=localhost -e SE_SCREEN_WIDTH=1680 -e SE_SCREEN_HEIGHT=1090 selenium/standalone-firefox:4.33.0"
