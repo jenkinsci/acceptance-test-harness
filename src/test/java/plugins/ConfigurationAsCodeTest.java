@@ -31,6 +31,7 @@ import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.configuration_as_code.JcascManage;
 import org.jenkinsci.test.acceptance.po.JenkinsConfig;
+import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
 import org.junit.Test;
 
 @WithPlugins("configuration-as-code")
@@ -41,7 +42,10 @@ public class ConfigurationAsCodeTest extends AbstractJUnitTest {
 
         JcascManage jm = new JcascManage(jenkins);
         jm.open();
-        jm.configure(resource("/configuration_as_code/trivial.yaml").asFile().getAbsolutePath());
+        try (UselessFileDetectorReplacement ufd = new UselessFileDetectorReplacement(driver)) {
+            jm.configure(
+                    resource("/configuration_as_code/trivial.yaml").asFile().getAbsolutePath());
+        }
 
         assertThat(jenkins.open(), hasContent(EXPECTED_DESC));
 

@@ -1,11 +1,13 @@
 ---
 services:
   init_video:
+    container_name: init_video
     image: ubuntu:noble
     command: >
-      sh -c "mkdir -p /tmp/videos && chmod 0777 /tmp/videos"
+      sh -c 'chown 1000:1000 /videos && chmod 0777 /videos'
+    user: root
     volumes:
-      - shared_tmp:/tmp
+      - videos:/videos:z
   firefox:
     container_name: firefox
     environment:
@@ -23,7 +25,7 @@ services:
       - 5900:5900  # VNC port
     shm_size: 2g
     volumes:
-      - shared_tmp:/tmp
+      - videos:/videos:z
   video:
     container_name: video
     depends_on:
@@ -36,12 +38,12 @@ services:
       - SE_VIDEO_FILE_NAME=auto
       - SE_VIDEO_FILE_NAME_SUFFIX=false
       - SE_VIDEO_RECORD_STANDALONE=true
-      - VIDEO_FOLDER=/tmp2/videos
+      - VIDEO_FOLDER=/videos
     image: selenium/video:ffmpeg-7.1-20250515@sha256:5e283b26b1bb14cabb03b31aaf7d88348e93e92d82b0e1704780611bef129964
     networks:
       - ath-network
     volumes:
-      - shared_tmp:/tmp2  # Avoid conflict with supervisord
+      - videos:/videos:z
   mvn:
     build:
       context: src/main/resources/ath-container
@@ -60,7 +62,7 @@ services:
       - SELENIUM_PROXY_HOSTNAME=mvn
       - SHARED_DOCKER_SERVICE=true
       - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
-      - VIDEO_FOLDER=/tmp/videos
+      - VIDEO_FOLDER=/videos
     extra_hosts:
       - host.docker.internal:host-gateway
     group_add:
@@ -73,16 +75,16 @@ services:
     shm_size: 2g
     user: ath-user
     volumes:
-      - ${PWD}:/home/ath-user/sources
-      - shared_tmp:/tmp
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}:/home/ath-user/sources:Z
+      - videos:/videos:z
+      - /var/run/docker.sock:/var/run/docker.sock:Z
     working_dir: /home/ath-user/sources
 networks:
   ath-network:
     name: ath-network
     attachable: true
 volumes:
-  shared_tmp:
+  videos:
     driver: local
     driver_opts:
       type: tmpfs
