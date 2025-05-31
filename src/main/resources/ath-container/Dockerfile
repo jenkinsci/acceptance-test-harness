@@ -25,7 +25,7 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
-ARG DOCKER_BUILDX_VERSION=0.23.0
+ARG DOCKER_BUILDX_VERSION=0.24.0
 ARG DOCKER_VERSION=28.2.2
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
