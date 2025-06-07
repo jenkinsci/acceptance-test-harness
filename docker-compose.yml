@@ -8,16 +8,16 @@ services:
     user: root
     volumes:
       - videos:/videos:z
-  firefox:
-    container_name: firefox
+  chrome:
+    container_name: chrome
     environment:
       - SE_JAVA_OPTS=-Xmx256m -XX:+HeapDumpOnOutOfMemoryError -XX:+TieredCompilation -XX:TieredStopAtLevel=1
-      - SE_NODE_GRID_URL=http://firefox:4444  # Selenium needs to know where to advertise itself (e.g. BiDi)
+      - SE_NODE_GRID_URL=http://chrome:4444  # Selenium needs to know where to advertise itself (e.g. BiDi)
       - SE_SCREEN_HEIGHT=1090
       - SE_SCREEN_WIDTH=1680
     extra_hosts:
       - host.docker.internal:host-gateway
-    image: selenium/standalone-firefox:4.33.0@sha256:d3dc802e0cdfa78586871183e20c5c230d151d381941140df6395f713e188c92
+    image: selenium/standalone-chrome:4.33.0@sha256:745c10306dcc8af6b779ac74f5671db61b3ba19641c5475aa432b3b9eb497d4f
     networks:
       - ath-network
     ports:
@@ -29,11 +29,11 @@ services:
   video:
     container_name: video
     depends_on:
-      - firefox
+      - chrome
       - init_video
     environment:
-      - DISPLAY_CONTAINER_NAME=firefox
-      - SE_NODE_GRID_URL=http://firefox:4444
+      - DISPLAY_CONTAINER_NAME=chrome
+      - SE_NODE_GRID_URL=http://chrome:4444
       - SE_NODE_PORT=4444
       - SE_VIDEO_FILE_NAME=auto
       - SE_VIDEO_FILE_NAME_SUFFIX=false
@@ -52,13 +52,13 @@ services:
         - jenkins/ath:latest
     container_name: mvn
     depends_on:
-      - firefox
+      - chrome
       - video
     environment:
-      - DISPLAY=firefox:99.0
+      - DISPLAY=chrome:99.0
       - DOCKER_FIXTURES_NETWORK=ath-network
       - JENKINS_LOCAL_HOSTNAME=mvn
-      - REMOTE_WEBDRIVER_URL=http://firefox:4444/wd/hub
+      - REMOTE_WEBDRIVER_URL=http://chrome:4444/wd/hub
       - SELENIUM_PROXY_HOSTNAME=mvn
       - SHARED_DOCKER_SERVICE=true
       - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
