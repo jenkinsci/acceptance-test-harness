@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import java.net.URL;
 
 /**
@@ -8,7 +7,7 @@ import java.net.URL;
  */
 @Describable("hudson.model.FreeStyleProject")
 public class FreeStyleJob extends Job {
-    public FreeStyleJob(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public FreeStyleJob(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 }

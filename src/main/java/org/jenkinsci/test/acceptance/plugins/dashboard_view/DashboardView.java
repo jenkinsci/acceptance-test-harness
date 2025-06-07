@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.plugins.dashboard_view;
 
-import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.net.URL;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.MainPanel;
 import org.jenkinsci.test.acceptance.plugins.dashboard_view.read.ProjectStatusStdJobList;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
+import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.View;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -68,8 +68,8 @@ public class DashboardView extends View {
      * @param injector Injector to use.
      * @param url      URL of view.
      */
-    public DashboardView(Injector injector, URL url) {
-        super(injector, url);
+    public DashboardView(PageObject context, URL url) {
+        super(context, url);
     }
 
     /**
