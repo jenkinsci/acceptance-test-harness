@@ -5,4 +5,5 @@ buildDockerAndPublishImage('ath', [
   dockerfile: 'src/main/resources/ath-container/Dockerfile',
   imageDir: 'src/main/resources/ath-container/',
   registryNamespace: 'jenkins',
+  cacheTo: 'type=registry,ref=jenkins/ath:build-cache',
 ])
