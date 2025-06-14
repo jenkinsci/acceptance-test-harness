@@ -49,7 +49,7 @@ services:
       context: src/main/resources/ath-container
       dockerfile: Dockerfile
       cache_from:
-        - jenkins/ath:latest
+        - type=registry,ref=jenkins/ath:build-cache
     container_name: mvn
     depends_on:
       - firefox
