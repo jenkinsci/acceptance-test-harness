@@ -35,7 +35,7 @@ public abstract class Action extends PageObject {
     protected final ContainerPageObject parent;
 
     public Action(ContainerPageObject parent, String relative) {
-        super(parent.injector, parent.url(relative + "/"));
+        super(parent, parent.url(relative + "/"));
         this.parent = parent;
     }
 

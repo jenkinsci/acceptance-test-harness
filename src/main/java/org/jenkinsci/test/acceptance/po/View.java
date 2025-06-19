@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Injector;
 import java.net.URL;
 import org.hamcrest.Description;
 import org.jenkinsci.test.acceptance.Matcher;
@@ -23,8 +22,8 @@ public abstract class View extends ContainerPageObject {
 
     public final JobsMixIn jobs;
 
-    public View(Injector injector, URL url) {
-        super(injector, url);
+    public View(PageObject context, URL url) {
+        super(context, url);
         jobs = new JobsMixIn(this);
     }
 
