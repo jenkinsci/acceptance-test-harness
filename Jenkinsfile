@@ -42,7 +42,7 @@ def axes = [
   jenkinsVersions: ['lts', 'latest'],
   platforms: ['linux'],
   jdks: [17, 21],
-  browsers: ['firefox'],
+  browsers: ['chrome', 'firefox'],
 ]
 
 stage('Record builds and sessions') {
@@ -101,6 +101,12 @@ for (int i = 0; i < splits.size(); i++) {
   int index = i
   axes.values().combinations {
     def (jenkinsVersion, platform, jdk, browser) = it
+    if (browser == 'chrome' && jenkinsVersion != 'latest') {
+      return
+    }
+    if (browser != 'chrome' && jenkinsVersion == 'latest') {
+      return
+    }
     if (jdk == 21 && jenkinsVersion != 'latest') {
       return
     }
