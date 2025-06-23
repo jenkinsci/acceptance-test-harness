@@ -11,9 +11,9 @@ import org.jenkinsci.test.acceptance.po.PostBuildStep;
  */
 @Describable("Editable Email Notification")
 public class EmailExtPublisher extends AbstractStep implements PostBuildStep {
-    public final Control subject = control("project_default_subject");
-    private final Control recipient = control("project_recipient_list", "recipientlist_recipients");
-    public final Control body = control("project_default_content");
+    public final Control subject = control("defaultSubject", "project_default_subject");
+    private final Control recipient = control("recipientList", "project_recipient_list", "recipientlist_recipients");
+    public final Control body = control("defaultContent", "project_default_content");
 
     private boolean advancedOpened;
 
@@ -25,7 +25,10 @@ public class EmailExtPublisher extends AbstractStep implements PostBuildStep {
         recipient.set(r);
 
         ensureAdvancedOpened();
-        control("project_triggers/hetero-list-add[recipientProviders]").selectDropdownMenu("Recipient List");
+        control(
+                        "configuredTriggers/hetero-list-add[recipientProviders]",
+                        "project_triggers/hetero-list-add[recipientProviders]")
+                .selectDropdownMenu("Recipient List");
     }
 
     public void ensureAdvancedOpened() {
