@@ -15,7 +15,7 @@ public class EmailExtPublisher extends AbstractStep implements PostBuildStep {
     private final Control recipient = control("project_recipient_list", "recipientlist_recipients");
     public final Control body = control("project_default_content");
 
-    private boolean advacedOpened;
+    private boolean advancedOpened;
 
     public EmailExtPublisher(Job parent, String path) {
         super(parent, path);
@@ -29,9 +29,9 @@ public class EmailExtPublisher extends AbstractStep implements PostBuildStep {
     }
 
     public void ensureAdvancedOpened() {
-        if (!advacedOpened) {
+        if (!advancedOpened) {
             control("advanced-button").click();
-            advacedOpened = true;
+            advancedOpened = true;
         }
     }
 }
