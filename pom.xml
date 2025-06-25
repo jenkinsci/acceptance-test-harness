@@ -804,7 +804,7 @@ and
     <profile>
       <id>lts</id>
       <properties>
-        <jenkins.version>2.504.2</jenkins.version>
+        <jenkins.version>2.504.3</jenkins.version>
       </properties>
     </profile>
   </profiles>
