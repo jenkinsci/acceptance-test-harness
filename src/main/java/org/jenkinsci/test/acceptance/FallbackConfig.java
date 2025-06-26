@@ -422,7 +422,7 @@ public class FallbackConfig extends AbstractModule {
             }
 
             /**
-             * Wait up to 500 milliseconds for the video container to finish writing out the last few frames of video.
+             * Wait up to 1 second for the video container to finish writing out the last few frames of video.
              */
             private static void waitUntilLastFramesAreRecorded(Path src) throws IOException, InterruptedException {
                 long lastSize = Files.size(src);
