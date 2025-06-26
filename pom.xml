@@ -141,11 +141,6 @@ and
       <version>2.37</version>
     </dependency>
     <dependency>
-      <groupId>ch.randelshofer</groupId>
-      <artifactId>org.monte.media.screenrecorder</artifactId>
-      <version>17.2.1</version>
-    </dependency>
-    <dependency>
       <groupId>com.browserup</groupId>
       <artifactId>browserup-proxy-core</artifactId>
       <version>2.1.2</version>
