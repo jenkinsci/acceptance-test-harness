@@ -40,8 +40,8 @@ function download() {
 	fi
 }
 
-if [[ -z $DISPLAY ]] && [[ -z $BROWSER_DISPLAY ]]; then
-	echo >&2 'Neither DISPLAY nor BROWSER_DISPLAY defined. Is the VNC server running?'
+if [[ -z $DISPLAY ]]; then
+	echo >&2 'DISPLAY is not defined. Is the VNC server running?'
 	exit 1
 fi
 

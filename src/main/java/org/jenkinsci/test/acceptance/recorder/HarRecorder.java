@@ -69,7 +69,7 @@ public class HarRecorder extends TestWatcher {
     }
 
     static State CAPTURE_HAR = State.value(SystemEnvironmentVariables.getPropertyVariableOrEnvironment(
-            "RECORD_BROWSER_TRAFFIC", State.FAILURES_ONLY.getValue()));
+            "RECORD_BROWSER_TRAFFIC", State.OFF.getValue()));
 
     private static BrowserUpProxy proxy;
 

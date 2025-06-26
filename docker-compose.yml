@@ -1,0 +1,91 @@
+---
+services:
+  init_video:
+    container_name: init_video
+    image: ubuntu:noble
+    command: >
+      sh -c 'chown 1000:1000 /videos && chmod 0777 /videos'
+    user: root
+    volumes:
+      - videos:/videos:z
+  browser:
+    container_name: browser
+    environment:
+      - SE_JAVA_OPTS=-Xmx256m -XX:+HeapDumpOnOutOfMemoryError -XX:+TieredCompilation -XX:TieredStopAtLevel=1
+      - SE_NODE_GRID_URL=http://browser:4444  # Selenium needs to know where to advertise itself (e.g. BiDi)
+      - SE_SCREEN_HEIGHT=1090
+      - SE_SCREEN_WIDTH=1680
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: selenium/standalone-firefox:4.33.0@sha256:e1f5e82d2525deafe5452d4fe9917dfe240e4e072f6caf1cb71e4ed4f32817b6
+    networks:
+      - ath-network
+    ports:
+      - 4444:4444  # Selenium Grid port
+      - 5900:5900  # VNC port
+    shm_size: 2g
+    volumes:
+      - videos:/videos:z
+  video:
+    container_name: video
+    depends_on:
+      - browser
+      - init_video
+    environment:
+      - DISPLAY_CONTAINER_NAME=browser
+      - SE_NODE_GRID_URL=http://browser:4444
+      - SE_NODE_PORT=4444
+      - SE_VIDEO_FILE_NAME=auto
+      - SE_VIDEO_FILE_NAME_SUFFIX=false
+      - SE_VIDEO_RECORD_STANDALONE=true
+      - VIDEO_FOLDER=/videos
+    image: selenium/video:ffmpeg-7.1-20250515@sha256:5e283b26b1bb14cabb03b31aaf7d88348e93e92d82b0e1704780611bef129964
+    networks:
+      - ath-network
+    volumes:
+      - videos:/videos:z
+  mvn:
+    build:
+      context: src/main/resources/ath-container
+      dockerfile: Dockerfile
+      cache_from:
+        - type=registry,ref=jenkins/ath:build-cache
+    container_name: mvn
+    depends_on:
+      - browser
+      - video
+    environment:
+      - DISPLAY=browser:99.0
+      - DOCKER_FIXTURES_NETWORK=ath-network
+      - JENKINS_LOCAL_HOSTNAME=mvn
+      - REMOTE_WEBDRIVER_URL=http://browser:4444/wd/hub
+      - SELENIUM_PROXY_HOSTNAME=mvn
+      - SHARED_DOCKER_SERVICE=true
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+      - VIDEO_FOLDER=/videos
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    group_add:
+      - ${DOCKER_GID}
+    image: jenkins/ath:latest
+    networks:
+      - ath-network
+    ports:
+      - 5005:5005  # Maven debug port
+    shm_size: 2g
+    user: ath-user
+    volumes:
+      - ${PWD}:/home/ath-user/sources:Z
+      - videos:/videos:z
+      - /var/run/docker.sock:/var/run/docker.sock:Z
+    working_dir: /home/ath-user/sources
+networks:
+  ath-network:
+    name: ath-network
+    attachable: true
+volumes:
+  videos:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs

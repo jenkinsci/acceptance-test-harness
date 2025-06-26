@@ -30,22 +30,16 @@
       "description": "We focus on Guice 6 until core adopts 7"
     },
     {
+      "allowedVersions": "<100.0.0",
+      "matchPackageNames": [
+        "/selenium/"
+      ],
+      "description": "Confusing dual versioning scheme"
+    },
+    {
       "groupName": "Selenium",
       "matchPackageNames": [
         "/selenium/"
-      ]
-    },
-    {
-      "matchDepNames": [
-        "docker",
-        "docker/buildx",
-        "firefox",
-        "mozilla/geckodriver",
-        "org.apache.maven:maven-core"
-      ],
-      "labels": [
-        "dependencies",
-        "build-image"
       ]
     }
   ],
@@ -55,8 +49,9 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java"
+      "managerFilePatterns": [
+        "/src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java/",
+        "/vars.sh/"
       ],
       "matchStrings": [
         "selenium/standalone-(firefox|chrome):(?<currentValue>.*?)\""
@@ -66,31 +61,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
-      ],
-      "matchStrings": [
-        "ARG FIREFOX_VERSION=(?<currentValue>.*?)\n"
-      ],
-      "depNameTemplate": "firefox",
-      "versioningTemplate": "semver-coerced",
-      "datasourceTemplate": "custom.firefox"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
-      ],
-      "matchStrings": [
-        "ARG GECKODRIVER_VERSION=(?<currentValue>.*?)\n"
-      ],
-      "depNameTemplate": "mozilla/geckodriver",
-      "datasourceTemplate": "github-releases"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG MAVEN_VERSION=(?<currentValue>.*?)\n"
@@ -100,8 +72,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG DOCKER_BUILDX_VERSION=(?<currentValue>.*?)\n"
@@ -111,8 +83,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/main/resources/ath-container/Dockerfile"
+      "managerFilePatterns": [
+        "/src/main/resources/ath-container/Dockerfile/"
       ],
       "matchStrings": [
         "ARG DOCKER_VERSION=(?<currentValue>.*?)\n"
@@ -122,8 +94,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "src/test/java/plugins/OicAuthPluginTest.java"
+      "managerFilePatterns": [
+        "/src/test/java/plugins/OicAuthPluginTest.java/"
       ],
       "matchStrings": [
         ".* KEYCLOAK_IMAGE =\n\\s*\"(?<repo>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:.*?)\";\n"
@@ -132,13 +104,5 @@
       "datasourceTemplate": "docker"
     }
   ],
-  "customDatasources": {
-    "firefox": {
-      "defaultRegistryUrlTemplate": "https://product-details.mozilla.org/1.0/firefox_history_stability_releases.json",
-      "transformTemplates": [
-        "{\"releases\": $map($keys($), function($v) { {\"version\": $v} })}"
-      ]
-    }
-  },
   "rebaseWhen": "conflicted"
 }

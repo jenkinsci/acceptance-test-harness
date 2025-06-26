@@ -15,7 +15,6 @@ import org.jenkinsci.test.acceptance.utils.mail.MailhogProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.openqa.selenium.By;
 
 @WithPlugins("mailer")
 @Category(DockerTest.class)
@@ -42,14 +41,6 @@ public class MailerPluginTest extends AbstractJUnitTest {
                 Pattern.compile("Test email #1"),
                 "admin@example.com",
                 Pattern.compile("This is test email #1 sent from Jenkins"));
-
-        /*
-         * Navigate back to the dashboard first to dismiss the alert so that CspRule can check for violations (see
-         * FormValidationTest).
-         */
-        jenkins.runThenConfirmAlert(() -> driver.findElement(By.xpath("//ol[@id=\"breadcrumbs\"]/li[1]/a"))
-                .click());
-        sleep(1000);
     }
 
     @Test

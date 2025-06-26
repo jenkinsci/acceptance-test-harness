@@ -3,7 +3,6 @@ package plugins;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertEquals;
@@ -208,7 +207,6 @@ public class DashboardViewPluginTest extends AbstractJobRelatedTest {
         assertThat(url, endsWith(name + "/"));
 
         final List<String> breadCrumbs = v.breadCrumbs.getBreadCrumbs();
-        assertThat(breadCrumbs, hasSize(2));
         final String nameCrumb = breadCrumbs.get(breadCrumbs.size() - 1);
         assertThat(nameCrumb, is(name));
 

@@ -55,7 +55,7 @@ stage('Record builds and sessions') {
       }
       axes['jenkinsVersions'].each { jenkinsVersion ->
         infra.withArtifactCachingProxy {
-            sh "rm -rf target && DISPLAY=:0 ./run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
+            sh "rm -rf target && DISPLAY=:0 ./src/main/resources/ath-container/run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
         }
         def coreCommit = sh(script: './core-commit.sh', returnStdout: true).trim()
         /*
@@ -97,8 +97,6 @@ branches['CI'] = {
   }
 }
 
-def skipImageBuild = env.CHANGE_ID && !pullRequest.labels.contains('build-image')
-
 for (int i = 0; i < splits.size(); i++) {
   int index = i
   axes.values().combinations {
@@ -122,11 +120,7 @@ for (int i = 0; i < splits.size(); i++) {
           retryCounts = retryCounts + 1 // increment the retry count before allocating a node in case it fails
           node(nodeLabel) {
             checkout scm
-            def image = skipImageBuild ? docker.image('jenkins/ath') : docker.build('jenkins/ath', '--build-arg uid="$(id -u)" --build-arg gid="$(id -g)" ./src/main/resources/ath-container/')
-            sh 'mkdir -p target/ath-reports && chmod a+rwx target/ath-reports'
-            def cwd = pwd()
-            def dockergid = sh label: 'get docker group', returnStdout: true, script: 'getent group docker | cut -d: -f3'
-            image.inside("--group-add ${dockergid} -v /var/run/docker.sock:/var/run/docker.sock -v '${cwd}/target/ath-reports:/reports:rw' --shm-size 2g") {
+              sh './build-image.sh'
               def exclusions = splits.get(index).join('\n')
               writeFile file: 'excludes.txt', text: exclusions
               infra.withArtifactCachingProxy {
@@ -140,24 +134,14 @@ for (int i = 0; i < splits.size(); i++) {
                     // but not letting the build to fail will cause next build not to try those tests again.
                     allowEmptyResults: true
                     ) {
-                      sh """
-                          set-java.sh ${jdk}
-                          # Ensure that Jenkins node setup does not influence the container java setup
-                          unset JAVA_HOME
-                          eval \$(vnc.sh)
-                          java -version
-                          mvn -v
-                          run.sh ${browser} ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -Dmaven.test.failure.ignore=true -Dcsp.rule -DforkCount=1 -B
-                          cp --verbose target/surefire-reports/TEST-*.xml /reports
-                          """
+                      sh "./ci.sh ${jdk} ${browser} ${jenkinsVersion}"
                     }
-              }
             }
             withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
               def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
               unstash sessionFile
               def session = readFile(sessionFile).trim()
-              sh "launchable verify && launchable record tests --session ${session} maven './target/ath-reports'"
+              sh "launchable verify && launchable record tests --session ${session} maven './target/surefire-reports'"
             }
           }
         }
