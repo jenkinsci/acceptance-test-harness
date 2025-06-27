@@ -45,6 +45,7 @@ public class Folder extends TopLevelItem implements Container {
     private final By viewTab = by.css(".tabBar .tab a");
     private final By activeViewTab = by.css(".tabBar .tab.active a");
 
+    @Deprecated
     public Folder(final Injector injector, final URL url, final String name) {
         super(injector, url, name);
 
