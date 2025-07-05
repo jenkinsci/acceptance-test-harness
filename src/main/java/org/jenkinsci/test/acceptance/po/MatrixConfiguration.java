@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import java.net.URL;
 
 /**
@@ -9,7 +8,7 @@ import java.net.URL;
  * @author Kohsuke Kawaguchi
  */
 public class MatrixConfiguration extends Job {
-    public MatrixConfiguration(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public MatrixConfiguration(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 }

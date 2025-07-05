@@ -53,6 +53,11 @@ public abstract class ConfigurablePageObject extends PageObject {
         super(context, url);
     }
 
+    /**
+     * @deprecated Use {@link #ConfigurablePageObject(PageObject, URL)} instead to properly maintain context hierarchy.
+     *             This constructor will be removed in a future version.
+     */
+    @Deprecated
     public ConfigurablePageObject(Injector injector, URL url) {
         super(injector, url);
     }
