@@ -88,6 +88,10 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void click() {
         WebElement we = resolve();
+        waitUntilClickSucceeds(we);
+    }
+
+    private void waitUntilClickSucceeds(WebElement we) {
         // button may be obscured by say the "Save Apply" screen so we wait as Selenium will do a scroll but the CSS
         // can take a while to update the layout \o/
         waitFor(we)
@@ -183,7 +187,7 @@ public class Control extends CapybaraPortingLayerImpl {
                 .pollingEvery(Duration.ofMillis(100))
                 .withTimeout(Duration.ofSeconds(1))
                 .until(we::isDisplayed);
-        we.click();
+        waitUntilClickSucceeds(we);
         // wait until the menu is hidden
         waitFor(we)
                 .pollingEvery(Duration.ofMillis(100))
@@ -199,7 +203,7 @@ public class Control extends CapybaraPortingLayerImpl {
                 .pollingEvery(Duration.ofMillis(100))
                 .withTimeout(Duration.ofSeconds(1))
                 .until(we::isDisplayed);
-        we.click();
+        waitUntilClickSucceeds(we);
         // wait until the menu is hidden
         waitFor(we)
                 .pollingEvery(Duration.ofMillis(100))
