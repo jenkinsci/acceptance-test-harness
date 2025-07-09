@@ -112,8 +112,7 @@
         "<jenkins\\.version>(?<currentValue>.*)<\\/jenkins\\.version><!--RENOVATE-LTS-->"
       ],
       "datasourceTemplate": "custom.jenkins-latest-lts",
-      "versioningTemplate": "semver-coerced",
-      "prTitle": "Update LTS profile to {{newVersion}}"
+      "versioningTemplate": "semver-coerced"
     }
   ],
   "customDatasources": {
