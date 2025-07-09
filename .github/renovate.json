@@ -111,6 +111,7 @@
       "matchStrings": [
         "<jenkins\\.version>(?<currentValue>.*)<\\/jenkins\\.version><!--RENOVATE-LTS-->"
       ],
+      "depNameTemplate": "jenkins-lts-profile",
       "datasourceTemplate": "custom.jenkins-latest-lts",
       "versioningTemplate": "semver-coerced"
     }
