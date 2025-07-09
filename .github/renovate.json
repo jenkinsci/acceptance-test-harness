@@ -102,7 +102,25 @@
       ],
       "depNameTemplate": "{{{repo}}}",
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "pom.xml"
+      ],
+      "matchStrings": [
+        "<jenkins\\.version>(?<currentValue>.*)<\\/jenkins\\.version><!--RENOVATE-LTS-->"
+      ],
+      "datasourceTemplate": "custom.jenkins-latest-lts",
+      "versioningTemplate": "semver-coerced",
+      "prTitle": "Update LTS profile to {{newVersion}}"
     }
   ],
+  "customDatasources": {
+    "jenkins-latest-lts": {
+      "defaultRegistryUrlTemplate": "https://updates.jenkins.io/stable/latestCore.txt",
+      "format": "plain"
+    }
+  },
   "rebaseWhen": "conflicted"
 }
