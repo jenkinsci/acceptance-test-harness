@@ -105,8 +105,8 @@
     },
     {
       "customType": "regex",
-      "fileMatch": [
-        "pom.xml"
+      "managerFilePatterns": [
+        "/pom.xml/"
       ],
       "matchStrings": [
         "<!--RENOVATE-LTS-->\n\\s+<jenkins\\.version>(?<currentValue>.*)<\\/jenkins\\.version>"
