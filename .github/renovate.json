@@ -109,7 +109,7 @@
         "pom.xml"
       ],
       "matchStrings": [
-        "<jenkins\\.version>(?<currentValue>.*)<\\/jenkins\\.version><!--RENOVATE-LTS-->"
+        "<!--RENOVATE-LTS-->\n\\s+<jenkins\\.version>(?<currentValue>.*)<\\/jenkins\\.version>"
       ],
       "depNameTemplate": "jenkins-lts-profile",
       "datasourceTemplate": "custom.jenkins-latest-lts",
