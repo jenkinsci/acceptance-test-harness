@@ -800,7 +800,7 @@ and
       <id>lts</id>
       <properties>
         <!--RENOVATE-LTS-->
-        <jenkins.version>2.504.3</jenkins.version>
+        <jenkins.version>2.516.1-rc36996.5d38c1a_d0c66</jenkins.version>
       </properties>
     </profile>
   </profiles>
