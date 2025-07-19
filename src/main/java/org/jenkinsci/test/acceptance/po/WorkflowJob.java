@@ -24,7 +24,6 @@
 
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
 import java.time.Duration;
@@ -37,8 +36,8 @@ import org.openqa.selenium.support.ui.Select;
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
 public class WorkflowJob extends Job {
 
-    public WorkflowJob(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public WorkflowJob(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 
     public final Control script = new Control(this, "/definition/script") {
