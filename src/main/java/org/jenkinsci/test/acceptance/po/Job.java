@@ -365,7 +365,7 @@ public class Job extends TopLevelItem {
 
         control(by.checkbox("This project is parameterized")).check();
 
-        control(by.xpath("//button[normalize-space(string(.)) = 'Add Parameter'] and not(contains(@class, 'hetero-list-add-top'))]"))
+        control(by.xpath("//button[normalize-space(string(.)) = 'Add Parameter' and not(contains(@class, 'hetero-list-add-top'))]"))
                 .selectDropdownMenu(type);
 
         // TODO selectDropdownMenu should not need this sleep - try and remove it
