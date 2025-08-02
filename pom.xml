@@ -491,6 +491,9 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <LOCAL_JARS>target/git-client.hpi:target/git.hpi:target/docker-java-api.hpi</LOCAL_JARS>
+          </environmentVariables>
           <runOrder>alphabetical</runOrder>
         </configuration>
       </plugin>
@@ -785,6 +788,27 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
+                    </artifactItem>
+                    <!-- https://github.com/jenkinsci/git-client-plugin/pull/1318 -->
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins</groupId>
+                      <artifactId>git-client</artifactId>
+                      <version>6.2.1-rc3761.0ec8ffc3f299</version>
+                      <type>hpi</type>
+                    </artifactItem>
+                    <!-- https://github.com/jenkinsci/git-plugin/pull/1776 -->
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins</groupId>
+                      <artifactId>git</artifactId>
+                      <version>5.7.1-rc5454.fa_ee06b_847ec</version>
+                      <type>hpi</type>
+                    </artifactItem>
+                    <!-- https://github.com/jenkinsci/docker-java-api-plugin/pull/138 -->
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins</groupId>
+                      <artifactId>docker-java-api</artifactId>
+                      <version>3.5.3-120.v7040fa_ec0d71</version>
+                      <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
