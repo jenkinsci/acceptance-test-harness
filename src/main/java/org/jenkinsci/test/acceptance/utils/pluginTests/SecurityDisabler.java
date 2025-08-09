@@ -35,7 +35,7 @@ public class SecurityDisabler extends PageObject {
     public final Jenkins jenkins;
 
     public SecurityDisabler(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url("configureSecurity"));
+        super(jenkins, jenkins.url("configureSecurity"));
         this.jenkins = jenkins;
     }
 

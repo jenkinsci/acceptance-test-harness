@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Injector;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +20,8 @@ public class MatrixProject extends Job {
     public final Control hasCombinationFilter = control("/hasCombinationFilter");
     public final Control combinationFilter = control("/hasCombinationFilter/combinationFilter");
 
-    public MatrixProject(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public MatrixProject(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 
     public void addUserAxis(String name, String value) {
@@ -57,7 +56,7 @@ public class MatrixProject extends Job {
     }
 
     public MatrixConfiguration getConfiguration(String name) {
-        return new MatrixConfiguration(injector, url(name + '/'), name);
+        return new MatrixConfiguration(this, url(name + '/'), name);
     }
 
     public void setTouchStoneBuild(String filter, String result) {
