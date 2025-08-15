@@ -29,7 +29,8 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.523</jenkins.version>
+    <!-- TODO https://github.com/jenkinsci/jenkins/pull/10659 -->
+    <jenkins.version>2.524-rc37368.6a_d9f3b_665a_9</jenkins.version>
     <selenium.version>4.34.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.4.8-jre</guava.version>
