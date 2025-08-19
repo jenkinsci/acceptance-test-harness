@@ -30,9 +30,12 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import com.google.inject.Injector;
 import groovy.lang.Closure;
 import java.net.URL;
+import java.time.Duration;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -131,9 +134,18 @@ public abstract class ConfigurablePageObject extends PageObject {
     public abstract URL getConfigUrl();
 
     public void save() {
-        WebElement e = find(SAVE_BUTTON);
-        e.click();
-        waitFor(e).until(CapybaraPortingLayerImpl::isStale);
+        AtomicReference<WebElement> found = new AtomicReference<>();
+        waitFor()
+                .withTimeout(Duration.ofSeconds(1))
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(ElementNotInteractableException.class)
+                .until(() -> {
+                    WebElement e = find(SAVE_BUTTON);
+                    found.set(e);
+                    e.click();
+                    return true;
+                });
+        waitFor(found.get()).until(CapybaraPortingLayerImpl::isStale);
     }
 
     public void apply() {

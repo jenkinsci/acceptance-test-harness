@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -159,8 +160,16 @@ public class Control extends CapybaraPortingLayerImpl {
         if (text != null && text.length() > 255) {
             setAtOnce(text);
         } else {
+            waitFor()
+                    .withTimeout(Duration.ofSeconds(1))
+                    .pollingEvery(Duration.ofMillis(100))
+                    .ignoring(ElementNotInteractableException.class)
+                    .until(() -> {
+                        WebElement e = resolve();
+                        e.clear();
+                        return true;
+                    });
             WebElement e = resolve();
-            e.clear();
             e.sendKeys(StringUtils.defaultString(text));
         }
     }
@@ -247,7 +256,14 @@ public class Control extends CapybaraPortingLayerImpl {
      */
     public void select(String option) {
         WebElement e = resolve();
-        findElement(e, by.option(option)).click();
+        waitFor()
+                .withTimeout(Duration.ofSeconds(1))
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(ElementNotInteractableException.class)
+                .until(() -> {
+                    findElement(e, by.option(option)).click();
+                    return true;
+                });
     }
 
     private WebElement findElement(WebElement context, By selector) {

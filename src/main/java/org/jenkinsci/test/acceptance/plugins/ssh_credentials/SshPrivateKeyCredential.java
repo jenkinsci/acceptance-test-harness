@@ -1,11 +1,13 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
+import java.time.Duration;
 import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -31,8 +33,16 @@ public class SshPrivateKeyCredential extends BaseStandardCredentials {
 
     public Direct selectEnterDirectly() {
         WebElement e = choose("Enter directly");
-        WebElement button = getElement(By.className("secret-update-btn"));
-        button.click();
+        waitFor()
+                .withTimeout(Duration.ofSeconds(1))
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(ElementNotInteractableException.class)
+                .until(() -> {
+                    WebElement button = getElement(By.className("secret-update-btn"));
+                    button.click();
+                    return true;
+                });
+
         return new Direct(getPage(), e.getAttribute("path"));
     }
 
