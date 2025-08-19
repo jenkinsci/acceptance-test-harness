@@ -16,6 +16,8 @@ import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.WebDriverListener;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Automatically scrolls the element into view.
@@ -150,6 +152,7 @@ public class Scroller implements WebDriverListener {
             new Wait<>(Boolean.TRUE)
                     .withTimeout(Duration.ofSeconds(5)) // Wall-clock time
                     .until(() -> (Boolean) executor.executeScript(scrollJs, eYCoord, eXCoord, id));
+            new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.elementToBeClickable(element));
         } catch (TimeoutException ex) {
             // Scrolling failed, but sometimes the element to click is already visible, let the test continue and
             // eventually fail later
