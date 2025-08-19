@@ -2,16 +2,14 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -75,14 +73,12 @@ public class Scroller implements WebDriverListener {
 
     private final Logger LOGGER = Logger.getLogger(Scroller.class.getName());
 
-    private final String scrollJs;
     private final String disableStickyElementsJs;
     private final WebDriver driver;
 
     public Scroller(WebDriver driver) {
         this.driver = driver;
         try {
-            scrollJs = IOUtils.toString(getClass().getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
             disableStickyElementsJs = IOUtils.toString(
                     getClass().getResourceAsStream("disable-sticky-elements.js"), StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -141,16 +137,11 @@ public class Scroller implements WebDriverListener {
             element = e.findElement(By.xpath("..")); // scroll select into view not option
         }
 
-        final int eYCoord = element.getLocation().getY();
-        final int eXCoord = element.getLocation().getX();
-        final String id = element.getAttribute("id");
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         // Wait until web element is successfully scrolled.
         try {
-            new Wait<>(Boolean.TRUE)
-                    .withTimeout(Duration.ofSeconds(5)) // Wall-clock time
-                    .until(() -> (Boolean) executor.executeScript(scrollJs, eYCoord, eXCoord, id));
-        } catch (TimeoutException ex) {
+            executor.executeScript("arguments[0].scrollIntoView({block:'center', inline:'nearest'});", element);
+        } catch (JavascriptException ex) {
             // Scrolling failed, but sometimes the element to click is already visible, let the test continue and
             // eventually fail later
             // This log message should be sufficient to diagnose the issue
