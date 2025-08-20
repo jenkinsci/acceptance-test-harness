@@ -2,18 +2,21 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.WebDriverListener;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Automatically scrolls the element into view.
@@ -138,10 +141,11 @@ public class Scroller implements WebDriverListener {
         }
 
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
+        executor.executeScript("arguments[0].scrollIntoView({block:'center', inline:'nearest'});", element);
         // Wait until web element is successfully scrolled.
         try {
-            executor.executeScript("arguments[0].scrollIntoView({block:'center', inline:'nearest'});", element);
-        } catch (JavascriptException ex) {
+            new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.elementToBeClickable(element));
+        } catch (TimeoutException ex) {
             // Scrolling failed, but sometimes the element to click is already visible, let the test continue and
             // eventually fail later
             // This log message should be sufficient to diagnose the issue
