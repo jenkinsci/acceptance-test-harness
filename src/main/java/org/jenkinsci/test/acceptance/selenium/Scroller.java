@@ -141,7 +141,7 @@ public class Scroller implements WebDriverListener {
         }
 
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
-        executor.executeScript("arguments[0].scrollIntoView({block:'center', inline:'nearest'});", element);
+        executor.executeScript("arguments[0].scrollIntoView({ behavior: 'instant', block: 'center', inline: 'nearest' });", element);
         // Wait until web element is successfully scrolled.
         try {
             new WebDriverWait(driver, Duration.ofSeconds(5)).until(ExpectedConditions.elementToBeClickable(element));
