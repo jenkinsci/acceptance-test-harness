@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
@@ -31,8 +32,10 @@ public class SshPrivateKeyCredential extends BaseStandardCredentials {
 
     public Direct selectEnterDirectly() {
         WebElement e = choose("Enter directly");
-        WebElement button = getElement(By.className("secret-update-btn"));
+        WebElement button = find(By.className("secret-update-btn"));
         button.click();
+        // wait until the update occurred (hiding the button and exposing the private key field)
+        waitFor(button).until(CapybaraPortingLayerImpl::isHiddenOrStale);
         return new Direct(getPage(), e.getAttribute("path"));
     }
 
