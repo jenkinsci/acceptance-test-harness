@@ -8,6 +8,7 @@ import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -162,6 +163,7 @@ public class Control extends CapybaraPortingLayerImpl {
             WebElement e = resolve();
             e.clear();
             e.sendKeys(StringUtils.defaultString(text));
+            e.sendKeys(Keys.TAB);
         }
     }
 
