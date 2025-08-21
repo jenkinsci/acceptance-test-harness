@@ -33,6 +33,7 @@ import java.net.URL;
 import java.util.concurrent.Callable;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -132,6 +133,12 @@ public abstract class ConfigurablePageObject extends PageObject {
 
     public void save() {
         WebElement e = find(SAVE_BUTTON);
+        // form validation may happen if a currently focused element loosed focus
+        // this can cause the position of the save button to change between the mouse down and mouse up
+        // causing the click to be lost.
+        // see https://github.com/mozilla/geckodriver/issues/2234 for more information
+        // give the save button focus by sending it a "shift key" which is mostly harmless
+        e.sendKeys(Keys.SHIFT);
         e.click();
         waitFor(e).until(CapybaraPortingLayerImpl::isStale);
     }
