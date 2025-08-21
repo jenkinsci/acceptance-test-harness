@@ -422,8 +422,10 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     public void runThenHandleDialog(Runnable runnable) {
         try {
             runnable.run();
-            waitFor(by.button("Yes"));
-            clickButton("Yes");
+            WebElement button = waitFor(by.button("Yes"));
+            button.click();
+            // wait for the dialog to be dismissed
+            waitFor(button).until(CapybaraPortingLayerImpl::isStale);
         } catch (UnhandledAlertException uae) {
             runThenConfirmAlert(runnable, 2);
         }
