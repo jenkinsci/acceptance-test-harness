@@ -67,6 +67,7 @@ import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.safari.SafariOptions;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 
 /**
@@ -118,7 +119,7 @@ public class FallbackConfig extends AbstractModule {
             case "chrome":
                 return new ChromeDriver(buildChromeOptions(testName));
             case "safari":
-                return new SafariDriver();
+                return new SafariDriver(buildSafariOptions(testName));
             case "saucelabs":
             case "saucelabs-firefox":
                 FirefoxOptions caps = new FirefoxOptions();
@@ -168,6 +169,9 @@ public class FallbackConfig extends AbstractModule {
 
     private FirefoxOptions buildFirefoxOptions(TestName testName) throws IOException {
         FirefoxOptions firefoxOptions = new FirefoxOptions();
+        firefoxOptions.setImplicitWaitTimeout(Duration.ofSeconds(IMPLICIT_WAIT_TIMEOUT));
+        firefoxOptions.setPageLoadTimeout(Duration.ofSeconds(PAGE_LOAD_TIMEOUT));
+
         firefoxOptions.addPreference(LANGUAGE_SELECTOR, "en");
         // Config screen with many plugins can cause FF to complain JS takes too long to complete - set longer timeout
         firefoxOptions.addPreference(
@@ -190,6 +194,9 @@ public class FallbackConfig extends AbstractModule {
 
     private ChromeOptions buildChromeOptions(TestName testName) throws IOException {
         ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.setImplicitWaitTimeout(Duration.ofSeconds(IMPLICIT_WAIT_TIMEOUT));
+        chromeOptions.setPageLoadTimeout(Duration.ofSeconds(PAGE_LOAD_TIMEOUT));
+
         chromeOptions.setExperimentalOption(
                 "prefs", Map.of(LANGUAGE_SELECTOR, "en", PASSWORD_MANAGER_LEAK_DETECTION, false));
         chromeOptions.enableBiDi();
@@ -201,6 +208,22 @@ public class FallbackConfig extends AbstractModule {
         chromeOptions.setCapability(
                 "se:recordVideo", TestRecorderRule.isRecorderEnabled() && System.getenv("VIDEO_FOLDER") != null);
         return chromeOptions;
+    }
+
+    private SafariOptions buildSafariOptions(TestName testName) throws IOException {
+        SafariOptions safariOptions = new SafariOptions();
+        safariOptions.setImplicitWaitTimeout(Duration.ofSeconds(IMPLICIT_WAIT_TIMEOUT));
+        safariOptions.setPageLoadTimeout(Duration.ofSeconds(PAGE_LOAD_TIMEOUT));
+
+        // no bidi support :(
+        // safariOptions.enableBiDi();
+        if (HarRecorder.isCaptureHarEnabled()) {
+            safariOptions.setProxy(createSeleniumProxy(testName.get()));
+        }
+        safariOptions.setCapability("se:name", testName.get());
+        safariOptions.setCapability(
+                "se:recordVideo", TestRecorderRule.isRecorderEnabled() && System.getenv("VIDEO_FOLDER") != null);
+        return safariOptions;
     }
 
     private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities)
