@@ -5,7 +5,6 @@ There are several profiles that might be handy for specifying tests to run:
 - `-PrunSmokeTests` - only the essential tests to execute the most fundamental use cases.
 - `-PrunDockerTests` - only tests that require docker.
 - `-PskipCucumberTests` - skip tests implemented in Cucumber.
-- `-PtestOnlyPlugins` - only tests that require plugins specified in the `TEST_ONLY_PLUGINS` environment variable (comma separated artifact ids).
 
 ## JUnit
 To run a single JUnit test from the command line, specify the name of the test with the `-Dtest=` option:

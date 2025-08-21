@@ -1,6 +1,4 @@
 @REM script for setting all the variables in order to run the ATH locally on windows
-@REM use config.groovy in the same folder if desired uncomment below
-@REM set CONFIG=%~dp0%config.groovy
 set DISPLAY=:0
 set INTERACTIVE=false
 set BROWSER=remote-webdriver-firefox
