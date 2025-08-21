@@ -33,6 +33,9 @@ public abstract class Credential extends PageAreaImpl {
         we.click();
         // wait for the form to be removed from the UI
         waitFor(driver).until(ExpectedConditions.invisibilityOf(dialog));
+        // the notification bar can place itslef over other elements
+        // so wait for it to be added and then disappear
+        waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
     }
 
     /**
