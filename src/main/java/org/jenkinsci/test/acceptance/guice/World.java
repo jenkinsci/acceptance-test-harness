@@ -9,7 +9,6 @@ import com.google.inject.Module;
 import com.google.inject.util.Modules;
 import jakarta.inject.Singleton;
 import java.util.List;
-import org.jenkinsci.test.acceptance.Config;
 import org.jenkinsci.test.acceptance.FallbackConfig;
 import org.junit.runners.model.MultipleFailureException;
 
@@ -83,9 +82,6 @@ public class World extends AbstractModule {
 
         // let extensions override the fallback config
         m = Modules.override(m).with(new ExtensionFinder(cl));
-
-        // user config trumps everything
-        m = Modules.override(m).with(new Config());
 
         install(m);
     }

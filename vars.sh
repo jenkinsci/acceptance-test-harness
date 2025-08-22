@@ -7,10 +7,8 @@ die() {
 
 #
 # Script for setting all the variables to run the ATH locally on Unix
-# Use config.groovy in the same folder if desired, uncomment below
 #
 
-#export CONFIG="${PWD}/config.groovy"
 export DISPLAY=:0
 export INTERACTIVE=false
 export BROWSER=remote-webdriver-firefox
