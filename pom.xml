@@ -38,7 +38,7 @@
     <maven.version>3.9.6</maven.version>
     <maven-sisu.version>0.9.0.M3</maven-sisu.version>
     <maven-resolver.version>1.9.18</maven-resolver.version>
-    
+
     <!-- TODO: Remove when tests pass https://github.com/jenkinsci/mina-sshd-api-plugin/pull/177 -->
     <mina-sshd-api.version>2.16.0-166.v852275134b_e6</mina-sshd-api.version>
 
