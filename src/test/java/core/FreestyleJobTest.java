@@ -28,6 +28,7 @@ import org.jenkinsci.test.acceptance.po.Artifact;
 import org.jenkinsci.test.acceptance.po.ArtifactArchiver;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.BuildWithParameters;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.ListView;
@@ -315,7 +316,9 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     }
 
     private void closeDialog() {
-        clickButton("Close");
+        WebElement close = find(by.button("Close"));
+        close.click();
+        waitFor(close).until(CapybaraPortingLayerImpl::isStale);
     }
 
     @Test

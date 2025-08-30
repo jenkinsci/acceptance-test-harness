@@ -1,12 +1,13 @@
 package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.IOUtils;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -14,6 +15,7 @@ import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.WebDriverListener;
 
@@ -81,10 +83,10 @@ public class Scroller implements WebDriverListener {
 
     public Scroller(WebDriver driver) {
         this.driver = driver;
-        try {
-            scrollJs = IOUtils.toString(getClass().getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
-            disableStickyElementsJs = IOUtils.toString(
-                    getClass().getResourceAsStream("disable-sticky-elements.js"), StandardCharsets.UTF_8);
+        try (InputStream scroller = getClass().getResourceAsStream("scroller.js");
+                InputStream sticky = getClass().getResourceAsStream("disable-sticky-elements.js")) {
+            scrollJs = new String(scroller.readAllBytes(), StandardCharsets.UTF_8);
+            disableStickyElementsJs = new String(sticky.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
@@ -107,6 +109,20 @@ public class Scroller implements WebDriverListener {
 
     @Override
     public void afterGet(WebDriver driver, String url) {
+        disableStickyElementsIgnoringDialogs();
+    }
+
+    @Override
+    public void afterTo(Navigation navigation, String url) {
+        disableStickyElementsIgnoringDialogs();
+    }
+
+    @Override
+    public void afterTo(Navigation navigation, URL url) {
+        disableStickyElementsIgnoringDialogs();
+    }
+
+    private void disableStickyElementsIgnoringDialogs() {
         try {
             // if there's an alert we can't run JavaScript
             // if we catch the exception from running JavaScript then FormValidationTest hangs
@@ -126,8 +142,12 @@ public class Scroller implements WebDriverListener {
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         try {
             executor.executeScript(disableStickyElementsJs);
-        } catch (UnhandledAlertException ignored) {
+        } catch (UnhandledAlertException unexpected) {
             // if we're in the process of navigating but an alert is in the way we can't run JS
+            LOGGER.log(
+                    Level.WARNING,
+                    "Failed to disable stick elements, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown",
+                    unexpected);
         }
     }
 
