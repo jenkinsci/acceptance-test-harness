@@ -17,14 +17,12 @@ Acceptance tests however use a different injection style rather than `DockerRule
 JUnit Tests that require docker fixtures are marked with `@WithDocker` annotation.
 If docker is not installed when you run tests, these tests are automatically skipped.
 
-##Docker injections
+## Docker injections
 
 To control docker 2 injections are available.
 
     Docker = "docker";  // Name of the docker command
     dockerPortOffset = 40000; // Offset for binding the docker ports to an host ip address
-
-Compare the dockerinject.groovy for a more advanced Docker injection.
 
 
 ## Writing a JUnit test that relies on Docker fixtures
