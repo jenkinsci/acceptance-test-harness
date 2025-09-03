@@ -71,9 +71,7 @@ import org.openqa.selenium.safari.SafariOptions;
 import org.openqa.selenium.support.events.EventFiringDecorator;
 
 /**
- * The default configuration for running tests.
- * <p>
- * See {@link Config} for how to override it.
+ * The configuration for running tests.
  *
  * @author Kohsuke Kawaguchi
  */
