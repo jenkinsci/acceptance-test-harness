@@ -14,6 +14,10 @@ if ((gid < 1000)); then
 	gid=1001
 fi
 
+if [[ -z ${BROWSER:-} ]]; then
+	export BROWSER=firefox
+fi
+
 # Obtain the group ID to grant to access the Docker socket
 if [[ -z ${DOCKER_GID:-} ]]; then
 	DOCKER_GID=$(docker run --rm -v /var/run/docker.sock:/var/run/docker.sock:Z ubuntu:noble stat -c %g /var/run/docker.sock) || exit 1
