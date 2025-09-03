@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.jenkinsci.test.acceptance.FallbackConfig;
+import org.jenkinsci.test.acceptance.Config;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
@@ -218,9 +218,7 @@ public class PluginManager extends ContainerPageObject {
                 driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(240)));
                 visit("available");
             } finally {
-                driver.manage()
-                        .timeouts()
-                        .pageLoadTimeout(Duration.ofMillis(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT)));
+                driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(Config.PAGE_LOAD_TIMEOUT)));
             }
             // End JENKINS-50790
 

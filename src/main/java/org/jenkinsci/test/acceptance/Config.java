@@ -77,9 +77,9 @@ import org.openqa.selenium.support.events.EventFiringDecorator;
  *
  * @author Kohsuke Kawaguchi
  */
-public class FallbackConfig extends AbstractModule {
+public class Config extends AbstractModule {
 
-    private static final Logger LOGGER = Logger.getLogger(FallbackConfig.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Config.class.getName());
 
     /** Browser property to set the default locale. */
     private static final String LANGUAGE_SELECTOR = "intl.accept_languages";
