@@ -20,7 +20,7 @@ import java.util.concurrent.SynchronousQueue;
 import jnr.unixsocket.UnixServerSocketChannel;
 import jnr.unixsocket.UnixSocketAddress;
 import jnr.unixsocket.UnixSocketChannel;
-import org.jenkinsci.test.acceptance.FallbackConfig;
+import org.jenkinsci.test.acceptance.Config;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsControllerFactory;
@@ -98,7 +98,7 @@ public class JenkinsControllerPoolProcess {
             @Override
             public void run() {
                 try {
-                    FallbackConfig f = new FallbackConfig();
+                    Config f = new Config();
                     while (true) {
                         lifecycle.startTestScope();
                         JenkinsController c = f.createController(injector, factories);
