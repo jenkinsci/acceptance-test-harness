@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectExists;
 
 import com.google.inject.Inject;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -207,15 +208,23 @@ public class MavenPluginTest extends AbstractJUnitTest {
 
         job.visit("modules");
         WebElement webElement = find(by.xpath("//a[@href='%s/']", name));
-        webElement.click();
-        // a menu pops out with how selenium clicks this, an actual user will not have an issue with this
-        // clicking a second time fixes it
-        if (!driver.getCurrentUrl().equals(job.module(name).url.toExternalForm())) {
+
+        // A selenium click will go to the center of the button.
+        // If the name is short enough (like root in some of these tests) the click will be the chevron button that flys
+        // out.
+        //
+        // To work around this we click multiple times, if the clicks are intercepted by a chevron flyout then due to
+        // the sticky element hacks they do not fly back in, so eventually one of the clicks will make!
+        waitFor(webElement).withTimeout(Duration.ofSeconds(5)).until(() -> {
             webElement.click();
-        }
+            return isStale(webElement);
+        });
+
         assertThat(driver.getCurrentUrl(), equalTo(job.module(name).url.toExternalForm()));
 
         build.open();
+        // in the build page the status icon is also within the 'a' element so the width is big enough that the center
+        // point won't be the chevron
         find(by.xpath("//a[@href='%s/']", name)).click();
         assertThat(driver.getCurrentUrl(), equalTo(build.module(name).url.toExternalForm()));
     }
