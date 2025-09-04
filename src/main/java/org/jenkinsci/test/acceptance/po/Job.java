@@ -34,6 +34,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.AssumptionViolatedException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
@@ -339,6 +340,9 @@ public class Job extends TopLevelItem {
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
             clickLink("Build Now");
+            // the notification bar can place itslef over other elements
+            // so wait for it to be added and then disappear
+            waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
         } else {
             clickLink("Build with Parameters");
             try {
@@ -348,7 +352,6 @@ public class Job extends TopLevelItem {
                 throw new Error(e);
             }
         }
-
         return build(nb);
     }
 
