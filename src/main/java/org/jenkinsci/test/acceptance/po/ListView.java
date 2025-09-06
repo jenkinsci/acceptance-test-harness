@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +30,8 @@ public class ListView extends View {
 
     private List<ListViewColumn> columns = new ArrayList<>();
 
-    public ListView(Injector injector, URL url) {
-        super(injector, url);
+    public ListView(PageObject context, URL url) {
+        super(context, url);
     }
 
     /**
