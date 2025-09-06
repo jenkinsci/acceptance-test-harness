@@ -51,6 +51,7 @@
       "customType": "regex",
       "managerFilePatterns": [
         "/src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java/",
+        "/vars.cmd/",
         "/vars.sh/"
       ],
       "matchStrings": [
