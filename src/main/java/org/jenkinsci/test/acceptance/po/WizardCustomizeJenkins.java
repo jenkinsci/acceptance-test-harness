@@ -94,8 +94,26 @@ public class WizardCustomizeJenkins extends PageObject {
         clickButton("Install");
     }
 
-    public void deselectAll() {
+    public void selectAll() {
+        clickLink("All");
+        elasticSleep(200);
+    }
+
+    public void selectNone() {
         clickLink("None");
         elasticSleep(200);
+    }
+
+    public void selectSuggested() {
+        clickLink("Suggested");
+        elasticSleep(200);
+    }
+
+    /**
+     * @deprecated use {@link #selectNone()} instead.
+     */
+    @Deprecated
+    public void deselectAll() {
+        selectNone();
     }
 }
