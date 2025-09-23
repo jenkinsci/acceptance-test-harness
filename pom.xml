@@ -38,6 +38,9 @@
     <maven.version>3.9.6</maven.version>
     <maven-sisu.version>0.9.0.M3</maven-sisu.version>
     <maven-resolver.version>1.9.18</maven-resolver.version>
+    
+    <!-- TODO: Remove when tests pass https://github.com/jenkinsci/okhttp-api-plugin/pull/264 -->
+    <okhttp-api.version>4.12.0-194.v17c708d785a_6</okhttp-api.version>
 
     <groovy.version>3.0.25</groovy.version>
     <jffi.version>1.3.13</jffi.version>
@@ -486,6 +489,10 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <!-- Use local version of the plugin over the released one ATH would otherwise use -->
+            <LOCAL_JARS>target/okhttp-api.hpi:target/okhttp-api.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -758,6 +765,13 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
+                    </artifactItem>
+                    <!-- TODO https://github.com/jenkinsci/okhttp-api-plugin/pull/264 -->
+                    <artifactItem>
+                      <groupId>io.jenkins.plugins</groupId>
+                      <artifactId>okhttp-api</artifactId>
+                      <version>${okhttp-api.version}</version>
+                      <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
