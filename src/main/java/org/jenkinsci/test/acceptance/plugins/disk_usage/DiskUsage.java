@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.test.acceptance.plugins.disk_usage;
 
-import com.google.inject.Injector;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.jenkinsci.test.acceptance.po.PluginPageObject;
@@ -31,7 +30,7 @@ import org.jenkinsci.test.acceptance.po.PluginPageObject;
 @PluginPageObject("disk-usage")
 public class DiskUsage extends PageObject {
 
-    public DiskUsage(Injector i, URL url) {
+    public DiskUsage(PageObject i, URL url) {
         super(i, url);
     }
 

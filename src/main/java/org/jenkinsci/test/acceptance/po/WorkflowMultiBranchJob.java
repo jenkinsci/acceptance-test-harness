@@ -1,6 +1,5 @@
 package org.jenkinsci.test.acceptance.po;
 
-import com.google.inject.Injector;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -17,8 +16,8 @@ import org.openqa.selenium.WebElement;
 @Describable("org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject")
 public class WorkflowMultiBranchJob extends Folder {
 
-    public WorkflowMultiBranchJob(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public WorkflowMultiBranchJob(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 
     public <T extends BranchSource> T addBranchSource(final Class<T> type) {
