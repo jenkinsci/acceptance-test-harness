@@ -38,7 +38,7 @@
     <maven.version>3.9.6</maven.version>
     <maven-sisu.version>0.9.0.M3</maven-sisu.version>
     <maven-resolver.version>1.9.18</maven-resolver.version>
-    
+
     <!-- TODO: Remove when tests pass https://github.com/jenkinsci/okhttp-api-plugin/pull/264 -->
     <okhttp-api.version>4.12.0-194.v17c708d785a_6</okhttp-api.version>
 
