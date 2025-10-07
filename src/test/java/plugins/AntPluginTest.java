@@ -196,7 +196,7 @@ public class AntPluginTest extends AbstractJUnitTest {
             return null;
         });
 
-        return job.startBuild().shouldSucceed().shouldContainsConsoleOutput("Hello World");
+        return job.startBuild().waitUntilFinished(240).shouldSucceed().shouldContainsConsoleOutput("Hello World");
     }
 
     private void setUpAnt() {

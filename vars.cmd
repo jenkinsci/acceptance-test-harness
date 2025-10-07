@@ -1,6 +1,4 @@
 @REM script for setting all the variables in order to run the ATH locally on windows
-@REM use config.groovy in the same folder if desired uncomment below
-@REM set CONFIG=%~dp0%config.groovy
 set DISPLAY=:0
 set INTERACTIVE=false
 set BROWSER=remote-webdriver-firefox
@@ -27,5 +25,5 @@ set TESTCONTAINERS_HOST_OVERRIDE=%IP%
 set JENKINS_LOCAL_HOSTNAME=%IP%
 @echo.
 @echo To start the remote firefox container run the following command:
-@echo docker run --shm-size=2g -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e SE_NODE_GRID_URL=http://127.0.0.1:4444 -e no_proxy=localhost -e SE_SCREEN_WIDTH=1680 -e SE_SCREEN_HEIGHT=1090 selenium/standalone-firefox:4.32.0
+@echo docker run --shm-size=2g -d -p 127.0.0.1:4444:4444 -p 127.0.0.1:5900:5900 -e SE_NODE_GRID_URL=http://127.0.0.1:4444 -e no_proxy=localhost -e SE_SCREEN_WIDTH=1680 -e SE_SCREEN_HEIGHT=1090 "selenium/standalone-firefox:4.35.0"
 
