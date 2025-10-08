@@ -99,7 +99,6 @@ public class WizardCustomizeJenkins extends PageObject {
      * @deprecated use {@link #selectNone()} instead.
      */
     @Deprecated
-
     public void deselectAll() {
         selectNone();
     }
