@@ -59,7 +59,7 @@ public class GerritTriggerJob extends PageObject {
             "/com-sonyericsson-hudson-plugins-gerrit-trigger-hudsontrigger-GerritTrigger/triggerOnEvents/commentAddedTriggerApprovalValue");
 
     public GerritTriggerJob(Jenkins jenkins, String jobName) {
-        super(jenkins.injector, jenkins.url("job/" + jobName + "/configure"));
+        super(jenkins, jenkins.url("job/" + jobName + "/configure"));
         this.jenkins = jenkins;
     }
 
