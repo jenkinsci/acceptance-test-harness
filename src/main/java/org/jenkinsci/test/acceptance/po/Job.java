@@ -26,7 +26,10 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Base64;
@@ -230,7 +233,7 @@ public class Job extends TopLevelItem {
      */
     public void copyResource(Resource resource, String fileName) {
         if (SystemUtils.IS_OS_WINDOWS) {
-            addBatchStep(copyResourceBatch(resource));
+            addBatchStep(copyResourceBatch(resource, fileName));
         } else {
             addShellStep(copyResourceShell(resource, fileName));
         }
@@ -253,13 +256,44 @@ public class Job extends TopLevelItem {
         }
     }
 
-    protected String copyResourceBatch(Resource resource) {
-        String path = resource.url.getPath();
-        if (path.startsWith("/")) {
-            path = path.substring(1);
+    protected String copyResourceBatch(Resource resource, String fileName) {
+        fileName = fileName.replace("/", "\\");
+        String path = null;
+        if (fileName.lastIndexOf('\\') > 0) {
+            path = fileName.substring(0, fileName.lastIndexOf('\\'));
         }
-        path = path.replace("/", "\\");
-        return xCopy(path, ".");
+        try (InputStream in = resource.asInputStream()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            try (ZipOutputStream zip = new ZipOutputStream(out)) {
+                zip.putNextEntry(new ZipEntry(fileName));
+                IOUtils.copy(in, zip);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            // create directories if needed
+            if (path != null) {
+                sb.append("mkdir ").append(path).append("\r\n");
+            }
+            // windows command limitation so we need to split the writing of the file to multiple lines
+            // additionally certutil can do not base64 decoding from stdin but needs a file.
+            // sb.append("SET TMPFILE=ath.resource.tmp-%RANDOM%").append("\r\n");
+            String encoded = java.util.Base64.getMimeEncoder().encodeToString(out.toByteArray());
+            sb.append(encoded.lines()
+                            .map(s -> "  echo." + s)
+                            .collect(Collectors.joining("\r\n", "> ath.resource.tmp.zip.b64 (\r\n", "\r\n)")))
+                    .append("\r\n");
+            sb.append("certutil -decode ath.resource.tmp.zip.b64 ath.resource.tmp.zip")
+                    .append("\r\n");
+            // tar is the way to work natively with zip files on windows!
+            sb.append("tar -x -m -f ath.resource.tmp.zip").append("\r\n");
+            sb.append("del ath.resource.tmp.zip.b64").append("\r\n");
+            sb.append("del ath.resource.tmp.zip").append("\r\n");
+            sb.append("dir /s/b").append("\r\n");
+            return sb.toString();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public void copyResource(Resource resource) {
