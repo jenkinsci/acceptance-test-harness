@@ -33,7 +33,7 @@ public class XUnitPluginTest extends AbstractJUnitTest {
         Build b = job.startBuild().shouldSucceed();
 
         b.open();
-        clickLink("Test Result");
+        clickLink("Tests");
         assertThat(driver, Matchers.hasContent("1 failures"));
 
         job.open();

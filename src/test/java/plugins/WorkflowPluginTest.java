@@ -178,7 +178,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         }
         new Artifact(build, "target/example-1.0-SNAPSHOT.jar").assertThatExists(true);
         build.open();
-        clickLink("Test Result");
+        clickLink("Tests");
         assertThat(driver, hasContent("All Tests"));
     }
 

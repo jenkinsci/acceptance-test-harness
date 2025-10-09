@@ -101,8 +101,8 @@ public class PipelineTest extends AbstractPipelineTest {
     private void assertTestResult(final Build b) {
         b.openStatusPage();
 
-        final WebElement testResultLink = getElement(by.link("Test Result"));
-        assertNotNull("Test Result link not found", testResultLink);
+        final WebElement testResultLink = getElement(by.link("Tests"));
+        assertNotNull("Tests link not found", testResultLink);
         assertThat(driver, hasContent("2 failures"));
 
         testResultLink.click();

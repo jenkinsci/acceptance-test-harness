@@ -31,7 +31,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
 
         j.startBuild().shouldSucceed().open();
 
-        clickLink("Test Result");
+        clickLink("Tests");
         assertThat(driver, hasContent("0 failures"));
     }
 
@@ -48,7 +48,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();
-        clickLink("Test Result");
+        clickLink("Tests");
         assertThat(driver, hasContent("1 failures"));
     }
 
@@ -66,7 +66,7 @@ public class JUnitPluginTest extends AbstractJUnitTest {
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();
-        clickLink("Test Result");
+        clickLink("Tests");
         assertMessage("JUnit.testScore[0]", "expected:<42> but was:<0>");
         assertMessage("JUnit.testScore[1]", "expected:<42> but was:<1>");
         assertMessage("JUnit.testScore[2]", "expected:<42> but was:<2>");
