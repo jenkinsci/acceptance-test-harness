@@ -79,6 +79,15 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
     }
 
     /**
+     * Ensures that the current page is the one represented by this PageObject, and opens it if not.
+     */
+    protected void ensureOpen() {
+        if (!url.toExternalForm().equals(driver.getCurrentUrl())) {
+            open();
+        }
+    }
+
+    /**
      * Given the path relative to {@link #url}, visit that page
      */
     public void visit(String relativePath) {
