@@ -44,6 +44,7 @@ import org.jenkinsci.test.acceptance.junit.WithDocker;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
 import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.NoVerificationStrategy;
+import org.jenkinsci.test.acceptance.plugins.junit.TestReport;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.GithubBranchSource;
 import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowGithubSharedLibrary;
@@ -178,7 +179,7 @@ public class WorkflowPluginTest extends AbstractJUnitTest {
         }
         new Artifact(build, "target/example-1.0-SNAPSHOT.jar").assertThatExists(true);
         build.open();
-        clickLink("Tests");
+        build.action(TestReport.class).openViaLink();
         assertThat(driver, hasContent("All Tests"));
     }
 

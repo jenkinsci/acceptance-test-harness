@@ -2,18 +2,16 @@ package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.junit.TestReport;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -29,10 +27,10 @@ public class JUnitPluginTest extends AbstractJUnitTest {
         j.addPublisher(JUnitPublisher.class).testResults.set("*.xml");
         j.save();
 
-        j.startBuild().shouldSucceed().open();
-
-        clickLink("Tests");
-        assertThat(driver, hasContent("0 failures"));
+        Build b = j.startBuild().shouldSucceed();
+        b.open();
+        TestReport testReport = b.action(TestReport.class).openViaLink();
+        assertEquals("There should be 0 failing tests", testReport.getFailedTestCount(), 0);
     }
 
     @Test
@@ -48,8 +46,8 @@ public class JUnitPluginTest extends AbstractJUnitTest {
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();
-        clickLink("Tests");
-        assertThat(driver, hasContent("1 failures"));
+        TestReport testReport = b.action(TestReport.class).openViaLink();
+        assertEquals("There should be 1 failing test", testReport.getFailedTestCount(), 1);
     }
 
     @Test
@@ -66,33 +64,14 @@ public class JUnitPluginTest extends AbstractJUnitTest {
         assertThat(b.getResult(), is("UNSTABLE"));
 
         b.open();
-        clickLink("Tests");
-        assertMessage("JUnit.testScore[0]", "expected:<42> but was:<0>");
-        assertMessage("JUnit.testScore[1]", "expected:<42> but was:<1>");
-        assertMessage("JUnit.testScore[2]", "expected:<42> but was:<2>");
+        TestReport testReport = b.action(TestReport.class).openViaLink();
 
-        assertMessage("TestNG.testScore", "expected:<42> but was:<0>");
-        assertMessage("TestNG.testScore", "expected:<42> but was:<1>");
-        assertMessage("TestNG.testScore", "expected:<42> but was:<2>");
-    }
+        testReport.assertFailureContent("JUnit.testScore[0]", "expected:<42> but was:<0>");
+        testReport.assertFailureContent("JUnit.testScore[1]", "expected:<42> but was:<1>");
+        testReport.assertFailureContent("JUnit.testScore[2]", "expected:<42> but was:<2>");
 
-    private void assertMessage(String test, String content) {
-        // Given that there may be several tests with the same name, we assert
-        // that at least one of the pages have the requested content
-        final List<WebElement> elements = all(by.xpath("//a[text()='%s']", test));
-        final List<String> testPages = new ArrayList<>(elements.size());
-        for (WebElement e : elements) {
-            testPages.add(e.getAttribute("href"));
-        }
-        boolean found = false;
-        for (String page : testPages) {
-            driver.get(page);
-            found = hasContent(content).matchesSafely(driver);
-            driver.navigate().back();
-            if (found) {
-                break;
-            }
-        }
-        assertThat("No test found with given content", found);
+        testReport.assertFailureContent("TestNG.testScore", "expected:<42> but was:<0>");
+        testReport.assertFailureContent("TestNG.testScore", "expected:<42> but was:<1>");
+        testReport.assertFailureContent("TestNG.testScore", "expected:<42> but was:<2>");
     }
 }

@@ -23,19 +23,17 @@
  */
 package plugins;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.AbstractPipelineTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.junit.TestReport;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 /**
  * Tests a complete pipeline flow:
@@ -101,11 +99,9 @@ public class PipelineTest extends AbstractPipelineTest {
     private void assertTestResult(final Build b) {
         b.openStatusPage();
 
-        final WebElement testResultLink = getElement(by.link("Tests"));
-        assertNotNull("Tests link not found", testResultLink);
-        assertThat(driver, hasContent("2 failures"));
-
-        testResultLink.click();
-        assertThat(driver, hasContent("io.jenkins.tools.MainTest.testApp"));
+        TestReport testReport = b.action(TestReport.class).openViaLink();
+        assertEquals("There should be 2 failures", 2, testReport.getFailedTestCount());
+        testReport.assertFailureContent(
+                "io.jenkins.tools.MainTest.testApp", "at io.jenkins.tools.MainTest.testApp(MainTest.java:19)");
     }
 }
