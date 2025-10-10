@@ -32,11 +32,11 @@ import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 
-@ActionPageObject("scriptler")
+@ActionPageObject(relativePath = "scriptler")
 public class Scriptler extends Action {
 
-    public Scriptler(Jenkins parent, String relative) {
-        super(parent, relative);
+    public Scriptler(Jenkins parent, String relative, String linkText) {
+        super(parent, relative, linkText);
     }
 
     public Script upload(Resource script) {
