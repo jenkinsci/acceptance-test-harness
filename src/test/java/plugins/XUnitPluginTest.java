@@ -1,10 +1,10 @@
 package plugins;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 
-import org.jenkinsci.test.acceptance.Matchers;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
+import org.jenkinsci.test.acceptance.plugins.junit.TestReport;
 import org.jenkinsci.test.acceptance.plugins.xunit.XUnitPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
@@ -33,8 +33,8 @@ public class XUnitPluginTest extends AbstractJUnitTest {
         Build b = job.startBuild().shouldSucceed();
 
         b.open();
-        clickLink("Test Result");
-        assertThat(driver, Matchers.hasContent("1 failures"));
+        TestReport testReport = b.action(TestReport.class).openViaLink();
+        assertEquals("There should be 1 failing tests", testReport.getFailedTestCount(), 1);
 
         job.open();
         find(TEST_RESULT_TREND_CHART);

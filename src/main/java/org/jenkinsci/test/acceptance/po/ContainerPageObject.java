@@ -86,13 +86,23 @@ public abstract class ContainerPageObject extends ConfigurablePageObject {
      * @param type Action type to create.
      */
     public <T extends Action> T action(Class<T> type) {
-        final String path = type.getAnnotation(ActionPageObject.class).value();
-        return action(type, path);
+        final String path = type.getAnnotation(ActionPageObject.class).relativePath();
+        final String linkText = type.getAnnotation(ActionPageObject.class).linkText();
+        return action(type, path, linkText.isBlank() ? null : linkText);
     }
 
-    public <T extends Action> T action(Class<T> type, String path) {
+    /**
+     * Create action of this page object.
+     * Preffer to use {@link #action(Class)} where fixed paths and link text is known.
+     * @param <T> The concrete action class to create.
+     * @param type Action type to create
+     * @param path the relative path from this PageObject
+     * @param linkText optional text of the link in the sidebar.
+     * @return the newly contructed Action of type T
+     */
+    public <T extends Action> T action(Class<T> type, String path, String linkText) {
 
-        T instance = newInstance(type, this, path);
+        T instance = newInstance(type, this, path, linkText);
 
         if (!instance.isApplicable(this)) {
             throw new AssertionError(

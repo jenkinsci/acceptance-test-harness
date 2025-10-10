@@ -45,7 +45,8 @@ public class HtmlPublisherPluginTest extends AbstractJUnitTest {
         job.save();
 
         job.startBuild().shouldSucceed();
-        job.action(HtmlReport.class, "MyReport")
+        job.action(HtmlReport.class, "MyReport", "MyReport")
+                .<HtmlReport>openViaLink()
                 .fileShouldMatch("root.html", "root")
                 .fileShouldMatch("dir/indir.html", "indir");
     }
