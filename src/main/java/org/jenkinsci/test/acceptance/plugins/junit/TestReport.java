@@ -54,9 +54,8 @@ public class TestReport extends Action {
             // this is a javascript expand
             WebElement link = row.findElement(By.tagName("a"));
             link.click();
-            WebElement details = waitFor(row)
-                    .ignoring(NoSuchElementException.class)
-                    .until(r -> r.findElement(By.xpath("following-sibling::*[1]")));
+            WebElement details =
+                    waitFor(row).ignoring(NoSuchElementException.class).until(TestReport::getTestDetailsRow);
             found = details.getText().contains(content);
             link.click(); // hide the content
             waitFor(details).until(CapybaraPortingLayerImpl::isStale);
@@ -71,5 +70,13 @@ public class TestReport extends Action {
     @Override
     public boolean isApplicable(ContainerPageObject po) {
         return po instanceof Build;
+    }
+
+    private static WebElement getTestDetailsRow(WebElement testRow) {
+        WebElement sibling = testRow.findElement(By.xpath("following-sibling::*[1]"));
+        if ("foldout-row".equals(sibling.getDomAttribute("data-type"))) {
+            return sibling;
+        }
+        return null;
     }
 }
