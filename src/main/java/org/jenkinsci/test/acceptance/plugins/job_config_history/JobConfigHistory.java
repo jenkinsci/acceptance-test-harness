@@ -32,11 +32,11 @@ import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.WebElement;
 
-@ActionPageObject("jobConfigHistory")
+@ActionPageObject(relativePath = "jobConfigHistory", linkText = "Job Config History")
 public class JobConfigHistory extends Action {
 
-    public JobConfigHistory(Job parent, String relative) {
-        super(parent, relative);
+    public JobConfigHistory(Job parent, String relative, String linkText) {
+        super(parent, relative, linkText);
     }
 
     public void showLastChange() {

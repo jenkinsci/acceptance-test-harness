@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.140</version>
+    <version>1.141</version>
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
@@ -29,8 +29,8 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.529</jenkins.version>
-    <selenium.version>4.35.0</selenium.version>
+    <jenkins.version>2.531</jenkins.version>
+    <selenium.version>4.36.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.5.0-jre</guava.version>
 
@@ -64,7 +64,7 @@
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-bom</artifactId>
-        <version>9.8</version>
+        <version>9.9</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -94,7 +94,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.17.7</version>
+        <version>1.17.8</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -251,7 +251,7 @@ and
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.18.0</version>
+      <version>3.19.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
@@ -351,7 +351,7 @@ and
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3341.v0766d82b_dec0</version>
+      <version>3345.v03dee9b_f88fc</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
@@ -421,7 +421,7 @@ and
     <dependency>
       <groupId>com.github.dasniko</groupId>
       <artifactId>testcontainers-keycloak</artifactId>
-      <version>3.8.0</version>
+      <version>3.9.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

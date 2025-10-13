@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.test.acceptance.po;
 
+import java.util.Objects;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -33,25 +34,40 @@ import org.openqa.selenium.WebDriver;
 public abstract class Action extends PageObject {
 
     protected final ContainerPageObject parent;
+    private final String linkText;
 
-    public Action(ContainerPageObject parent, String relative) {
+    public Action(ContainerPageObject parent, String relative, String linkText) {
         super(parent.injector, parent.url(relative + "/"));
         this.parent = parent;
+        this.linkText = linkText;
     }
 
     @Override
     public WebDriver open() {
         WebDriver wd = super.open();
-
-        if (!wd.getCurrentUrl().startsWith(url.toString())) {
-            throw new AssertionError("Action " + url + " does not exist. Redirected to " + wd.getCurrentUrl());
-        }
-
+        assertCorrectUrl();
         return wd;
+    }
+
+    /**
+     * Opens the Action page by clicking on the link on the parent page.
+     */
+    public <T extends Action> T openViaLink() {
+        Objects.requireNonNull(linkText, "The linkText must be provided in order to utilise this method");
+        parent.ensureOpen();
+        find(by.link(linkText)).click();
+        assertCorrectUrl();
+        return (T) this;
     }
 
     /**
      * @return true if and action can be attached to given page object.
      */
     public abstract boolean isApplicable(ContainerPageObject po);
+
+    private void assertCorrectUrl() {
+        if (!driver.getCurrentUrl().startsWith(url.toString())) {
+            throw new AssertionError("Action " + url + " does not exist. Redirected to " + driver.getCurrentUrl());
+        }
+    }
 }
