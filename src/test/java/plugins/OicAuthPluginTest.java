@@ -157,7 +157,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
             jenkinsClient.setClientId(CLIENT);
             jenkinsClient.setProtocol("openid-connect");
             jenkinsClient.setSecret(CLIENT);
-            jenkinsClient.serviceAccountsEnabled(true);
+            jenkinsClient.setServiceAccountsEnabled(true);
             final String jenkinsUrl = jenkins.url.toString();
             jenkinsClient.setRootUrl(jenkinsUrl);
             jenkinsClient.setRedirectUris(List.of(String.format("%ssecurityRealm/finishLogin", jenkinsUrl)));
