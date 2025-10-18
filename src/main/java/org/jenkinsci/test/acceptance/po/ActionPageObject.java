@@ -39,5 +39,7 @@ import org.jvnet.hudson.annotation_indexer.Indexed;
 @Indexed
 public @interface ActionPageObject {
     /** Relative path to parent */
-    String value();
+    String relativePath();
+    /** Text of the link for the action */
+    String linkText() default "";
 }

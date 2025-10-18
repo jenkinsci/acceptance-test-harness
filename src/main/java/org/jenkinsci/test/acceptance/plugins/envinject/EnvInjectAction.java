@@ -28,11 +28,11 @@ import org.jenkinsci.test.acceptance.po.ActionPageObject;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 
-@ActionPageObject("injectedEnvVars")
+@ActionPageObject(relativePath = "injectedEnvVars", linkText = "Environment variables")
 public class EnvInjectAction extends Action {
 
-    public EnvInjectAction(Build build, String path) {
-        super(build, path);
+    public EnvInjectAction(Build build, String path, String linkText) {
+        super(build, path, linkText);
     }
 
     public EnvInjectAction shouldContain(String key, String value) {

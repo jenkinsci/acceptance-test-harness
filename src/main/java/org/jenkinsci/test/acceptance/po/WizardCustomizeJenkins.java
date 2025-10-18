@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 
 import java.time.Duration;
+import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NoSuchFrameException;
@@ -87,15 +88,61 @@ public class WizardCustomizeJenkins extends PageObject {
 
     public void selectPlugin(String pluginKey) {
         control(by.name(pluginKey)).click();
-        elasticSleep(200);
+        waitFor().withTimeout(Duration.ofSeconds(1)).until(() -> isSelected(pluginKey));
     }
 
     public void startInstall() {
         clickButton("Install");
     }
 
+    /**
+     * @deprecated use {@link #selectNone()} instead.
+     */
+    @Deprecated
     public void deselectAll() {
+        selectNone();
+    }
+
+    public void selectAll() {
+        clickLink("All");
+        waitFor()
+                .withTimeout(Duration.ofSeconds(1))
+                .until(() -> !getSelected().isEmpty() && getUnselected().isEmpty());
+    }
+
+    public void selectNone() {
         clickLink("None");
-        elasticSleep(200);
+        waitFor()
+                .withTimeout(Duration.ofSeconds(1))
+                .until(() -> getSelected().isEmpty() && !getUnselected().isEmpty());
+    }
+
+    public void selectSuggested() {
+        clickLink("Suggested");
+        waitFor()
+                .withTimeout(Duration.ofSeconds(1))
+                .until(() -> !getSelected().isEmpty() && !getUnselected().isEmpty());
+    }
+
+    private boolean isSelected(String pluginKey) {
+        return driver
+                .findElements(by.xpath(
+                        "//div[contains(@class, 'plugins-for-category')]/div[contains(@class, 'plugin') and contains(@class, 'selected') and contains(@class, '%s')]",
+                        pluginKey))
+                .stream()
+                .findFirst()
+                .isPresent();
+    }
+
+    private List<WebElement> getSelected() {
+        return driver.findElements(
+                by.xpath(
+                        "//div[contains(@class, 'plugins-for-category')]/div[contains(@class, 'plugin') and contains(@class, 'selected')]"));
+    }
+
+    private List<WebElement> getUnselected() {
+        return driver.findElements(
+                by.xpath(
+                        "//div[contains(@class, 'plugins-for-category')]/div[contains(@class, 'plugin') and not(contains(@class, 'selected'))]"));
     }
 }

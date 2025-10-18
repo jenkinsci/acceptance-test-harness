@@ -1,20 +1,16 @@
 package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.IOUtils;
-import org.jenkinsci.test.acceptance.junit.Wait;
-import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.support.events.WebDriverListener;
 
 /**
@@ -72,41 +68,36 @@ import org.openqa.selenium.support.events.WebDriverListener;
  * @author Kohsuke Kawaguchi
  */
 public class Scroller implements WebDriverListener {
-
     private final Logger LOGGER = Logger.getLogger(Scroller.class.getName());
 
-    private final String scrollJs;
     private final String disableStickyElementsJs;
     private final WebDriver driver;
 
     public Scroller(WebDriver driver) {
         this.driver = driver;
-        try {
-            scrollJs = IOUtils.toString(getClass().getResourceAsStream("scroller.js"), StandardCharsets.UTF_8);
-            disableStickyElementsJs = IOUtils.toString(
-                    getClass().getResourceAsStream("disable-sticky-elements.js"), StandardCharsets.UTF_8);
+        try (InputStream sticky = getClass().getResourceAsStream("disable-sticky-elements.js")) {
+            disableStickyElementsJs = new String(sticky.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
     }
 
     @Override
-    public void beforeClick(WebElement element) {
-        scrollIntoView(element);
-    }
-
-    @Override
-    public void beforeSendKeys(WebElement element, CharSequence[] keysToSend) {
-        scrollIntoView(element);
-    }
-
-    @Override
-    public void beforeClear(WebElement element) {
-        scrollIntoView(element);
-    }
-
-    @Override
     public void afterGet(WebDriver driver, String url) {
+        disableStickyElementsIgnoringDialogs();
+    }
+
+    @Override
+    public void afterTo(Navigation navigation, String url) {
+        disableStickyElementsIgnoringDialogs();
+    }
+
+    @Override
+    public void afterTo(Navigation navigation, URL url) {
+        disableStickyElementsIgnoringDialogs();
+    }
+
+    private void disableStickyElementsIgnoringDialogs() {
         try {
             // if there's an alert we can't run JavaScript
             // if we catch the exception from running JavaScript then FormValidationTest hangs
@@ -126,38 +117,12 @@ public class Scroller implements WebDriverListener {
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         try {
             executor.executeScript(disableStickyElementsJs);
-        } catch (UnhandledAlertException ignored) {
+        } catch (UnhandledAlertException unexpected) {
             // if we're in the process of navigating but an alert is in the way we can't run JS
-        }
-    }
-
-    /**
-     * The framework is expected to take care of the correct scrolling. When you are tempted to scroll from PageObjects
-     * or tests, there is likely a framework problem to be fixed.
-     */
-    public void scrollIntoView(WebElement e) {
-        WebElement element = e;
-        if (Objects.equals(element.getTagName(), "option")) {
-            element = e.findElement(By.xpath("..")); // scroll select into view not option
-        }
-
-        final int eYCoord = element.getLocation().getY();
-        final int eXCoord = element.getLocation().getX();
-        final String id = element.getAttribute("id");
-        final JavascriptExecutor executor = (JavascriptExecutor) driver;
-        // Wait until web element is successfully scrolled.
-        try {
-            new Wait<>(Boolean.TRUE)
-                    .withTimeout(Duration.ofSeconds(5)) // Wall-clock time
-                    .until(() -> (Boolean) executor.executeScript(scrollJs, eYCoord, eXCoord, id));
-        } catch (TimeoutException ex) {
-            // Scrolling failed, but sometimes the element to click is already visible, let the test continue and
-            // eventually fail later
-            // This log message should be sufficient to diagnose the issue
             LOGGER.log(
                     Level.WARNING,
-                    "Scrolling failed, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown",
-                    ex);
+                    "Failed to disable stick elements, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown",
+                    unexpected);
         }
     }
 }

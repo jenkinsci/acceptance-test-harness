@@ -30,11 +30,11 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 
-@ActionPageObject("advanced-build-queue")
+@ActionPageObject(relativePath = "advanced-build-queue", linkText = "Job Priorities")
 public class PriorityConfig extends Action {
 
-    public PriorityConfig(ContainerPageObject parent, String relative) {
-        super(parent, relative);
+    public PriorityConfig(ContainerPageObject parent, String relative, String linkText) {
+        super(parent, relative, linkText);
     }
 
     @Override

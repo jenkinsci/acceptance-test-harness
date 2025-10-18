@@ -6,6 +6,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PostBuildStep;
+import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
 
 /**
  * Helperclass for configuring the logparser plugin.
@@ -97,6 +98,8 @@ public class LogParserPublisher extends AbstractStep implements PostBuildStep {
      * @param resource The {@link Resource} object of a rule file.
      */
     public void setRule(Resource resource) {
-        setRule(RuleType.PROJECT, resource.url.getPath());
+        try (UselessFileDetectorReplacement ufd = new UselessFileDetectorReplacement(driver)) {
+            setRule(RuleType.PROJECT, resource.url.getPath());
+        }
     }
 }

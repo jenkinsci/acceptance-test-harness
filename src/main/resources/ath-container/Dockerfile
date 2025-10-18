@@ -4,7 +4,7 @@
 
 FROM ubuntu:noble
 
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3008
@@ -25,8 +25,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
-ARG DOCKER_BUILDX_VERSION=0.23.0
-ARG DOCKER_VERSION=28.1.1
+ARG DOCKER_BUILDX_VERSION=0.29.1
+ARG DOCKER_VERSION=28.5.1
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
   && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
@@ -39,11 +39,15 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && rm -rf /var/lib/apt/lists/*
 
 # Maven in repo is not new enough for ATH
-ARG MAVEN_VERSION=3.9.9
+ARG MAVEN_VERSION=3.9.11
 RUN curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+    curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512" && \
+    echo "$(cat apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512)  apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum --check --strict && \
     tar -xvzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz" -C /opt/ && \
-    mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven
-ENV PATH "$PATH:/opt/maven/bin"
+    mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven && \
+    rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+    rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512"
+ENV PATH="$PATH:/opt/maven/bin"
 
 COPY run.sh /usr/bin
 COPY set-java.sh /usr/bin
@@ -60,5 +64,5 @@ RUN deluser --remove-home ubuntu \
 RUN chmod u+s "$(which update-alternatives)"
 
 USER ath-user
-ENV USER ath-user
+ENV USER=ath-user
 WORKDIR /home/ath-user

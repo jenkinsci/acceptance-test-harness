@@ -26,7 +26,10 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Base64;
@@ -34,6 +37,7 @@ import org.jenkinsci.test.acceptance.controller.JenkinsController;
 import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.AssumptionViolatedException;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.zeroturnaround.zip.ZipUtil;
@@ -230,7 +234,7 @@ public class Job extends TopLevelItem {
      */
     public void copyResource(Resource resource, String fileName) {
         if (SystemUtils.IS_OS_WINDOWS) {
-            addBatchStep(copyResourceBatch(resource));
+            addBatchStep(copyResourceBatch(resource, fileName));
         } else {
             addShellStep(copyResourceShell(resource, fileName));
         }
@@ -253,13 +257,33 @@ public class Job extends TopLevelItem {
         }
     }
 
-    protected String copyResourceBatch(Resource resource) {
-        String path = resource.url.getPath();
-        if (path.startsWith("/")) {
-            path = path.substring(1);
+    protected String copyResourceBatch(Resource resource, String fileName) {
+        try (InputStream in = resource.asInputStream()) {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            try (ZipOutputStream zip = new ZipOutputStream(out)) {
+                zip.putNextEntry(new ZipEntry(fileName));
+                IOUtils.copy(in, zip);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            // windows command limitation so we need to split the writing of the file to multiple lines
+            // additionally certutil can do not base64 decoding from stdin but needs a file.
+            String encoded = java.util.Base64.getMimeEncoder().encodeToString(out.toByteArray());
+            sb.append(encoded.lines()
+                            .map(s -> "  echo." + s)
+                            .collect(Collectors.joining("\r\n", "> ath.resource.tmp.zip.b64 (\r\n", "\r\n)")))
+                    .append("\r\n");
+            sb.append("certutil -decode ath.resource.tmp.zip.b64 ath.resource.tmp.zip")
+                    .append("\r\n");
+            // tar is the way to work natively with zip files on windows!
+            sb.append("tar -x -m -f ath.resource.tmp.zip").append("\r\n");
+            sb.append("del ath.resource.tmp.zip.b64").append("\r\n");
+            sb.append("del ath.resource.tmp.zip").append("\r\n");
+            return sb.toString();
+        } catch (IOException e) {
+            throw new AssertionError(e);
         }
-        path = path.replace("/", "\\");
-        return xCopy(path, ".");
     }
 
     public void copyResource(Resource resource) {
@@ -340,6 +364,9 @@ public class Job extends TopLevelItem {
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
             clickLink("Build Now");
+            // the notification bar can place itslef over other elements
+            // so wait for it to be added and then disappear
+            waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
         } else {
             clickLink("Build with Parameters");
             try {
@@ -349,7 +376,6 @@ public class Job extends TopLevelItem {
                 throw new Error(e);
             }
         }
-
         return build(nb);
     }
 
@@ -366,7 +392,10 @@ public class Job extends TopLevelItem {
 
         control(by.checkbox("This project is parameterized")).check();
 
-        control(by.xpath("//button[text()='Add Parameter']")).selectDropdownMenu(type);
+        control(
+                        by.xpath(
+                                "//button[normalize-space(string(.)) = 'Add Parameter' and not(contains(@class, 'hetero-list-add-top'))]"))
+                .selectDropdownMenu(type);
 
         // TODO selectDropdownMenu should not need this sleep - try and remove it
         elasticSleep(500);

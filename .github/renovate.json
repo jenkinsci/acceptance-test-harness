@@ -51,6 +51,7 @@
       "customType": "regex",
       "managerFilePatterns": [
         "/src/main/java/org/jenkinsci/test/acceptance/FallbackConfig\\.java/",
+        "/vars.cmd/",
         "/vars.sh/"
       ],
       "matchStrings": [
@@ -102,7 +103,25 @@
       ],
       "depNameTemplate": "{{{repo}}}",
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/pom.xml/"
+      ],
+      "matchStrings": [
+        "<!--RENOVATE-LTS-->\n\\s+<jenkins\\.version>(?<currentValue>.*)<\\/jenkins\\.version>"
+      ],
+      "depNameTemplate": "jenkins-lts-profile",
+      "datasourceTemplate": "custom.jenkins-latest-lts",
+      "versioningTemplate": "semver-coerced"
     }
   ],
+  "customDatasources": {
+    "jenkins-latest-lts": {
+      "defaultRegistryUrlTemplate": "https://updates.jenkins.io/stable/latestCore.txt",
+      "format": "plain"
+    }
+  },
   "rebaseWhen": "conflicted"
 }

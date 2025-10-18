@@ -31,10 +31,10 @@ import org.jenkinsci.test.acceptance.po.ActionPageObject;
 import org.jenkinsci.test.acceptance.po.ContainerPageObject;
 import org.jenkinsci.test.acceptance.po.Job;
 
-@ActionPageObject("HTML_Report")
+@ActionPageObject(relativePath = "HTML_Report", linkText = "HTML Report")
 public class HtmlReport extends Action {
-    public HtmlReport(Job parent, String relative) {
-        super(parent, relative);
+    public HtmlReport(Job parent, String relative, String linkText) {
+        super(parent, relative, linkText);
     }
 
     public HtmlReport fileShouldMatch(String path, String content) {

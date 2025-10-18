@@ -16,7 +16,7 @@ fi
 
 # Obtain the group ID to grant to access the Docker socket
 if [[ -z ${DOCKER_GID:-} ]]; then
-	DOCKER_GID=$(docker run --rm -v /var/run/docker.sock:/var/run/docker.sock ubuntu:noble stat -c %g /var/run/docker.sock) || exit 1
+	DOCKER_GID=$(docker run --rm -v /var/run/docker.sock:/var/run/docker.sock:Z ubuntu:noble stat -c %g /var/run/docker.sock) || exit 1
 	export DOCKER_GID
 fi
 

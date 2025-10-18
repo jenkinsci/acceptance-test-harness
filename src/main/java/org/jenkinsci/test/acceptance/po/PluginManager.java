@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
-import org.jenkinsci.test.acceptance.FallbackConfig;
+import org.jenkinsci.test.acceptance.Config;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.update_center.MockUpdateCenter;
 import org.jenkinsci.test.acceptance.update_center.PluginMetadata;
@@ -216,12 +215,10 @@ public class PluginManager extends ContainerPageObject {
 
             // JENKINS-50790 It seems that this page takes too much time to load when running in the new ci.jenkins.io
             try {
-                driver.manage().timeouts().pageLoadTimeout(time.seconds(240), TimeUnit.MILLISECONDS);
+                driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(240)));
                 visit("available");
             } finally {
-                driver.manage()
-                        .timeouts()
-                        .pageLoadTimeout(time.seconds(FallbackConfig.PAGE_LOAD_TIMEOUT), TimeUnit.MILLISECONDS);
+                driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(Config.PAGE_LOAD_TIMEOUT)));
             }
             // End JENKINS-50790
 
