@@ -69,7 +69,7 @@ public class FormValidationTest extends AbstractJUnitTest {
         c.quietPeriod.sleep(100L);
         formValidation = c.quietPeriod.getFormValidation();
 
-        String errorMessage = "Not a non-negative integer";
+        String errorMessage = "This value should be larger than 0";
         assertThat(formValidation, reports(Kind.ERROR, errorMessage));
     }
 
