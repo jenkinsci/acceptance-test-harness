@@ -36,10 +36,7 @@ public final class CspRule implements TestRule {
                 try {
                     base.evaluate();
                 } finally {
-                    // TODO enable for ArtifactoryPluginTest when JENKINS-74047 is resolved
-                    if (isEnabled()
-                            && !isSkipped()
-                            && !d.getTestClass().getName().equals("plugins.ArtifactoryPluginTest")) {
+                    if (isEnabled() && !isSkipped()) {
                         ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
                         jenkins.runThenHandleUserPrompt(() -> csp.open());
                         List<String> lines = csp.getReport();
