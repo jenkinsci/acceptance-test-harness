@@ -95,6 +95,8 @@ public class InstallWizardTest extends AbstractJUnitTest {
         wizardCustomize.selectNone();
         wizardCustomize.searchPlugin("JUnit");
         wizardCustomize.selectPlugin("junit");
+        wizardCustomize.searchPlugin("Pipeline");
+        wizardCustomize.selectPlugin("workflow-aggregator");
         wizardCustomize.startInstall();
 
         wizardCustomize.shouldFinishInstallSuccessfully();
