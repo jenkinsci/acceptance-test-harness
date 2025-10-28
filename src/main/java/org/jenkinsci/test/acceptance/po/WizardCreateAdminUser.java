@@ -65,12 +65,8 @@ public class WizardCreateAdminUser extends PageObject {
         }
 
         driver.switchTo().defaultContent();
-        control(by.css(".btn-primary.save-first-user")).click();
+        control(by.css(".btn-primary.save-first-user")).clickAndWaitToBecomeStale(Duration.ofSeconds(time.seconds(5)));
         return this;
-    }
-
-    public void shouldCreateTheUserSuccessfully() {
-        waitFor(hasContent("Jenkins is ready!"));
     }
 
     public void confirmURLSettings() {
