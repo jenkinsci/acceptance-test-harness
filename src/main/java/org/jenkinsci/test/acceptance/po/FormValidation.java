@@ -33,6 +33,7 @@ import org.hamcrest.StringDescription;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -88,14 +89,16 @@ public class FormValidation {
             element.sendKeys(Keys.TAB);
 
             // Wait for validation area to stop being <div></div>
-            validationArea = control.waitFor().until(() -> {
-                // path to validation area is the parents sibling with class `validation-error-area`
-                String xpath = silent
-                        ? "../../div[contains(@class,'validation-error-area')]"
-                        : "../../div[contains(@class,'validation-error-area--visible')]";
+            validationArea = control.waitFor()
+                    .ignoring(NoSuchElementException.class)
+                    .until(() -> {
+                        // path to validation area is the parents sibling with class `validation-error-area`
+                        String xpath = silent
+                                ? "../../div[contains(@class,'validation-error-area')]"
+                                : "../../div[contains(@class,'validation-error-area--visible')]";
 
-                return element.findElement(by.xpath(xpath));
-            });
+                        return element.findElement(by.xpath(xpath));
+                    });
         }
 
         return new FormValidation(validationArea);
