@@ -1,8 +1,10 @@
 package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.BufferedReader;
@@ -143,11 +145,11 @@ public class StageViewTest extends AbstractJUnitTest {
         job.open();
         job.getNavigationLinks();
         StageView stageView = new StageView(job, JOB_PATH);
-        String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
-        String secondJob = stageView.getLatestBuild().getStageViewItem(1).toString();
+        String firstStage = stageView.getLatestBuild().getStageViewItem(0).toString();
+        String secondStage = stageView.getLatestBuild().getStageViewItem(1).toString();
         assertThat(stageView.getLatestBuild().getCssClasses(), containsString("FAILED"));
-        assertThat(firstJob, containsString("ms"));
-        assertThat(secondJob, containsString("failed"));
+        assertThat(firstStage, allOf(containsString("ms"), not(containsString("failed"))));
+        assertThat(secondStage, containsString("failed"));
     }
 
     /**
@@ -161,9 +163,9 @@ public class StageViewTest extends AbstractJUnitTest {
         job.open();
         job.getNavigationLinks();
         StageView stageView = new StageView(job, JOB_PATH);
-        String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
+        String firstStage = stageView.getLatestBuild().getStageViewItem(0).toString();
         assertThat(stageView.getLatestBuild().getCssClasses(), containsString("UNSTABLE"));
-        assertThat(firstJob, containsString("ms"));
+        assertThat(firstStage, containsString("ms"));
     }
 
     /**
@@ -178,9 +180,9 @@ public class StageViewTest extends AbstractJUnitTest {
         job.open();
         job.getNavigationLinks();
         StageView stageView = new StageView(job, JOB_PATH);
-        String firstJob = stageView.getLatestBuild().getStageViewItem(0).toString();
+        String firstStage = stageView.getLatestBuild().getStageViewItem(0).toString();
         assertThat(stageView.getLatestBuild().getCssClasses(), containsString("ABORTED"));
-        assertThat(firstJob, containsString("ms"));
+        assertThat(firstStage, containsString("ms"));
     }
 
     /**

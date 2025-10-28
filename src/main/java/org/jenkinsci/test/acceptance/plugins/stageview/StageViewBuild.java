@@ -56,8 +56,8 @@ public class StageViewBuild {
      *
      * @return specific item
      */
-    public StageViewStage getStageViewItem(int buildNumber) {
-        return this.stageViewStages.get(stageViewStages.size() - 1);
+    public StageViewStage getStageViewItem(int stageNumber) {
+        return this.stageViewStages.get(stageNumber);
     }
 
     /**

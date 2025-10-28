@@ -58,6 +58,8 @@ public class StageView extends PageAreaImpl {
      * To generate and build up the whole stageview structure.
      */
     public void buildStructure() {
+        // stage view loads asynchronously
+        waitFor(by.id(ID_WRAPPER));
         List<WebElement> children = driver.findElements(By.xpath(XPATH_JOBS + "/tr"));
 
         for (WebElement e : children) {
@@ -136,11 +138,11 @@ public class StageView extends PageAreaImpl {
     }
 
     /**
-     * Returns the root eelement
+     * Returns the root element
      *
      * @return the root element
      */
     public WebElement getRootElementName() {
-        return super.find(By.id("pipeline-box"));
+        return super.find(By.id(ID_WRAPPER));
     }
 }
