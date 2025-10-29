@@ -125,13 +125,7 @@ public class WizardCustomizeJenkins extends PageObject {
     }
 
     private boolean isSelected(String pluginKey) {
-        return driver
-                .findElements(by.xpath(
-                        "//div[contains(@class, 'plugins-for-category')]/div[contains(@class, 'plugin') and contains(@class, 'selected') and contains(@class, '%s')]",
-                        pluginKey))
-                .stream()
-                .findFirst()
-                .isPresent();
+        return driver.findElement(by.id("chk-" + pluginKey)).isSelected();
     }
 
     private List<WebElement> getSelected() {

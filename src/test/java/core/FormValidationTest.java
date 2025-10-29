@@ -60,16 +60,16 @@ public class FormValidationTest extends AbstractJUnitTest {
     private void jsValidation() {
         JenkinsConfig c = jenkins.getConfigPage();
         c.configure();
-        c.numExecutors.set(16);
-        FormValidation formValidation = c.numExecutors.getSilentFormValidation();
+        c.setQuietPeriod(16);
+        FormValidation formValidation = c.quietPeriod.getSilentFormValidation();
         assertThat(formValidation, silent());
 
-        c.numExecutors.set(-16);
-        c.numExecutors.resolve().sendKeys(Keys.TAB);
-        c.numExecutors.sleep(100L);
-        formValidation = c.numExecutors.getFormValidation();
+        c.setQuietPeriod(-16);
+        c.quietPeriod.resolve().sendKeys(Keys.TAB);
+        c.quietPeriod.sleep(100L);
+        formValidation = c.quietPeriod.getFormValidation();
 
-        String errorMessage = "Not a non-negative integer";
+        String errorMessage = "This value should be larger than 0";
         assertThat(formValidation, reports(Kind.ERROR, errorMessage));
     }
 

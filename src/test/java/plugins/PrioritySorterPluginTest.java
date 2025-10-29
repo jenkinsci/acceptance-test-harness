@@ -112,7 +112,7 @@ public class PrioritySorterPluginTest extends AbstractJUnitTest {
 
         final JenkinsConfig global = jenkins.getConfigPage();
         global.configure();
-        global.numExecutors.set(42);
+        global.setDescription("Testing");
         global.save();
 
         assertThat(action.getChanges().size(), equalTo(expected));

@@ -11,9 +11,7 @@ import org.openqa.selenium.By;
 public class JenkinsConfig extends ConfigurablePageObject {
     public final Jenkins jenkins;
 
-    public final Control numExecutors = control("/jenkins-model-MasterBuildConfiguration/numExecutors");
-
-    public final Control labels = control("/jenkins-model-MasterBuildConfiguration/labelString");
+    public final Control quietPeriod = control("/jenkins-model-GlobalQuietPeriodConfiguration/quietPeriod");
 
     public JenkinsConfig(Jenkins jenkins) {
         super(jenkins.injector, jenkins.url("configure"));
@@ -45,7 +43,7 @@ public class JenkinsConfig extends ConfigurablePageObject {
     }
 
     public void setQuietPeriod(int seconds) {
-        control("/jenkins-model-GlobalQuietPeriodConfiguration/quietPeriod").set(seconds);
+        quietPeriod.set(seconds);
     }
 
     public void setDescription(String desc) {
