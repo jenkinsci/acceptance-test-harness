@@ -45,12 +45,12 @@ public class KeycloakUtils extends CapybaraPortingLayerImpl {
         return new User(null /* id not available in this page*/, username, email, firstName, lastName);
     }
 
-    public void logout(User user) {
+    public void logout(String keycloakUrl, String realm, User user) {
+        driver.get(String.format("%s/realms/%s/account", keycloakUrl, realm));
+
         final String caption = user.getFirstName() + " " + user.getLastName();
-        waitFor(by.button(caption), 5);
-        clickButton(caption);
-        waitFor(by.button("Sign out"));
-        clickButton("Sign out");
+        waitFor(by.button(caption), 5).click();
+        waitFor(by.button("Sign out")).click();
     }
 
     public static class User {
