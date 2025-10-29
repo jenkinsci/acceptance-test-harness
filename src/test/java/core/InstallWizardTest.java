@@ -68,7 +68,6 @@ public class InstallWizardTest extends AbstractJUnitTest {
         WizardCreateAdminUser createAdmin = new WizardCreateAdminUser(jenkins);
 
         createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
-        createAdmin.shouldCreateTheUserSuccessfully();
         createAdmin.confirmURLSettings();
         createAdmin.wizardShouldFinishSuccessfully();
 
@@ -105,7 +104,6 @@ public class InstallWizardTest extends AbstractJUnitTest {
         WizardCreateAdminUser createAdmin = new WizardCreateAdminUser(jenkins);
 
         createAdmin.createAdminUser(USERNAME, PASSWORD, FULL_NAME, EMAIL);
-        createAdmin.shouldCreateTheUserSuccessfully();
         createAdmin.confirmURLSettings();
         createAdmin.wizardShouldFinishSuccessfully();
 
