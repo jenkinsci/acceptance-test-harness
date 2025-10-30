@@ -33,16 +33,13 @@ public final class CspRule implements TestRule {
                     security.disableCspReportOnly();
                     security.save();
                 }
-                try {
-                    base.evaluate();
-                } finally {
-                    if (isEnabled() && !isSkipped()) {
-                        ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
-                        jenkins.runThenHandleUserPrompt(() -> csp.open());
-                        List<String> lines = csp.getReport();
-                        if (lines.size() > 2) {
-                            throw new AssertionError(String.join("\n", lines));
-                        }
+                base.evaluate();
+                if (isEnabled() && !isSkipped()) {
+                    ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
+                    jenkins.runThenHandleUserPrompt(() -> csp.open());
+                    List<String> lines = csp.getReport();
+                    if (lines.size() > 2) {
+                        throw new AssertionError(String.join("\n", lines));
                     }
                 }
             }
