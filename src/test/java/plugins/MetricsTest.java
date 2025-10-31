@@ -46,7 +46,7 @@ public class MetricsTest extends AbstractPipelineTest {
     private final Logger LOGGER = Logger.getLogger(MetricsTest.class.getName());
 
     @Test
-    @WithPlugins({"metrics", "parameter-separator"})
+    @WithPlugins("metrics")
     public void testMetrics() throws IOException {
         this.checkHealthcheck();
         this.checkPing();
