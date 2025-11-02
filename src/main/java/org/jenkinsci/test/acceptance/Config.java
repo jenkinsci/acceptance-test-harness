@@ -87,7 +87,7 @@ public class Config extends AbstractModule {
     public static final String DEVTOOLS_JSONVIEW_ENABLED = "devtools.jsonview.enabled";
     public static final String PASSWORD_MANAGER_LEAK_DETECTION = "profile.password_manager_leak_detection";
     public static final int PAGE_LOAD_TIMEOUT = 30;
-    public static final int IMPLICIT_WAIT_TIMEOUT = 1;
+    public static final int IMPLICIT_WAIT_TIMEOUT = 0;
 
     @Override
     protected void configure() {
