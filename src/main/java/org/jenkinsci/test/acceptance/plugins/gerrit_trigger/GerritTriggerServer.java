@@ -59,7 +59,7 @@ public class GerritTriggerServer extends PageObject {
     private static final String serverUrl = "gerrit-trigger/server/";
 
     public GerritTriggerServer(Jenkins jenkins, String serverName) {
-        super(jenkins.injector, jenkins.url(serverUrl + serverName));
+        super(jenkins, jenkins.url(serverUrl + serverName));
         this.jenkins = jenkins;
     }
 
