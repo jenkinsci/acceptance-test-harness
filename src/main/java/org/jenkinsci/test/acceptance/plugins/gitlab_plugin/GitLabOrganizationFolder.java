@@ -1,15 +1,15 @@
 package org.jenkinsci.test.acceptance.plugins.gitlab_plugin;
 
-import com.google.inject.Injector;
 import java.net.URL;
 import java.time.Duration;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.Folder;
+import org.jenkinsci.test.acceptance.po.PageObject;
 
 @Describable("jenkins.branch.OrganizationFolder")
 public class GitLabOrganizationFolder extends Folder {
-    public GitLabOrganizationFolder(Injector injector, URL url, String name) {
-        super(injector, url, name);
+    public GitLabOrganizationFolder(PageObject context, URL url, String name) {
+        super(context, url, name);
     }
 
     public void create(String owner) {

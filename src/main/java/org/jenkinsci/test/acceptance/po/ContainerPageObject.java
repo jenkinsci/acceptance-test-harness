@@ -21,6 +21,12 @@ import org.openqa.selenium.WebElement;
  * @author Kohsuke Kawaguchi
  */
 public abstract class ContainerPageObject extends ConfigurablePageObject {
+
+    /**
+     * @deprecated Use {@link #ContainerPageObject(PageObject, URL)} instead to properly maintain context hierarchy.
+     *             This constructor will be removed in a future version.
+     */
+    @Deprecated
     protected ContainerPageObject(Injector injector, URL url) {
         super(injector, url);
         if (!url.toExternalForm().endsWith("/")) {
