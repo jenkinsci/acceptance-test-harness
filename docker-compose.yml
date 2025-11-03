@@ -17,7 +17,7 @@ services:
       - SE_SCREEN_WIDTH=1680
     extra_hosts:
       - host.docker.internal:host-gateway
-    image: selenium/standalone-firefox:4.38.0@sha256:c6a658f92ef38747da1179363daaa2f0bbc36e6d01f6405633947c4687c49f86
+    image: selenium/standalone-firefox:4.38.0@sha256:47f24b4abdb42c093b02bd97fd3983cabf1dd0a5c046efc6bdc9889a971dbb71
     networks:
       - ath-network
     ports:
