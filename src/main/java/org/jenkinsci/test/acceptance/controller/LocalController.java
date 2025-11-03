@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Expand;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.log.LogListenable;
@@ -27,6 +28,7 @@ import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.MultipleFailureException;
+import org.jvnet.winp.WinProcess;
 import org.openqa.selenium.TimeoutException;
 
 /**
@@ -209,7 +211,11 @@ public abstract class LocalController extends JenkinsController implements LogLi
     @Override
     public void stopNow() throws IOException {
         LOGGER.info("Stopping Jenkins (" + getLogId() + ") in " + this);
-        process.getProcess().destroy();
+        if (!process.getProcess().supportsNormalTermination() && SystemUtils.IS_OS_WINDOWS) {
+            new WinProcess(process.getProcess()).sendCtrlC();
+        } else {
+            process.getProcess().destroy();
+        }
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
         try {
             if (!process.getProcess().waitFor(time.seconds(20), TimeUnit.MILLISECONDS)) {
