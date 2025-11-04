@@ -364,6 +364,11 @@ and
       <version>20250517</version>
     </dependency>
     <dependency>
+      <groupId>org.jvnet.winp</groupId>
+      <artifactId>winp</artifactId>
+      <version>1.31</version>
+    </dependency>
+    <dependency>
       <groupId>org.kohsuke</groupId>
       <artifactId>wordnet-random-name</artifactId>
       <version>1.6</version>

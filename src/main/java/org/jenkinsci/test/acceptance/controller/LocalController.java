@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.util.Expand;
 import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
 import org.jenkinsci.test.acceptance.log.LogListenable;
@@ -27,6 +28,7 @@ import org.jenkinsci.test.acceptance.utils.ElasticTime;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.jenkinsci.utils.process.ProcessInputStream;
 import org.junit.runners.model.MultipleFailureException;
+import org.jvnet.winp.WinProcess;
 import org.openqa.selenium.TimeoutException;
 
 /**
@@ -209,12 +211,24 @@ public abstract class LocalController extends JenkinsController implements LogLi
     @Override
     public void stopNow() throws IOException {
         LOGGER.info("Stopping Jenkins (" + getLogId() + ") in " + this);
-        process.getProcess().destroy();
+        if (!process.getProcess().supportsNormalTermination() && SystemUtils.IS_OS_WINDOWS) {
+            new WinProcess(process.getProcess()).sendCtrlC();
+        } else {
+            // https://bugs.openjdk.org/browse/JDK-5101298
+            // process.destroy closes all the streams even if there if the process is still alive and writing
+            // causing shutdown logs to be lost.  sending the signal via the ProcessHandle solves this issue.
+            try {
+                process.getProcess().toHandle().destroy();
+            } catch (UnsupportedOperationException huh) {
+                process.getProcess().destroy();
+            }
+        }
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
         try {
             if (!process.getProcess().waitFor(time.seconds(20), TimeUnit.MILLISECONDS)) {
                 throw new IOException("Jenkins (" + getLogId() + ") failed to stop within the allowed timeout");
             }
+            logWatcher.close();
         } catch (InterruptedException e) {
             throw new IOException("Jenkins (" + getLogId() + ") failed to terminate due to interruption", e);
         }
