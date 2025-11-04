@@ -214,13 +214,21 @@ public abstract class LocalController extends JenkinsController implements LogLi
         if (!process.getProcess().supportsNormalTermination() && SystemUtils.IS_OS_WINDOWS) {
             new WinProcess(process.getProcess()).sendCtrlC();
         } else {
-            process.getProcess().destroy();
+            // https://bugs.openjdk.org/browse/JDK-5101298
+            // process.destroy closes all the streams even if there if the process is still alive and writing
+            // causing shutdown logs to be lost.  sending the signal via the ProcessHandle solves this issue.
+            try {
+                process.getProcess().toHandle().destroy();
+            } catch (UnsupportedOperationException huh) {
+                process.getProcess().destroy();
+            }
         }
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
         try {
             if (!process.getProcess().waitFor(time.seconds(20), TimeUnit.MILLISECONDS)) {
                 throw new IOException("Jenkins (" + getLogId() + ") failed to stop within the allowed timeout");
             }
+            logWatcher.close();
         } catch (InterruptedException e) {
             throw new IOException("Jenkins (" + getLogId() + ") failed to terminate due to interruption", e);
         }
