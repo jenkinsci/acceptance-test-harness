@@ -27,8 +27,7 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
                                 by.xpath(
                                         "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
                         .click(),
-                name,
-                "OK");
+                name);
         return getUser(name);
     }
 

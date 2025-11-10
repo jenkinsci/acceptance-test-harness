@@ -21,14 +21,15 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.bidi.browsingcontext.BrowsingContext;
 import org.openqa.selenium.bidi.browsingcontext.UserPromptType;
 import org.openqa.selenium.bidi.module.BrowsingContextInspector;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
@@ -411,51 +412,43 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
     /**
      * Helper to execute something that shows a confirmation dialog
-     * with a "Yes" button or a classical browser confirm
+     * with the default button.
      *
-     * Executes the runnable, wait for "Yes" button
-     * of the modal dialog and presses the "Yes" button"
-     * In case the runnable opens a classical browse dialog this is accepted.
+     * Executes the runnable, wait for dialog then confirm with a press on the default button
+     * of the modal dialog.
+     * In case the runnable opens a classical browse alert then use {@link #runThenHandleAlert}
      *
-     * @param runnable
+     * @param runnable the code to run that will trigger the display of a dialog
      */
     public void runThenHandleDialog(Runnable runnable) {
-        try {
-            runnable.run();
-            WebElement button = waitFor(by.button("Yes"));
-            button.click();
-            // wait for the dialog to be dismissed
-            waitFor(button).until(CapybaraPortingLayerImpl::isStale);
-        } catch (UnhandledAlertException uae) {
-            runThenConfirmAlert(runnable, 2);
-        }
+        runnable.run();
+
+        WebElement dialog = waitFor(driver)
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(NoSuchElementException.class)
+                .until(waitForElementAnimationToFinish(By.className("jenkins-dialog")));
+        WebElement defaultBtn = dialog.findElement(by.css(".jenkins-button--primary"));
+        defaultBtn.click();
+        waitFor(defaultBtn).until(CapybaraPortingLayerImpl::isStale);
     }
 
     /**
-     * Executes the runnable, then attempts to write {@code input} in a dialog's input field and click the button with the specified label {@code buttonLabel}.
-     * If an alert appears, instead the runnable is re-run, the input written to the alert, then the alert is submitted.
+     * Executes the runnable, then attempts to write {@code input} in a dialog's input field before clicking the default button.
      *
      * @param runnable the runnable to run that causes a dialog to appear
-     * @param input the text to input into the dialog or alert
-     * @param buttonLabel the button of the dialog to click
+     * @param input the text to input into the dialog.
      */
-    public void runThenHandleInputDialog(Runnable runnable, String input, String buttonLabel) {
-        try {
-            runnable.run();
-            WebElement button = waitFor(by.button(buttonLabel));
-            find(by.css("dialog input")).sendKeys(input);
-            button.click();
-            // wait for the dialog to be dismissed
-            waitFor(button).until(CapybaraPortingLayerImpl::isStale);
-        } catch (UnhandledAlertException uae) {
-            runThenHandleAlert(
-                    runnable,
-                    a -> {
-                        a.sendKeys(input);
-                        a.accept();
-                    },
-                    2);
-        }
+    public void runThenHandleInputDialog(Runnable runnable, String input) {
+        runnable.run();
+        WebElement dialog = waitFor(driver)
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(NoSuchElementException.class)
+                .until(waitForElementAnimationToFinish(By.className("jenkins-dialog")));
+
+        dialog.findElement(by.css("dialog input")).sendKeys(input);
+        WebElement defaultBtn = dialog.findElement(by.css(".jenkins-button--primary"));
+        defaultBtn.click();
+        waitFor(defaultBtn).until(CapybaraPortingLayerImpl::isStale);
     }
 
     public void handleAlert(Consumer<Alert> action) {
@@ -622,5 +615,38 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
 
         protected abstract void resolve(String caption);
+    }
+
+    /**
+     * Expected Condition that waits for any animation (size or opacity) of a matched element to finish.
+     * @param by Selector to locate the element
+     * @return the {@link WebElement} that matched the selector that has for 2 consecutive calls not changed position or opacity.
+     */
+    private static ExpectedCondition<WebElement> waitForElementAnimationToFinish(final By by) {
+        return new ExpectedCondition<>() {
+            private Rectangle rect;
+            private String opacity;
+
+            @Override
+            public WebElement apply(WebDriver driver) {
+                WebElement element = driver.findElement(by);
+                if (!element.isDisplayed()) {
+                    return null;
+                }
+                String newOpacity = element.getCssValue("opacity");
+                Rectangle newRect = element.getRect();
+                if (newRect.equals(rect) && newOpacity.equals(opacity)) {
+                    return element;
+                }
+                opacity = newOpacity;
+                rect = newRect;
+                return null;
+            }
+
+            @Override
+            public String toString() {
+                return "Animation complete for selector: " + by;
+            }
+        };
     }
 }
