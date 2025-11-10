@@ -5,6 +5,7 @@
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
     <version>1.141</version>
+    <relativePath />
   </parent>
 
   <artifactId>acceptance-test-harness</artifactId>
