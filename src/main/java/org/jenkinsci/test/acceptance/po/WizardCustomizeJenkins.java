@@ -47,9 +47,9 @@ public class WizardCustomizeJenkins extends PageObject {
 
     public WizardCustomizeJenkins doInstallSuggested() {
         By suggestedButtonLocator = by.partialLinkText("Install suggested plugins");
-        waitFor(suggestedButtonLocator, 30);
-        Control installSuggested = control(suggestedButtonLocator);
+        WebElement installSuggested = waitFor(suggestedButtonLocator, 30);
         installSuggested.click();
+        waitFor(installSuggested).until(CapybaraPortingLayerImpl::isStale);
         return this;
     }
 
