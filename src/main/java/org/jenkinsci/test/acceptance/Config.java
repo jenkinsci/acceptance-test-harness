@@ -61,6 +61,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.remote.CapabilityType;
@@ -105,6 +106,10 @@ public class Config extends AbstractModule {
                 GeckoDriverService.Builder builder = new GeckoDriverService.Builder();
                 if (display != null) {
                     builder.withEnvironment(Map.of("DISPLAY", display));
+                }
+                if (System.getenv("FIREFOX_TRACE") != null) {
+                    builder.withLogLevel(FirefoxDriverLogLevel.fromString(System.getenv("FIREFOX_TRACE")));
+                    builder.withLogOutput(System.out);
                 }
                 GeckoDriverService service = builder.build();
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));
