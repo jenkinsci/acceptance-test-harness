@@ -109,7 +109,7 @@ public class Config extends AbstractModule {
                 }
                 if (System.getenv("FIREFOX_TRACE") != null) {
                     builder.withLogLevel(FirefoxDriverLogLevel.fromString(System.getenv("FIREFOX_TRACE")));
-                    builder.withLogOutput(System.out);
+                    builder.withLogOutput(System.err);
                 }
                 GeckoDriverService service = builder.build();
                 return new FirefoxDriver(service, buildFirefoxOptions(testName));
