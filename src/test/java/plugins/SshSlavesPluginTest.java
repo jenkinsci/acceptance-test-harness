@@ -215,15 +215,15 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         setUp();
         SshSlaveLauncher launcher = configureDefaultSSHSlaveLauncher().pwdCredentials("test", "test");
 
-        String javaPath = "/usr/lib/jvm/java-17-openjdk-amd64/bin/java";
+        String javaPath = "/usr/lib/jvm/java-21-openjdk-amd64/bin/java";
         if (System.getProperty("os.arch").equals("aarch64")) {
-            javaPath = "/usr/lib/jvm/java-17-openjdk-arm64/bin/java";
+            javaPath = "/usr/lib/jvm/java-21-openjdk-arm64/bin/java";
         }
         launcher.setJavaPath(javaPath);
         slave.save();
 
         verify();
-        verifyLog("java-17-openjdk");
+        verifyLog("java-21-openjdk");
     }
 
     @Test
