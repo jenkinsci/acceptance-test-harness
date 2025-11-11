@@ -416,7 +416,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      *
      * Executes the runnable, wait for dialog then confirm with a press on the default button
      * of the modal dialog.
-     * In case the runnable opens a classical browse alert then use #runThenHandleAlert
+     * In case the runnable opens a classical browse alert then use {@link #runThenHandleAlert}
      *
      * @param runnable the code to run that will trigger the display of a dialog
      */
@@ -620,7 +620,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
     /**
      * Expected Condition that waits for any animation (size or opacity) of a matched element to finish.
      * @param by Selector to locate the element
-     * @return the {@link WebElement} that matched the selector that has for 2 consequtive calls not changed position or opacity.
+     * @return the {@link WebElement} that matched the selector that has for 2 consecutive calls not changed position or opacity.
      */
     private static ExpectedCondition<WebElement> waitForElementAnimationToFinish(final By by) {
         return new ExpectedCondition<>() {
@@ -645,7 +645,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
 
             @Override
             public String toString() {
-                return "Annimation complete for selector: " + by;
+                return "Animation complete for selector: " + by;
             }
         };
     }
