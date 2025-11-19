@@ -21,7 +21,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -29,7 +28,6 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.bidi.browsingcontext.BrowsingContext;
 import org.openqa.selenium.bidi.browsingcontext.UserPromptType;
 import org.openqa.selenium.bidi.module.BrowsingContextInspector;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
@@ -426,7 +424,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         WebElement dialog = waitFor(driver)
                 .pollingEvery(Duration.ofMillis(100))
                 .ignoring(NoSuchElementException.class)
-                .until(waitForElementAnimationToFinish(By.className("jenkins-dialog")));
+                .until(Conditions.waitForElementAnimationToFinish(By.className("jenkins-dialog")));
         WebElement defaultBtn = dialog.findElement(by.css(".jenkins-button--primary"));
         defaultBtn.click();
         waitFor(defaultBtn).until(CapybaraPortingLayerImpl::isStale);
@@ -443,7 +441,7 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         WebElement dialog = waitFor(driver)
                 .pollingEvery(Duration.ofMillis(100))
                 .ignoring(NoSuchElementException.class)
-                .until(waitForElementAnimationToFinish(By.className("jenkins-dialog")));
+                .until(Conditions.waitForElementAnimationToFinish(By.className("jenkins-dialog")));
 
         dialog.findElement(by.css("dialog input")).sendKeys(input);
         WebElement defaultBtn = dialog.findElement(by.css(".jenkins-button--primary"));
@@ -615,38 +613,5 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
         }
 
         protected abstract void resolve(String caption);
-    }
-
-    /**
-     * Expected Condition that waits for any animation (size or opacity) of a matched element to finish.
-     * @param by Selector to locate the element
-     * @return the {@link WebElement} that matched the selector that has for 2 consecutive calls not changed position or opacity.
-     */
-    private static ExpectedCondition<WebElement> waitForElementAnimationToFinish(final By by) {
-        return new ExpectedCondition<>() {
-            private Rectangle rect;
-            private String opacity;
-
-            @Override
-            public WebElement apply(WebDriver driver) {
-                WebElement element = driver.findElement(by);
-                if (!element.isDisplayed()) {
-                    return null;
-                }
-                String newOpacity = element.getCssValue("opacity");
-                Rectangle newRect = element.getRect();
-                if (newRect.equals(rect) && newOpacity.equals(opacity)) {
-                    return element;
-                }
-                opacity = newOpacity;
-                rect = newRect;
-                return null;
-            }
-
-            @Override
-            public String toString() {
-                return "Animation complete for selector: " + by;
-            }
-        };
     }
 }
