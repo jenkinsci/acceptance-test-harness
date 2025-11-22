@@ -2,11 +2,10 @@ package org.jenkinsci.test.acceptance.junit;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import java.util.List;
-import org.jenkinsci.test.acceptance.plugins.csp.ContentSecurityPolicyReport;
-import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import java.util.Map;
+import java.util.logging.Level;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.jenkinsci.test.acceptance.po.JenkinsLogger;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -25,21 +24,13 @@ public final class CspRule implements TestRule {
                 Jenkins jenkins = injector.getInstance(Jenkins.class);
 
                 if (isEnabled() && !isSkipped()) {
-                    PluginSpec plugin = new PluginSpec("csp");
-                    jenkins.getPluginManager().installPlugins(plugin);
-
-                    GlobalSecurityConfig security = new GlobalSecurityConfig(jenkins);
-                    security.open();
-                    security.disableCspReportOnly();
-                    security.save();
+                    jenkins.createLogger("CSP", Map.of("jenkins.security.csp.impl.LoggingReceiver", Level.FINEST));
                 }
                 base.evaluate();
                 if (isEnabled() && !isSkipped()) {
-                    ContentSecurityPolicyReport csp = new ContentSecurityPolicyReport(jenkins);
-                    jenkins.runThenHandleUserPrompt(() -> csp.open());
-                    List<String> lines = csp.getReport();
-                    if (lines.size() > 2) {
-                        throw new AssertionError(String.join("\n", lines));
+                    JenkinsLogger logger = new JenkinsLogger(jenkins, "CSP");
+                    if (!logger.isEmpty()) {
+                        throw new AssertionError("CSP violations were logged during the test: " + logger.getAllMessages());
                     }
                 }
             }

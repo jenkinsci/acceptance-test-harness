@@ -84,10 +84,6 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         }
     }
 
-    public void disableCspReportOnly() {
-        control(By.name("_.reportOnly")).uncheck();
-    }
-
     public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {
         final String path =
                 createPageArea("/jenkins-security-QueueItemAuthenticatorConfiguration/authenticators", () -> control(
