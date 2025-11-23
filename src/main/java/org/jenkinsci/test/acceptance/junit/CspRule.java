@@ -28,6 +28,8 @@ public final class CspRule implements TestRule {
                 }
                 base.evaluate();
                 if (isEnabled() && !isSkipped()) {
+                    // Account for tests ending in a form that asks before navigating away
+                    jenkins.runThenHandleUserPrompt(jenkins::open);
                     JenkinsLogger logger = new JenkinsLogger(jenkins, "CSP");
                     if (!logger.isEmpty()) {
                         throw new AssertionError("CSP violations were logged during the test: " + logger.getAllMessages());
