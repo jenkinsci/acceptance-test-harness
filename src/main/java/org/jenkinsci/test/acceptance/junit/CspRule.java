@@ -32,7 +32,8 @@ public final class CspRule implements TestRule {
                     jenkins.runThenHandleUserPrompt(jenkins::open);
                     JenkinsLogger logger = new JenkinsLogger(jenkins, "CSP");
                     if (!logger.isEmpty()) {
-                        throw new AssertionError("CSP violations were logged during the test: " + logger.getAllMessages());
+                        throw new AssertionError(
+                                "CSP violations were logged during the test: " + logger.getAllMessages());
                     }
                 }
             }
