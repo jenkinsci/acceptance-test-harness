@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.plugins.authorize_project.BuildAccessControl;
 import org.jenkinsci.test.acceptance.plugins.git_client.ssh_host_key_verification.SshHostKeyVerificationStrategy;
-import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -82,10 +81,6 @@ public class GlobalSecurityConfig extends ContainerPageObject {
         } catch (NoSuchElementException x) {
             // JENKINS-40228, OK
         }
-    }
-
-    public void disableCspReportOnly() {
-        control(By.name("_.reportOnly")).uncheck();
     }
 
     public <T extends BuildAccessControl> T addBuildAccessControl(final Class<T> type) {

@@ -43,6 +43,15 @@ public class JenkinsLogger extends PageObject {
         return getElement(by.css("#main-panel pre")) == null;
     }
 
+    public String getAllMessages() {
+        open();
+        StringBuilder sb = new StringBuilder();
+        for (WebElement e : all(by.css("#main-panel pre"))) {
+            sb.append(e.getText()).append("\n");
+        }
+        return sb.toString();
+    }
+
     public boolean hasLogged(Pattern pattern) {
         open();
         for (WebElement e : all(by.css("#main-panel pre"))) {
