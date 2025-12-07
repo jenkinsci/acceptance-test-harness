@@ -20,8 +20,7 @@ public class GitLabBranchSource extends BranchSource {
         find(by.path("/sources/source/projectOwner")).sendKeys(owner);
     }
 
-    public void setProject(String owner, String project) {
-        find(by.path("/sources/source/projectPath")).click();
-        waitFor(by.option(owner + "/" + project)).click();
+    public void enableTagDiscovery() {
+        control("/hetero-list-add[traits]").selectDropdownMenu("Discover tags");
     }
 }

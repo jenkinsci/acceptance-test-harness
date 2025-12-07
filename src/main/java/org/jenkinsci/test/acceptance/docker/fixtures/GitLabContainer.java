@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -9,8 +8,6 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.ProjectApi;
-import org.gitlab4j.api.models.Project;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
@@ -21,12 +18,13 @@ import org.jenkinsci.test.acceptance.utils.ElasticTime;
         id = "gitlab-plugin",
         ports = {80, 443, 22})
 public class GitLabContainer extends DockerContainer {
-    protected static final String REPO_DIR = "/home/gitlab/gitlabRepo";
+    public static final int GITLAB_API_CONNECT_TIMEOUT_MS = 30_000;
+    public static final int GITLAB_API_READ_TIMEOUT_MS = 120_000;
 
-    private static final HttpClient client = HttpClient.newBuilder()
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .connectTimeout(Duration.ofMillis(200))
-            .build();
+    private static final int READINESS_TIMEOUT_SECONDS = 600;
+    private static final int READINESS_POLL_INTERVAL_SECONDS = 5;
+    private static final int READINESS_REQUEST_TIMEOUT_SECONDS = 5;
+    private static final int READINESS_CONNECTION_TIMEOUT_MILLISECONDS = 500;
 
     private static final ElasticTime time = new ElasticTime();
 
@@ -46,65 +44,52 @@ public class GitLabContainer extends DockerContainer {
         return ipBound(80);
     }
 
-    public URL getURL() throws IOException {
-        return new URL("http://" + getIpAddress() + sshPort());
+    public String getHttpUrl() {
+        return "http://" + httpHost() + ":" + httpPort();
     }
 
-    public URL getHttpUrl() throws IOException {
-        return new URL("http", httpHost(), httpPort(), "");
+    /**
+     * @return Authenticated Git URL ("http://username:token@host:port/username/repo.git")
+     */
+    public String repoUrl(String projectPath, String token) {
+        String username = projectPath.split("/")[0];
+        return getHttpUrl().replace("://", "://" + username + ":" + token + "@") + "/" + projectPath + ".git";
     }
 
-    /** URL visible from the host. */
-    public String getRepoUrl() {
-        return "ssh://git@" + host() + ":" + sshPort() + REPO_DIR;
+    /**
+     * Extracts the GitLab project path from an authenticated Git repository URL.
+     *
+     * @param repoUrl see {@link GitLabContainer#repoUrl(String, String)}
+     * @return Project path ("username/repo")
+     */
+    public String extractProjectPath(String repoUrl) {
+        String afterAuth = repoUrl.split("@")[1];
+        return afterAuth.split("/", 2)[1].replace(".git", "");
     }
 
     public void waitForReady(CapybaraPortingLayer p) {
+        var client = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .connectTimeout(Duration.ofMillis(time.milliseconds(READINESS_CONNECTION_TIMEOUT_MILLISECONDS)))
+                .build();
+
         p.waitFor()
                 .withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes add some headway
-                .pollingEvery(Duration.ofSeconds(2))
+                .withTimeout(Duration.ofSeconds(time.seconds(READINESS_TIMEOUT_SECONDS)))
+                .pollingEvery(Duration.ofSeconds(READINESS_POLL_INTERVAL_SECONDS))
                 .until(() -> {
                     try {
-                        HttpRequest request = HttpRequest.newBuilder()
-                                .uri(getHttpUrl().toURI())
+                        var request = HttpRequest.newBuilder()
+                                .uri(new URL(getHttpUrl()).toURI())
                                 .GET()
-                                .timeout(Duration.ofSeconds(1))
+                                .timeout(Duration.ofSeconds(READINESS_REQUEST_TIMEOUT_SECONDS))
                                 .build();
-                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         return response.body().contains("GitLab Community Edition");
-                    } catch (IOException ignored) {
-                        // we can not use .ignoring as this is a checked exception (even though a callable can throw
-                        // this!)
-                        return Boolean.FALSE;
+                    } catch (IOException | InterruptedException ignored) {
+                        return false;
                     }
                 });
-    }
-
-    public HttpResponse<String> createRepo(String repoName, String token) throws RuntimeException {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(getHttpUrl() + "/api/v4/projects"))
-                    .header("Content-Type", "application/json")
-                    .header("PRIVATE-TOKEN", token)
-                    .POST(HttpRequest.BodyPublishers.ofString("{ \"name\": \"" + repoName + "\" }"))
-                    .build();
-            return client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void deleteRepo(String token, String repoName) throws IOException, GitLabApiException {
-        // get the project and delete the project
-        GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), token);
-        ProjectApi projApi = new ProjectApi(gitlabapi);
-
-        Project project = projApi.getProjects().stream()
-                .filter((proj -> repoName.equals(proj.getName())))
-                .findAny()
-                .orElse(null);
-        projApi.deleteProject(project);
     }
 
     public String createUserToken(String userName, String password, String email, String isAdmin)
@@ -118,5 +103,42 @@ public class GitLabContainer extends DockerContainer {
                 .popen()
                 .verifyOrDieWith("Unable to create user")
                 .trim();
+    }
+
+    // attempt to cleanup, no retry
+    public void cleanup(String token, String repoName, String groupName) {
+        try (var gitlabapi = new GitLabApi(getHttpUrl(), token)
+                .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
+
+            try {
+                gitlabapi.getProjectApi().getProjects(repoName).stream()
+                        .filter(proj -> repoName.equals(proj.getName()))
+                        .findFirst()
+                        .ifPresent(project -> {
+                            try {
+                                gitlabapi.getProjectApi().deleteProject(project);
+                            } catch (GitLabApiException e) {
+                                throw new RuntimeException("Failed to delete project: " + repoName, e);
+                            }
+                        });
+            } catch (Exception e) {
+                System.err.println("Failed to delete repo '" + repoName + "': " + e.getMessage());
+            }
+
+            try {
+                gitlabapi.getGroupApi().getGroups(groupName).stream()
+                        .filter(g -> groupName.equals(g.getName()))
+                        .findFirst()
+                        .ifPresent(group -> {
+                            try {
+                                gitlabapi.getGroupApi().deleteGroup(group.getId());
+                            } catch (GitLabApiException e) {
+                                throw new RuntimeException("Failed to delete group: " + groupName, e);
+                            }
+                        });
+            } catch (Exception e) {
+                System.err.println("Failed to delete group '" + groupName + "': " + e.getMessage());
+            }
+        }
     }
 }
