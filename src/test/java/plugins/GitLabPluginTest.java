@@ -110,10 +110,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     public void init() throws InterruptedException, IOException {
         long startTime = System.currentTimeMillis();
         container = gitLabServer.get();
+        jenkins.open();
         container.waitForReady(this);
         adminToken = container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
         userToken = container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
         System.out.println("GitLab container init: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+        jenkins.open();
     }
 
     @After
