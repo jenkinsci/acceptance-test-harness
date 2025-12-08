@@ -22,7 +22,7 @@ public class GitLabContainer extends DockerContainer {
     public static final int GITLAB_API_READ_TIMEOUT_MS = 120_000;
 
     private static final int READINESS_TIMEOUT_SECONDS = 600;
-    private static final int READINESS_POLL_INTERVAL_SECONDS = 5;
+    private static final int READINESS_POLL_INTERVAL_SECONDS = 10;
     private static final int READINESS_REQUEST_TIMEOUT_SECONDS = 5;
     private static final int READINESS_CONNECTION_TIMEOUT_MILLISECONDS = 500;
 

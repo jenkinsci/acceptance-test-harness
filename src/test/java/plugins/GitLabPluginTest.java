@@ -58,11 +58,11 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private GitLabContainer container;
 
-    private static final int BRANCH_INDEXING_TIMEOUT_SECONDS = 240;
+    private static final int BRANCH_INDEXING_TIMEOUT_SECONDS = 120;
     private static final int BUILD_COMPLETION_TIMEOUT_SECONDS = 120;
     private static final int JOB_CREATION_TIMEOUT_SECONDS = 30;
     private static final int GITLAB_API_RETRY_TIMEOUT_SECONDS = 30;
-    private static final int POLLING_INTERVAL_SECONDS = 5;
+    private static final int POLLING_INTERVAL_SECONDS = 10;
 
     private static final String REPO_NAME = "testrepo";
     private static final String ANOTHER_REPO_NAME = "anotherproject";
@@ -113,8 +113,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         var starter = gitLabServer.starter();
         starter.withOptions(new org.jenkinsci.utils.process.CommandBuilder()
                 .add("--shm-size", "1g")
-                .add("--memory", "3g")
-                .add("--memory-swap", "4g"));
+                .add("--memory", "4g")
+                .add("--memory-swap", "5g"));
         container = starter.start();
 
         jenkins.open();
@@ -126,9 +126,11 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     @After
-    public void cleanup() {
+    public void cleanup() throws IOException {
         if (container != null) {
             container.cleanup(adminToken, REPO_NAME, GROUP_NAME);
+            container.close();
+            container = null;
         }
     }
 
@@ -150,7 +152,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             setupBranchFromViaGit(gitlabRepoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(gitlabRepoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
 
-            createMergeRequestViaApi(gitlabapi, project, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
+            MergeRequest mr = createMergeRequestViaApi(gitlabapi, project, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
+            awaitMergeRequestMergeRefViaApi(gitlabapi, project.getId(), mr.getIid());
         }
 
         createGitLabToken(userToken, "GitLab Personal Access Token");
@@ -219,7 +222,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             setupBranchFromViaGit(repoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
-            createMergeRequestViaApi(gitlabapi, project1, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
+            MergeRequest mr1 = createMergeRequestViaApi(gitlabapi, project1, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
+            awaitMergeRequestMergeRefViaApi(gitlabapi, project1.getId(), mr1.getIid());
 
             var project2 = createProjectViaApi(
                     gitlabapi.getProjectApi(),
@@ -230,7 +234,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             setupBranchFromViaGit(anotherRepoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(anotherRepoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(anotherRepoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
-            createMergeRequestViaApi(gitlabapi, project2, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
+            MergeRequest mr2 = createMergeRequestViaApi(gitlabapi, project2, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
+            awaitMergeRequestMergeRefViaApi(gitlabapi, project2.getId(), mr2.getIid());
         }
 
         createGitLabToken(adminToken, "GitLab Personal Access Token");
@@ -530,6 +535,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .pollingEvery(Duration.ofSeconds(POLLING_INTERVAL_SECONDS))
                 .until(() -> {
                     try {
+                        try {
+                            WorkflowJob existingJob = multibranchJob.getJob(branchName);
+                            existingJob.url("").openStream().close();
+                            return existingJob;
+                        } catch (Exception e) {
+                        }
+
                         reIndex(multibranchJob);
                         multibranchJob.waitForBranchIndexingFinished(
                                 (int) time.seconds(BUILD_COMPLETION_TIMEOUT_SECONDS));
@@ -568,5 +580,23 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     });
         }
         System.out.println("GitLab tags wait: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+    }
+
+    private void awaitMergeRequestMergeRefViaApi(GitLabApi gitlabapi, Long projectId, Long mrIid) {
+        long startTime = System.currentTimeMillis();
+        String mergeRef = "refs/merge-requests/" + mrIid + "/merge";
+        waitFor()
+                .withMessage("Waiting for GitLab MR %d merge ref to be available", mrIid)
+                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                .until(() -> {
+                    try {
+                        gitlabapi.getRepositoryFileApi().getFile(projectId, "Jenkinsfile", mergeRef);
+                        return true;
+                    } catch (Exception e) {
+                        return false;
+                    }
+                });
+        System.out.println(
+                "GitLab MR " + mrIid + " merge ref wait: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
     }
 }
