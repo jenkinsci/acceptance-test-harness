@@ -27,7 +27,6 @@ import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
-import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
@@ -38,6 +37,7 @@ import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabServerConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
+import org.jenkinsci.test.acceptance.update_center.PluginSpec;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +50,6 @@ import org.openqa.selenium.WebElement;
  */
 @WithDocker
 @Category(DockerTest.class)
-@WithPlugins({"gitlab-branch-source", "workflow-multibranch"})
 public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -116,13 +115,14 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .add("--memory", "4g")
                 .add("--memory-swap", "5g"));
         container = starter.start();
-
-        jenkins.open();
         container.waitForReady(this);
         adminToken = container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
         userToken = container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
         System.out.println("GitLab container init: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+
         jenkins.open();
+        jenkins.getPluginManager()
+                .installPlugins(new PluginSpec("gitlab-branch-source"), new PluginSpec("workflow-multibranch"));
     }
 
     @After
