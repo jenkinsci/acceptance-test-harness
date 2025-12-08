@@ -10,7 +10,9 @@ ENV GITLAB_SKIP_PG_UPGRADE=true \
     GITLAB_SKIP_TAIL_LOGS=true \
     GITLAB_POST_RECONFIGURE_SCRIPT="" \
     GITLAB_ROOT_PASSWORD=testpassword123 \
-    GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN=""
+    GITLAB_SHARED_RUNNERS_REGISTRATION_TOKEN="" \
+    GITLAB_SKIP_UNMIGRATED_DATA_CHECK=true \
+    GITLAB_SKIP_RECONFIGURE=false
 
 ENV GITLAB_OMNIBUS_CONFIG="prometheus_monitoring['enable'] = false; \
 node_exporter['enable'] = false; \
@@ -51,20 +53,40 @@ gitlab_rails['auto_migrate'] = true; \
 gitlab_rails['initial_root_password'] = 'testpassword123'; \
 gitlab_rails['monitoring_whitelist'] = []; \
 gitlab_rails['env'] = { 'MALLOC_ARENA_MAX' => '2' }; \
-puma['worker_processes'] = 2; \
-puma['worker_timeout'] = 60; \
-puma['per_worker_max_memory_mb'] = 1024; \
-sidekiq['concurrency'] = 10; \
-sidekiq['max_retries'] = 3; \
-postgresql['max_connections'] = 100; \
-postgresql['work_mem'] = '8MB'; \
-postgresql['shared_buffers'] = '256MB'; \
+gitlab_rails['migrate_timeout'] = 60; \
+gitlab_rails['db_statement_timeout'] = 15000; \
+gitlab_rails['rake_cache_clear'] = false; \
+gitlab_rails['db_load_balancing'] = { 'hosts' => [] }; \
+puma['worker_processes'] = 1; \
+puma['min_threads'] = 1; \
+puma['max_threads'] = 2; \
+puma['worker_timeout'] = 30; \
+puma['per_worker_max_memory_mb'] = 512; \
+sidekiq['concurrency'] = 5; \
+sidekiq['max_retries'] = 1; \
+sidekiq['queue_groups'] = ['*']; \
+postgresql['max_connections'] = 50; \
+postgresql['work_mem'] = '4MB'; \
+postgresql['shared_buffers'] = '128MB'; \
 postgresql['checkpoint_completion_target'] = 0.9; \
-postgresql['wal_buffers'] = '16MB'; \
+postgresql['wal_buffers'] = '8MB'; \
 postgresql['fsync'] = 'off'; \
 postgresql['synchronous_commit'] = 'off'; \
 postgresql['full_page_writes'] = 'off'; \
-gitaly['configuration'] = { concurrency: [{ rpc: '/gitaly.SmartHTTPService/PostReceivePack', max_per_repo: 3 }, { rpc: '/gitaly.SSHService/SSHUploadPack', max_per_repo: 3 }] };"
+postgresql['autovacuum'] = 'off'; \
+postgresql['track_activities'] = 'off'; \
+postgresql['track_counts'] = 'off'; \
+postgresql['track_io_timing'] = 'off'; \
+postgresql['log_statement'] = 'none'; \
+postgresql['log_duration'] = 'off'; \
+gitaly['configuration'] = { concurrency: [{ rpc: '/gitaly.SmartHTTPService/PostReceivePack', max_per_repo: 2 }, { rpc: '/gitaly.SSHService/SSHUploadPack', max_per_repo: 2 }], git: { catfile_cache_size: 5 } }; \
+nginx['worker_processes'] = 1; \
+nginx['worker_connections'] = 256; \
+nginx['gzip_enabled'] = false; \
+nginx['keepalive_timeout'] = 10; \
+redis['maxmemory'] = '256mb'; \
+redis['maxmemory_policy'] = 'allkeys-lru'; \
+redis['save'] = [];"
 
 # Expose the required ports
 EXPOSE 80 443 22
