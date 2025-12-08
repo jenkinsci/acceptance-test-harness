@@ -109,7 +109,14 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @Before
     public void init() throws InterruptedException, IOException {
         long startTime = System.currentTimeMillis();
-        container = gitLabServer.get();
+
+        var starter = gitLabServer.starter();
+        starter.withOptions(new org.jenkinsci.utils.process.CommandBuilder()
+                .add("--shm-size", "1g")
+                .add("--memory", "3g")
+                .add("--memory-swap", "4g"));
+        container = starter.start();
+
         jenkins.open();
         container.waitForReady(this);
         adminToken = container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
