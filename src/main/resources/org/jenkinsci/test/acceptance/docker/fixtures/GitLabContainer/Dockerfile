@@ -91,6 +91,7 @@ nginx['worker_processes'] = 1; \
 nginx['worker_connections'] = 256; \
 nginx['gzip_enabled'] = false; \
 nginx['keepalive_timeout'] = 10; \
+nginx['status'] = { 'enable' => false }; \
 redis['maxmemory'] = '256mb'; \
 redis['maxmemory_policy'] = 'allkeys-lru'; \
 redis['save'] = []; \

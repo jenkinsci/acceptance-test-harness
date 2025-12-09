@@ -158,7 +158,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     /**
-     * Verifies multibranch pipeline discovers branches/MRs, builds them, and detects dynamic branch
+     * Verifies multibranch pipeline discovers branches/MRs/tags, builds them, and detects dynamic branch
      */
     @Test
     public void testGitLabMultibranchPipeline() throws IOException, GitLabApiException {
@@ -221,6 +221,38 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         // Then the branch is discovered
         final WorkflowJob newBranchJob = awaitBranchDiscoveryViaJenkins(multibranchJob, newBranch);
         assertExistAndResult(newBranchJob, true);
+
+        // When add tags to repository
+        try (GitRepo repo = new GitRepo(container.repoUrl(USERNAME + "/" + REPO_NAME, userToken))) {
+            repo.git("checkout", MAIN_BRANCH);
+            repo.git("tag", "-a", "v1.0.0", "-m", "Release v1.0.0");
+            repo.git("push", "origin", "v1.0.0");
+            repo.git("tag", "-a", "v2.0.0", "-m", "Release v2.0.0");
+            repo.git("push", "origin", "v2.0.0");
+        }
+
+        try (var gitlabapi = new GitLabApi(container.getHttpUrl(), userToken)
+                .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
+            String projectPath = container.extractProjectPath(container.repoUrl(USERNAME + "/" + REPO_NAME, userToken));
+            awaitTagsAvailabilityViaApi(gitlabapi, projectPath, "v1.0.0", "v2.0.0");
+        }
+
+        // When multibranch job with tag discovery scans repository
+        final WorkflowMultiBranchJob tagMultibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
+        var tagBranchSource = configureJobWithGitLabBranchSource(tagMultibranchJob, USERNAME, REPO_NAME);
+        tagBranchSource.enableTagDiscovery();
+        tagMultibranchJob.save();
+
+        tagMultibranchJob.waitForBranchIndexingFinished((int) time.seconds(BRANCH_INDEXING_TIMEOUT_SECONDS));
+
+        // Then tags discovered and jobs created (builds not auto-triggered)
+        String tagIndexingLog = tagMultibranchJob.getBranchIndexingLogText();
+        assertThat(tagIndexingLog, containsString("Finished: SUCCESS"));
+        assertThat(tagIndexingLog, containsString("v1.0.0"));
+        assertThat(tagIndexingLog, containsString("v2.0.0"));
+
+        assertJobExists(tagMultibranchJob.getJob("v1.0.0"));
+        assertJobExists(tagMultibranchJob.getJob("v2.0.0"));
     }
 
     /**
@@ -288,47 +320,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             assertExistAndResult(project.getJob("MR-1"), true);
             assertExistAndResult(project.getJob(FAILED_JOB), false);
         }
-    }
-
-    /**
-     * Verifies tag discovery creates jobs
-     */
-    @Test
-    public void testTagDiscovery() throws IOException, GitLabApiException {
-        // Given a repository with main branch and 2 release tags
-        var project = new Project().withName(REPO_NAME).withInitializeWithReadme(true);
-        try (var gitlabapi = new GitLabApi(container.getHttpUrl(), userToken)
-                .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
-            createProjectViaApi(gitlabapi.getProjectApi(), project);
-
-            String gitlabRepoUrl = container.repoUrl(USERNAME + "/" + REPO_NAME, userToken);
-            setupInitialBranchViaGit(gitlabRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
-            createTagViaGit(gitlabRepoUrl, "v1.0.0", MAIN_BRANCH);
-            createTagViaGit(gitlabRepoUrl, "v2.0.0", MAIN_BRANCH);
-
-            String projectPath = container.extractProjectPath(gitlabRepoUrl);
-            awaitTagsAvailabilityViaApi(gitlabapi, projectPath, "v1.0.0", "v2.0.0");
-        }
-
-        // When multibranch pipeline scans with tag discovery enabled
-        createGitLabToken(userToken, "GitLab Personal Access Token");
-        configureGitLabServer();
-
-        final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
-        var branchSource = configureJobWithGitLabBranchSource(multibranchJob, USERNAME, REPO_NAME);
-        branchSource.enableTagDiscovery();
-        multibranchJob.save();
-
-        multibranchJob.waitForBranchIndexingFinished((int) time.seconds(BRANCH_INDEXING_TIMEOUT_SECONDS));
-
-        // Then tags discovered and jobs created (builds not auto-triggered)
-        String indexingLog = multibranchJob.getBranchIndexingLogText();
-        assertThat(indexingLog, containsString("Finished: SUCCESS"));
-        assertThat(indexingLog, containsString("v1.0.0"));
-        assertThat(indexingLog, containsString("v2.0.0"));
-
-        assertJobExists(multibranchJob.getJob("v1.0.0"));
-        assertJobExists(multibranchJob.getJob("v2.0.0"));
     }
 
     // ==================== Helper Methods ====================
