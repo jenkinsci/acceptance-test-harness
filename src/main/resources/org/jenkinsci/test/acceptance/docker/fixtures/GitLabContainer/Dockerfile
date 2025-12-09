@@ -52,7 +52,11 @@ gitlab_rails['cron_jobs'] = {}; \
 gitlab_rails['auto_migrate'] = true; \
 gitlab_rails['initial_root_password'] = 'testpassword123'; \
 gitlab_rails['monitoring_whitelist'] = []; \
-gitlab_rails['env'] = { 'MALLOC_ARENA_MAX' => '2' }; \
+gitlab_rails['pipeline_schedule_worker_cron'] = ''; \
+gitlab_rails['stuck_ci_jobs_worker_cron'] = ''; \
+gitlab_rails['analytics_usage_trends_cron_worker_cron'] = ''; \
+gitlab_rails['analytics_devops_adoption_cron_worker_cron'] = ''; \
+gitlab_rails['env'] = { 'MALLOC_ARENA_MAX' => '2', 'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000' }; \
 gitlab_rails['migrate_timeout'] = 60; \
 gitlab_rails['db_statement_timeout'] = 15000; \
 gitlab_rails['rake_cache_clear'] = false; \
@@ -65,10 +69,12 @@ puma['per_worker_max_memory_mb'] = 512; \
 sidekiq['concurrency'] = 5; \
 sidekiq['max_retries'] = 1; \
 sidekiq['queue_groups'] = ['*']; \
+gitaly['env'] = { 'GITALY_COMMAND_SPAWN_MAX_PARALLEL' => '2' }; \
 postgresql['max_connections'] = 50; \
 postgresql['work_mem'] = '4MB'; \
 postgresql['shared_buffers'] = '128MB'; \
-postgresql['checkpoint_completion_target'] = 0.9; \
+postgresql['checkpoint_completion_target'] = 0.7; \
+postgresql['checkpoint_timeout'] = '15min'; \
 postgresql['wal_buffers'] = '8MB'; \
 postgresql['fsync'] = 'off'; \
 postgresql['synchronous_commit'] = 'off'; \
@@ -79,6 +85,7 @@ postgresql['track_counts'] = 'off'; \
 postgresql['track_io_timing'] = 'off'; \
 postgresql['log_statement'] = 'none'; \
 postgresql['log_duration'] = 'off'; \
+postgresql['log_min_duration_statement'] = 1000; \
 gitaly['configuration'] = { concurrency: [{ rpc: '/gitaly.SmartHTTPService/PostReceivePack', max_per_repo: 2 }, { rpc: '/gitaly.SSHService/SSHUploadPack', max_per_repo: 2 }], git: { catfile_cache_size: 5 } }; \
 nginx['worker_processes'] = 1; \
 nginx['worker_connections'] = 256; \
@@ -86,7 +93,9 @@ nginx['gzip_enabled'] = false; \
 nginx['keepalive_timeout'] = 10; \
 redis['maxmemory'] = '256mb'; \
 redis['maxmemory_policy'] = 'allkeys-lru'; \
-redis['save'] = [];"
+redis['save'] = []; \
+redis['appendonly'] = 'no'; \
+redis['stop_writes_on_bgsave_error'] = 'no';"
 
 # Expose the required ports
 EXPOSE 80 443 22

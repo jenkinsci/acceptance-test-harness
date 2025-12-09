@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
 import org.jenkinsci.test.acceptance.junit.WithDocker;
+import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.credentials.CredentialsPage;
 import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.git.GitRepo;
@@ -37,7 +38,7 @@ import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabServerConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
-import org.jenkinsci.test.acceptance.update_center.PluginSpec;
+import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,7 @@ import org.openqa.selenium.WebElement;
  */
 @WithDocker
 @Category(DockerTest.class)
+@WithPlugins({"gitlab-branch-source", "workflow-multibranch"})
 public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Inject
@@ -109,20 +111,41 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     public void init() throws InterruptedException, IOException {
         long startTime = System.currentTimeMillis();
 
-        var starter = gitLabServer.starter();
-        starter.withOptions(new org.jenkinsci.utils.process.CommandBuilder()
-                .add("--shm-size", "1g")
-                .add("--memory", "4g")
-                .add("--memory-swap", "5g"));
-        container = starter.start();
-        container.waitForReady(this);
-        adminToken = container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
-        userToken = container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
-        System.out.println("GitLab container init: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+        // Keep WebDriver session alive during GitLab startup to prevent timeout
+        Thread keepaliveThread = new Thread(() -> {
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    Thread.sleep(30000);
+                    try {
+                        driver.getCurrentUrl();
+                    } catch (Exception e) {
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        keepaliveThread.setDaemon(true);
+        keepaliveThread.start();
 
-        jenkins.open();
-        jenkins.getPluginManager()
-                .installPlugins(new PluginSpec("gitlab-branch-source"), new PluginSpec("workflow-multibranch"));
+        try {
+            jenkins.open();
+
+            var starter = gitLabServer.starter();
+            starter.withOptions(new CommandBuilder()
+                    .add("--shm-size", "1g")
+                    .add("--memory", "4g")
+                    .add("--memory-swap", "5g"));
+            container = starter.start();
+            container.waitForReady(this);
+            adminToken =
+                    container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
+            userToken =
+                    container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
+            System.out.println("GitLab container init: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+        } finally {
+            keepaliveThread.interrupt();
+        }
     }
 
     @After
