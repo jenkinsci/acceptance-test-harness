@@ -132,6 +132,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             jenkins.open();
 
             var starter = gitLabServer.starter();
+            // https://docs.gitlab.com/ee/install/requirements.html#memory
             starter.withOptions(new CommandBuilder()
                     .add("--shm-size", "1g")
                     .add("--memory", "4g")

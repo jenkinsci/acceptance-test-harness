@@ -3,9 +3,27 @@ FROM gitlab/gitlab-ce:18.6.1-ce.0
 
 COPY create_user.rb /usr/bin/
 
-# Optimize GitLab for testing: disable monitoring to avoid /dev/shm exhaustion,
-# disable unused services, tune for 4GB memory (Puma 2 workers, Sidekiq 10 threads)
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║             BEHOLD! THE GITLAB TEST CONTAINER OF MINIMALISM!             ║
+# ║                                                                          ║
+# ║ None of these are required for tests to pass - feel free to remove them! ║
+# ║ These optimizations exist solely to reduce CI resource usage.            ║
+# ║                                                                          ║
+# ║      "With great performance comes great configuration complexity"       ║
+# ║                                                    - Ancient Proverb     ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
 #
+# https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template
+# https://docs.gitlab.com/omnibus/settings/memory_constrained_envs
+# https://docs.gitlab.com/omnibus/settings/redis
+# https://docs.gitlab.com/omnibus/settings/nginx
+# https://docs.gitlab.com/omnibus/settings/database
+# https://docs.gitlab.com/administration/environment_variables
+# https://docs.gitlab.com/ee/administration/operations/puma
+# https://docs.gitlab.com/ee/administration/sidekiq
+# https://docs.gitlab.com/ee/administration/gitaly
+# https://docs.gitlab.com/ee/administration/monitoring/prometheus
+
 ENV GITLAB_SKIP_PG_UPGRADE=true \
     GITLAB_SKIP_TAIL_LOGS=true \
     GITLAB_POST_RECONFIGURE_SCRIPT="" \
