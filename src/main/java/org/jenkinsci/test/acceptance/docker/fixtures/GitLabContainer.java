@@ -1,6 +1,7 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -21,12 +22,16 @@ public class GitLabContainer extends DockerContainer {
     public static final int GITLAB_API_CONNECT_TIMEOUT_MS = 30_000;
     public static final int GITLAB_API_READ_TIMEOUT_MS = 120_000;
 
-    private static final int READINESS_TIMEOUT_SECONDS = 600;
-    private static final int READINESS_POLL_INTERVAL_SECONDS = 10;
-    private static final int READINESS_REQUEST_TIMEOUT_SECONDS = 5;
-    private static final int READINESS_CONNECTION_TIMEOUT_MILLISECONDS = 500;
+    private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(10);
+    private static final Duration READINESS_POLL_INTERVAL = Duration.ofSeconds(10);
+    private static final Duration READINESS_REQUEST_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration READINESS_CONNECTION_TIMEOUT = Duration.ofMillis(500);
 
     private static final ElasticTime time = new ElasticTime();
+
+    private static Duration time(Duration duration) {
+        return Duration.ofMillis(time.milliseconds(duration.toMillis()));
+    }
 
     public String host() {
         return ipBound(22);
@@ -70,24 +75,25 @@ public class GitLabContainer extends DockerContainer {
     public void waitForReady(CapybaraPortingLayer p) {
         var client = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
-                .connectTimeout(Duration.ofMillis(time.milliseconds(READINESS_CONNECTION_TIMEOUT_MILLISECONDS)))
+                .connectTimeout(time(READINESS_CONNECTION_TIMEOUT))
                 .build();
 
         p.waitFor()
                 .withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofSeconds(time.seconds(READINESS_TIMEOUT_SECONDS)))
-                .pollingEvery(Duration.ofSeconds(READINESS_POLL_INTERVAL_SECONDS))
+                .withTimeout(READINESS_TIMEOUT)
+                .pollingEvery(READINESS_POLL_INTERVAL)
+                .ignoring(UncheckedIOException.class)
                 .until(() -> {
                     try {
                         var request = HttpRequest.newBuilder()
                                 .uri(new URL(getHttpUrl()).toURI())
                                 .GET()
-                                .timeout(Duration.ofSeconds(READINESS_REQUEST_TIMEOUT_SECONDS))
+                                .timeout(time(READINESS_REQUEST_TIMEOUT))
                                 .build();
                         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         return response.body().contains("GitLab Community Edition");
-                    } catch (IOException | InterruptedException ignored) {
-                        return false;
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
                     }
                 });
     }
@@ -109,7 +115,6 @@ public class GitLabContainer extends DockerContainer {
     public void cleanup(String token, String repoName, String groupName) {
         try (var gitlabapi = new GitLabApi(getHttpUrl(), token)
                 .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
-
             try {
                 gitlabapi.getProjectApi().getProjects(repoName).stream()
                         .filter(proj -> repoName.equals(proj.getName()))
@@ -118,11 +123,11 @@ public class GitLabContainer extends DockerContainer {
                             try {
                                 gitlabapi.getProjectApi().deleteProject(project);
                             } catch (GitLabApiException e) {
-                                throw new RuntimeException("Failed to delete project: " + repoName, e);
+                                System.err.println("Failed to delete project '" + repoName + "': " + e.getMessage());
                             }
                         });
             } catch (Exception e) {
-                System.err.println("Failed to delete repo '" + repoName + "': " + e.getMessage());
+                System.err.println("Failed to list projects for '" + repoName + "': " + e.getMessage());
             }
 
             try {
@@ -133,11 +138,11 @@ public class GitLabContainer extends DockerContainer {
                             try {
                                 gitlabapi.getGroupApi().deleteGroup(group.getId());
                             } catch (GitLabApiException e) {
-                                throw new RuntimeException("Failed to delete group: " + groupName, e);
+                                System.err.println("Failed to delete group '" + groupName + "': " + e.getMessage());
                             }
                         });
             } catch (Exception e) {
-                System.err.println("Failed to delete group '" + groupName + "': " + e.getMessage());
+                System.err.println("Failed to list groups for '" + groupName + "': " + e.getMessage());
             }
         }
     }

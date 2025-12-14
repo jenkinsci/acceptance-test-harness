@@ -26,10 +26,10 @@ public class GitLabOrganizationFolder extends Folder {
         return driver.getPageSource();
     }
 
-    public GitLabOrganizationFolder waitForCheckFinished(final int timeout) {
+    public GitLabOrganizationFolder waitForCheckFinished(Duration timeout) {
         waitFor()
                 .withMessage("Waiting for GitLab group scan to finish in %s", this.name)
-                .withTimeout(Duration.ofSeconds(timeout))
+                .withTimeout(timeout)
                 .until(() -> GitLabOrganizationFolder.this.getCheckLog().contains("Finished: "));
 
         return this;

@@ -2,12 +2,17 @@ package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer.GITLAB_API_CONNECT_TIMEOUT_MS;
 import static org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer.GITLAB_API_READ_TIMEOUT_MS;
 
 import jakarta.inject.Inject;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
@@ -21,6 +26,7 @@ import org.gitlab4j.api.models.MergeRequest;
 import org.gitlab4j.api.models.MergeRequestFilter;
 import org.gitlab4j.api.models.MergeRequestParams;
 import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.Tag;
 import org.gitlab4j.api.models.Visibility;
 import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
@@ -59,11 +65,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private GitLabContainer container;
 
-    private static final int BRANCH_INDEXING_TIMEOUT_SECONDS = 120;
-    private static final int BUILD_COMPLETION_TIMEOUT_SECONDS = 120;
-    private static final int JOB_CREATION_TIMEOUT_SECONDS = 30;
-    private static final int GITLAB_API_RETRY_TIMEOUT_SECONDS = 30;
-    private static final int POLLING_INTERVAL_SECONDS = 10;
+    private static final Duration BRANCH_INDEXING_TIMEOUT = Duration.ofMinutes(2);
+    private static final Duration BUILD_COMPLETION_TIMEOUT = Duration.ofMinutes(2);
+    private static final Duration JOB_CREATION_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration GITLAB_API_RETRY_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration POLLING_INTERVAL = Duration.ofSeconds(10);
+    private static final Duration PAGE_LOAD_TIMEOUT = Duration.ofSeconds(10);
 
     private static final String REPO_NAME = "testrepo";
     private static final String ANOTHER_REPO_NAME = "anotherproject";
@@ -109,7 +116,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     @Before
     public void init() throws InterruptedException, IOException {
-        long startTime = System.currentTimeMillis();
+        Instant startTime = Instant.now();
 
         // Keep WebDriver session alive during GitLab startup to prevent timeout
         Thread keepaliveThread = new Thread(() -> {
@@ -143,7 +150,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
             userToken =
                     container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
-            System.out.println("GitLab container init: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+            System.out.println("GitLab container init: " + elapsed(startTime));
         } finally {
             keepaliveThread.interrupt();
         }
@@ -171,7 +178,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     gitlabapi.getProjectApi(), new Project().withName(REPO_NAME).withInitializeWithReadme(true));
 
             String gitlabRepoUrl = container.repoUrl(USERNAME + "/" + REPO_NAME, userToken);
-            setupInitialBranchViaGit(gitlabRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            setUpInitialBranchViaGit(gitlabRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(gitlabRepoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(gitlabRepoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(gitlabRepoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
@@ -188,7 +195,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         configureJobWithGitLabBranchSource(multibranchJob, USERNAME, REPO_NAME);
         multibranchJob.save();
 
-        multibranchJob.waitForBranchIndexingFinished((int) time.seconds(BRANCH_INDEXING_TIMEOUT_SECONDS));
+        multibranchJob.waitForBranchIndexingFinished((int) BRANCH_INDEXING_TIMEOUT.toSeconds());
 
         // Then all branches and MR discovered, valid builds succeed, broken build fails
         var log = multibranchJob.getBranchIndexingLogText();
@@ -244,7 +251,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         tagBranchSource.enableTagDiscovery();
         tagMultibranchJob.save();
 
-        tagMultibranchJob.waitForBranchIndexingFinished((int) time.seconds(BRANCH_INDEXING_TIMEOUT_SECONDS));
+        tagMultibranchJob.waitForBranchIndexingFinished((int) BRANCH_INDEXING_TIMEOUT.toSeconds());
 
         // Then tags discovered and jobs created (builds not auto-triggered)
         String tagIndexingLog = tagMultibranchJob.getBranchIndexingLogText();
@@ -274,7 +281,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     new Project().withPublic(false).withPath(REPO_NAME).withNamespaceId(group.getId()));
 
             String repoUrl = container.repoUrl(GROUP_NAME + "/" + REPO_NAME, adminToken);
-            setupInitialBranchViaGit(repoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            setUpInitialBranchViaGit(repoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
@@ -286,7 +293,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     new Project().withPublic(false).withPath(ANOTHER_REPO_NAME).withNamespaceId(group.getId()));
 
             String anotherRepoUrl = container.repoUrl(GROUP_NAME + "/" + ANOTHER_REPO_NAME, adminToken);
-            setupInitialBranchViaGit(anotherRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            setUpInitialBranchViaGit(anotherRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(anotherRepoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(anotherRepoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(anotherRepoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
@@ -302,13 +309,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         organizationFolder.create(GROUP_NAME);
         organizationFolder.save();
 
-        organizationFolder.waitForCheckFinished((int) time.seconds(BRANCH_INDEXING_TIMEOUT_SECONDS));
+        organizationFolder.waitForCheckFinished(BRANCH_INDEXING_TIMEOUT);
 
         // Then both projects discovered, all branches indexed and built
         assertThat(organizationFolder.getCheckLog(), containsString("Finished: SUCCESS"));
 
         organizationFolder.open();
-        waitFor().withTimeout(Duration.ofSeconds(time.seconds(10))).until(() -> driver.getPageSource()
+        waitFor().withTimeout(PAGE_LOAD_TIMEOUT).until(() -> driver.getPageSource()
                 .contains("Scan GitLab Group Now"));
 
         var projects = List.of(
@@ -369,14 +376,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         branchSource
                 .waitFor()
                 .withMessage("Waiting for GitLab project '%s' to appear in dropdown", fullPath)
-                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
-                .until(() -> {
-                    try {
-                        return branchSource.find(branchSource.by.option(fullPath)) != null;
-                    } catch (NoSuchElementException e) {
-                        return false;
-                    }
-                });
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(NoSuchElementException.class)
+                .until(() -> branchSource.find(branchSource.by.option(fullPath)) != null);
         branchSource.waitFor(branchSource.by.option(fullPath)).click();
         return branchSource;
     }
@@ -386,40 +388,41 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertJobExists(job);
         waitFor()
                 .withMessage("Waiting for job '%s' to complete with result %s", job, expectedResult)
-                .withTimeout(Duration.ofSeconds(time.seconds(BUILD_COMPLETION_TIMEOUT_SECONDS)))
-                .pollingEvery(Duration.ofSeconds(POLLING_INTERVAL_SECONDS))
+                .withTimeout(BUILD_COMPLETION_TIMEOUT)
+                .pollingEvery(POLLING_INTERVAL)
+                .ignoring(NoSuchElementException.class)
                 .until(() -> {
-                    try {
-                        Build lastBuild = job.getLastBuild();
-                        if (lastBuild == null) {
-                            return false;
-                        }
-                        String result = lastBuild.getResult();
-                        return result != null && result.contains(expectedResult.name());
-                    } catch (Exception e) {
+                    Build lastBuild = job.getLastBuild();
+                    if (lastBuild == null) {
                         return false;
                     }
+                    String result = lastBuild.getResult();
+                    return result != null && result.contains(expectedResult.name());
                 });
     }
 
     private void assertJobExists(final WorkflowJob job) {
         waitFor()
                 .withMessage("Waiting for job '%s' to be created", job)
-                .withTimeout(Duration.ofSeconds(time.seconds(JOB_CREATION_TIMEOUT_SECONDS)))
-                .pollingEvery(Duration.ofSeconds(POLLING_INTERVAL_SECONDS))
+                .withTimeout(JOB_CREATION_TIMEOUT)
+                .pollingEvery(POLLING_INTERVAL)
+                .ignoring(UncheckedIOException.class)
                 .until(() -> {
-                    try {
-                        job.url("").openStream().close();
-                        return true;
-                    } catch (IOException e) {
-                        return false;
-                    }
+                    checkCanOpenJobUrl(job);
+                    return true;
                 });
+    }
+
+    private static void checkCanOpenJobUrl(final WorkflowJob job) throws UncheckedIOException {
+        try (var unused = job.url("").openStream()) {
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     // ==================== Git operations ====================
 
-    private void setupInitialBranchViaGit(String repoUrl, String branchName, String content) throws IOException {
+    private void setUpInitialBranchViaGit(String repoUrl, String branchName, String content) throws IOException {
         try (GitRepo repo = new GitRepo(repoUrl)) {
             repo.changeAndCommitFile("Jenkinsfile", content, "Initial commit");
             repo.git("push", "-u", "origin", branchName);
@@ -436,20 +439,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         }
     }
 
-    private void createTagViaGit(String repoUrl, String tagName, String ref) throws IOException {
-        try (GitRepo repo = new GitRepo(repoUrl)) {
-            repo.git("checkout", ref);
-            repo.git("tag", "-a", tagName, "-m", "Release " + tagName);
-            repo.git("push", "origin", tagName);
-        }
-    }
-
     // ==================== GitLab API ====================
 
     private Project createProjectViaApi(ProjectApi projApi, Project projectSpec) {
         return waitFor()
                 .withMessage("Creating GitLab project '%s'", projectSpec.getPath())
-                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
                 .until(() -> {
                     try {
                         return projApi.createProject(projectSpec);
@@ -468,7 +463,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 new GroupParams().withName(groupName).withPath(groupPath).withMembershipLock(false);
         return waitFor()
                 .withMessage("Creating GitLab group '%s'", groupName)
-                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
                 .until(() -> {
                     try {
                         return groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
@@ -485,7 +480,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     private Member addGroupMemberViaApi(GroupApi groupApi, Long groupId, Long userId, AccessLevel accessLevel) {
         return waitFor()
                 .withMessage("Adding user %d to group %d", userId, groupId)
-                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
                 .until(() -> {
                     try {
                         return groupApi.addMember(groupId, userId, accessLevel);
@@ -507,7 +502,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .withTitle(mrTitle);
         return waitFor()
                 .withMessage("Creating merge request '%s'", mrTitle)
-                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
                 .until(() -> {
                     try {
                         return gitlabapi.getMergeRequestApi().createMergeRequest(project, params);
@@ -526,92 +521,102 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     private void awaitBranchAvailabilityViaApi(GitLabApi gitlabapi, Long projectId, String branchName) {
-        long startTime = System.currentTimeMillis();
+        Instant startTime = Instant.now();
         waitFor()
                 .withMessage("Waiting for GitLab branch '%s' to be available", branchName)
-                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(GitLabApiRuntimeException.class)
                 .until(() -> {
                     try {
                         var branch = gitlabapi.getRepositoryApi().getBranch(projectId, branchName);
                         return branch != null && branch.getCommit() != null;
-                    } catch (Exception e) {
-                        return false;
+                    } catch (GitLabApiException e) {
+                        throw new GitLabApiRuntimeException(e);
                     }
                 });
-        System.out.println("GitLab branch '" + branchName + "' wait: "
-                + Duration.ofMillis(System.currentTimeMillis() - startTime));
+        System.out.println("GitLab branch '" + branchName + "' wait: " + elapsed(startTime));
     }
 
     private WorkflowJob awaitBranchDiscoveryViaJenkins(WorkflowMultiBranchJob multibranchJob, String branchName) {
-        long startTime = System.currentTimeMillis();
+        Instant startTime = Instant.now();
         WorkflowJob job = waitFor()
                 .withMessage("Waiting for Jenkins to discover branch '%s'", branchName)
-                .withTimeout(Duration.ofSeconds(time.seconds(BRANCH_INDEXING_TIMEOUT_SECONDS)))
-                .pollingEvery(Duration.ofSeconds(POLLING_INTERVAL_SECONDS))
+                .withTimeout(BRANCH_INDEXING_TIMEOUT)
+                .pollingEvery(POLLING_INTERVAL)
+                .ignoring(UncheckedIOException.class, NoSuchElementException.class)
                 .until(() -> {
                     try {
-                        try {
-                            WorkflowJob existingJob = multibranchJob.getJob(branchName);
-                            existingJob.url("").openStream().close();
-                            return existingJob;
-                        } catch (Exception e) {
-                        }
-
-                        reIndex(multibranchJob);
-                        multibranchJob.waitForBranchIndexingFinished(
-                                (int) time.seconds(BUILD_COMPLETION_TIMEOUT_SECONDS));
-                        String indexingLog = multibranchJob.getBranchIndexingLogText();
-
-                        if (!indexingLog.contains("Finished: SUCCESS")
-                                || !indexingLog.contains("Scheduled build for branch: " + branchName)) {
-                            return null;
-                        }
-
-                        WorkflowJob discoveredJob = multibranchJob.getJob(branchName);
-                        discoveredJob.url("").openStream().close();
-                        return discoveredJob;
-                    } catch (Exception e) {
-                        return null;
+                        WorkflowJob existingJob = multibranchJob.getJob(branchName);
+                        checkCanOpenJobUrl(existingJob);
+                        return existingJob;
+                    } catch (UncheckedIOException e) {
+                        System.err.println(branchName + " not found, expected, attempting reIndex ...");
                     }
+
+                    reIndex(multibranchJob);
+                    multibranchJob.waitForBranchIndexingFinished((int) BRANCH_INDEXING_TIMEOUT.toSeconds());
+                    String indexingLog = multibranchJob.getBranchIndexingLogText();
+
+                    if (!indexingLog.contains("Finished: SUCCESS")
+                            || !indexingLog.contains("Scheduled build for branch: " + branchName)) {
+                        throw new NoSuchElementException(
+                                "reIndex unsuccessful or branch " + branchName + " could not be found: " + indexingLog);
+                    }
+
+                    WorkflowJob discoveredJob = multibranchJob.getJob(branchName);
+                    checkCanOpenJobUrl(discoveredJob);
+                    return discoveredJob;
                 });
-        System.out.println("Jenkins branch '" + branchName + "' discovery: "
-                + Duration.ofMillis(System.currentTimeMillis() - startTime));
+        System.out.println("Jenkins branch '" + branchName + "' discovery: " + elapsed(startTime));
         return job;
     }
 
     private void awaitTagsAvailabilityViaApi(GitLabApi gitlabapi, String projectPath, String... tagNames) {
-        long startTime = System.currentTimeMillis();
+        Instant startTime = Instant.now();
         for (String tagName : tagNames) {
             waitFor()
                     .withMessage("Waiting for tag '%s' in GitLab API", tagName)
-                    .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                    .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                    .ignoring(GitLabApiRuntimeException.class, AssertionError.class)
                     .until(() -> {
                         try {
                             var tags = gitlabapi.getTagsApi().getTags(projectPath);
-                            return tags != null && tags.stream().anyMatch(tag -> tagName.equals(tag.getName()));
-                        } catch (Exception e) {
-                            return false;
+                            assertThat(tags, is(notNullValue()));
+                            assertThat(tags.stream().map(Tag::getName).toList(), hasItems(tagNames));
+                            return true;
+                        } catch (GitLabApiException e) {
+                            throw new GitLabApiRuntimeException(e);
                         }
                     });
         }
-        System.out.println("GitLab tags wait: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+        System.out.println("GitLab tags wait: " + elapsed(startTime));
     }
 
     private void awaitMergeRequestMergeRefViaApi(GitLabApi gitlabapi, Long projectId, Long mrIid) {
-        long startTime = System.currentTimeMillis();
+        Instant startTime = Instant.now();
         String mergeRef = "refs/merge-requests/" + mrIid + "/merge";
         waitFor()
                 .withMessage("Waiting for GitLab MR %d merge ref to be available", mrIid)
-                .withTimeout(Duration.ofSeconds(time.seconds(GITLAB_API_RETRY_TIMEOUT_SECONDS)))
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(GitLabApiRuntimeException.class)
                 .until(() -> {
                     try {
-                        gitlabapi.getRepositoryFileApi().getFile(projectId, "Jenkinsfile", mergeRef);
-                        return true;
-                    } catch (Exception e) {
-                        return false;
+                        return gitlabapi.getRepositoryFileApi().getFile(projectId, "Jenkinsfile", mergeRef);
+                    } catch (GitLabApiException e) {
+                        throw new GitLabApiRuntimeException(e);
                     }
                 });
-        System.out.println(
-                "GitLab MR " + mrIid + " merge ref wait: " + Duration.ofMillis(System.currentTimeMillis() - startTime));
+        System.out.println("GitLab MR " + mrIid + " merge ref wait: " + elapsed(startTime));
+    }
+
+    // To use in {@code .ignoring}
+    private static class GitLabApiRuntimeException extends RuntimeException {
+        GitLabApiRuntimeException(GitLabApiException e) {
+            super(e);
+        }
+    }
+
+    private static Duration elapsed(Instant startTime) {
+        return Duration.between(startTime, Instant.now());
     }
 }
