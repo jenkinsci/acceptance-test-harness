@@ -30,16 +30,16 @@ public class WorkflowMultiBranchJob extends Folder {
     }
 
     public String getBranchIndexingLog() {
-        try {
-            return IOUtils.toString(url("indexing/console").openStream(), StandardCharsets.UTF_8);
+        try (var in = url("indexing/console").openStream()) {
+            return IOUtils.toString(in, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             throw new AssertionError(ex);
         }
     }
 
     public String getBranchIndexingLogText() {
-        try {
-            return IOUtils.toString(url("indexing/consoleText").openStream(), StandardCharsets.UTF_8);
+        try (var in = url("indexing/consoleText").openStream()) {
+            return IOUtils.toString(in, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             throw new AssertionError(ex);
         }
