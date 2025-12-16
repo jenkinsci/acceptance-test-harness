@@ -30,7 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.540</jenkins.version>
+    <jenkins.version>2.541</jenkins.version>
     <selenium.version>4.39.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.5.0-jre</guava.version>
@@ -58,14 +58,14 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.2.7.Final</version>
+        <version>4.2.9.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-bom</artifactId>
-        <version>9.9</version>
+        <version>9.9.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -100,7 +100,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-text</artifactId>
-        <version>1.14.0</version>
+        <version>1.15.0</version>
         <!--
         commons config is only used by org/jenkinsci/test/acceptance/utils/pluginreporter/TextFileExercisedPluginReporter
         should be possible to rewrite without the need for commons-config but for later
@@ -427,7 +427,7 @@ and
     <dependency>
       <groupId>com.github.dasniko</groupId>
       <artifactId>testcontainers-keycloak</artifactId>
-      <version>3.9.0</version>
+      <version>3.9.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -779,7 +779,7 @@ and
       <id>lts</id>
       <properties>
         <!--RENOVATE-LTS-->
-        <jenkins.version>2.528.2</jenkins.version>
+        <jenkins.version>2.528.3</jenkins.version>
       </properties>
     </profile>
   </profiles>
