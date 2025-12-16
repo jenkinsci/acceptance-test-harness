@@ -1,6 +1,7 @@
 package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -10,10 +11,12 @@ import static org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer.GITL
 
 import jakarta.inject.Inject;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.GroupApi;
@@ -60,6 +63,8 @@ import org.openqa.selenium.WebElement;
 @WithPlugins({"gitlab-branch-source", "workflow-multibranch"})
 public class GitLabPluginTest extends AbstractJUnitTest {
 
+    private static final Logger LOGGER = Logger.getLogger(GitLabPluginTest.class.getName());
+
     @Inject
     DockerContainerHolder<GitLabContainer> gitLabServer;
 
@@ -69,7 +74,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     private static final Duration BUILD_COMPLETION_TIMEOUT = Duration.ofMinutes(2);
     private static final Duration JOB_CREATION_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration GITLAB_API_RETRY_TIMEOUT = Duration.ofSeconds(30);
-    private static final Duration POLLING_INTERVAL = Duration.ofSeconds(10);
+    private static final Duration POLLING_INTERVAL = Duration.ofSeconds(5);
     private static final Duration PAGE_LOAD_TIMEOUT = Duration.ofSeconds(10);
 
     private static final String REPO_NAME = "testrepo";
@@ -150,7 +155,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
             userToken =
                     container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
-            System.out.println("GitLab container init: " + elapsed(startTime));
+            LOGGER.info("GitLab container init: " + elapsed(startTime));
         } finally {
             keepaliveThread.interrupt();
         }
@@ -159,7 +164,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @After
     public void cleanup() throws IOException {
         if (container != null) {
-            container.cleanup(adminToken, REPO_NAME, GROUP_NAME);
             container.close();
             container = null;
         }
@@ -169,7 +173,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
      * Verifies multibranch pipeline discovers branches/MRs/tags, builds them, and detects dynamic branch
      */
     @Test
-    public void testGitLabMultibranchPipeline() throws IOException, GitLabApiException {
+    public void testGitLabMultibranchPipeline() throws IOException {
         // Given a repository with 4 branches (3 valid, 1 broken) and 1 merge request
         Project project;
         try (var gitlabapi = new GitLabApi(container.getHttpUrl(), userToken)
@@ -199,12 +203,15 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // Then all branches and MR discovered, valid builds succeed, broken build fails
         var log = multibranchJob.getBranchIndexingLogText();
-        assertThat(log, containsString("Finished: SUCCESS"));
-        assertThat(log, containsString("Scheduled build for branch: main"));
-        assertThat(log, containsString("Scheduled build for branch: firstbranch"));
-        assertThat(log, containsString("Scheduled build for branch: failedjob"));
-        assertThat(log, containsString("Scheduled build for branch: MR-1"));
-        assertThat(log, containsString("1 merge requests were processed"));
+        assertThat(
+                log,
+                allOf(
+                        containsString("Finished: SUCCESS"),
+                        containsString("Scheduled build for branch: main"),
+                        containsString("Scheduled build for branch: firstbranch"),
+                        containsString("Scheduled build for branch: failedjob"),
+                        containsString("Scheduled build for branch: MR-1"),
+                        containsString("1 merge requests were processed")));
 
         assertExistAndResult(multibranchJob.getJob(MAIN_BRANCH), true);
         assertExistAndResult(multibranchJob.getJob(FIRST_BRANCH), true);
@@ -255,9 +262,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // Then tags discovered and jobs created (builds not auto-triggered)
         String tagIndexingLog = tagMultibranchJob.getBranchIndexingLogText();
-        assertThat(tagIndexingLog, containsString("Finished: SUCCESS"));
-        assertThat(tagIndexingLog, containsString("v1.0.0"));
-        assertThat(tagIndexingLog, containsString("v2.0.0"));
+        assertThat(
+                tagIndexingLog,
+                allOf(containsString("Finished: SUCCESS"), containsString("v1.0.0"), containsString("v2.0.0")));
 
         assertJobExists(tagMultibranchJob.getJob("v1.0.0"));
         assertJobExists(tagMultibranchJob.getJob("v2.0.0"));
@@ -267,7 +274,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
      * Verifies organization folder discovers group projects and indexes their branches/MRs.
      */
     @Test
-    public void gitLabGroupFolderOrganization() throws GitLabApiException, IOException {
+    public void gitLabGroupFolderOrganization() throws IOException {
         // Given a GitLab group with 2 projects, each with 4 branches and 1 merge request
         try (var gitlabapi = new GitLabApi(container.getHttpUrl(), adminToken)
                 .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
@@ -385,20 +392,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private void assertExistAndResult(final WorkflowJob job, final boolean withSuccess) {
         final Build.Result expectedResult = withSuccess ? Build.Result.SUCCESS : Build.Result.FAILURE;
-        assertJobExists(job);
-        waitFor()
-                .withMessage("Waiting for job '%s' to complete with result %s", job, expectedResult)
-                .withTimeout(BUILD_COMPLETION_TIMEOUT)
-                .pollingEvery(POLLING_INTERVAL)
-                .ignoring(NoSuchElementException.class)
-                .until(() -> {
-                    Build lastBuild = job.getLastBuild();
-                    if (lastBuild == null) {
-                        return false;
-                    }
-                    String result = lastBuild.getResult();
-                    return result != null && result.contains(expectedResult.name());
-                });
+        Build b = job.getLastBuild();
+        b.waitUntilFinished((int) BUILD_COMPLETION_TIMEOUT.toSeconds());
+        b.shouldBe(expectedResult);
     }
 
     private void assertJobExists(final WorkflowJob job) {
@@ -406,18 +402,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .withMessage("Waiting for job '%s' to be created", job)
                 .withTimeout(JOB_CREATION_TIMEOUT)
                 .pollingEvery(POLLING_INTERVAL)
-                .ignoring(UncheckedIOException.class)
-                .until(() -> {
-                    checkCanOpenJobUrl(job);
-                    return true;
-                });
+                .until(() -> canLoadJob(job));
     }
 
-    private static void checkCanOpenJobUrl(final WorkflowJob job) throws UncheckedIOException {
-        try (var unused = job.url("").openStream()) {
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    private boolean canLoadJob(WorkflowJob job) {
+        job.open();
+        return driver.getPageSource().contains("Full project name:");
     }
 
     // ==================== Git operations ====================
@@ -534,7 +524,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                         throw new GitLabApiRuntimeException(e);
                     }
                 });
-        System.out.println("GitLab branch '" + branchName + "' wait: " + elapsed(startTime));
+        LOGGER.info("GitLab branch '" + branchName + "' wait: " + elapsed(startTime));
     }
 
     private WorkflowJob awaitBranchDiscoveryViaJenkins(WorkflowMultiBranchJob multibranchJob, String branchName) {
@@ -543,53 +533,62 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .withMessage("Waiting for Jenkins to discover branch '%s'", branchName)
                 .withTimeout(BRANCH_INDEXING_TIMEOUT)
                 .pollingEvery(POLLING_INTERVAL)
-                .ignoring(UncheckedIOException.class, NoSuchElementException.class)
+                .ignoring(NoSuchElementException.class)
                 .until(() -> {
                     try {
                         WorkflowJob existingJob = multibranchJob.getJob(branchName);
-                        checkCanOpenJobUrl(existingJob);
-                        return existingJob;
-                    } catch (UncheckedIOException e) {
-                        System.err.println(branchName + " not found, expected, attempting reIndex ...");
+                        if (canLoadJob(existingJob)) {
+                            return existingJob;
+                        }
+                    } catch (Exception e) {
+                        LOGGER.log(Level.WARNING, branchName + " not found, expected, attempting reIndex", e);
                     }
 
                     reIndex(multibranchJob);
                     multibranchJob.waitForBranchIndexingFinished((int) BRANCH_INDEXING_TIMEOUT.toSeconds());
                     String indexingLog = multibranchJob.getBranchIndexingLogText();
 
-                    if (!indexingLog.contains("Finished: SUCCESS")
-                            || !indexingLog.contains("Scheduled build for branch: " + branchName)) {
-                        throw new NoSuchElementException(
-                                "reIndex unsuccessful or branch " + branchName + " could not be found: " + indexingLog);
+                    if (!indexingLog.contains("Finished: SUCCESS")) {
+                        throw new NoSuchElementException("reIndex failed: " + indexingLog);
                     }
 
+                    if (!indexingLog.contains(branchName)) {
+                        throw new NoSuchElementException(
+                                "Branch " + branchName + " not found in indexing log: " + indexingLog);
+                    }
+
+                    multibranchJob.open();
+                    waitFor()
+                            .withMessage("Waiting for branch '%s' to appear in job list", branchName)
+                            .withTimeout(JOB_CREATION_TIMEOUT)
+                            .pollingEvery(POLLING_INTERVAL)
+                            .until(() -> driver.getPageSource().contains(branchName));
+
                     WorkflowJob discoveredJob = multibranchJob.getJob(branchName);
-                    checkCanOpenJobUrl(discoveredJob);
+                    assertJobExists(discoveredJob);
                     return discoveredJob;
                 });
-        System.out.println("Jenkins branch '" + branchName + "' discovery: " + elapsed(startTime));
+        LOGGER.info("Jenkins branch '" + branchName + "' discovery: " + elapsed(startTime));
         return job;
     }
 
     private void awaitTagsAvailabilityViaApi(GitLabApi gitlabapi, String projectPath, String... tagNames) {
         Instant startTime = Instant.now();
-        for (String tagName : tagNames) {
-            waitFor()
-                    .withMessage("Waiting for tag '%s' in GitLab API", tagName)
-                    .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                    .ignoring(GitLabApiRuntimeException.class, AssertionError.class)
-                    .until(() -> {
-                        try {
-                            var tags = gitlabapi.getTagsApi().getTags(projectPath);
-                            assertThat(tags, is(notNullValue()));
-                            assertThat(tags.stream().map(Tag::getName).toList(), hasItems(tagNames));
-                            return true;
-                        } catch (GitLabApiException e) {
-                            throw new GitLabApiRuntimeException(e);
-                        }
-                    });
-        }
-        System.out.println("GitLab tags wait: " + elapsed(startTime));
+        waitFor()
+                .withMessage("Waiting for tags '%s' in GitLab API", Arrays.asList(tagNames))
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(GitLabApiRuntimeException.class, AssertionError.class)
+                .until(() -> {
+                    try {
+                        var tags = gitlabapi.getTagsApi().getTags(projectPath);
+                        assertThat(tags, is(notNullValue()));
+                        assertThat(tags.stream().map(Tag::getName).toList(), hasItems(tagNames));
+                        return true;
+                    } catch (GitLabApiException e) {
+                        throw new GitLabApiRuntimeException(e);
+                    }
+                });
+        LOGGER.info("GitLab tags wait: " + elapsed(startTime));
     }
 
     private void awaitMergeRequestMergeRefViaApi(GitLabApi gitlabapi, Long projectId, Long mrIid) {
@@ -606,7 +605,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                         throw new GitLabApiRuntimeException(e);
                     }
                 });
-        System.out.println("GitLab MR " + mrIid + " merge ref wait: " + elapsed(startTime));
+        LOGGER.info("GitLab MR " + mrIid + " merge ref wait: " + elapsed(startTime));
     }
 
     // To use in {@code .ignoring}

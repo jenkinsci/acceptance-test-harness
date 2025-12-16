@@ -7,8 +7,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
@@ -24,7 +22,7 @@ public class GitLabContainer extends DockerContainer {
 
     private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration READINESS_POLL_INTERVAL = Duration.ofSeconds(10);
-    private static final Duration READINESS_REQUEST_TIMEOUT = Duration.ofSeconds(5);
+    private static final Duration READINESS_REQUEST_TIMEOUT = Duration.ofSeconds(1);
     private static final Duration READINESS_CONNECTION_TIMEOUT = Duration.ofMillis(500);
 
     private static final ElasticTime time = new ElasticTime();
@@ -109,41 +107,5 @@ public class GitLabContainer extends DockerContainer {
                 .popen()
                 .verifyOrDieWith("Unable to create user")
                 .trim();
-    }
-
-    // attempt to cleanup, no retry
-    public void cleanup(String token, String repoName, String groupName) {
-        try (var gitlabapi = new GitLabApi(getHttpUrl(), token)
-                .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
-            try {
-                gitlabapi.getProjectApi().getProjects(repoName).stream()
-                        .filter(proj -> repoName.equals(proj.getName()))
-                        .findFirst()
-                        .ifPresent(project -> {
-                            try {
-                                gitlabapi.getProjectApi().deleteProject(project);
-                            } catch (GitLabApiException e) {
-                                System.err.println("Failed to delete project '" + repoName + "': " + e.getMessage());
-                            }
-                        });
-            } catch (Exception e) {
-                System.err.println("Failed to list projects for '" + repoName + "': " + e.getMessage());
-            }
-
-            try {
-                gitlabapi.getGroupApi().getGroups(groupName).stream()
-                        .filter(g -> groupName.equals(g.getName()))
-                        .findFirst()
-                        .ifPresent(group -> {
-                            try {
-                                gitlabapi.getGroupApi().deleteGroup(group.getId());
-                            } catch (GitLabApiException e) {
-                                System.err.println("Failed to delete group '" + groupName + "': " + e.getMessage());
-                            }
-                        });
-            } catch (Exception e) {
-                System.err.println("Failed to list groups for '" + groupName + "': " + e.getMessage());
-            }
-        }
     }
 }
