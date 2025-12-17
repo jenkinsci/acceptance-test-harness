@@ -6,8 +6,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer.GITLAB_API_CONNECT_TIMEOUT_MS;
-import static org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer.GITLAB_API_READ_TIMEOUT_MS;
 
 import jakarta.inject.Inject;
 import java.io.IOException;
@@ -70,6 +68,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private GitLabContainer container;
 
+    private static final int GITLAB_API_CONNECT_TIMEOUT_MS = 30_000;
+    private static final int GITLAB_API_READ_TIMEOUT_MS = 120_000;
+
     private static final Duration BRANCH_INDEXING_TIMEOUT = Duration.ofMinutes(2);
     private static final Duration BUILD_COMPLETION_TIMEOUT = Duration.ofMinutes(2);
     private static final Duration JOB_CREATION_TIMEOUT = Duration.ofSeconds(30);
@@ -123,42 +124,19 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     public void init() throws InterruptedException, IOException {
         Instant startTime = Instant.now();
 
-        // Keep WebDriver session alive during GitLab startup to prevent timeout
-        Thread keepaliveThread = new Thread(() -> {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(30000);
-                    try {
-                        driver.getCurrentUrl();
-                    } catch (Exception e) {
-                    }
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
-        keepaliveThread.setDaemon(true);
-        keepaliveThread.start();
+        jenkins.open();
 
-        try {
-            jenkins.open();
-
-            var starter = gitLabServer.starter();
-            // https://docs.gitlab.com/ee/install/requirements.html#memory
-            starter.withOptions(new CommandBuilder()
-                    .add("--shm-size", "1g")
-                    .add("--memory", "4g")
-                    .add("--memory-swap", "5g"));
-            container = starter.start();
-            container.waitForReady(this);
-            adminToken =
-                    container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
-            userToken =
-                    container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
-            LOGGER.info("GitLab container init: " + elapsed(startTime));
-        } finally {
-            keepaliveThread.interrupt();
-        }
+        var starter = gitLabServer.starter();
+        // https://docs.gitlab.com/ee/install/requirements.html#memory
+        starter.withOptions(new CommandBuilder()
+                .add("--shm-size", "1g")
+                .add("--memory", "4g")
+                .add("--memory-swap", "5g"));
+        container = starter.start();
+        container.waitForReady(this);
+        adminToken = container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
+        userToken = container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
+        LOGGER.info("GitLab container init: " + elapsed(startTime));
     }
 
     @After
