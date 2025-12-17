@@ -50,6 +50,7 @@ import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -69,7 +70,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @Inject
     DockerContainerHolder<GitLabContainer> gitLabServer;
 
-    private GitLabContainer container;
+    private static GitLabContainer CONTAINER;
+    private static String ADMIN_TOKEN;
+    private static String USER_TOKEN;
 
     private static final int GITLAB_API_CONNECT_TIMEOUT_MS = 30_000;
     private static final int GITLAB_API_READ_TIMEOUT_MS = 120_000;
@@ -120,33 +123,75 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 agent any
             """;
 
-    private String adminToken;
-    private String userToken;
-
     @Before
-    public void init() throws InterruptedException, IOException {
-        Instant startTime = Instant.now();
-
+    public void init() throws Exception {
         jenkins.open();
 
-        var starter = gitLabServer.starter();
-        // https://docs.gitlab.com/ee/install/requirements.html#memory
-        starter.withOptions(new CommandBuilder()
-                .add("--shm-size", "1g")
-                .add("--memory", "4g")
-                .add("--memory-swap", "5g"));
-        container = starter.start();
-        container.waitForReady(this);
-        adminToken = container.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
-        userToken = container.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
-        LOGGER.info("GitLab container init: " + elapsed(startTime));
+        if (CONTAINER == null) {
+            var starter = gitLabServer.starter();
+            // https://docs.gitlab.com/ee/install/requirements.html#memory
+            starter.withOptions(new CommandBuilder()
+                    .add("--shm-size", "1g")
+                    .add("--memory", "4g")
+                    .add("--memory-swap", "5g"));
+            CONTAINER = starter.start();
+            LOGGER.info("GitLab container launched");
+        }
+
+        Instant startTime = Instant.now();
+        CONTAINER.waitForReady(this);
+        LOGGER.info("GitLab ready check: " + elapsed(startTime));
+
+        if (ADMIN_TOKEN == null) {
+            ADMIN_TOKEN =
+                    CONTAINER.createUserToken(ADMIN_USERNAME, "arandompassword12#", "testadmin@invalid.test", "true");
+        }
+        if (USER_TOKEN == null) {
+            USER_TOKEN =
+                    CONTAINER.createUserToken(USERNAME, "passwordforsimpleuser12#", "testsimple@invalid.test", "false");
+        }
     }
 
     @After
-    public void cleanup() throws IOException {
-        if (container != null) {
-            container.close();
-            container = null;
+    public void cleanup() {
+        Instant startTime = Instant.now();
+        try (var gitlabapi = new GitLabApi(CONTAINER.getHttpUrl(), ADMIN_TOKEN)
+                .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
+            waitFor()
+                    .withMessage("Deleting all GitLab projects")
+                    .withTimeout(GITLAB_API_RETRY_TIMEOUT.multipliedBy(2))
+                    .ignoring(GitLabApiException.class)
+                    .until(toFunction(() -> {
+                        for (var project : gitlabapi.getProjectApi().getProjects()) {
+                            if (project.getMarkedForDeletionOn() != null) {
+                                continue;
+                            }
+                            gitlabapi.getProjectApi().deleteProject(project);
+                        }
+                        return true;
+                    }));
+            waitFor()
+                    .withMessage("Deleting all GitLab groups")
+                    .withTimeout(GITLAB_API_RETRY_TIMEOUT.multipliedBy(2))
+                    .ignoring(GitLabApiException.class)
+                    .until(toFunction(() -> {
+                        for (var group : gitlabapi.getGroupApi().getGroups()) {
+                            if (group.getMarkedForDeletionOn() != null) {
+                                continue;
+                            }
+                            gitlabapi.getGroupApi().deleteGroup(group.getId());
+                        }
+                        return true;
+                    }));
+        }
+        LOGGER.info("GitLab cleanup completed: " + elapsed(startTime));
+    }
+
+    @AfterClass
+    public static void tearDownGitLabContainer() {
+        if (CONTAINER != null) {
+            CONTAINER.close();
+            CONTAINER = null;
         }
     }
 
@@ -157,12 +202,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     public void testGitLabMultibranchPipeline() throws IOException {
         // Given a repository with 4 branches (3 valid, 1 broken) and 1 merge request
         Project project;
-        try (var gitlabapi = new GitLabApi(container.getHttpUrl(), userToken)
+        try (var gitlabapi = new GitLabApi(CONTAINER.getHttpUrl(), USER_TOKEN)
                 .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
             project = createProjectViaApi(
                     gitlabapi.getProjectApi(), new Project().withName(REPO_NAME).withInitializeWithReadme(true));
 
-            String gitlabRepoUrl = container.repoUrl(USERNAME + "/" + REPO_NAME, userToken);
+            String gitlabRepoUrl = CONTAINER.repoUrl(USERNAME + "/" + REPO_NAME, USER_TOKEN);
             setUpInitialBranchViaGit(gitlabRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(gitlabRepoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(gitlabRepoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
@@ -172,7 +217,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             awaitMergeRequestMergeRefViaApi(gitlabapi, project.getId(), mr.getIid());
         }
 
-        createGitLabToken(userToken, "GitLab Personal Access Token");
+        createGitLabToken(USER_TOKEN, "GitLab Personal Access Token");
         configureGitLabServer();
 
         // When multibranch job scans GitLab project
@@ -201,7 +246,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // When add new branch dynamically via git push
         String newBranch = "feature-dynamic";
-        try (GitRepo repo = new GitRepo(container.repoUrl(USERNAME + "/" + REPO_NAME, userToken))) {
+        try (GitRepo repo = new GitRepo(CONTAINER.repoUrl(USERNAME + "/" + REPO_NAME, USER_TOKEN))) {
             repo.git("checkout", "-b", newBranch);
             repo.touch("marker-" + System.currentTimeMillis() + ".txt");
             repo.git("add", ".");
@@ -209,7 +254,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             repo.git("push", "origin", newBranch);
         }
 
-        try (var gitlabapi = new GitLabApi(container.getHttpUrl(), userToken)
+        try (var gitlabapi = new GitLabApi(CONTAINER.getHttpUrl(), USER_TOKEN)
                 .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
             awaitBranchAvailabilityViaApi(gitlabapi, project.getId(), newBranch);
         }
@@ -219,7 +264,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertExistAndResult(newBranchJob, true);
 
         // When add tags to repository
-        try (GitRepo repo = new GitRepo(container.repoUrl(USERNAME + "/" + REPO_NAME, userToken))) {
+        try (GitRepo repo = new GitRepo(CONTAINER.repoUrl(USERNAME + "/" + REPO_NAME, USER_TOKEN))) {
             repo.git("checkout", MAIN_BRANCH);
             repo.git("tag", "-a", "v1.0.0", "-m", "Release v1.0.0");
             repo.git("push", "origin", "v1.0.0");
@@ -227,9 +272,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             repo.git("push", "origin", "v2.0.0");
         }
 
-        try (var gitlabapi = new GitLabApi(container.getHttpUrl(), userToken)
+        try (var gitlabapi = new GitLabApi(CONTAINER.getHttpUrl(), USER_TOKEN)
                 .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
-            String projectPath = container.extractProjectPath(container.repoUrl(USERNAME + "/" + REPO_NAME, userToken));
+            String projectPath =
+                    CONTAINER.extractProjectPath(CONTAINER.repoUrl(USERNAME + "/" + REPO_NAME, USER_TOKEN));
             awaitTagsAvailabilityViaApi(gitlabapi, projectPath, "v1.0.0", "v2.0.0");
         }
 
@@ -257,7 +303,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @Test
     public void gitLabGroupFolderOrganization() throws IOException {
         // Given a GitLab group with 2 projects, each with 4 branches and 1 merge request
-        try (var gitlabapi = new GitLabApi(container.getHttpUrl(), adminToken)
+        try (var gitlabapi = new GitLabApi(CONTAINER.getHttpUrl(), ADMIN_TOKEN)
                 .withRequestTimeout(GITLAB_API_CONNECT_TIMEOUT_MS, GITLAB_API_READ_TIMEOUT_MS)) {
             var group = createGroupViaApi(gitlabapi.getGroupApi(), GROUP_NAME, GROUP_NAME);
 
@@ -268,7 +314,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     gitlabapi.getProjectApi(),
                     new Project().withPublic(false).withPath(REPO_NAME).withNamespaceId(group.getId()));
 
-            String repoUrl = container.repoUrl(GROUP_NAME + "/" + REPO_NAME, adminToken);
+            String repoUrl = CONTAINER.repoUrl(GROUP_NAME + "/" + REPO_NAME, ADMIN_TOKEN);
             setUpInitialBranchViaGit(repoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
@@ -280,7 +326,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     gitlabapi.getProjectApi(),
                     new Project().withPublic(false).withPath(ANOTHER_REPO_NAME).withNamespaceId(group.getId()));
 
-            String anotherRepoUrl = container.repoUrl(GROUP_NAME + "/" + ANOTHER_REPO_NAME, adminToken);
+            String anotherRepoUrl = CONTAINER.repoUrl(GROUP_NAME + "/" + ANOTHER_REPO_NAME, ADMIN_TOKEN);
             setUpInitialBranchViaGit(anotherRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(anotherRepoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(anotherRepoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
@@ -289,7 +335,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             awaitMergeRequestMergeRefViaApi(gitlabapi, project2.getId(), mr2.getIid());
         }
 
-        createGitLabToken(adminToken, "GitLab Personal Access Token");
+        createGitLabToken(ADMIN_TOKEN, "GitLab Personal Access Token");
         configureGitLabServer();
 
         // When organization folder scans GitLab group
@@ -350,7 +396,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private void configureGitLabServer() throws IOException {
         jenkins.configure();
-        new GitLabServerConfig(jenkins).configureServer(container.getHttpUrl());
+        new GitLabServerConfig(jenkins).configureServer(CONTAINER.getHttpUrl());
         jenkins.save();
     }
 
