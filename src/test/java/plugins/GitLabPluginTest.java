@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -412,63 +413,26 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     // ==================== GitLab API ====================
 
     private Project createProjectViaApi(ProjectApi projApi, Project projectSpec) {
-        return waitFor()
-                .withMessage("Creating GitLab project '%s'", projectSpec.getPath())
-                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiException.class)
-                .until(toFunction(() -> {
-                    GitLabApiException firstException = null;
-                    try {
-                        return projApi.createProject(projectSpec);
-                    } catch (GitLabApiException e) {
-                	if(firstException == null) {
-                	    firstException =e;
-                	}
-                	try {                	    
-                	    return projApi.getProject(projectSpec.getPath());
-                	}catch (GitLabApiException ee) {
-                	    throw firstException;
-                        }
-                    }
-                }));
+        return createOrGetWithRetry(
+                String.format("Creating GitLab project '%s'", projectSpec.getPath()),
+                () -> projApi.createProject(projectSpec),
+                () -> projApi.getProject(projectSpec.getPath()));
     }
 
     private Group createGroupViaApi(GroupApi groupApi, String groupName, String groupPath) {
         var groupParams =
                 new GroupParams().withName(groupName).withPath(groupPath).withMembershipLock(false);
-        return waitFor()
-                .withMessage("Creating GitLab group '%s'", groupName)
-                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiException.class)
-                .until(() -> {
-                    try {
-                        return groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
-                    } catch (Exception e) {
-                        try {
-                            return groupApi.getGroup(groupPath);
-                        } catch (Exception ex) {
-                            return null;
-                        }
-                    }
-                });
+        return createOrGetWithRetry(
+                String.format("Creating GitLab group '%s'", groupName),
+                () -> groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE),
+                () -> groupApi.getGroup(groupPath));
     }
 
     private Member addGroupMemberViaApi(GroupApi groupApi, Long groupId, Long userId, AccessLevel accessLevel) {
-        return waitFor()
-                .withMessage("Adding user %d to group %d", userId, groupId)
-                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiException.class)
-                .until(() -> {
-                    try {
-                        return groupApi.addMember(groupId, userId, accessLevel);
-                    } catch (Exception e) {
-                        try {
-                            return groupApi.getMember(groupId, userId);
-                        } catch (Exception ex) {
-                            return null;
-                        }
-                    }
-                });
+        return createOrGetWithRetry(
+                String.format("Adding user %d to group %d", userId, groupId),
+                () -> groupApi.addMember(groupId, userId, accessLevel),
+                () -> groupApi.getMember(groupId, userId));
     }
 
     private MergeRequest createMergeRequestViaApi(
@@ -477,24 +441,15 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .withSourceBranch(sourceBranch)
                 .withTargetBranch(targetBranch)
                 .withTitle(mrTitle);
-        return waitFor()
-                .withMessage("Creating merge request '%s'", mrTitle)
-                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiException.class)
-                .until(() -> {
-                    try {
-                        return gitlabapi.getMergeRequestApi().createMergeRequest(project, params);
-                    } catch (Exception e) {
-                        try {
-                            var filter = new MergeRequestFilter().withProjectId(project.getId());
-                            return gitlabapi.getMergeRequestApi().getMergeRequests(filter).stream()
-                                    .filter(mr -> mrTitle.equals(mr.getTitle()))
-                                    .findFirst()
-                                    .orElse(null);
-                        } catch (Exception ex) {
-                            return null;
-                        }
-                    }
+        return createOrGetWithRetry(
+                String.format("Creating merge request '%s'", mrTitle),
+                () -> gitlabapi.getMergeRequestApi().createMergeRequest(project, params),
+                () -> {
+                    var filter = new MergeRequestFilter().withProjectId(project.getId());
+                    return gitlabapi.getMergeRequestApi().getMergeRequests(filter).stream()
+                            .filter(mr -> mrTitle.equals(mr.getTitle()))
+                            .findFirst()
+                            .orElse(null);
                 });
     }
 
@@ -582,6 +537,26 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     return gitlabapi.getRepositoryFileApi().getFile(projectId, "Jenkinsfile", mergeRef);
                 }));
         LOGGER.info("GitLab MR " + mrIid + " merge ref wait: " + elapsed(startTime));
+    }
+
+    private <T> T createOrGetWithRetry(String message, Callable<T> create, Callable<T> get) {
+        final AtomicReference<Exception> firstCreateException = new AtomicReference<>();
+        return waitFor()
+                .withMessage(message)
+                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(GitLabApiException.class)
+                .until(toFunction(() -> {
+                    try {
+                        return create.call();
+                    } catch (Exception eCreate) {
+                        firstCreateException.compareAndSet(null, eCreate);
+                        try {
+                            return get.call();
+                        } catch (Exception eGet) {
+                            throw firstCreateException.get();
+                        }
+                    }
+                }));
     }
 
     private static Duration elapsed(Instant startTime) {
