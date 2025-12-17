@@ -13,6 +13,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.gitlab4j.api.GitLabApi;
@@ -413,17 +415,22 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         return waitFor()
                 .withMessage("Creating GitLab project '%s'", projectSpec.getPath())
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .until(() -> {
+                .ignoring(GitLabApiException.class)
+                .until(toFunction(() -> {
+                    GitLabApiException firstException = null;
                     try {
                         return projApi.createProject(projectSpec);
-                    } catch (Exception e) {
-                        try {
-                            return projApi.getProject(projectSpec.getPath());
-                        } catch (Exception ex) {
-                            return null;
+                    } catch (GitLabApiException e) {
+                	if(firstException == null) {
+                	    firstException =e;
+                	}
+                	try {                	    
+                	    return projApi.getProject(projectSpec.getPath());
+                	}catch (GitLabApiException ee) {
+                	    throw firstException;
                         }
                     }
-                });
+                }));
     }
 
     private Group createGroupViaApi(GroupApi groupApi, String groupName, String groupPath) {
@@ -432,6 +439,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         return waitFor()
                 .withMessage("Creating GitLab group '%s'", groupName)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(GitLabApiException.class)
                 .until(() -> {
                     try {
                         return groupApi.createGroup(groupParams).withVisibility(Visibility.PRIVATE);
@@ -449,6 +457,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         return waitFor()
                 .withMessage("Adding user %d to group %d", userId, groupId)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(GitLabApiException.class)
                 .until(() -> {
                     try {
                         return groupApi.addMember(groupId, userId, accessLevel);
@@ -471,6 +480,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         return waitFor()
                 .withMessage("Creating merge request '%s'", mrTitle)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
+                .ignoring(GitLabApiException.class)
                 .until(() -> {
                     try {
                         return gitlabapi.getMergeRequestApi().createMergeRequest(project, params);
@@ -493,15 +503,11 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         waitFor()
                 .withMessage("Waiting for GitLab branch '%s' to be available", branchName)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiRuntimeException.class)
-                .until(() -> {
-                    try {
-                        var branch = gitlabapi.getRepositoryApi().getBranch(projectId, branchName);
-                        return branch != null && branch.getCommit() != null;
-                    } catch (GitLabApiException e) {
-                        throw new GitLabApiRuntimeException(e);
-                    }
-                });
+                .ignoring(GitLabApiException.class)
+                .until(toFunction(() -> {
+                    var branch = gitlabapi.getRepositoryApi().getBranch(projectId, branchName);
+                    return branch != null && branch.getCommit() != null;
+                }));
         LOGGER.info("GitLab branch '" + branchName + "' wait: " + elapsed(startTime));
     }
 
@@ -555,17 +561,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         waitFor()
                 .withMessage("Waiting for tags '%s' in GitLab API", Arrays.asList(tagNames))
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiRuntimeException.class, AssertionError.class)
-                .until(() -> {
-                    try {
-                        var tags = gitlabapi.getTagsApi().getTags(projectPath);
-                        assertThat(tags, is(notNullValue()));
-                        assertThat(tags.stream().map(Tag::getName).toList(), hasItems(tagNames));
-                        return true;
-                    } catch (GitLabApiException e) {
-                        throw new GitLabApiRuntimeException(e);
-                    }
-                });
+                .ignoring(GitLabApiException.class, AssertionError.class)
+                .until(toFunction(() -> {
+                    var tags = gitlabapi.getTagsApi().getTags(projectPath);
+                    assertThat(tags, is(notNullValue()));
+                    assertThat(tags.stream().map(Tag::getName).toList(), hasItems(tagNames));
+                    return true;
+                }));
         LOGGER.info("GitLab tags wait: " + elapsed(startTime));
     }
 
@@ -575,25 +577,33 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         waitFor()
                 .withMessage("Waiting for GitLab MR %d merge ref to be available", mrIid)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiRuntimeException.class)
-                .until(() -> {
-                    try {
-                        return gitlabapi.getRepositoryFileApi().getFile(projectId, "Jenkinsfile", mergeRef);
-                    } catch (GitLabApiException e) {
-                        throw new GitLabApiRuntimeException(e);
-                    }
-                });
+                .ignoring(GitLabApiException.class)
+                .until(toFunction(() -> {
+                    return gitlabapi.getRepositoryFileApi().getFile(projectId, "Jenkinsfile", mergeRef);
+                }));
         LOGGER.info("GitLab MR " + mrIid + " merge ref wait: " + elapsed(startTime));
-    }
-
-    // To use in {@code .ignoring}
-    private static class GitLabApiRuntimeException extends RuntimeException {
-        GitLabApiRuntimeException(GitLabApiException e) {
-            super(e);
-        }
     }
 
     private static Duration elapsed(Instant startTime) {
         return Duration.between(startTime, Instant.now());
+    }
+
+    // ==================== TODO To be deleted : workaround for checked exceptions with .ignoring() ====================
+    // see https://github.com/jenkinsci/acceptance-test-harness/issues/2559
+
+    private static <T, R> Function<T, R> toFunction(Callable<R> callable) {
+        return unused -> {
+            try {
+                return callable.call();
+            } catch (Exception e) {
+                sneakyThrow(e);
+                return null;
+            }
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <E extends Exception> void sneakyThrow(Throwable e) throws E {
+        throw (E) e;
     }
 }
