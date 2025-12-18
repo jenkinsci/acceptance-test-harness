@@ -372,7 +372,7 @@ and
     <dependency>
       <groupId>org.kohsuke</groupId>
       <artifactId>wordnet-random-name</artifactId>
-      <version>1.6</version>
+      <version>1.9</version>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
