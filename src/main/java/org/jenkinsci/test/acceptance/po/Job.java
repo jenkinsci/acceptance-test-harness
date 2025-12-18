@@ -367,7 +367,7 @@ public class Job extends TopLevelItem {
             // so wait for it to be added and then disappear
             waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
         } else {
-            clickLink("Build with Parameters");
+            clickButton("Build with Parameters");
             try {
                 BuildWithParameters paramsPage = new BuildWithParameters(this, new URL(driver.getCurrentUrl()));
                 paramsPage.enter(parameters, params).start();
