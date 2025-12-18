@@ -367,7 +367,7 @@ public class Job extends TopLevelItem {
             // so wait for it to be added and then disappear
             waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
         } else {
-            if (Boolean.getBoolean("new-build-page.flag.defaultValue")) {
+            if (Boolean.getBoolean("new-job-page.flag.defaultValue")) {
                 clickButton("Build with Parameters");
             } else {
                 clickLink("Build with Parameters");

@@ -49,7 +49,7 @@ public class BuildWithParameters extends PageObject {
     }
 
     public void start() {
-        if (Boolean.getBoolean("new-build-page.flag.defaultValue")) {
+        if (Boolean.getBoolean("new-job-page.flag.defaultValue")) {
             find(by.xpath("//dialog[@open]//div[@id='bottom-sticker']//button[contains(., 'Build')]"))
                     .click();
         } else {
