@@ -49,7 +49,8 @@ public class ManagedCredentials extends ContainerPageObject {
      * Find the href of the associted
      */
     public String credentialById(String name) {
-        By xpath = by.xpath("//td[contains(text(),'" + name + "')]/parent::tr//a | //span[contains(text(),'" + name + "')]/parent::div/parent::div//a");
+        By xpath = by.xpath("//td[contains(text(),'" + name + "')]/parent::tr//a | //span[contains(text(),'" + name
+                + "')]/parent::div/parent::div//a");
         return control(xpath).resolve().getAttribute("href");
     }
 }
