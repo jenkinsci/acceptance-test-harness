@@ -33,7 +33,7 @@ public class CredentialsTest extends AbstractJUnitTest {
     private static final String CRED_DOMAIN = "mydomain";
     private static final String CRED_USER = "user";
     private static final String CRED_PWD = "password";
-    private static final String CRED_DESCR = "descr";
+    private static final String CRED_DESCR = "My-super-unique-description";
 
     @Test
     @WithPlugins("ssh-credentials")
