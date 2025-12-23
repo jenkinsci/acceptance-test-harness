@@ -1,0 +1,139 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║           BEHOLD! THE GITLAB TEST CONFIGURATION OF MINIMALISM!           ║
+# ║                                                                          ║
+# ║ None of these are required for tests to pass - feel free to remove them! ║
+# ║ These optimizations exist solely to reduce CI resource usage.            ║
+# ║                                                                          ║
+# ║      "With great performance comes great configuration complexity"       ║
+# ║                                                    - Ancient Proverb     ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+#
+# https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template
+# https://docs.gitlab.com/omnibus/settings/memory_constrained_envs
+# https://docs.gitlab.com/omnibus/settings/redis
+# https://docs.gitlab.com/omnibus/settings/nginx
+# https://docs.gitlab.com/omnibus/settings/database
+# https://docs.gitlab.com/administration/environment_variables
+# https://docs.gitlab.com/ee/administration/operations/puma
+# https://docs.gitlab.com/ee/administration/sidekiq
+# https://docs.gitlab.com/ee/administration/gitaly
+# https://docs.gitlab.com/ee/administration/monitoring/prometheus
+#
+
+prometheus_monitoring['enable'] = false
+node_exporter['enable'] = false
+redis_exporter['enable'] = false
+postgres_exporter['enable'] = false
+gitlab_exporter['enable'] = false
+alertmanager['enable'] = false
+registry['enable'] = false
+gitlab_pages['enable'] = false
+gitlab_kas['enable'] = false
+sentinel['enable'] = false
+mattermost['enable'] = false
+storage_check['enable'] = false
+gitlab_sshd['enable'] = false
+logrotate['enable'] = false
+
+gitlab_rails['gitlab_default_projects_features_builds'] = false
+gitlab_rails['gitlab_default_projects_features_container_registry'] = false
+gitlab_rails['gitlab_default_projects_features_issues'] = false
+gitlab_rails['gitlab_default_projects_features_wiki'] = false
+gitlab_rails['gitlab_default_projects_features_snippets'] = false
+gitlab_rails['gitlab_email_enabled'] = false
+gitlab_rails['incoming_email_enabled'] = false
+gitlab_rails['terraform_state_enabled'] = false
+gitlab_rails['packages_enabled'] = false
+gitlab_rails['dependency_proxy_enabled'] = false
+gitlab_rails['actioncable_enabled'] = false
+gitlab_rails['omniauth_enabled'] = false
+gitlab_rails['gravatar_enabled'] = false
+gitlab_rails['automatic_issue_creation_enabled'] = false
+gitlab_rails['usage_ping_enabled'] = false
+gitlab_rails['sentry_enabled'] = false
+gitlab_rails['gitlab_shell_ssh_port'] = 0
+gitlab_rails['gitaly_timeout'] = 30
+gitlab_rails['backup_keep_time'] = 0
+gitlab_rails['db_pool'] = 10
+gitlab_rails['cron_jobs'] = {}
+gitlab_rails['pipeline_schedule_worker_cron'] = ''
+gitlab_rails['stuck_ci_jobs_worker_cron'] = ''
+gitlab_rails['analytics_usage_trends_cron_worker_cron'] = ''
+gitlab_rails['analytics_devops_adoption_cron_worker_cron'] = ''
+gitlab_rails['auto_migrate'] = true
+gitlab_rails['initial_root_password'] = 'testpassword123'
+gitlab_rails['monitoring_whitelist'] = []
+gitlab_rails['env'] = {
+  'MALLOC_ARENA_MAX' => '2',
+  'MALLOC_CONF' => 'dirty_decay_ms:1000,muzzy_decay_ms:1000'
+}
+gitlab_rails['migrate_timeout'] = 60
+gitlab_rails['db_statement_timeout'] = 15000
+gitlab_rails['rake_cache_clear'] = false
+gitlab_rails['db_load_balancing'] = { 'hosts' => [] }
+gitlab_rails['database_reindexing_enabled'] = false
+
+puma['worker_processes'] = 1
+puma['min_threads'] = 1
+puma['max_threads'] = 2
+puma['worker_timeout'] = 30
+puma['per_worker_max_memory_mb'] = 512
+
+sidekiq['concurrency'] = 5
+sidekiq['max_retries'] = 1
+sidekiq['queue_groups'] = ['*']
+
+gitaly['env'] = {
+  'GITALY_COMMAND_SPAWN_MAX_PARALLEL' => '2'
+}
+gitaly['configuration'] = {
+  concurrency: [
+    {
+      rpc: '/gitaly.SmartHTTPService/PostReceivePack',
+      max_per_repo: 2
+    },
+    {
+      rpc: '/gitaly.SSHService/SSHUploadPack',
+      max_per_repo: 2
+    }
+  ],
+  git: {
+    catfile_cache_size: 5
+  }
+}
+
+postgresql['max_connections'] = 50
+postgresql['work_mem'] = '4MB'
+postgresql['shared_buffers'] = '128MB'
+postgresql['wal_buffers'] = '8MB'
+postgresql['checkpoint_completion_target'] = 0.7
+postgresql['checkpoint_timeout'] = '15min'
+postgresql['fsync'] = 'off'
+postgresql['synchronous_commit'] = 'off'
+postgresql['full_page_writes'] = 'off'
+postgresql['autovacuum'] = 'off'
+postgresql['track_activities'] = 'off'
+postgresql['track_counts'] = 'off'
+postgresql['track_io_timing'] = 'off'
+postgresql['log_statement'] = 'none'
+postgresql['log_duration'] = 'off'
+postgresql['log_min_duration_statement'] = 1000
+postgresql['log_checkpoints'] = 'off'
+postgresql['log_connections'] = 'off'
+postgresql['log_disconnections'] = 'off'
+postgresql['max_wal_senders'] = 0
+
+nginx['worker_processes'] = 1
+nginx['worker_connections'] = 256
+nginx['gzip_enabled'] = false
+nginx['keepalive_timeout'] = 10
+nginx['access_log_enabled'] = false
+nginx['error_log_level'] = 'crit'
+nginx['status'] = {
+  'enable' => false
+}
+
+redis['maxmemory'] = '256mb'
+redis['maxmemory_policy'] = 'allkeys-lru'
+redis['save'] = []
+redis['stop_writes_on_bgsave_error'] = 'no'

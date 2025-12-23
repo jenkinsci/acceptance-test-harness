@@ -1,15 +1,40 @@
-input_array = ARGV
+# frozen_string_literal: true
 
-user = User.create();
-user.name = input_array[0];
-user.username = input_array[0];
-user.password = input_array[1];
-user.confirmed_at = '01/01/1990';
-user.admin = input_array[3];
-user.email = input_array[2];
-user.save!;
+# Script to create GitLab user with personal access token
+# Usage: gitlab-rails runner create_user.rb <username> <password> <email> <is_admin>
 
-token = user.personal_access_tokens.create(scopes: [:api], name: 'MyToken');
-token.expires_at='01/01/2024';
-token.save!;
-puts token.token;
+username, password, email, is_admin = ARGV
+
+# Ensure default organization exists
+default_org = Organizations::Organization.find_or_create_by!(name: 'Default', path: 'default') do |org|
+  org.description = 'Default organization for test users'
+end
+
+# Create user with namespace and organization
+user_params = {
+  name: username,
+  username: username,
+  password: password,
+  password_confirmation: password,
+  email: email,
+  admin: is_admin == 'true',
+  skip_confirmation: true,
+  organization_id: default_org&.id
+}.compact
+
+result = Users::CreateService.new(nil, user_params).execute
+
+raise "Failed to create user: #{result.message}" unless result.success?
+
+user = result.payload[:user]
+
+raise "Failed to create user. Result: #{result.inspect}" unless user&.persisted?
+
+# Create personal access token with 1-month expiration
+token = user.personal_access_tokens.create!(
+  scopes: [:api, :read_user, :read_api, :read_repository, :write_repository],
+  name: 'MyToken',
+  expires_at: 30.days.from_now
+)
+
+puts token.token

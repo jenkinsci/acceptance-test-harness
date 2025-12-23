@@ -1,34 +1,18 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.Duration;
-import org.gitlab4j.api.GitLabApi;
-import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.ProjectApi;
-import org.gitlab4j.api.models.Project;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
-import org.jenkinsci.test.acceptance.po.CapybaraPortingLayer;
-import org.jenkinsci.test.acceptance.utils.ElasticTime;
+import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 
 @DockerFixture(
         id = "gitlab-plugin",
         ports = {80, 443, 22})
 public class GitLabContainer extends DockerContainer {
-    protected static final String REPO_DIR = "/home/gitlab/gitlabRepo";
-
-    private static final HttpClient client = HttpClient.newBuilder()
-            .followRedirects(HttpClient.Redirect.NORMAL)
-            .connectTimeout(Duration.ofMillis(200))
-            .build();
-
-    private static final ElasticTime time = new ElasticTime();
+    private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(5);
+    private static final Duration READINESS_POLL_INTERVAL = Duration.ofSeconds(5);
 
     public String host() {
         return ipBound(22);
@@ -46,65 +30,39 @@ public class GitLabContainer extends DockerContainer {
         return ipBound(80);
     }
 
-    public URL getURL() throws IOException {
-        return new URL("http://" + getIpAddress() + sshPort());
+    public String getHttpUrl() {
+        return "http://" + httpHost() + ":" + httpPort();
     }
 
-    public URL getHttpUrl() throws IOException {
-        return new URL("http", httpHost(), httpPort(), "");
+    /**
+     * @return Authenticated Git URL ("http://username:token@host:port/username/repo.git")
+     */
+    public String repoUrl(String projectPath, String token) {
+        String username = projectPath.split("/")[0];
+        return getHttpUrl().replace("://", "://" + username + ":" + token + "@") + "/" + projectPath + ".git";
     }
 
-    /** URL visible from the host. */
-    public String getRepoUrl() {
-        return "ssh://git@" + host() + ":" + sshPort() + REPO_DIR;
+    /**
+     * Extracts the GitLab project path from an authenticated Git repository URL.
+     *
+     * @param repoUrl see {@link GitLabContainer#repoUrl(String, String)}
+     * @return Project path ("username/repo")
+     */
+    public String extractProjectPath(String repoUrl) {
+        String afterAuth = repoUrl.split("@")[1];
+        return afterAuth.split("/", 2)[1].replace(".git", "");
     }
 
-    public void waitForReady(CapybaraPortingLayer p) {
+    public void waitForReady(CapybaraPortingLayerImpl p) {
         p.waitFor()
                 .withMessage("Waiting for GitLab to come up")
-                .withTimeout(Duration.ofSeconds(200)) // GitLab starts in about 2 minutes add some headway
-                .pollingEvery(Duration.ofSeconds(2))
+                .withTimeout(READINESS_TIMEOUT)
+                .pollingEvery(READINESS_POLL_INTERVAL)
                 .until(() -> {
-                    try {
-                        HttpRequest request = HttpRequest.newBuilder()
-                                .uri(getHttpUrl().toURI())
-                                .GET()
-                                .timeout(Duration.ofSeconds(1))
-                                .build();
-                        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                        return response.body().contains("GitLab Community Edition");
-                    } catch (IOException ignored) {
-                        // we can not use .ignoring as this is a checked exception (even though a callable can throw
-                        // this!)
-                        return Boolean.FALSE;
-                    }
+                    p.executeScript("window.location.href = arguments[0];", getHttpUrl());
+                    var page = p.getPageSource();
+                    return page != null && page.contains("GitLab Community Edition");
                 });
-    }
-
-    public HttpResponse<String> createRepo(String repoName, String token) throws RuntimeException {
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(getHttpUrl() + "/api/v4/projects"))
-                    .header("Content-Type", "application/json")
-                    .header("PRIVATE-TOKEN", token)
-                    .POST(HttpRequest.BodyPublishers.ofString("{ \"name\": \"" + repoName + "\" }"))
-                    .build();
-            return client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void deleteRepo(String token, String repoName) throws IOException, GitLabApiException {
-        // get the project and delete the project
-        GitLabApi gitlabapi = new GitLabApi(getHttpUrl().toString(), token);
-        ProjectApi projApi = new ProjectApi(gitlabapi);
-
-        Project project = projApi.getProjects().stream()
-                .filter((proj -> repoName.equals(proj.getName())))
-                .findAny()
-                .orElse(null);
-        projApi.deleteProject(project);
     }
 
     public String createUserToken(String userName, String password, String email, String isAdmin)
