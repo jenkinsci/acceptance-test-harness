@@ -492,6 +492,9 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <LOCAL_JARS>target/git-client.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -764,6 +767,11 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins</groupId>
+                      <artifactId>git-client</artifactId>
+                      <version>6.5.0-rc3842.4de3b_c6d6cc3</version>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
