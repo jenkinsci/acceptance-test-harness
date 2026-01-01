@@ -18,6 +18,7 @@ RUN apt-get update \
     lsb-release \
     openjdk-17-jdk \
     openjdk-21-jdk \
+    openjdk-25-jdk \
     openssh-client \
     unzip \
     xfonts-base \
