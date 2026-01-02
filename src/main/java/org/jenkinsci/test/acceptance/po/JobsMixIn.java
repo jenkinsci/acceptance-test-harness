@@ -109,7 +109,7 @@ public class JobsMixIn extends MixIn {
         @Override
         protected WebElement find(String caption) {
             String normalizedCaption = caption.replace('.', '_');
-            return outer.find(by.css("li." + normalizedCaption));
+            return outer.find(by.css("." + normalizedCaption));
         }
     };
 
