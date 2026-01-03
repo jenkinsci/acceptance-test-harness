@@ -13,7 +13,7 @@ fi
 
 trap 'docker-compose kill && docker-compose down' EXIT
 
-docker-compose run --name mvn --rm -P -v "${HOME}/.m2/repository:/home/ath-user/.m2/repository:Z" mvn bash -c 'set-java.sh 17; bash'
+docker-compose run --name mvn --rm -P -v "${HOME}/.m2/repository:/home/ath-user/.m2/repository:Z" mvn bash -c 'set-java.sh 25; bash'
 status=$?
 
 exit $status

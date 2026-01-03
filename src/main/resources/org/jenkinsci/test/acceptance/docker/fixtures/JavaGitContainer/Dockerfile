@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     openssh-server \
     git \
     zip \
-    openjdk-17-jdk \
     openjdk-21-jdk \
     openjdk-25-jdk \
     && rm -rf /var/lib/apt/lists/*
