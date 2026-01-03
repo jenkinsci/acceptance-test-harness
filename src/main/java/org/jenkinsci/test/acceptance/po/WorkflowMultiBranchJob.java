@@ -12,7 +12,6 @@ import org.openqa.selenium.WebElement;
 
 /**
  * A pipeline multi-branch job (requires installation of multi-branch-project-plugin).
- *
  */
 @Describable("org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject")
 public class WorkflowMultiBranchJob extends Folder {
@@ -31,8 +30,16 @@ public class WorkflowMultiBranchJob extends Folder {
     }
 
     public String getBranchIndexingLog() {
-        try {
-            return IOUtils.toString(url("indexing/console").openStream(), StandardCharsets.UTF_8);
+        try (var in = url("indexing/console").openStream()) {
+            return IOUtils.toString(in, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            throw new AssertionError(ex);
+        }
+    }
+
+    public String getBranchIndexingLogText() {
+        try (var in = url("indexing/consoleText").openStream()) {
+            return IOUtils.toString(in, StandardCharsets.UTF_8);
         } catch (IOException ex) {
             throw new AssertionError(ex);
         }
@@ -40,6 +47,7 @@ public class WorkflowMultiBranchJob extends Folder {
 
     public WorkflowMultiBranchJob waitForBranchIndexingFinished(final int timeout) {
         waitFor()
+                .withMessage("Waiting for branch indexing to finish in %s", this.name)
                 .withTimeout(Duration.ofMillis(super.time.seconds(timeout)))
                 .until(() -> WorkflowMultiBranchJob.this.getBranchIndexingLog().contains("Finished: "));
 
@@ -50,6 +58,7 @@ public class WorkflowMultiBranchJob extends Folder {
         return this.getJobs().get(WorkflowJob.class, name);
     }
 
+    // NOTE: GitLab uses a different selector see GitLabPluginTest#reIndex
     public void reIndex() {
         final List<WebElement> scanRepoNow =
                 driver.findElements(by.xpath("//div[@class=\"task\"]//*[text()=\"Scan Repository Now\"]"));
