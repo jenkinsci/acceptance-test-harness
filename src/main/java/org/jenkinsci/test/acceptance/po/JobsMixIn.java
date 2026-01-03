@@ -97,7 +97,7 @@ public class JobsMixIn extends MixIn {
 
     public void copy(String from, String to) {
         visit("newJob");
-        check("[name='mode'][value='copy']");
+        check("Duplicate an existing item");
         fillIn("from", from);
         // There is a javascript magic bound to loss of focus on 'from' field that is a pain to duplicate through
         // selenium
