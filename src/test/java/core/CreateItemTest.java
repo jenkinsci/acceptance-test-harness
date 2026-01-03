@@ -1,9 +1,9 @@
 package core;
 
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.Since;
@@ -17,9 +17,9 @@ public class CreateItemTest extends AbstractJUnitTest {
     private static final String JOB_NAME = "asdf";
     private static final String NAME_FIELD = "name";
     private static final String JOB_CREATION_ERROR_MSG = "A job already exists";
+    private static final String NAME_NOT_EMPTY_MSG = "This field cannot be empty, please enter a valid name";
+    private static final String EXISTING_NAME_MSG = "A job already exists with the name ‘asdf’";
 
-    private static final By NAME_NOT_EMPTY_MSG = by.id("itemname-required");
-    private static final By EXISTING_NAME_MSG = by.id("itemname-invalid");
     private static final By OK_BUTTON = by.id("ok-button");
 
     @Test
@@ -33,20 +33,17 @@ public class CreateItemTest extends AbstractJUnitTest {
         fillIn(NAME_FIELD, JOB_NAME);
         blur(find(by.name(NAME_FIELD)));
 
-        assertFalse(findIfNotVisible(NAME_NOT_EMPTY_MSG).isDisplayed());
-        assertTrue(find(EXISTING_NAME_MSG).isDisplayed());
+        assertThat(driver, not(hasContent(NAME_NOT_EMPTY_MSG)));
+        assertThat(driver, hasContent(EXISTING_NAME_MSG));
         assertFalse(find(OK_BUTTON).isEnabled());
 
         // select type of job
         jenkins.jobs.findTypeCaption(FreeStyleJob.class).click();
 
-        assertFalse(findIfNotVisible(NAME_NOT_EMPTY_MSG).isDisplayed());
-        assertTrue(find(EXISTING_NAME_MSG).isDisplayed());
+        assertThat(driver, not(hasContent(NAME_NOT_EMPTY_MSG)));
+        assertThat(driver, hasContent(EXISTING_NAME_MSG));
 
         final WebElement okButtonElement = find(OK_BUTTON);
-        // TODO JENKINS-73034
-        // assertTrue(okButtonElement.isEnabled());
-
         okButtonElement.click();
         assertThat(driver, hasContent(JOB_CREATION_ERROR_MSG));
     }
