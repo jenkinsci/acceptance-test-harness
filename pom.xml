@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>1.142</version>
+    <version>2.1328.vfd10e2339a_19</version>
     <relativePath />
   </parent>
 
@@ -347,7 +347,7 @@ and
     <dependency>
       <groupId>org.jenkins-ci</groupId>
       <artifactId>version-number</artifactId>
-      <version>1.12</version>
+      <version>1.14</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
