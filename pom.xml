@@ -779,7 +779,7 @@ and
       <id>lts</id>
       <properties>
         <!--RENOVATE-LTS-->
-        <jenkins.version>2.528.3</jenkins.version>
+        <jenkins.version>2.541.1-rc37778.ff54607d5228</jenkins.version>
       </properties>
     </profile>
   </profiles>
