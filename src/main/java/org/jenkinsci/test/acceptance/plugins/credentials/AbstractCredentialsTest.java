@@ -126,7 +126,7 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
         tryCredentialsClick();
         waitFor(by.href("/user/" + CREATED_USER + "/credentials/store/user")).click();
         waitFor(by.href("domain/_")).click();
-        waitFor(by.href("newCredentials")).click();
+        waitFor(by.button("Add Credentials")).click();
         waitFor(by.name("_.id"));
     }
 
