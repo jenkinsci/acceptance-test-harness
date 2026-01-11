@@ -10,6 +10,7 @@ import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -55,6 +56,8 @@ public class CredentialsPage extends ConfigurablePageObject {
 
         WebElement nextButton = find(by.id("cr-dialog-next"));
         nextButton.click();
+        waitFor(by.id("cr-dialog-submit"));
+        new Scroller(driver).disableStickyElements();
 
         return newInstance(type, this, path);
     }
