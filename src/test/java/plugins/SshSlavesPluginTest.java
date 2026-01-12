@@ -96,14 +96,13 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
                 // ignore
             }
 
-            SshCredentialDialog f = l.addCredential();
+            SshPrivateKeyCredential sc = l.addCredential(SshPrivateKeyCredential.class);
             {
-                SshPrivateKeyCredential sc = f.select(SshPrivateKeyCredential.class);
                 sc.description.set(description);
                 sc.username.set(username);
                 sc.selectEnterDirectly().privateKey.set(privateKey);
+                sc.add();
             }
-            f.add();
 
             l.credentialsId.select(String.format("%s (%s)", username, description));
         }

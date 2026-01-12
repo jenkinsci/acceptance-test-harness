@@ -16,19 +16,4 @@ public class SshCredentialDialog extends BaseStandardCredentials {
     public SshCredentialDialog(PageObject context, String path) {
         super(context, path);
     }
-
-    /**
-     * Selects the credential type and bind the controls to the page area.
-     */
-    public <T extends Credential> T select(Class<T> type) {
-
-        findCaption(type, new Resolver() {
-            @Override
-            protected void resolve(String caption) {
-                kind.select(caption);
-            }
-        });
-
-        return newInstance(type, getPage(), getPath());
-    }
 }
