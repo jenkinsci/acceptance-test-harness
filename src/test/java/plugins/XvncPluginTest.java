@@ -3,8 +3,6 @@ package plugins;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 
-import com.google.inject.Inject;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.XvncSlaveContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
@@ -16,6 +14,7 @@ import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -26,14 +25,23 @@ import org.jvnet.hudson.test.Issue;
 @WithDocker
 public class XvncPluginTest extends AbstractJUnitTest {
 
-    @Inject
-    DockerContainerHolder<XvncSlaveContainer> containerHolder;
+    private XvncSlaveContainer container;
 
     @Before
     public void setUp() {
-        Slave slave = containerHolder.get().connect(jenkins);
+        container = new XvncSlaveContainer();
+
+        container.start();
+        Slave slave = container.connect(jenkins);
         slave.setLabels("xvnc");
         slave.save();
+    }
+
+    @After
+    public void tearDown() {
+        if (container != null) {
+            container.stop();
+        }
     }
 
     private FreeStyleJob createJob() {

@@ -29,10 +29,9 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.google.inject.Inject;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.Callable;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
@@ -47,6 +46,7 @@ import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
@@ -59,18 +59,23 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     public static final String REMOTE_FS = "/tmp";
 
-    @Inject
-    private DockerContainerHolder<SshAgentContainer> docker;
-
     private SshAgentContainer sshd;
+
     private DumbSlave slave;
 
     private void setUp() {
-        sshd = docker.get();
-
+        sshd = new SshAgentContainer();
+        sshd.start();
         slave = jenkins.slaves.create(DumbSlave.class);
         slave.setExecutors(1);
         slave.remoteFS.set(REMOTE_FS);
+    }
+
+    @After
+    public void tearDown() {
+        if (sshd != null) {
+            sshd.stop();
+        }
     }
 
     @Test
@@ -171,7 +176,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    public void connectWithKey() {
+    public void connectWithKey() throws IOException {
         setUp();
         configureDefaultSSHSlaveLauncher().keyCredentials("test", sshd.getPrivateKeyString(), null);
         slave.save();
@@ -181,7 +186,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
 
     @Issue("JENKINS-46754")
     @Test
-    public void connectWithEd25519EncKey() {
+    public void connectWithEd25519EncKey() throws IOException {
         setUp();
         configureDefaultSSHSlaveLauncher()
                 .keyCredentials(
@@ -193,7 +198,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     @Test
     public void unableToConnectWrongPort() {
         setUp();
-        configureSSHSlaveLauncher(sshd.ipBound(22), 1234).pwdCredentials("test", "test");
+        configureSSHSlaveLauncher(sshd.getHost(), 1234).pwdCredentials("test", "test");
         slave.save();
 
         // Wait for connection attempt to fail
@@ -285,7 +290,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     private SshSlaveLauncher configureDefaultSSHSlaveLauncher() {
-        return configureSSHSlaveLauncher(sshd.ipBound(22), sshd.port(22));
+        return configureSSHSlaveLauncher(sshd.getHost(), sshd.getMappedPort(22));
     }
 
     private SshSlaveLauncher configureSSHSlaveLauncher(String host, int port) {
