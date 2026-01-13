@@ -4,10 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.time.Duration;
-import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.ComputerLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
@@ -39,9 +37,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public <T extends Credential> T addCredential(Class<T> type) {
         find(by.button("Add")).click();
 
-        find(by.css(".jenkins-dropdown"))
-                .findElement(by.button("Global"))
-                .click();
+        find(by.css(".jenkins-dropdown")).findElement(by.button("Global")).click();
 
         // Selenium will execute the next step before the options have loaded if we don't wait for them
         waitFor(by.css(".jenkins-choice-list__item__label"));

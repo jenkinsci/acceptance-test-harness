@@ -16,6 +16,11 @@ document.querySelectorAll(".bottom-sticker-inner")
       }
   })
 
+document.querySelectorAll(".jenkins-bottom-app-bar__shadow")
+  .forEach(element => {
+    element.style.position = "initial";
+  })
+
 if (header) {
     header.style.position = "relative";
 }

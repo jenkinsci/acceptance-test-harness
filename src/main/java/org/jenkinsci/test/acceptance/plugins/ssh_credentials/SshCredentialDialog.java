@@ -1,7 +1,6 @@
 package org.jenkinsci.test.acceptance.plugins.ssh_credentials;
 
 import org.jenkinsci.test.acceptance.plugins.credentials.BaseStandardCredentials;
-import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.PageObject;
 
