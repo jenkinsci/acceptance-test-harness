@@ -110,6 +110,7 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
             SshPrivateKeyCredential castedCred = (SshPrivateKeyCredential) cred;
             castedCred.description.set(CRED_DSCR);
             if (scope != null) {
+                waitFor(by.option(scope));
                 castedCred.scope.select(scope);
             }
             castedCred.username.set(CRED_USER);
