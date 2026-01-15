@@ -43,27 +43,21 @@ public class SshAgentContainer extends GenericContainer<SshAgentContainer> {
     }
 
     public String getEncryptedEd25519PrivateKey() throws IOException {
-        return new String(
-                SshAgentContainer.class
-                        .getResourceAsStream("SshAgentContainer/ed25519.priv")
-                        .readAllBytes(),
-                StandardCharsets.US_ASCII);
+        return load("ed25519.priv");
     }
 
     public String getEncryptedEd25519PrivateKeyPassphrase() throws IOException {
-        return new String(
-                SshAgentContainer.class
-                        .getResourceAsStream("SshAgentContainer/ed25519.pass")
-                        .readAllBytes(),
-                StandardCharsets.US_ASCII);
+        return load("ed25519.pass");
     }
 
     public String getPrivateKeyString() throws IOException {
-        return new String(
-                SshAgentContainer.class
-                        .getResourceAsStream("SshAgentContainer/unsafe")
-                        .readAllBytes(),
-                StandardCharsets.US_ASCII);
+        return load("unsafe");
+    }
+
+    private String load(String resourceFile) throws IOException {
+        try (var is = SshAgentContainer.class.getResourceAsStream("SshAgentContainer/" + resourceFile)) {
+            return new String(is.readAllBytes(), StandardCharsets.US_ASCII);
+        }
     }
 
     public SshSlaveLauncher configureSSHSlaveLauncher(DumbSlave agent) {
