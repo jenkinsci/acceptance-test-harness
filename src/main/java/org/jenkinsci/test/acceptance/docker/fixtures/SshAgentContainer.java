@@ -24,28 +24,46 @@
 
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.jenkinsci.test.acceptance.plugins.ssh_slaves.SshSlaveLauncher;
 import org.jenkinsci.test.acceptance.po.DumbSlave;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 
 /**
  * Jenkins agent with various login methods.
  */
-@DockerFixture(id = "ssh-agent", ports = 22)
-public class SshAgentContainer extends JavaContainer {
+public class SshAgentContainer extends GenericContainer<SshAgentContainer> {
 
-    public String getEncryptedEd25519PrivateKey() {
-        return resource("ed25519.priv").asText();
+    public SshAgentContainer() {
+        super(new ImageFromDockerfile("localhost/testcontainers/ath-ssh-agent", false)
+                .withFileFromClasspath(".", SshAgentContainer.class.getName().replace('.', '/')));
+        withExposedPorts(22);
     }
 
-    public String getEncryptedEd25519PrivateKeyPassphrase() {
-        return resource("ed25519.pass").asText();
+    public String getEncryptedEd25519PrivateKey() throws IOException {
+        return load("ed25519.priv");
+    }
+
+    public String getEncryptedEd25519PrivateKeyPassphrase() throws IOException {
+        return load("ed25519.pass");
+    }
+
+    public String getPrivateKeyString() throws IOException {
+        return load("unsafe");
+    }
+
+    private String load(String resourceFile) throws IOException {
+        try (var is = SshAgentContainer.class.getResourceAsStream("SshAgentContainer/" + resourceFile)) {
+            return new String(is.readAllBytes(), StandardCharsets.US_ASCII);
+        }
     }
 
     public SshSlaveLauncher configureSSHSlaveLauncher(DumbSlave agent) {
         SshSlaveLauncher launcher = agent.setLauncher(SshSlaveLauncher.class);
-        launcher.host.set(ipBound(22));
-        launcher.port(port(22));
+        launcher.host.set(getHost());
+        launcher.port(getMappedPort(22));
         launcher.setSshHostKeyVerificationStrategy(SshSlaveLauncher.NonVerifyingKeyVerificationStrategy.class);
         return launcher;
     }
