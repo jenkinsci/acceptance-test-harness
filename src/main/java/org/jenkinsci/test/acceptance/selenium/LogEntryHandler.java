@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.openqa.selenium.bidi.log.GenericLogEntry;
 import org.openqa.selenium.bidi.log.LogLevel;
 import org.openqa.selenium.bidi.log.StackTrace;
@@ -51,7 +52,7 @@ public class LogEntryHandler<T extends GenericLogEntry> implements Consumer<T> {
             sb.append(stackTrace.getCallFrames().stream()
                     .map(t -> t.getUrl() + "\t" + t.getFunctionName() + ":" + t.getLineNumber() + "["
                             + t.getColumnNumber() + "]")
-                    .collect(java.util.stream.Collectors.joining("\n\t", "\n\t", "")));
+                    .collect(Collectors.joining("\n\t", "\n\t", "")));
         }
         return sb.toString();
     }
