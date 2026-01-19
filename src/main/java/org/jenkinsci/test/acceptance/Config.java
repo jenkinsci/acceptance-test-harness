@@ -36,6 +36,7 @@ import org.jenkinsci.test.acceptance.guice.TestScope;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
+import org.jenkinsci.test.acceptance.selenium.LogEntryHandler;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
@@ -57,6 +58,7 @@ import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.UnsupportedCommandException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.bidi.log.LogLevel;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -356,6 +358,16 @@ public class Config extends AbstractModule {
     @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
         WebDriver base = createWebDriver(cleaner, testName);
+
+        if (base instanceof RemoteWebDriver rwd) {
+            rwd.script()
+                    .addConsoleMessageHandler(new LogEntryHandler<>(
+                            System.getenv("BROWSER_CONSOLE_LEVEL") != null
+                                    ? LogLevel.valueOf(System.getenv("BROWSER_CONSOLE_LEVEL"))
+                                    : LogLevel.INFO,
+                            "[BROWSER CONSOLE]"));
+            rwd.script().addJavaScriptErrorHandler(new LogEntryHandler<>(LogLevel.DEBUG, "[BROWSER JAVASCRIPT]"));
+        }
 
         // Make sure the window has minimal resolution set, even when out of the visible screen.
         // Note - not maximizing here any more because that doesn't do anything.

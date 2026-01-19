@@ -24,3 +24,8 @@ Possible values are:
 * always
 
 The Java system property takes precedence over environment variable.
+
+### Javascript console
+
+By default any output from javascript scripts (console.log / console.warn etc)  is shown in the logs.
+it is possible to change this to include trace output in addition by setting the environment variable `BROWSER_CONSOLE_LEVEL=DEBUG`.
