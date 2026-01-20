@@ -362,6 +362,8 @@ public class Job extends TopLevelItem {
         open();
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
+            // Wait for "Build Now" link to become visible (JS shows it after page load)
+            waitFor(by.link("Build Now"));
             clickLink("Build Now");
             // the notification bar can place itslef over other elements
             // so wait for it to be added and then disappear
