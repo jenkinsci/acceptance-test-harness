@@ -128,7 +128,6 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
         waitFor(by.href("/user/" + CREATED_USER + "/credentials/store/user")).click();
         waitFor(by.href("domain/_")).click();
         waitFor(by.button("Add Credentials")).click();
-        waitFor(by.name("_.id"));
     }
 
     private void tryCredentialsClick() {
