@@ -11,6 +11,7 @@ import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -74,7 +75,14 @@ public class CredentialsPage extends ConfigurablePageObject {
 
     public void create() {
         find(by.id("cr-dialog-submit")).click();
-        assertThat(driver, not(hasContent("This page expects a form submission")));
+        try {
+            assertThat(driver, not(hasContent("This page expects a form submission")));
+        } catch (UnhandledAlertException e) {
+            // TODO seems to occur on at least up to 2.541.1 but doesn't occur on 2.547
+            // can't see what the alert is, selenium goes too fast and if you pause it there's no issue
+            sleep(100);
+            assertThat(driver, not(hasContent("This page expects a form submission")));
+        }
     }
 
     public void delete() {
