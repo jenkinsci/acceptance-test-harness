@@ -23,8 +23,8 @@ import org.jenkinsci.test.acceptance.po.OicAuthSecurityRealm;
 import org.jenkinsci.test.acceptance.po.WhoAmI;
 import org.jenkinsci.test.acceptance.utils.keycloack.KeycloakUtils;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.GroupResource;
@@ -47,8 +47,7 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
     private static final String KEYCLOAK_IMAGE =
             "keycloak/keycloak:26.4.7@sha256:9409c59bdfb65dbffa20b11e6f18b8abb9281d480c7ca402f51ed3d5977e6007";
 
-    @Rule
-    public KeycloakContainer keycloak = new KeycloakContainer(KEYCLOAK_IMAGE);
+    private KeycloakContainer keycloak;
 
     @Inject
     public KeycloakUtils keycloakUtils;
@@ -58,8 +57,17 @@ public class OicAuthPluginTest extends AbstractJUnitTest {
 
     @Before
     public void setUpKeycloak() throws Exception {
+        keycloak = new KeycloakContainer(KEYCLOAK_IMAGE);
+        keycloak.start();
         configureOIDCProvider();
         configureRealm();
+    }
+
+    @After
+    public void tearDownKeycloak() {
+        if (keycloak != null) {
+            keycloak.stop();
+        }
     }
 
     private void configureOIDCProvider() throws Exception {
