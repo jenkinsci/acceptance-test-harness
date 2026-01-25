@@ -781,7 +781,7 @@ and
                     <artifactItem>
                       <groupId>org.jenkins-ci.plugins</groupId>
                       <artifactId>credentials</artifactId>
-                      <version>1563.vce68da_082a_d1</version>
+                      <version>1578.v4ea_f41d464ed</version>
                       <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
