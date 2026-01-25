@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 @Describable("Secret file")
 public class FileCredentials extends BaseStandardCredentials {
 
-    public Control file = control("file");
+    public Control file = control(by.name("file"));
 
     public FileCredentials(PageObject context, String path) {
         super(context, path);
