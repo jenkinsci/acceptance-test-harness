@@ -5,11 +5,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertTrue;
 
-import com.google.inject.Inject;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.Matchers;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.SshAgentContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -20,6 +18,7 @@ import org.jenkinsci.test.acceptance.po.DumbSlave;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ToolInstallation;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -41,19 +40,26 @@ public class AntPluginTest extends AbstractJUnitTest {
     FreeStyleJob job;
     private AntBuildStep step;
 
-    @Inject
-    private DockerContainerHolder<SshAgentContainer> docker;
-
     private SshAgentContainer sshd;
+
     private DumbSlave agent;
 
     @Before
     public void setUp() {
         job = jenkins.jobs.create(FreeStyleJob.class);
-        sshd = docker.get();
+    }
+
+    @After
+    public void tearDown() {
+        if (sshd != null) {
+            sshd.stop();
+        }
     }
 
     private void useCustomAgent() {
+        sshd = new SshAgentContainer();
+        sshd.start();
+
         String remote_fs = "/tmp";
         agent = jenkins.slaves.create(DumbSlave.class);
         agent.setExecutors(1);

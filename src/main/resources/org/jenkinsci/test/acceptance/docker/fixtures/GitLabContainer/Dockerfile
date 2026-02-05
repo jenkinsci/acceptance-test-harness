@@ -1,5 +1,5 @@
 # Use the official GitLab Community Edition image as the base
-FROM gitlab/gitlab-ce:18.6.1-ce.0
+FROM gitlab/gitlab-ce:18.8.1-ce.0
 
 COPY create_user.rb /usr/bin/
 COPY gitlab.rb /etc/gitlab/

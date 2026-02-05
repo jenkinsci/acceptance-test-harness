@@ -1,8 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
-    ":semanticCommitsDisabled",
+    "github>jenkinsci/renovate-config",
     "schedule:daily"
   ],
   "automerge": true,
@@ -42,9 +41,6 @@
         "/selenium/"
       ]
     }
-  ],
-  "labels": [
-    "dependencies"
   ],
   "customManagers": [
     {
@@ -122,6 +118,5 @@
       "defaultRegistryUrlTemplate": "https://updates.jenkins.io/stable/latestCore.txt",
       "format": "plain"
     }
-  },
-  "rebaseWhen": "conflicted"
+  }
 }

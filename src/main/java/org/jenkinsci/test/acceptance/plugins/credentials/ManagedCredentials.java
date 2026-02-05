@@ -41,11 +41,7 @@ public class ManagedCredentials extends ContainerPageObject {
      * Check if the given credential is part of the domain.
      */
     public Control checkIfCredentialsExist(String name) {
-        By xpath = by.xpath("//a[@title='" + name + "']");
-        if (getElement(xpath) == null) {
-            // post credentials-2.3.2
-            xpath = by.xpath("//td[contains(text(),'" + name + "')]");
-        }
+        By xpath = by.xpath("//td[contains(text(),'" + name + "')] | //a[contains(text(), '" + name + "')]");
         return control(xpath);
     }
 
@@ -53,11 +49,8 @@ public class ManagedCredentials extends ContainerPageObject {
      * Find the href of the associted
      */
     public String credentialById(String name) {
-        By xpath = by.xpath("//a[@title='" + name + "']");
-        if (getElement(xpath) == null) {
-            // post credentials-2.3.2
-            xpath = by.xpath("//td[contains(text(),'" + name + "')]/parent::tr//a");
-        }
+        By xpath = by.xpath("//td[contains(text(),'" + name + "')]/parent::tr//a | //span[contains(text(),'" + name
+                + "')]/parent::div/parent::div//a");
         return control(xpath).resolve().getAttribute("href");
     }
 }
