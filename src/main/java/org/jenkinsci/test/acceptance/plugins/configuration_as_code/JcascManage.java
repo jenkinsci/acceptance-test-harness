@@ -46,9 +46,8 @@ public class JcascManage extends PageObject {
      * Configure and apply the new source
      */
     public void configure(String path) {
-        visit("#new");
-
         Control control = control("/newSource");
+
         control.set(path);
         waitFor()
                 .withTimeout(Duration.ofSeconds(5))
@@ -60,12 +59,12 @@ public class JcascManage extends PageObject {
                     return true;
                 });
 
-        clickButton("Apply configuration");
+        clickButton("Apply new configuration");
         verifySuccessfulApplication();
     }
 
     public void reload() {
-        find(by.name("reload")).click();
+        clickButton("Reload existing configuration");
         verifySuccessfulApplication();
     }
 
