@@ -48,10 +48,8 @@ public class JcascManage extends PageObject {
         open();
         driver.get(url + "#new");
 
-        waitFor(driver)
-                .pollingEvery(Duration.ofMillis(100))
-                .ignoring(NoSuchElementException.class)
-                .until(Conditions.waitForElementAnimationToFinish(By.cssSelector("dialog[open]")));
+        waitFor().withTimeout(Duration.ofSeconds(5))
+                .until(() -> find(by.css("dialog[open]")) != null);
 
         Control control = control("/newSource");
         control.set(path);
