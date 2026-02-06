@@ -35,6 +35,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 public class JcascManage extends PageObject {
     public JcascManage(Jenkins jenkins) {
@@ -45,11 +46,7 @@ public class JcascManage extends PageObject {
      * Configure and apply the new source
      */
     public void configure(String path) {
-        open();
-        driver.get(url + "#new");
-
-        waitFor().withTimeout(Duration.ofSeconds(5))
-                .until(() -> find(by.css("dialog[open]")) != null);
+        visit("#new");
 
         Control control = control("/newSource");
         control.set(path);
