@@ -28,10 +28,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 
 import java.time.Duration;
+import org.jenkinsci.test.acceptance.po.Conditions;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.FormValidation;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 
 public class JcascManage extends PageObject {
     public JcascManage(Jenkins jenkins) {
@@ -44,7 +47,11 @@ public class JcascManage extends PageObject {
     public void configure(String path) {
         visit("#new");
 
-        waitFor().withTimeout(Duration.ofSeconds(5)).until(() -> getElement(by.css("dialog[open]")) != null);
+        waitFor(driver)
+            .withTimeout(Duration.ofSeconds(10))
+            .pollingEvery(Duration.ofMillis(100))
+            .ignoring(NoSuchElementException.class)
+            .until(Conditions.waitForElementAnimationToFinish(By.cssSelector("dialog[open]")));
 
         Control control = control("/newSource");
         control.set(path);
