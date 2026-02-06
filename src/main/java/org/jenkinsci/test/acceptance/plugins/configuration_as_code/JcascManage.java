@@ -45,11 +45,13 @@ public class JcascManage extends PageObject {
      * Configure and apply the new source
      */
     public void configure(String path) {
-        visit("#new");
+        open();
+        driver.get(url + "#new");
+
         waitFor(driver)
-            .pollingEvery(Duration.ofMillis(100))
-            .ignoring(NoSuchElementException.class)
-            .until(Conditions.waitForElementAnimationToFinish(By.cssSelector("dialog[open]")));
+                .pollingEvery(Duration.ofMillis(100))
+                .ignoring(NoSuchElementException.class)
+                .until(Conditions.waitForElementAnimationToFinish(By.cssSelector("dialog[open]")));
 
         Control control = control("/newSource");
         control.set(path);
