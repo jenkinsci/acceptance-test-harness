@@ -44,6 +44,8 @@ public class JcascManage extends PageObject {
     public void configure(String path) {
         visit("#new");
 
+        waitFor().withTimeout(Duration.ofSeconds(5)).until(() -> getElement(by.css("dialog[open]")) != null);
+
         Control control = control("/newSource");
         control.set(path);
         waitFor()
