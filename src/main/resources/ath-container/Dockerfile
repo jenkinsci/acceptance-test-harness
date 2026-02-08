@@ -26,7 +26,7 @@ RUN apt-get update \
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
 ARG DOCKER_BUILDX_VERSION=0.31.1
-ARG DOCKER_VERSION=29.2.0
+ARG DOCKER_VERSION=29.2.1
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
   && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
