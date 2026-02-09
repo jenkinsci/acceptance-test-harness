@@ -30,7 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.547</jenkins.version>
+    <jenkins.version>2.549</jenkins.version>
     <selenium.version>4.40.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.5.0-jre</guava.version>
@@ -61,7 +61,7 @@
         <!-- upper bounds conflict -->
         <groupId>io.netty</groupId>
         <artifactId>netty-bom</artifactId>
-        <version>4.2.9.Final</version>
+        <version>4.2.10.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -225,7 +225,7 @@ and
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.20.0</version>
+      <version>1.21.0</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -787,7 +787,7 @@ and
       <id>lts</id>
       <properties>
         <!--RENOVATE-LTS-->
-        <jenkins.version>2.528.3</jenkins.version>
+        <jenkins.version>2.541.1</jenkins.version>
       </properties>
     </profile>
   </profiles>
