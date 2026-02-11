@@ -30,8 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <!-- using version with garbage data fix for better stability -->
-    <jenkins.version>2.548-rc37921.fdf986d6fc46</jenkins.version>
+    <jenkins.version>2.547</jenkins.version>
     <selenium.version>4.40.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.5.0-jre</guava.version>
@@ -501,10 +500,6 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-          <environmentVariables>
-            <!-- Use local version of the plugin over the released one ATH would otherwise use -->
-            <LOCAL_JARS>target/credentials.hpi</LOCAL_JARS>
-          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -777,12 +772,6 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
-                    </artifactItem>
-                    <artifactItem>
-                      <groupId>org.jenkins-ci.plugins</groupId>
-                      <artifactId>credentials</artifactId>
-                      <version>1578.v4ea_f41d464ed</version>
-                      <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
