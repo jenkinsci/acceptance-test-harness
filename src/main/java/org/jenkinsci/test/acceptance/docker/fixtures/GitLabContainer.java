@@ -1,11 +1,14 @@
 package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.time.Duration;
 import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.docker.DockerContainer;
 import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
+import org.openqa.selenium.WebDriverException;
 
 @DockerFixture(
         id = "gitlab-plugin",
@@ -53,15 +56,16 @@ public class GitLabContainer extends DockerContainer {
         return afterAuth.split("/", 2)[1].replace(".git", "");
     }
 
-    public void waitForReady(CapybaraPortingLayerImpl p) {
+    public void waitForReady(CapybaraPortingLayerImpl p) throws MalformedURLException {
+        GitLabPage gitLabPage = new GitLabPage(p.injector, new URL(getHttpUrl()));
         p.waitFor()
                 .withMessage("Waiting for GitLab to come up")
                 .withTimeout(READINESS_TIMEOUT)
                 .pollingEvery(READINESS_POLL_INTERVAL)
+                .ignoring(WebDriverException.class) // connection reset while not up
                 .until(() -> {
-                    p.executeScript("window.location.href = arguments[0];", getHttpUrl());
-                    var page = p.getPageSource();
-                    return page != null && page.contains("GitLab Community Edition");
+                    gitLabPage.open();
+                    return gitLabPage.isReady();
                 });
     }
 

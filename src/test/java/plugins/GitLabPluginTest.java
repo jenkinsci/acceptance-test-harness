@@ -52,7 +52,6 @@ import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.openqa.selenium.NoSuchElementException;
@@ -200,7 +199,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
      * Verifies multibranch pipeline discovers branches/MRs/tags, builds them, and detects dynamic branch
      */
     @Test
-    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1461")
     public void testGitLabMultibranchPipeline() throws IOException {
         // Given a repository with 4 branches (3 valid, 1 broken) and 1 merge request
         Project project;
@@ -303,7 +301,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
      * Verifies organization folder discovers group projects and indexes their branches/MRs.
      */
     @Test
-    @Ignore("https://github.com/jenkinsci/acceptance-test-harness/issues/1461")
     public void gitLabGroupFolderOrganization() throws IOException {
         // Given a GitLab group with 2 projects, each with 4 branches and 1 merge request
         try (var gitlabapi = new GitLabApi(CONTAINER.getHttpUrl(), ADMIN_TOKEN)
@@ -394,7 +391,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         var tk = cp.add(GitLabPersonalAccessTokenCredential.class);
         tk.setToken(token);
         tk.setId(id);
-        tk.create();
+        cp.create();
     }
 
     private void configureGitLabServer() throws IOException {
