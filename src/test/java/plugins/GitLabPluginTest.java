@@ -394,7 +394,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         var tk = cp.add(GitLabPersonalAccessTokenCredential.class);
         tk.setToken(token);
         tk.setId(id);
-        tk.create();
+        cp.create();
     }
 
     private void configureGitLabServer() throws IOException {
