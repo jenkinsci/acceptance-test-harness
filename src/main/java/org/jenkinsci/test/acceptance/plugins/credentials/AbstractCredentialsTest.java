@@ -110,6 +110,7 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
             SshPrivateKeyCredential castedCred = (SshPrivateKeyCredential) cred;
             castedCred.description.set(CRED_DSCR);
             if (scope != null) {
+                waitFor(by.option(scope));
                 castedCred.scope.select(scope);
             }
             castedCred.username.set(CRED_USER);
@@ -126,8 +127,7 @@ public class AbstractCredentialsTest extends AbstractJUnitTest {
         tryCredentialsClick();
         waitFor(by.href("/user/" + CREATED_USER + "/credentials/store/user")).click();
         waitFor(by.href("domain/_")).click();
-        waitFor(by.href("newCredentials")).click();
-        waitFor(by.name("_.id"));
+        waitFor(by.button("Add Credentials")).click();
     }
 
     private void tryCredentialsClick() {

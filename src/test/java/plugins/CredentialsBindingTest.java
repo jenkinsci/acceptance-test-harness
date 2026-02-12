@@ -72,6 +72,7 @@ public class CredentialsBindingTest extends AbstractCredentialsTest {
         CredentialsPage mc = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
         mc.open();
         StringCredentials cred = mc.add(StringCredentials.class);
+        cred.scope.waitFor(by.option("GLOBAL"));
         cred.scope.select("GLOBAL");
         cred.secret.set(SECRET_TEXT);
         mc.create();
