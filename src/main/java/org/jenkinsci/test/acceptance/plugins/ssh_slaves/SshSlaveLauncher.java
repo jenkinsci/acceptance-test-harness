@@ -4,14 +4,16 @@ import static org.junit.Assert.assertTrue;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.time.Duration;
+import org.jenkinsci.test.acceptance.plugins.credentials.Credential;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
-import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshCredentialDialog;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.ComputerLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -32,14 +34,31 @@ public class SshSlaveLauncher extends ComputerLauncher {
         super(context, path);
     }
 
-    public SshCredentialDialog addCredential() {
+    public <T extends Credential> T addCredential(Class<T> type) {
         find(by.button("Add")).click();
 
-        find(by.css(".jenkins-dropdown"))
-                .findElement(by.button("Jenkins Credentials Provider"))
-                .click();
+        find(by.css(".jenkins-dropdown")).findElement(by.button("Global")).click();
 
-        return new SshCredentialDialog(getPage(), "/credentials");
+        // Selenium will execute the next step before the options have loaded if we don't wait for them
+        waitFor(by.css(".jenkins-choice-list__item__label"));
+
+        WebElement radio = findCaption(type, caption -> {
+            for (WebElement webElement : all(by.css(".jenkins-choice-list__item__label"))) {
+                if (webElement.getText().equals(caption)) {
+                    webElement.click();
+                    return webElement.findElement(by.xpath("./../input"));
+                }
+            }
+            return null;
+        });
+
+        String path = radio.getAttribute("path");
+
+        WebElement nextButton = find(by.id("cr-dialog-next"));
+        nextButton.click();
+        waitFor(by.id("cr-dialog-submit"));
+        new Scroller(driver).disableStickyElements();
+        return newInstance(type, getPage(), path);
     }
 
     public void setJavaPath(String jvmPath) {
@@ -55,6 +74,8 @@ public class SshSlaveLauncher extends ComputerLauncher {
     }
 
     private void ensureAdvancedOpen() {
+        new Scroller(driver).disableStickyElements();
+
         control("advanced-button").click();
     }
 
@@ -66,8 +87,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher pwdCredentials(String username, String password) {
-        final SshCredentialDialog dia = this.addCredential();
-        final UserPwdCredential cred = dia.select(UserPwdCredential.class);
+        final UserPwdCredential cred = this.addCredential(UserPwdCredential.class);
         cred.username.set(username);
         cred.password.set(password);
         // credentials are identified by their id. Set username as id so it can be found by it
@@ -86,8 +106,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher pwdCredentials(String username, String password, String id) {
-        final SshCredentialDialog dia = this.addCredential();
-        final UserPwdCredential cred = dia.select(UserPwdCredential.class);
+        final UserPwdCredential cred = this.addCredential(UserPwdCredential.class);
         cred.username.set(username);
         cred.password.set(password);
         // credentials are identified by their id.
@@ -105,8 +124,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
      * @return the SshSlaveLauncher to be configured
      */
     public SshSlaveLauncher keyCredentials(String username, String key, @CheckForNull String passphrase) {
-        final SshCredentialDialog dia = this.addCredential();
-        final SshPrivateKeyCredential cred = dia.select(SshPrivateKeyCredential.class);
+        final SshPrivateKeyCredential cred = this.addCredential(SshPrivateKeyCredential.class);
         cred.username.set(username);
         if (passphrase != null) {
             cred.passphrase.set(passphrase);

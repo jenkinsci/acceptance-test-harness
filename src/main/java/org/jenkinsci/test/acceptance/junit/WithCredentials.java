@@ -15,7 +15,6 @@ import org.jenkinsci.test.acceptance.plugins.credentials.ManagedCredentials;
 import org.jenkinsci.test.acceptance.plugins.credentials.UserPwdCredential;
 import org.jenkinsci.test.acceptance.plugins.ssh_credentials.SshPrivateKeyCredential;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -107,19 +106,13 @@ public @interface WithCredentials {
                  * @param sshKeyPath path to the ssh key
                  */
                 private void addSshUsernamePrivateKeyCredentials(String username, String sshKeyPath, String id) {
-                    try {
-                        CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
-                        cp.open();
-                        SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
-                        sc.username.set(username);
-                        sc.selectEnterDirectly()
-                                .privateKey
-                                .set(resource(sshKeyPath).asText());
-                        maybeSetId(sc, id);
-                        cp.create();
-                    } catch (Exception ex) {
-                        throw new AssumptionViolatedException("@WithCredentials requires credentials@2.0.7.", ex);
-                    }
+                    CredentialsPage cp = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
+                    cp.open();
+                    SshPrivateKeyCredential sc = cp.add(SshPrivateKeyCredential.class);
+                    sc.username.set(username);
+                    sc.selectEnterDirectly().privateKey.set(resource(sshKeyPath).asText());
+                    maybeSetId(sc, id);
+                    cp.create();
                 }
 
                 /**
@@ -128,17 +121,13 @@ public @interface WithCredentials {
                  * @param password password
                  */
                 private void addUsernamePasswordCredentials(String username, String password, String id) {
-                    try {
-                        CredentialsPage c = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
-                        c.open();
-                        final UserPwdCredential upc = c.add(UserPwdCredential.class);
-                        upc.username.set(username);
-                        upc.password.set(password);
-                        maybeSetId(upc, id);
-                        c.create();
-                    } catch (Exception ex) {
-                        throw new AssumptionViolatedException("@WithCredentials requires credentials@2.0.7.", ex);
-                    }
+                    CredentialsPage c = new CredentialsPage(jenkins, ManagedCredentials.DEFAULT_DOMAIN);
+                    c.open();
+                    final UserPwdCredential upc = c.add(UserPwdCredential.class);
+                    upc.username.set(username);
+                    upc.password.set(password);
+                    maybeSetId(upc, id);
+                    c.create();
                 }
 
                 private void maybeSetId(BaseStandardCredentials creds, String id) {

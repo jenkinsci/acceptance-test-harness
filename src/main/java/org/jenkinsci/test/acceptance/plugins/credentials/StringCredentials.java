@@ -8,7 +8,7 @@ import org.jenkinsci.test.acceptance.po.PageObject;
 @Describable("Secret text")
 public class StringCredentials extends BaseStandardCredentials {
 
-    public Control secret = control("secret");
+    public Control secret = control(by.name("_.secret"));
 
     public StringCredentials(PageObject context, String path) {
         super(context, path);

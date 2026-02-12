@@ -10,7 +10,10 @@ import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
+import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 public class CredentialsPage extends ConfigurablePageObject {
     public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')] | "
@@ -22,26 +25,41 @@ public class CredentialsPage extends ConfigurablePageObject {
      * Create a new Credential
      */
     public CredentialsPage(Jenkins j, String domainName) {
-        super(j, j.url("credentials/store/system/domain/" + domainName + "/newCredentials"));
+        super(j, j.url("credentials/store/system/domain/" + domainName));
     }
 
     /**
      * Create a new Credential scoped to a Folder
      */
     public CredentialsPage(Folder f, String domainName) {
-        super(f, f.url("credentials/store/folder/domain/" + domainName + "/newCredentials"));
+        super(f, f.url("credentials/store/folder/domain/" + domainName));
     }
 
     /**
      * Create a new personal Credential
      */
     public CredentialsPage(Jenkins j, String domainName, String userName) {
-        super(j, j.url(String.format("user/%s/credentials/store/user/domain/%s/newCredentials", userName, domainName)));
+        super(j, j.url(String.format("user/%s/credentials/store/user/domain/%s", userName, domainName)));
     }
 
     public <T extends Credential> T add(Class<T> type) {
-        addButton.selectDropdownMenuAlt(type);
-        String path = find(by.name("credentials")).getAttribute("path");
+        WebElement radio = findCaption(type, caption -> {
+            for (WebElement webElement : all(by.css(".jenkins-choice-list__item__label"))) {
+                if (webElement.getText().equals(caption)) {
+                    webElement.click();
+                    return webElement.findElement(by.xpath("./../input"));
+                }
+            }
+            return null;
+        });
+
+        String path = radio.getAttribute("path");
+
+        WebElement nextButton = find(by.id("cr-dialog-next"));
+        nextButton.click();
+        waitFor(by.id("cr-dialog-submit"));
+        new Scroller(driver).disableStickyElements();
+
         return newInstance(type, this, path);
     }
 
@@ -56,8 +74,15 @@ public class CredentialsPage extends ConfigurablePageObject {
     }
 
     public void create() {
-        find(by.name("Submit")).click();
-        assertThat(driver, not(hasContent("This page expects a form submission")));
+        find(by.id("cr-dialog-submit")).click();
+        try {
+            assertThat(driver, not(hasContent("This page expects a form submission")));
+        } catch (UnhandledAlertException e) {
+            // TODO seems to occur on at least up to 2.541.1 but doesn't occur on 2.547
+            // can't see what the alert is, selenium goes too fast and if you pause it there's no issue
+            sleep(100);
+            assertThat(driver, not(hasContent("This page expects a form submission")));
+        }
     }
 
     public void delete() {
@@ -72,9 +97,10 @@ public class CredentialsPage extends ConfigurablePageObject {
     @Override
     public WebDriver open() {
         WebDriver wd = super.open();
-        // wait for default form fields to be present to avoid possible race
-        // condition when changing credentials type too fast (happens rarely)
-        waitFor(by.name("_.id"));
+
+        clickButton("Add Credentials");
+        // Selenium will execute the next step before the options have loaded if we don't wait for them
+        waitFor(by.css(".jenkins-choice-list__item__label"));
         return wd;
     }
 
