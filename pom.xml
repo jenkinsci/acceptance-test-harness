@@ -30,7 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.550</jenkins.version>
+    <jenkins.version>2.551-rc37992.1480767d627e</jenkins.version>
     <selenium.version>4.40.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.5.0-jre</guava.version>
