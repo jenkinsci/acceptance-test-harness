@@ -168,12 +168,13 @@ public class ByFactory {
                 locator, base);
     }
 
+
     /**
      * Finds a button
      */
     public By button(String locator) {
         return xpath(
-                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][((./@id = '%1$s' or ./@name = '%1$s' or contains(./@value, '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')] | .//button[(((./@id = '%1$s' or contains(./@value, '%1$s')) or contains(normalize-space(.), '%1$s')) or contains(./@title, '%1$s'))] | .//input[./@type = 'image'][contains(./@alt, '%1$s')]",
+                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][./@id = '%1$s' or ./@name = '%1$s' or ./@value = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s'] | .//button[./@id = '%1$s' or ./@value = '%1$s' or normalize-space(.) = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s']",
                 locator);
     }
 
