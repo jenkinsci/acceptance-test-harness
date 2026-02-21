@@ -38,7 +38,7 @@ public class SshSlaveLauncher extends ComputerLauncher {
         find(by.button("Add")).click();
 
         find(by.css(".jenkins-dropdown"))
-                .findElement(by.button("Global Credentials that should be available everywhere."))
+                .findElement(by.button("GlobalCredentials that should be available everywhere."))
                 .click();
 
         // Selenium will execute the next step before the options have loaded if we don't wait for them
