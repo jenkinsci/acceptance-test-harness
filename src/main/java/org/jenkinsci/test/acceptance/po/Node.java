@@ -82,7 +82,9 @@ public abstract class Node extends ContainerPageObject {
         visit("script");
         CodeMirror cm = new CodeMirror(this, "/script");
         cm.set(String.format(script, args));
-        find(by.css("button[value='Run']")).click();
+
+        // REVERTED WORKAROUND: Now using the standard clickButton helper
+        clickButton("Run");
 
         waitFor(by.xpath("//h2[contains(text(), 'Result')]"), timeoutSeconds);
 
