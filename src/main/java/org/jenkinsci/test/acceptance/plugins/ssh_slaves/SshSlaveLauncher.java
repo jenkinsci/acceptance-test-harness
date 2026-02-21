@@ -37,8 +37,9 @@ public class SshSlaveLauncher extends ComputerLauncher {
     public <T extends Credential> T addCredential(Class<T> type) {
         find(by.button("Add")).click();
 
-
-        find(by.css(".jenkins-dropdown")).findElement(by.css(".jenkins-dropdown__item")).click();
+        find(by.css(".jenkins-dropdown"))
+                .findElement(by.css(".jenkins-dropdown__item"))
+                .click();
 
         // Selenium will execute the next step before the options have loaded if we don't wait for them
         waitFor(by.css(".jenkins-choice-list__item__label"));

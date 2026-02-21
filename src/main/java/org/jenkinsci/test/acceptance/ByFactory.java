@@ -168,7 +168,6 @@ public class ByFactory {
                 locator, base);
     }
 
-
     /**
      * Finds a button
      */
