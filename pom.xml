@@ -30,7 +30,11 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.553</jenkins.version>
+    <!-- TODO: Spring v7 -->
+    <!-- TODO: https://github.com/jenkinsci/jenkins/pull/26445 -->
+    <!-- TODO: https://github.com/jenkinsci/jenkins/pull/11304 -->
+    <!-- TODO: https://github.com/jenkinsci/jenkins/pull/11292 -->
+    <jenkins.version>2.555-rc38089.050181ec5589</jenkins.version>
     <selenium.version>4.41.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.5.0-jre</guava.version>
