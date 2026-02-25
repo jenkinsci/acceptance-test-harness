@@ -31,7 +31,9 @@ import java.time.Duration;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
@@ -67,15 +69,29 @@ public class WorkflowJob extends Job {
         }
 
         private String waitFor(@NonNull final String selector) {
-            waitForRenderOf(selector + " .ace_text-input", getJenkins());
+            // scroll into view whilst we are waiting
+            WebElement placeholder = driver.findElement(By.className("workflow-editor-wrapper"));
+            Actions actions = new Actions(driver);
+            actions.moveToElement(placeholder);
+            actions.perform();
+            try {
+                waitForRenderOf(selector + " .ace_text-input", getJenkins());
+            } catch (TimeoutException tex) {
+                System.err.println("Timeout waiting for .ace_text-input");
+                placeholder = driver.findElement(By.className("workflow-editor-wrapper"));
+                System.err.println(placeholder.getAttribute("outerHTML"));
+                throw tex;
+            }
             return selector;
         }
     };
 
-    private static void waitForRenderOf(@NonNull final String cssSelector, @NonNull final Jenkins jenkins) {
-        jenkins.waitFor()
+    private void waitForRenderOf(@NonNull final String cssSelector, @NonNull final Jenkins jenkins) {
+        waitFor(driver)
                 .withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
                 .withTimeout(Duration.ofSeconds(20))
+                // .ignoring(NoSuchElementException.class)
+                // .until((d) -> d.findElement(By.cssSelector(cssSelector)));
                 .until(() -> isRendered(cssSelector, jenkins));
     }
 
@@ -89,6 +105,7 @@ public class WorkflowJob extends Job {
                         + "}",
                 cssSelector);
     }
+
 
     public final Control sandbox = control("/definition/sandbox");
 
