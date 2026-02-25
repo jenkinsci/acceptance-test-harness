@@ -72,7 +72,7 @@ public class WorkflowJob extends Job {
             // scroll into view whilst we are waiting
             WebElement placeholder = driver.findElement(By.className("workflow-editor-wrapper"));
             Actions actions = new Actions(driver);
-            actions.moveToElement(placeholder);
+            actions.scrollToElement(placeholder);
             actions.perform();
             try {
                 waitForRenderOf(selector + " .ace_text-input", getJenkins());
