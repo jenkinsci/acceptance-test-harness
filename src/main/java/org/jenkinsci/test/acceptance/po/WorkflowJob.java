@@ -26,12 +26,17 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import java.net.URL;
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.HasCapabilities;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.Platform;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Locatable;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.Select;
 
@@ -51,26 +56,19 @@ public class WorkflowJob extends Job {
             // We can not do in a cross platform way because mac doesn't use <ctrl>+a for "select all" shortcut
             WebElement aceEditorHolder = resolve();
 
-            // scroll into view https://github.com/SeleniumHQ/selenium/issues/17141#issuecomment-3969129937
-            if (aceEditorHolder instanceof Locatable l) {
-                // force a scroll into view
-                l.getCoordinates().inViewPort();
-            }
-
-            // The following can set the text without javascript but this only works the first time
-            // subsequent calls to set will append onto what was already set.
-            /*
+            // click in the editor to make it active
+            aceEditorHolder.click();
+            // the click causes the component receiving events to be active so grab that
             WebElement we = driver.switchTo().activeElement();
-            // the following will clear the contents but does not work on mac
-            // new Actions(driver).keyDown(Keys.CONTROL).sendKeys("a").keyUp(Keys.CONTROL).sendKeys(Keys.DELETE).perform();
-            we.sendKeys(text);
-            */
-            executeScript("""
-                    if (!arguments[0].aceEditor) {
-                        throw '**** Selected ACE Editor target object is not an active ACE Editor';
-                    }
-                    arguments[0].aceEditor.setValue(arguments[1]);
-                    """, aceEditorHolder, text);
+
+            CharSequence controlKey = isMac() ? Keys.OPTION : Keys.CONTROL;
+            new Actions(driver)
+                    .keyDown(controlKey)
+                    .sendKeys("a")
+                    .keyUp(controlKey)
+                    .sendKeys(Keys.DELETE)
+                    .sendKeys(text)
+                    .perform();
         }
 
         @Override
@@ -88,6 +86,18 @@ public class WorkflowJob extends Job {
                             By.xpath(".."), // parent (/div[class=workflow-editor-wrapper])
                             By.className("ace_editor") // editor component injected by the editor script
                             )));
+        }
+
+        private boolean isMac() {
+            if (driver instanceof HasCapabilities capabilityOwner) {
+                Capabilities caps = capabilityOwner.getCapabilities();
+                Platform platform = caps.getPlatformName();
+                if (platform != null) {
+                    return platform.family() == Platform.MAC;
+                }
+            }
+            // fallback to what the local process is running as
+            return SystemUtils.IS_OS_MAC;
         }
     };
 
