@@ -61,6 +61,7 @@ public class WorkflowJob extends Job {
             // the click causes the component receiving events to be active so grab that
             WebElement we = driver.switchTo().activeElement();
 
+            // simulate what a user would do which is to clear using select all and delete then enter the script
             CharSequence controlKey = isMac() ? Keys.OPTION : Keys.CONTROL;
             new Actions(driver)
                     .keyDown(controlKey)
@@ -77,7 +78,7 @@ public class WorkflowJob extends Job {
             // and the script runs after the page loads so we need to wait for it to add all the parts needed.
 
             // super.resolve calls CapybaraPortingLayerImpl.find, which calls isDisplayed and fails.
-            // do find directly and wait for javascript to have created all the parts.
+            // so find directly and wait for javascript to have created all the parts.
             return waitFor(driver)
                     .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
                     .until(d -> driver.findElement(new ByChained(
