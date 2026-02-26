@@ -31,6 +31,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Locatable;
 import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.Select;
 
@@ -50,8 +51,12 @@ public class WorkflowJob extends Job {
             // We can not do in a cross platform way because mac doesn't use <ctrl>+a for "select all" shortcut
             WebElement aceEditorHolder = resolve();
 
-            // scroll into view (by performing a click :-o) so we can see the script being set.
-            aceEditorHolder.click();
+            // scroll into view https://github.com/SeleniumHQ/selenium/issues/17141#issuecomment-3969129937
+            if (aceEditorHolder instanceof Locatable l) {
+                // force a scroll into view
+                l.getCoordinates().inViewPort();
+            }
+
             // The following can set the text without javascript but this only works the first time
             // subsequent calls to set will append onto what was already set.
             /*
