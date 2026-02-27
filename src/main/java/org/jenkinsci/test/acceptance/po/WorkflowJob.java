@@ -52,6 +52,8 @@ public class WorkflowJob extends Job {
 
             // click in the editor to make it active (this also performs a scroll)
             aceEditorHolder.click();
+
+            // we can not use sendKeys as ACE editor auto complete closing brackets corrupting passed in scripts.
             executeScript("""
                     if (!arguments[0].aceEditor) {
                         throw '**** Selected ACE Editor target object is not an active ACE Editor. element: ' + arguments[0];
