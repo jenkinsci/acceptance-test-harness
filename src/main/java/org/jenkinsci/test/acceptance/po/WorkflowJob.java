@@ -26,17 +26,11 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
 import java.net.URL;
-import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.HasCapabilities;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.Platform;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.Select;
 
@@ -56,20 +50,14 @@ public class WorkflowJob extends Job {
             // We can not do in a cross platform way because mac doesn't use <ctrl>+a for "select all" shortcut
             WebElement aceEditorHolder = resolve();
 
-            // click in the editor to make it active
+            // click in the editor to make it active (this also performs a scroll)
             aceEditorHolder.click();
-            // the click causes the component receiving events to be active so grab that
-            WebElement we = driver.switchTo().activeElement();
-
-            // simulate what a user would do which is to clear using select all and delete then enter the script
-            CharSequence controlKey = isMac() ? Keys.COMMAND : Keys.CONTROL;
-            new Actions(driver)
-                    .keyDown(controlKey)
-                    .sendKeys("a")
-                    .keyUp(controlKey)
-                    .sendKeys(Keys.DELETE)
-                    .sendKeys(text)
-                    .perform();
+            executeScript("""
+                    if (!arguments[0].aceEditor) {
+                        throw '**** Selected ACE Editor target object is not an active ACE Editor. element: ' + arguments[0];
+                    }
+                    arguments[0].aceEditor.setValue(arguments[1]);
+                    """, aceEditorHolder, text);
         }
 
         @Override
@@ -87,18 +75,6 @@ public class WorkflowJob extends Job {
                             By.xpath(".."), // parent (/div[class=workflow-editor-wrapper])
                             By.className("ace_editor") // editor component injected by the editor script
                             )));
-        }
-
-        private boolean isMac() {
-            if (driver instanceof HasCapabilities capabilityOwner) {
-                Capabilities caps = capabilityOwner.getCapabilities();
-                Platform platform = caps.getPlatformName();
-                if (platform != null) {
-                    return platform.family() == Platform.MAC;
-                }
-            }
-            // fallback to what the local process is running as
-            return SystemUtils.IS_OS_MAC;
         }
     };
 
