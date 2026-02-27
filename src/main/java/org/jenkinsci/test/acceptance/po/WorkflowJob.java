@@ -62,7 +62,7 @@ public class WorkflowJob extends Job {
             WebElement we = driver.switchTo().activeElement();
 
             // simulate what a user would do which is to clear using select all and delete then enter the script
-            CharSequence controlKey = isMac() ? Keys.OPTION : Keys.CONTROL;
+            CharSequence controlKey = isMac() ? Keys.COMMAND : Keys.CONTROL;
             new Actions(driver)
                     .keyDown(controlKey)
                     .sendKeys("a")
