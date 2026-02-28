@@ -25,13 +25,13 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.inject.Injector;
-import edu.umd.cs.findbugs.annotations.NonNull;
 import java.net.URL;
-import java.time.Duration;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.Select;
 
 @Describable("org.jenkinsci.plugins.workflow.job.WorkflowJob")
@@ -42,53 +42,43 @@ public class WorkflowJob extends Job {
     }
 
     public final Control script = new Control(this, "/definition/script") {
+
         @Override
         public void set(String text) {
-            try {
-                super.set(text);
-            } catch (NoSuchElementException x) {
-                // As of JENKINS-28769, the textarea is set display: none due to the ACE editor, so
-                // CapybaraPortingLayerImpl.find, called by super.resolve, calls isDisplayed and fails.
-                // Anyway we cannot use the web driver to interact with the hidden textarea.
-                // Some code cannibalized from #45:
-                String cssSelector = waitFor("#workflow-editor-1");
-                executeScript(
-                        "var targets = document.getElementsBySelector(arguments[0]);"
-                                + "if (!targets || targets.length === 0) {"
-                                + "    throw '**** Failed to find ACE Editor target object on page. Selector: ' + arguments[0];"
-                                + "}"
-                                + "if (!targets[0].aceEditor) {"
-                                + "    throw '**** Selected ACE Editor target object is not an active ACE Editor. Selector: ' + arguments[0];"
-                                + "}"
-                                + "targets[0].aceEditor.setValue(arguments[1]);",
-                        cssSelector,
-                        text);
-            }
+            // Whilst we can interact with the ace editor we may need to clear all the contents which is not possible.
+            // The only way to clear the current text on the editor is to select all the text and delete it.
+            // We can not do in a cross platform way because mac doesn't use <ctrl>+a for "select all" shortcut
+            WebElement aceEditorHolder = resolve();
+
+            // click in the editor to make it active (this also performs a scroll)
+            aceEditorHolder.click();
+
+            // we can not use sendKeys as ACE editor auto complete closing brackets corrupting passed in scripts.
+            executeScript("""
+                    if (!arguments[0].aceEditor) {
+                        throw '**** Selected ACE Editor target object is not an active ACE Editor. element: ' + arguments[0];
+                    }
+                    arguments[0].aceEditor.setValue(arguments[1]);
+                    """, aceEditorHolder, text);
         }
 
-        private String waitFor(@NonNull final String selector) {
-            waitForRenderOf(selector + " .ace_text-input", getJenkins());
-            return selector;
+        @Override
+        public WebElement resolve() {
+            // When the ACE editor loads it sets the textarea's style to display: none
+            // and the script runs after the page loads so we need to wait for it to add all the parts needed.
+
+            // super.resolve calls CapybaraPortingLayerImpl.find, which calls isDisplayed and fails.
+            // so find directly and wait for javascript to have created all the parts.
+            return waitFor(driver)
+                    .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                    .until(d -> driver.findElement(new ByChained(
+                            by.path("/definition/script"), // the form textarea will be updated to be hidden by the
+                            // editor script
+                            By.xpath(".."), // parent (/div[class=workflow-editor-wrapper])
+                            By.className("ace_editor") // editor component injected by the editor script
+                            )));
         }
     };
-
-    private static void waitForRenderOf(@NonNull final String cssSelector, @NonNull final Jenkins jenkins) {
-        jenkins.waitFor()
-                .withMessage("Timed out waiting on '" + cssSelector + "' to be rendered.")
-                .withTimeout(Duration.ofSeconds(20))
-                .until(() -> isRendered(cssSelector, jenkins));
-    }
-
-    private static boolean isRendered(@NonNull String cssSelector, @NonNull Jenkins jenkins) {
-        return (boolean) jenkins.executeScript(
-                "var targets = document.getElementsBySelector(arguments[0]);"
-                        + "if (!targets || targets.length === 0) {"
-                        + "    return false;"
-                        + "} else {"
-                        + "    return true;"
-                        + "}",
-                cssSelector);
-    }
 
     public final Control sandbox = control("/definition/sandbox");
 
