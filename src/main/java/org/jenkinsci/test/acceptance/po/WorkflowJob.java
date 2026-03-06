@@ -28,9 +28,11 @@ import com.google.inject.Injector;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.pagefactory.ByChained;
 import org.openqa.selenium.support.ui.Select;
 
@@ -69,14 +71,28 @@ public class WorkflowJob extends Job {
 
             // super.resolve calls CapybaraPortingLayerImpl.find, which calls isDisplayed and fails.
             // so find directly and wait for javascript to have created all the parts.
-            return waitFor(driver)
-                    .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
-                    .until(d -> driver.findElement(new ByChained(
-                            by.path("/definition/script"), // the form textarea will be updated to be hidden by the
-                            // editor script
-                            By.xpath(".."), // parent (/div[class=workflow-editor-wrapper])
-                            By.className("ace_editor") // editor component injected by the editor script
-                            )));
+            try {
+                return waitFor(driver)
+                        .ignoring(NoSuchElementException.class, StaleElementReferenceException.class)
+                        .until(d -> driver.findElement(new ByChained(
+                                by.path("/definition/script"), // the form textarea will be updated to be hidden by the
+                                // editor script
+                                By.xpath(".."), // parent (/div[class=workflow-editor-wrapper])
+                                By.className("ace_editor") // editor component injected by the editor script
+                                )));
+            } catch (Throwable t) {
+                var action = new Actions(driver).keyDown(Keys.PAGE_DOWN).build();
+                for (int i = 0; i < 5; i++) {
+                    action.perform();
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+                throw t;
+            }
         }
     };
 
