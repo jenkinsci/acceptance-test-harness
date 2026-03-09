@@ -4,8 +4,8 @@ import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * Mix-in for {@link PageObject}s that own a group of jobs, like
@@ -28,18 +28,11 @@ public class JobsMixIn extends MixIn {
 
         findTypeCaption(type).click();
 
-        // since 2.7, a bug in Firefox webdriver may prevent the blur event from triggering
-        // properly, so we manually execute a blur event here, see: JENKINS-37232
-        // See: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/7346
-        try {
-            blur(find(By.name("name")));
-        } catch (Exception e) {
-            // This should rarely fail on modern browsers,
-            // we don't really care if it does since Firefox was
-            // the only one that seemed to exhibit the issue
-        }
+        // the OK button is enabled in reaction to the click on the type
+        // so wait to ensure the click goes to an enabled button
+        WebElement okButton = waitFor(driver).until(ExpectedConditions.elementToBeClickable(by.button("OK")));
+        okButton.click();
 
-        clickButton("OK");
         // Sometimes job creation is not fast enough, so make sure it's finished before continue
         waitFor(by.name("config"), 10);
 
