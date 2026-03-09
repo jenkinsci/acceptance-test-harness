@@ -26,7 +26,7 @@ RUN apt-get update \
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
 ARG DOCKER_BUILDX_VERSION=0.31.1
-ARG DOCKER_VERSION=29.2.1
+ARG DOCKER_VERSION=29.3.0
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
   && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
@@ -39,7 +39,7 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && rm -rf /var/lib/apt/lists/*
 
 # Maven in repo is not new enough for ATH
-ARG MAVEN_VERSION=3.9.12
+ARG MAVEN_VERSION=3.9.13
 RUN curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
     curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512" && \
     echo "$(cat apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512)  apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum --check --strict && \
