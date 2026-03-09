@@ -28,7 +28,7 @@ public class JobsMixIn extends MixIn {
 
         findTypeCaption(type).click();
 
-        // the OK button is enabled in reaction to the click
+        // the OK button is enabled in reaction to the click on the type
         // so wait to ensure the click goes to an enabled button
         WebElement okButton = waitFor(driver).until(ExpectedConditions.elementToBeClickable(by.button("OK")));
         okButton.click();
