@@ -7,7 +7,6 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
-import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.selenium.Scroller;
@@ -16,10 +15,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 public class CredentialsPage extends ConfigurablePageObject {
-    public final Control addButton = control(by.xpath("//select[contains(@class, 'setting-input dropdownList')] | "
-            + "//select[contains(@class, 'jenkins-select__input dropdownList')]"));
     private URL configUrl;
-    private URL deleteUrl;
 
     /**
      * Create a new Credential
@@ -60,6 +56,13 @@ public class CredentialsPage extends ConfigurablePageObject {
         waitFor(by.id("cr-dialog-submit"));
         new Scroller(driver).disableStickyElements();
 
+        // If the credential has a scope field, wait for the options to load.
+        // Otherwise, sometimes the JS doesn't run fast enough to fill in the options
+        WebElement scope = getElement(by.name("_.scope"));
+        if (scope != null) {
+            waitFor(scope).until(el -> !el.findElements(by.tagName("option")).isEmpty());
+        }
+
         return newInstance(type, this, path);
     }
 
@@ -69,8 +72,7 @@ public class CredentialsPage extends ConfigurablePageObject {
     }
 
     public void setConfigUrl(String url) throws MalformedURLException {
-        configUrl = new URL(url + "/update");
-        deleteUrl = new URL(url + "/delete");
+        configUrl = new URL(url);
     }
 
     public void create() {
@@ -89,8 +91,10 @@ public class CredentialsPage extends ConfigurablePageObject {
         if (driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
             return;
         }
-        visit(deleteUrl);
-        elasticSleep(1000); // configure page requires some time to load
+        visit(configUrl);
+        clickButton("More actions");
+
+        clickLink("Delete credential");
         clickButton("Yes");
     }
 
@@ -102,6 +106,20 @@ public class CredentialsPage extends ConfigurablePageObject {
         // Selenium will execute the next step before the options have loaded if we don't wait for them
         waitFor(by.css(".jenkins-choice-list__item__label"));
         return wd;
+    }
+
+    @Override
+    public void configure() {
+        if (!driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
+            visit(getConfigUrl());
+        }
+
+        clickButton("Update credential");
+
+        new Scroller(driver).disableStickyElements();
+
+        waitFor(by.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
+        waitFor(SAVE_BUTTON, 5);
     }
 
     @Override

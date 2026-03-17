@@ -47,7 +47,7 @@ import org.openqa.selenium.WebElement;
  */
 public abstract class ConfigurablePageObject extends PageObject {
 
-    private static final By SAVE_BUTTON = By.xpath(
+    protected static final By SAVE_BUTTON = By.xpath(
             "//div[contains(@class, 'bottom-sticker-inner')]//input[@type='submit'] | //div[contains(@class, 'bottom-sticker-inner')]//button[contains(@name, 'Submit')]");
 
     protected ConfigurablePageObject(PageObject context, URL url) {
