@@ -138,7 +138,6 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         // See https://jenkins.io/doc/developer/security/secrets/#secrets-and-configuration-forms
         verifyUnexpectedValueForCredential(
                 "Credentials in plain text should not be accessible from Web UI",
-                c,
                 sc.selectEnterDirectly().privateKey,
                 privateKey);
 
@@ -158,8 +157,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
     }
 
     private void verifyUnexpectedValueForCredential(
-            String message, CredentialsPage cp, Control element, String notExpected) {
-        cp.configure();
+            String message, Control element, String notExpected) {
         assert (element.exists());
         assertThat(message, element.resolve().getAttribute("value"), not(containsString(notExpected)));
     }
