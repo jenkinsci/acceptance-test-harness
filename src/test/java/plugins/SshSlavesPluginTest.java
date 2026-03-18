@@ -156,8 +156,7 @@ public class SshSlavesPluginTest extends AbstractJUnitTest {
         assertThat(element.resolve().getAttribute("value"), containsString(expected));
     }
 
-    private void verifyUnexpectedValueForCredential(
-            String message, Control element, String notExpected) {
+    private void verifyUnexpectedValueForCredential(String message, Control element, String notExpected) {
         assert (element.exists());
         assertThat(message, element.resolve().getAttribute("value"), not(containsString(notExpected)));
     }
