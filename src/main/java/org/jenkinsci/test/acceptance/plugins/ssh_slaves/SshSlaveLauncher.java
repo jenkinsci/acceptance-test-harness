@@ -60,6 +60,14 @@ public class SshSlaveLauncher extends ComputerLauncher {
         nextButton.click();
         waitFor(by.id("cr-dialog-submit"));
         new Scroller(driver).disableStickyElements();
+
+        // If the credential has a scope field, wait for the options to load.
+        // Otherwise, sometimes the JS doesn't run fast enough to fill in the options
+        WebElement scope = getElement(by.name("_.scope"));
+        if (scope != null) {
+            waitFor(scope).until(el -> !el.findElements(by.tagName("option")).isEmpty());
+        }
+
         return newInstance(type, getPage(), path);
     }
 
