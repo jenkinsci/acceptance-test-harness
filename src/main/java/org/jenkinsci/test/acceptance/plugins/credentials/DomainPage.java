@@ -7,6 +7,7 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 
 public class DomainPage extends ConfigurablePageObject {
 
@@ -34,6 +35,20 @@ public class DomainPage extends ConfigurablePageObject {
     @Override
     public URL getConfigUrl() {
         return url(CONFIGURE_URL);
+    }
+
+    @Override
+    public void configure() {
+        if (!driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
+            visit(getConfigUrl());
+        }
+
+        clickButton("Update domain");
+
+        new Scroller(driver).disableStickyElements();
+
+        waitFor(by.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
+        waitFor(SAVE_BUTTON, 5);
     }
 
     @Override
