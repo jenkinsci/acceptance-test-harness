@@ -12,7 +12,6 @@ import org.jenkinsci.test.acceptance.selenium.Scroller;
 public class DomainPage extends ConfigurablePageObject {
 
     private static final String SYSTEM_STORE_URL = "credentials/store/system";
-    private static final String CONFIGURE_URL = "configure";
 
     private final String domainName;
 
@@ -34,13 +33,13 @@ public class DomainPage extends ConfigurablePageObject {
 
     @Override
     public URL getConfigUrl() {
-        return url(CONFIGURE_URL);
+        return url;
     }
 
     @Override
     public void configure() {
-        if (!driver.getCurrentUrl().equals(getConfigUrl().toExternalForm())) {
-            visit(getConfigUrl());
+        if (!onDomainConfigurationPage()) {
+            visit(url);
         }
 
         clickButton("Update domain");
@@ -65,7 +64,7 @@ public class DomainPage extends ConfigurablePageObject {
     private boolean onDomainConfigurationPage() {
         return this.domainName != null
                 && driver.getCurrentUrl()
-                        .contains(String.format("%s/domain/%s/%s", SYSTEM_STORE_URL, this.domainName, CONFIGURE_URL));
+                        .contains(String.format("%s/domain/%s", SYSTEM_STORE_URL, this.domainName));
     }
 
     public void delete() {
