@@ -13,19 +13,21 @@ public class DomainPage extends ConfigurablePageObject {
 
     private static final String SYSTEM_STORE_URL = "credentials/store/system";
 
-    private final String domainName;
-
     public DomainPage(Jenkins j) {
-        super(j, j.url(SYSTEM_STORE_URL + "/newDomain"));
-        this.domainName = null;
+        super(j, j.url(SYSTEM_STORE_URL));
     }
 
     public DomainPage(Jenkins j, String domain) {
         super(j, j.url(String.format("%s/domain/%s/", SYSTEM_STORE_URL, domain)));
-        this.domainName = domain;
     }
 
     public Domain addDomain() {
+        clickButton("Add domain");
+
+        new Scroller(driver).disableStickyElements();
+
+        waitFor(by.xpath("//form[contains(@name, 'newDomain')]"), 10);
+
         String path = find(by.name("newDomain")).getAttribute("path");
 
         return newInstance(Domain.class, this, path);
@@ -38,9 +40,7 @@ public class DomainPage extends ConfigurablePageObject {
 
     @Override
     public void configure() {
-        if (!onDomainConfigurationPage()) {
-            visit(url);
-        }
+        visit(url);
 
         clickButton("Update domain");
 
@@ -62,15 +62,13 @@ public class DomainPage extends ConfigurablePageObject {
     }
 
     private boolean onDomainConfigurationPage() {
-        return this.domainName != null
-                && driver.getCurrentUrl()
-                        .contains(String.format("%s/domain/%s", SYSTEM_STORE_URL, this.domainName));
+        return !driver.findElements(
+                by.xpath(String.format("//form[contains(@name, '%s')]", getFormName()))
+        ).isEmpty();
     }
 
     public void delete() {
-        if (!onDomainConfigurationPage()) {
-            visit(url);
-        }
+        visit(url);
 
         clickButton("More actions");
 
