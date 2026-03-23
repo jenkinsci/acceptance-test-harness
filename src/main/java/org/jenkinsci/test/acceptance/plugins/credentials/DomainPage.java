@@ -68,8 +68,13 @@ public class DomainPage extends ConfigurablePageObject {
     }
 
     public void delete() {
-        visit(url("delete"));
-        waitFor(by.button("Yes"));
+        if (!onDomainConfigurationPage()) {
+            visit(url);
+        }
+
+        clickButton("More actions");
+
+        clickLink("Delete domain");
         clickButton("Yes");
     }
 }
