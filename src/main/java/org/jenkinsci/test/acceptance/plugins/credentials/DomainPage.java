@@ -62,9 +62,8 @@ public class DomainPage extends ConfigurablePageObject {
     }
 
     private boolean onDomainConfigurationPage() {
-        return !driver.findElements(
-                by.xpath(String.format("//form[contains(@name, '%s')]", getFormName()))
-        ).isEmpty();
+        return !driver.findElements(by.xpath(String.format("//form[contains(@name, '%s')]", getFormName())))
+                .isEmpty();
     }
 
     public void delete() {
