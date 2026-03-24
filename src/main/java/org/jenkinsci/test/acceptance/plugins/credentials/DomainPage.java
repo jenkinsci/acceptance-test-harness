@@ -7,25 +7,27 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
+import org.jenkinsci.test.acceptance.selenium.Scroller;
 
 public class DomainPage extends ConfigurablePageObject {
 
     private static final String SYSTEM_STORE_URL = "credentials/store/system";
-    private static final String CONFIGURE_URL = "configure";
-
-    private final String domainName;
 
     public DomainPage(Jenkins j) {
-        super(j, j.url(SYSTEM_STORE_URL + "/newDomain"));
-        this.domainName = null;
+        super(j, j.url(SYSTEM_STORE_URL));
     }
 
     public DomainPage(Jenkins j, String domain) {
         super(j, j.url(String.format("%s/domain/%s/", SYSTEM_STORE_URL, domain)));
-        this.domainName = domain;
     }
 
     public Domain addDomain() {
+        clickButton("Add domain");
+
+        new Scroller(driver).disableStickyElements();
+
+        waitFor(by.xpath("//form[contains(@name, 'newDomain')]"), 10);
+
         String path = find(by.name("newDomain")).getAttribute("path");
 
         return newInstance(Domain.class, this, path);
@@ -33,7 +35,19 @@ public class DomainPage extends ConfigurablePageObject {
 
     @Override
     public URL getConfigUrl() {
-        return url(CONFIGURE_URL);
+        return url;
+    }
+
+    @Override
+    public void configure() {
+        visit(url);
+
+        clickButton("Update domain");
+
+        new Scroller(driver).disableStickyElements();
+
+        waitFor(by.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
+        waitFor(SAVE_BUTTON, 5);
     }
 
     @Override
@@ -48,14 +62,16 @@ public class DomainPage extends ConfigurablePageObject {
     }
 
     private boolean onDomainConfigurationPage() {
-        return this.domainName != null
-                && driver.getCurrentUrl()
-                        .contains(String.format("%s/domain/%s/%s", SYSTEM_STORE_URL, this.domainName, CONFIGURE_URL));
+        return !driver.findElements(by.xpath(String.format("//form[contains(@name, '%s')]", getFormName())))
+                .isEmpty();
     }
 
     public void delete() {
-        visit(url("delete"));
-        waitFor(by.button("Yes"));
+        visit(url);
+
+        clickButton("More actions");
+
+        clickLink("Delete domain");
         clickButton("Yes");
     }
 }
