@@ -92,7 +92,7 @@ public class CredentialsPage extends ConfigurablePageObject {
             return;
         }
         visit(configUrl);
-        clickButton("More actions");
+        find(by.id("more-credential-actions")).click();
 
         clickLink("Delete credential");
         clickButton("Yes");
