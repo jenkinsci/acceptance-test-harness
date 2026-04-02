@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.gitlab4j.api.GitLabApi;
@@ -161,7 +160,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     .withMessage("Deleting all GitLab projects")
                     .withTimeout(GITLAB_API_RETRY_TIMEOUT.multipliedBy(2))
                     .ignoring(GitLabApiException.class)
-                    .until(toFunction(() -> {
+                    .until(() -> {
                         for (var project : gitlabapi.getProjectApi().getProjects()) {
                             if (project.getMarkedForDeletionOn() != null) {
                                 continue;
@@ -169,12 +168,12 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                             gitlabapi.getProjectApi().deleteProject(project);
                         }
                         return true;
-                    }));
+                    });
             waitFor()
                     .withMessage("Deleting all GitLab groups")
                     .withTimeout(GITLAB_API_RETRY_TIMEOUT.multipliedBy(2))
                     .ignoring(GitLabApiException.class)
-                    .until(toFunction(() -> {
+                    .until(() -> {
                         for (var group : gitlabapi.getGroupApi().getGroups()) {
                             if (group.getMarkedForDeletionOn() != null) {
                                 continue;
@@ -182,7 +181,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                             gitlabapi.getGroupApi().deleteGroup(group.getId());
                         }
                         return true;
-                    }));
+                    });
         }
         LOGGER.info("GitLab cleanup completed: " + elapsed(startTime));
     }
@@ -505,10 +504,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .withMessage("Waiting for GitLab branch '%s' to be available", branchName)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
                 .ignoring(GitLabApiException.class)
-                .until(toFunction(() -> {
+                .until(() -> {
                     var branch = gitlabapi.getRepositoryApi().getBranch(projectId, branchName);
                     return branch != null && branch.getCommit() != null;
-                }));
+                });
         LOGGER.info("GitLab branch '" + branchName + "' wait: " + elapsed(startTime));
     }
 
@@ -562,13 +561,13 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         waitFor()
                 .withMessage("Waiting for tags '%s' in GitLab API", Arrays.asList(tagNames))
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(GitLabApiException.class, AssertionError.class)
-                .until(toFunction(() -> {
+                .ignoring(GitLabApiException.class)
+                .until(() -> {
                     var tags = gitlabapi.getTagsApi().getTags(projectPath);
                     assertThat(tags, is(notNullValue()));
                     assertThat(tags.stream().map(Tag::getName).toList(), hasItems(tagNames));
                     return true;
-                }));
+                });
         LOGGER.info("GitLab tags wait: " + elapsed(startTime));
     }
 
@@ -579,9 +578,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .withMessage("Waiting for GitLab MR %d merge ref to be available", mrIid)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
                 .ignoring(GitLabApiException.class)
-                .until(toFunction(() -> {
+                .until(() -> {
                     return gitlabapi.getRepositoryFileApi().getFile(projectId, "Jenkinsfile", mergeRef);
-                }));
+                });
         LOGGER.info("GitLab MR " + mrIid + " merge ref wait: " + elapsed(startTime));
     }
 
@@ -591,7 +590,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                 .withMessage(message)
                 .withTimeout(GITLAB_API_RETRY_TIMEOUT)
                 .ignoring(GitLabApiException.class)
-                .until(toFunction(() -> {
+                .until(() -> {
                     try {
                         return create.call();
                     } catch (Exception eCreate) {
@@ -602,29 +601,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                             throw firstCreateException.get();
                         }
                     }
-                }));
+                });
     }
 
     private static Duration elapsed(Instant startTime) {
         return Duration.between(startTime, Instant.now());
-    }
-
-    // ==================== TODO To be deleted : workaround for checked exceptions with .ignoring() ====================
-    // see https://github.com/jenkinsci/acceptance-test-harness/issues/2559
-
-    private static <T, R> Function<T, R> toFunction(Callable<R> callable) {
-        return unused -> {
-            try {
-                return callable.call();
-            } catch (Exception e) {
-                sneakyThrow(e);
-                return null;
-            }
-        };
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <E extends Exception> void sneakyThrow(Throwable e) throws E {
-        throw (E) e;
     }
 }
