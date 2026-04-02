@@ -30,7 +30,21 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.557</jenkins.version>
+    <!-- TODO
+         * https://github.com/jenkinsci/jenkins/pull/26549
+         * https://github.com/jenkinsci/jenkins/pull/26554
+         * https://github.com/jenkinsci/jenkins/pull/26558
+         * https://github.com/jenkinsci/jenkins/pull/26559
+         * https://github.com/jenkinsci/jenkins/pull/26564
+         * https://github.com/jenkinsci/jenkins/pull/26566
+         * https://github.com/jenkinsci/jenkins/pull/26569
+         * https://github.com/jenkinsci/jenkins/pull/26570
+         * https://github.com/jenkinsci/jenkins/pull/26571
+         * https://github.com/jenkinsci/acceptance-test-harness/pull/2660
+         * https://github.com/jenkinsci/acceptance-test-harness/pull/2661
+         * https://github.com/jenkinsci/acceptance-test-harness/pull/2663
+        -->
+    <jenkins.version>2.558-rc38151.0a_d2b_24b_cc0e</jenkins.version>
     <selenium.version>4.41.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.5.0-jre</guava.version>
