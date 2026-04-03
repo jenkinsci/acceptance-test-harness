@@ -48,11 +48,11 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
                 .fullname(name)
                 .email(name + "@mailinator.com", false)
                 .password(name)
-                .register();
+                .signup();
     }
 
     public User signup(String name, String pwd, String fullName, String email) {
-        return signup().username(name).fullname(fullName).email(email).password(pwd).register();
+        return signup().username(name).fullname(fullName).email(email).password(pwd).signup();
     }
 
     public static final class Signup extends PageObject {
@@ -99,14 +99,14 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
             return this;
         }
 
-        public User register() {
+        public User signup() {
             control(by.name("Submit")).clickAndWaitToBecomeStale();
 
             return new User(getJenkins(), username);
         }
 
         /**
-         * @deprecated use {@link #username(String)} and {@link #register()} instead
+         * @deprecated use {@link #username(String)} and {@link #signup()} instead
          */
         @Deprecated
         public User signup(String name) {
