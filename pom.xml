@@ -780,7 +780,7 @@ and
                     <artifactItem>
                       <groupId>org.jenkins-ci.plugins</groupId>
                       <artifactId>matrix-auth</artifactId>
-                      <version>3.2.10-rc495.f71149268c96</version>
+                      <version>3.2.10-rc496.220a_8329c907</version>
                       <type>hpi</type>
                     </artifactItem>
                   </artifactItems>

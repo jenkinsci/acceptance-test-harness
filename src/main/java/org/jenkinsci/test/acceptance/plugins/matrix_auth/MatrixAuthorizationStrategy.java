@@ -23,9 +23,7 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
         runThenHandleInputDialog(
                 () -> this.table
                         .resolve()
-                        .findElement(
-                                by.xpath(
-                                        "../div/span/span/button[text()='Add user\u2026'] | ../div/button[text()='Add user\u2026']"))
+                        .findElement(by.button("Add user"))
                         .click(),
                 name);
         return getUser(name);
