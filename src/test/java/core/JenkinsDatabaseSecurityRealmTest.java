@@ -63,7 +63,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     public void login_and_logout() {
 
         User user =
-                realm.signup().fullname(FULL_NAME).email(EMAIL).password(PWD).signup(NAME);
+                realm.signup().username(NAME).fullname(FULL_NAME).email(EMAIL).password(PWD).register();
 
         jenkins.login().doLogin(user.id(), PWD);
 
@@ -78,7 +78,7 @@ public class JenkinsDatabaseSecurityRealmTest extends AbstractJUnitTest {
     public void create_update_delete() {
 
         User user =
-                realm.signup().fullname(FULL_NAME).password(PWD).email(EMAIL).signup(NAME);
+                realm.signup().fullname(FULL_NAME).password(PWD).email(EMAIL).register();
         assertThat(user.id(), equalTo(NAME));
         assertThat(user.fullName(), equalTo(FULL_NAME));
         jenkins.logout();
