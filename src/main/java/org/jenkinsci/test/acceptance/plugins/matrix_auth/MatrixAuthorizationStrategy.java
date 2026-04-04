@@ -21,11 +21,7 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      */
     public MatrixRow addUser(String name) {
         runThenHandleInputDialog(
-                () -> this.table
-                        .resolve()
-                        .findElement(by.button("Add user"))
-                        .click(),
-                name);
+                () -> this.table.resolve().findElement(by.button("Add user")).click(), name);
         return getUser(name);
     }
 

@@ -43,8 +43,7 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
     }
 
     public User signup(String name) {
-        return signup()
-                .username(name)
+        return signup().username(name)
                 .fullname(name)
                 .email(name + "@mailinator.com", false)
                 .password(name)
@@ -52,7 +51,11 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
     }
 
     public User signup(String name, String pwd, String fullName, String email) {
-        return signup().username(name).fullname(fullName).email(email).password(pwd).signup();
+        return signup().username(name)
+                .fullname(fullName)
+                .email(email)
+                .password(pwd)
+                .signup();
     }
 
     public static final class Signup extends PageObject {
