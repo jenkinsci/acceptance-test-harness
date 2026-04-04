@@ -500,6 +500,10 @@ and
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+          <environmentVariables>
+            <!-- Use local version of the plugin over the released one ATH would otherwise use -->
+            <LOCAL_JARS>target/matrix-auth.hpi</LOCAL_JARS>
+          </environmentVariables>
         </configuration>
       </plugin>
       <plugin>
@@ -772,6 +776,12 @@ and
                       <artifactId>jenkins-war</artifactId>
                       <version>${jenkins.version}</version>
                       <type>war</type>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.jenkins-ci.plugins</groupId>
+                      <artifactId>matrix-auth</artifactId>
+                      <version>3.2.10-rc496.220a_8329c907</version>
+                      <type>hpi</type>
                     </artifactItem>
                   </artifactItems>
                   <outputDirectory>${project.build.directory}</outputDirectory>
