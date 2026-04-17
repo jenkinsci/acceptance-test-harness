@@ -62,7 +62,7 @@ import org.openqa.selenium.WebElement;
  */
 @WithDocker
 @Category(DockerTest.class)
-@WithPlugins({"gitlab-branch-source", "workflow-multibranch"})
+@WithPlugins({"gitlab-branch-source", "workflow-multibranch", "pipeline-model-definition"})
 public class GitLabPluginTest extends AbstractJUnitTest {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabPluginTest.class.getName());
