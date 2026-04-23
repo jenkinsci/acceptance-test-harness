@@ -7,7 +7,8 @@ import java.time.Duration;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.openqa.selenium.WebDriverException;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategy;
+import org.testcontainers.containers.wait.strategy.WaitStrategyTarget;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class GitLabContainer extends GenericContainer<GitLabContainer> {
@@ -27,14 +28,17 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
         withCreateContainerCmdModifier(
                 cmd -> cmd.getHostConfig().withMemory(4L * 1024 * 1024 * 1024).withMemorySwap(5L * 1024 * 1024 * 1024));
         // Startup takes too long which causes the selenium session to timeout so consumers must call waitForReady
-        // which polls using webdriver
-        /*
-        waitingFor(new HttpWaitStrategy()
-                .forPort(80)
-                .forStatusCode(200)
-                .forResponsePredicate(response -> response.contains("GitLab Community Edition"))
-                .withStartupTimeout(READINESS_TIMEOUT));
-        */
+        // which polls using webdriver. But the default will timeout after 60 seconds so we need to say don't wait
+        // which means if things do fail we do not get logs :(
+        // so make this a no-op
+        waitingFor(new WaitStrategy() {
+
+            public void waitUntilReady(WaitStrategyTarget waitStrategyTarget) {}
+
+            public WaitStrategy withStartupTimeout(Duration ignored) {
+                return this;
+            }
+        });
     }
 
     public String host() {
