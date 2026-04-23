@@ -14,6 +14,11 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
     private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration READINESS_POLL_INTERVAL = Duration.ofSeconds(5);
 
+    /**
+     * Create a GitLabContainer.
+     * <strong>starting this container takes a long time</strong>, as such waiting for it to be ready
+     * must use WebDriver via #waitForReady
+     */
     public GitLabContainer() {
         super(new ImageFromDockerfile("localhost/testcontainers/ath-gitlab", false)
                 .withFileFromClasspath(".", GitLabContainer.class.getName().replace('.', '/')));
@@ -21,11 +26,15 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
         withSharedMemorySize(1073741824L);
         withCreateContainerCmdModifier(
                 cmd -> cmd.getHostConfig().withMemory(4L * 1024 * 1024 * 1024).withMemorySwap(5L * 1024 * 1024 * 1024));
+        // Startup takes too long which causes the selenium session to timeout so consumers must call waitForReady
+        // which polls using webdriver
+        /*
         waitingFor(new HttpWaitStrategy()
                 .forPort(80)
                 .forStatusCode(200)
                 .forResponsePredicate(response -> response.contains("GitLab Community Edition"))
                 .withStartupTimeout(READINESS_TIMEOUT));
+        */
     }
 
     public String host() {
