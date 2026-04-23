@@ -4,37 +4,48 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
-import org.jenkinsci.test.acceptance.docker.Docker;
-import org.jenkinsci.test.acceptance.docker.DockerContainer;
-import org.jenkinsci.test.acceptance.docker.DockerFixture;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.openqa.selenium.WebDriverException;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.HttpWaitStrategy;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 
-@DockerFixture(
-        id = "gitlab-plugin",
-        ports = {80, 443, 22})
-public class GitLabContainer extends DockerContainer {
+public class GitLabContainer extends GenericContainer<GitLabContainer> {
     private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration READINESS_POLL_INTERVAL = Duration.ofSeconds(5);
 
+    public GitLabContainer() {
+        super(new ImageFromDockerfile("localhost/testcontainers/ath-gitlab", false)
+                .withFileFromClasspath(".", GitLabContainer.class.getName().replace('.', '/')));
+        withExposedPorts(80, 443, 22);
+        withSharedMemorySize(1073741824L);
+        withCreateContainerCmdModifier(
+                cmd -> cmd.getHostConfig().withMemory(4L * 1024 * 1024 * 1024).withMemorySwap(5L * 1024 * 1024 * 1024));
+        waitingFor(new HttpWaitStrategy()
+                .forPort(80)
+                .forStatusCode(200)
+                .forResponsePredicate(response -> response.contains("GitLab Community Edition"))
+                .withStartupTimeout(READINESS_TIMEOUT));
+    }
+
     public String host() {
-        return ipBound(22);
+        return getHost();
     }
 
     public int sshPort() {
-        return port(22);
+        return getMappedPort(22);
     }
 
     public int httpPort() {
-        return port(80);
+        return getMappedPort(80);
     }
 
     public String httpHost() {
-        return ipBound(80);
+        return getHost();
     }
 
     public String getHttpUrl() {
-        return "http://" + httpHost() + ":" + httpPort();
+        return "http://" + getHost() + ":" + getMappedPort(80);
     }
 
     /**
@@ -62,7 +73,7 @@ public class GitLabContainer extends DockerContainer {
                 .withMessage("Waiting for GitLab to come up")
                 .withTimeout(READINESS_TIMEOUT)
                 .pollingEvery(READINESS_POLL_INTERVAL)
-                .ignoring(WebDriverException.class) // connection reset while not up
+                .ignoring(WebDriverException.class)
                 .until(() -> {
                     gitLabPage.open();
                     return gitLabPage.isReady();
@@ -71,14 +82,14 @@ public class GitLabContainer extends DockerContainer {
 
     public String createUserToken(String userName, String password, String email, String isAdmin)
             throws IOException, InterruptedException {
-        return Docker.cmd("exec", getCid())
-                .add(
-                        "/bin/bash",
-                        "-c",
-                        "gitlab-rails runner -e production /usr/bin/create_user.rb" + " " + userName + " " + password
-                                + " " + email + " " + isAdmin)
-                .popen()
-                .verifyOrDieWith("Unable to create user")
-                .trim();
+        var result = execInContainer(
+                "/bin/bash",
+                "-c",
+                "gitlab-rails runner -e production /usr/bin/create_user.rb" + " " + userName + " " + password + " "
+                        + email + " " + isAdmin);
+        if (result.getExitCode() != 0) {
+            throw new IOException("Unable to create user: " + result.getStderr());
+        }
+        return result.getStdout().trim();
     }
 }

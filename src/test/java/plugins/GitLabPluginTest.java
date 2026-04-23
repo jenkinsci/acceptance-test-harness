@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,7 +31,6 @@ import org.gitlab4j.api.models.MergeRequestParams;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.Tag;
 import org.gitlab4j.api.models.Visibility;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
@@ -48,7 +46,6 @@ import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabServerConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
-import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -66,9 +63,6 @@ import org.openqa.selenium.WebElement;
 public class GitLabPluginTest extends AbstractJUnitTest {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabPluginTest.class.getName());
-
-    @Inject
-    DockerContainerHolder<GitLabContainer> gitLabServer;
 
     private static GitLabContainer CONTAINER;
     private static String ADMIN_TOKEN;
@@ -128,13 +122,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         jenkins.open();
 
         if (CONTAINER == null) {
-            var starter = gitLabServer.starter();
-            // https://docs.gitlab.com/ee/install/requirements.html#memory
-            starter.withOptions(new CommandBuilder()
-                    .add("--shm-size", "1g")
-                    .add("--memory", "4g")
-                    .add("--memory-swap", "5g"));
-            CONTAINER = starter.start();
+            CONTAINER = new GitLabContainer();
+            CONTAINER.start();
             LOGGER.info("GitLab container launched");
         }
 
@@ -190,7 +179,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @AfterClass
     public static void tearDownGitLabContainer() {
         if (CONTAINER != null) {
-            CONTAINER.close();
+            CONTAINER.stop();
             CONTAINER = null;
         }
     }
