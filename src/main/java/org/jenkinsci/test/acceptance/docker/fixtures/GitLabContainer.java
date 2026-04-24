@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.util.Map;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.openqa.selenium.WebDriverException;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.InternetProtocol;
