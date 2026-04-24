@@ -61,7 +61,7 @@ services:
       - REMOTE_WEBDRIVER_URL=http://browser:4444/wd/hub
       - SELENIUM_PROXY_HOSTNAME=mvn
       - SHARED_DOCKER_SERVICE=true
-      - TESTCONTAINERS_HOST_OVERRIDE=mvn
+      - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
       - VIDEO_FOLDER=/videos
     extra_hosts:
       - host.docker.internal:host-gateway
