@@ -7,7 +7,6 @@ import java.time.Duration;
 import java.util.Map;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.openqa.selenium.WebDriverException;
-import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.InternetProtocol;
@@ -23,7 +22,7 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
     private static final int FIXED_HTTP_PORT = 6680;
 
     // we need to tell the container what its hostname is
-    private String hostname;
+    private final String hostname;
 
     /**
      * Create a GitLabContainer.
@@ -42,12 +41,17 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
         // ssh still binds in the container to port 22.
         addFixedExposedPort(FIXED_SSH_PORT, 22, InternetProtocol.TCP);
         // and we fix the hostname
-        hostname = DockerClientFactory.instance().dockerHostIpAddress();
+        if (System.getenv("TESTCONTAINERS_HOST_OVERRIDE") != null) {
+            hostname = System.getenv("TESTCONTAINERS_HOST_OVERRIDE");
+        } else {
+            hostname = "localhost";
+        }
         withEnv(Map.of(
                 "GITLAB_OMNIBUS_CONFIG",
                 "external_url 'http://" + hostname + ":" + FIXED_HTTP_PORT
                         + "'; gitlab_rails['gitlab_shell_ssh_port'] = " + FIXED_SSH_PORT));
-        withSharedMemorySize(1073741824L);
+        withSharedMemorySize(1L * 1024 * 1024 * 1024);
+
         withCreateContainerCmdModifier(
                 cmd -> cmd.getHostConfig().withMemory(4L * 1024 * 1024 * 1024).withMemorySwap(5L * 1024 * 1024 * 1024));
     }

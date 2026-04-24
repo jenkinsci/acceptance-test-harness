@@ -419,7 +419,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private void setUpInitialBranchViaGit(String repoUrl, String branchName, String content) throws IOException {
         try (GitRepo repo = new GitRepo(repoUrl)) {
-            repo.changeAndCommitFile("Jenkinsfile", content, "Initial commit");
+            repo.setAndCommitFile("Jenkinsfile", content, "Initial commit");
             repo.git("push", "-u", "origin", branchName);
         }
     }
@@ -429,7 +429,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         try (GitRepo repo = new GitRepo(repoUrl)) {
             repo.git("fetch", "origin");
             repo.git("checkout", "-b", branchName, "origin/" + sourceRef);
-            repo.changeAndCommitFile("Jenkinsfile", content, "Add/update Jenkinsfile");
+            repo.setAndCommitFile("Jenkinsfile", content, "Add/update Jenkinsfile");
+
             repo.git("push", "origin", branchName);
         }
     }
