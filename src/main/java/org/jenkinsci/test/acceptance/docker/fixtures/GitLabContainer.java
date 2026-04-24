@@ -41,11 +41,7 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
         // ssh still binds in the container to port 22.
         addFixedExposedPort(FIXED_SSH_PORT, 22, InternetProtocol.TCP);
         // and we fix the hostname
-        if (System.getenv("TESTCONTAINERS_HOST_OVERRIDE") != null) {
-            hostname = System.getenv("TESTCONTAINERS_HOST_OVERRIDE");
-        } else {
-            hostname = "localhost";
-        }
+        hostname = DockerClientFactory.instance().dockerHostIpAddress();
         withEnv(Map.of(
                 "GITLAB_OMNIBUS_CONFIG",
                 "external_url 'http://" + hostname + ":" + FIXED_HTTP_PORT
