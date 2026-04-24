@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -32,7 +31,6 @@ import org.gitlab4j.api.models.MergeRequestParams;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.Tag;
 import org.gitlab4j.api.models.Visibility;
-import org.jenkinsci.test.acceptance.docker.DockerContainerHolder;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitLabContainer;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.DockerTest;
@@ -48,7 +46,6 @@ import org.jenkinsci.test.acceptance.plugins.gitlab_plugin.GitLabServerConfig;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
-import org.jenkinsci.utils.process.CommandBuilder;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -62,13 +59,10 @@ import org.openqa.selenium.WebElement;
  */
 @WithDocker
 @Category(DockerTest.class)
-@WithPlugins({"gitlab-branch-source", "workflow-multibranch"})
+@WithPlugins({"gitlab-branch-source", "workflow-multibranch", "pipeline-model-definition"})
 public class GitLabPluginTest extends AbstractJUnitTest {
 
     private static final Logger LOGGER = Logger.getLogger(GitLabPluginTest.class.getName());
-
-    @Inject
-    DockerContainerHolder<GitLabContainer> gitLabServer;
 
     private static GitLabContainer CONTAINER;
     private static String ADMIN_TOKEN;
@@ -128,19 +122,10 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         jenkins.open();
 
         if (CONTAINER == null) {
-            var starter = gitLabServer.starter();
-            // https://docs.gitlab.com/ee/install/requirements.html#memory
-            starter.withOptions(new CommandBuilder()
-                    .add("--shm-size", "1g")
-                    .add("--memory", "4g")
-                    .add("--memory-swap", "5g"));
-            CONTAINER = starter.start();
+            CONTAINER = new GitLabContainer();
+            CONTAINER.start(this);
             LOGGER.info("GitLab container launched");
         }
-
-        Instant startTime = Instant.now();
-        CONTAINER.waitForReady(this);
-        LOGGER.info("GitLab ready check: " + elapsed(startTime));
 
         if (ADMIN_TOKEN == null) {
             ADMIN_TOKEN =
@@ -190,7 +175,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     @AfterClass
     public static void tearDownGitLabContainer() {
         if (CONTAINER != null) {
-            CONTAINER.close();
+            CONTAINER.stop();
             CONTAINER = null;
         }
     }
@@ -222,7 +207,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // When multibranch job scans GitLab project
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
-        configureJobWithGitLabBranchSource(multibranchJob, USERNAME, REPO_NAME);
+        configureJobWithGitLabBranchSource(multibranchJob, USERNAME, REPO_NAME, "GitLab Personal Access Token");
         multibranchJob.save();
 
         multibranchJob.waitForBranchIndexingFinished((int) BRANCH_INDEXING_TIMEOUT.toSeconds());
@@ -281,7 +266,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // When multibranch job with tag discovery scans repository
         final WorkflowMultiBranchJob tagMultibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
-        var tagBranchSource = configureJobWithGitLabBranchSource(tagMultibranchJob, USERNAME, REPO_NAME);
+        var tagBranchSource = configureJobWithGitLabBranchSource(
+                tagMultibranchJob, USERNAME, REPO_NAME, "GitLab Personal Access Token");
         tagBranchSource.enableTagDiscovery();
         tagMultibranchJob.save();
 
@@ -341,6 +327,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         // When organization folder scans GitLab group
         final GitLabOrganizationFolder organizationFolder = jenkins.jobs.create(GitLabOrganizationFolder.class);
         organizationFolder.create(GROUP_NAME);
+        organizationFolder.setCheckoutCredentials("GitLab Personal Access Token");
         organizationFolder.save();
 
         organizationFolder.waitForCheckFinished(BRANCH_INDEXING_TIMEOUT);
@@ -401,19 +388,11 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     private GitLabBranchSource configureJobWithGitLabBranchSource(
-            final WorkflowMultiBranchJob job, String owner, String project) {
+            final WorkflowMultiBranchJob job, String owner, String project, String credentialId) {
         var branchSource = job.addBranchSource(GitLabBranchSource.class);
         branchSource.setOwner(owner);
-        branchSource.find(branchSource.by.path("/sources/source/projectPath")).click();
-
-        String fullPath = owner + "/" + project;
-        branchSource
-                .waitFor()
-                .withMessage("Waiting for GitLab project '%s' to appear in dropdown", fullPath)
-                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(NoSuchElementException.class)
-                .until(() -> branchSource.find(branchSource.by.option(fullPath)) != null);
-        branchSource.waitFor(branchSource.by.option(fullPath)).click();
+        branchSource.setCheckoutCredentials(credentialId);
+        branchSource.setProject(owner + "/" + project);
         return branchSource;
     }
 
@@ -441,7 +420,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
     private void setUpInitialBranchViaGit(String repoUrl, String branchName, String content) throws IOException {
         try (GitRepo repo = new GitRepo(repoUrl)) {
-            repo.changeAndCommitFile("Jenkinsfile", content, "Initial commit");
+            repo.setAndCommitFile("Jenkinsfile", content, "Initial commit");
             repo.git("push", "-u", "origin", branchName);
         }
     }
@@ -451,7 +430,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         try (GitRepo repo = new GitRepo(repoUrl)) {
             repo.git("fetch", "origin");
             repo.git("checkout", "-b", branchName, "origin/" + sourceRef);
-            repo.changeAndCommitFile("Jenkinsfile", content, "Add/update Jenkinsfile");
+            repo.setAndCommitFile("Jenkinsfile", content, "Add/update Jenkinsfile");
+
             repo.git("push", "origin", branchName);
         }
     }
