@@ -123,13 +123,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         if (CONTAINER == null) {
             CONTAINER = new GitLabContainer();
-            CONTAINER.start();
+            CONTAINER.start(this);
             LOGGER.info("GitLab container launched");
         }
-
-        Instant startTime = Instant.now();
-        CONTAINER.waitForReady(this);
-        LOGGER.info("GitLab ready check: " + elapsed(startTime));
 
         if (ADMIN_TOKEN == null) {
             ADMIN_TOKEN =
@@ -211,7 +207,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // When multibranch job scans GitLab project
         final WorkflowMultiBranchJob multibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
-        configureJobWithGitLabBranchSource(multibranchJob, USERNAME, REPO_NAME);
+        configureJobWithGitLabBranchSource(multibranchJob, USERNAME, REPO_NAME, "GitLab Personal Access Token");
         multibranchJob.save();
 
         multibranchJob.waitForBranchIndexingFinished((int) BRANCH_INDEXING_TIMEOUT.toSeconds());
@@ -270,7 +266,8 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
         // When multibranch job with tag discovery scans repository
         final WorkflowMultiBranchJob tagMultibranchJob = jenkins.jobs.create(WorkflowMultiBranchJob.class);
-        var tagBranchSource = configureJobWithGitLabBranchSource(tagMultibranchJob, USERNAME, REPO_NAME);
+        var tagBranchSource = configureJobWithGitLabBranchSource(
+                tagMultibranchJob, USERNAME, REPO_NAME, "GitLab Personal Access Token");
         tagBranchSource.enableTagDiscovery();
         tagMultibranchJob.save();
 
@@ -390,19 +387,11 @@ public class GitLabPluginTest extends AbstractJUnitTest {
     }
 
     private GitLabBranchSource configureJobWithGitLabBranchSource(
-            final WorkflowMultiBranchJob job, String owner, String project) {
+            final WorkflowMultiBranchJob job, String owner, String project, String credentialId) {
         var branchSource = job.addBranchSource(GitLabBranchSource.class);
         branchSource.setOwner(owner);
-        branchSource.find(branchSource.by.path("/sources/source/projectPath")).click();
-
-        String fullPath = owner + "/" + project;
-        branchSource
-                .waitFor()
-                .withMessage("Waiting for GitLab project '%s' to appear in dropdown", fullPath)
-                .withTimeout(GITLAB_API_RETRY_TIMEOUT)
-                .ignoring(NoSuchElementException.class)
-                .until(() -> branchSource.find(branchSource.by.option(fullPath)) != null);
-        branchSource.waitFor(branchSource.by.option(fullPath)).click();
+        branchSource.setCheckoutCredentials(credentialId);
+        branchSource.setProject(owner + "/" + project);
         return branchSource;
     }
 
