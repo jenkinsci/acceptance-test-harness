@@ -327,6 +327,7 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         // When organization folder scans GitLab group
         final GitLabOrganizationFolder organizationFolder = jenkins.jobs.create(GitLabOrganizationFolder.class);
         organizationFolder.create(GROUP_NAME);
+        organizationFolder.setCheckoutCredentials("GitLab Personal Access Token");
         organizationFolder.save();
 
         organizationFolder.waitForCheckFinished(BRANCH_INDEXING_TIMEOUT);
