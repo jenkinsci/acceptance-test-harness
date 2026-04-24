@@ -185,7 +185,7 @@ public class GitRepo implements Closeable {
      */
     public void setAndCommitFile(String fileName, String fileContent, String message) {
         try {
-            Path p = Path.of(fileName);
+            Path p = path(Path.of(fileName));
             Files.writeString(p, fileContent, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             git("add", fileName);
             // the file may not have changed, but we don't want to fail
@@ -207,7 +207,7 @@ public class GitRepo implements Closeable {
      */
     public void appendToAndCommitFile(String fileName, String fileContent, String message) {
         try {
-            Path p = Path.of(fileName);
+            Path p = path(Path.of(fileName));
             Files.writeString(p, fileContent, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             git("add", fileName);
             commit(message);
