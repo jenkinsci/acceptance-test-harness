@@ -129,6 +129,11 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
                             .pollingEvery(READINESS_POLL_INTERVAL)
                             .ignoring(WebDriverException.class)
                             .until(() -> {
+                                try {
+                                    System.err.println(waitStrategyTarget.getContainerInfo());
+                                } catch (Throwable t) {
+                                    t.printStackTrace(System.err);
+                                }
                                 gitLabPage.open();
                                 return gitLabPage.isReady();
                             });
