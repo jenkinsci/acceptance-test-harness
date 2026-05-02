@@ -25,7 +25,7 @@ public class FavoriteTest extends AbstractJUnitTest {
         realm.signup(USER);
         jenkins.login().doLogin(USER);
 
-        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']"))
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false'], a.favorite-toggle[data-full-name='my-project'][data-fav='false']"))
                 .click();
         // ensure the project is now a favourite
         waitFor(by.css(".icon-fav-active:not(.jenkins-hidden)"));
@@ -33,9 +33,9 @@ public class FavoriteTest extends AbstractJUnitTest {
         final User user = new User(jenkins, USER);
         jenkins.visit(user.url("favorites").toString());
         // will fail if the project has not been favorited
-        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='true']"))
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='true'], a.favorite-toggle[data-full-name='my-project'][data-fav='true']"))
                 .click();
         // ensure the project is no longer a favourite
-        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false']"));
+        waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false'], a.favorite-toggle[data-full-name='my-project'][data-fav='false']"));
     }
 }
