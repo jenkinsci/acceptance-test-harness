@@ -176,7 +176,7 @@ public class Slave extends Node {
             open();
             try {
                 clickButton("Launch agent");
-            }  catch (NoSuchElementException e) {
+            } catch (NoSuchElementException e) {
                 clickButton("Launch");
             }
         }
