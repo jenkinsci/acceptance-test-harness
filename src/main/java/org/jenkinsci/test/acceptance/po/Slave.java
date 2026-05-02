@@ -108,12 +108,20 @@ public class Slave extends Node {
 
         if (isOnline()) {
             open();
-            clickButton("Mark this node temporarily offline");
+            try {
+                clickButton("Mark this node temporarily offline");
+            } catch (NoSuchElementException e) {
+                clickLink("Mark temporarily offline");
+            }
 
             find(by.input("offlineMessage")).clear();
             find(by.input("offlineMessage")).sendKeys(message);
 
-            clickButton("Mark this node temporarily offline");
+            try {
+                clickButton("Mark this node temporarily offline");
+            } catch (NoSuchElementException e) {
+                clickButton("Mark temporarily offline");
+            }
         }
     }
 
@@ -137,7 +145,11 @@ public class Slave extends Node {
             find(by.link("Disconnect")).click();
             find(by.input("offlineMessage")).clear();
             find(by.input("offlineMessage")).sendKeys(message);
-            clickButton("Yes");
+            try {
+                clickButton("Yes");
+            } catch (NoSuchElementException e) {
+                clickButton("Disconnect");
+            }
         }
     }
 
@@ -162,7 +174,11 @@ public class Slave extends Node {
     public void launch() {
         if (isOffline()) {
             open();
-            clickButton("Launch agent");
+            try {
+                clickButton("Launch agent");
+            }  catch (NoSuchElementException e) {
+                clickButton("Launch");
+            }
         }
     }
 }
