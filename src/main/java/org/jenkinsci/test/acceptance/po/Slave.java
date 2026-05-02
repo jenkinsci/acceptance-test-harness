@@ -111,7 +111,7 @@ public class Slave extends Node {
             try {
                 clickButton("Mark this node temporarily offline");
             } catch (NoSuchElementException e) {
-                clickLink("Mark temporarily offline");
+                clickButton("Mark temporarily offline");
             }
 
             find(by.input("offlineMessage")).clear();
