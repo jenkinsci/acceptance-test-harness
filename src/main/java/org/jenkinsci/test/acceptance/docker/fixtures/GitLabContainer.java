@@ -49,6 +49,11 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
                         + "'; gitlab_rails['gitlab_shell_ssh_port'] = " + FIXED_SSH_PORT));
         withSharedMemorySize(1L * 1024 * 1024 * 1024);
 
+        String network = System.getenv("DOCKER_FIXTURES_NETWORK");
+        if (network != null) {
+            withNetworkMode(network);
+        }
+
         withCreateContainerCmdModifier(
                 cmd -> cmd.getHostConfig().withMemory(4L * 1024 * 1024 * 1024).withMemorySwap(5L * 1024 * 1024 * 1024));
     }
