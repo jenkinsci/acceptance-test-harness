@@ -16,7 +16,7 @@ import org.testcontainers.containers.wait.strategy.WaitStrategyTarget;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class GitLabContainer extends GenericContainer<GitLabContainer> {
-    private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(3);
+    private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration READINESS_POLL_INTERVAL = Duration.ofSeconds(5);
     // non-privaledged non-ephemeral ports that are not likely to be in use.
     private static final int FIXED_SSH_PORT = 6622;
