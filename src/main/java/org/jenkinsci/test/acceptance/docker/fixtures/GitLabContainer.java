@@ -116,10 +116,9 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
 
     @SuppressWarnings("resource")
     public void start(CapybaraPortingLayerImpl p) {
-        // Startup takes too long which causes the selenium session to timeout so consumers must call waitForReady
-        // which polls using webdriver. But the default will timeout after 60 seconds so we need to say don't wait
-        // which means if things do fail we do not get logs :(
-        // so make this a no-op
+        // Startup takes too long which causes the selenium session to timeout. 
+        // To avoid this we set the wait strategy here using which polls using webdriver
+        // thus keeping the selenium session alive
         waitingFor(new WaitStrategy() {
 
             Duration timeout = READINESS_TIMEOUT;
