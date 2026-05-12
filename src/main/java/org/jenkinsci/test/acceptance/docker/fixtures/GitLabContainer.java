@@ -104,9 +104,9 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
     }
 
     /**
-     * Call {@link #start()} instead to ensure Selenium does not timeout.
+     * Call {@link #start(CapybaraPortingLayerImpl)} instead to ensure Selenium does not timeout.
      * @throws RuntimeException whenever this method is called
-     * @deprecated use {@link #start()} instead.
+     * @deprecated use {@link #start(CapybaraPortingLayerImpl)} instead.
      */
     @Override
     @Deprecated
