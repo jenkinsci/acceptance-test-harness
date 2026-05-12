@@ -32,10 +32,10 @@ for (build = currentBuild.previousCompletedBuild; build != null; build = build.p
 if (needSplittingFromWorkspace) {
   node { // When there are no previous build, we need to estimate splits from files which require workspace
     checkout scm
-    splits = splitTests estimateTestsFromFiles: true, parallelism: count(1)
+    splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
   }
 } else {
-  splits = splitTests count(1)
+  splits = splitTests count(10)
 }
 
 def axes = [
