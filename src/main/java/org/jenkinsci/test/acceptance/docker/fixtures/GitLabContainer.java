@@ -120,16 +120,13 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
         // To avoid this we set the wait strategy here using which polls using webdriver
         // thus keeping the selenium session alive
         waitingFor(new WaitStrategy() {
-
-            Duration timeout = READINESS_TIMEOUT;
-
             @Override
             public void waitUntilReady(WaitStrategyTarget waitStrategyTarget) {
                 try {
                     GitLabPage gitLabPage = new GitLabPage(p.injector, new URL(getHttpUrl()));
                     p.waitFor(this)
                             .withMessage("Waiting for GitLab to come up")
-                            .withTimeout(timeout)
+                            .withTimeout(READINESS_TIMEOUT)
                             .pollingEvery(READINESS_POLL_INTERVAL)
                             .ignoring(WebDriverException.class)
                             .until(() -> {
