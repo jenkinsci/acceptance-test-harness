@@ -115,7 +115,7 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
 
     @SuppressWarnings("resource")
     public void start(CapybaraPortingLayerImpl p) {
-        // Startup takes too long which causes the selenium session to timeout. 
+        // Startup takes too long which causes the selenium session to timeout.
         // To avoid this we set the wait strategy here using which polls using webdriver
         // thus keeping the selenium session alive
         waitingFor(new WaitStrategy() {
