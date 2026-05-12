@@ -61,7 +61,6 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
     @Override
     public String getHost() {
         return hostname;
-        // return super.getHost();
     }
 
     public String host() {
