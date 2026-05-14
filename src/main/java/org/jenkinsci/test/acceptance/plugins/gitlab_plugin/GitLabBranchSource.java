@@ -32,16 +32,6 @@ public class GitLabBranchSource extends BranchSource {
     }
 
     public void setProject(String project) {
-        /*
-        waitFor()
-            .withMessage("Waiting for GitLab projects to be populated")
-            .withTimeout(Duration.ofSeconds(10)).until(() -> {
-            final Select select = new Select(projectPath.resolve());
-            return !select.getOptions().isEmpty();
-        });
-
-        projectPath.select(project);
-        */
         waitFor(this)
                 .withMessage("Waiting for GitLab project '%s' to appear in dropdown", project)
                 .withTimeout(Duration.ofSeconds(10))
