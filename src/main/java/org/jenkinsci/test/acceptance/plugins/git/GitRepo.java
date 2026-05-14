@@ -20,11 +20,14 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
@@ -50,9 +53,10 @@ public class GitRepo implements Closeable {
 
     public GitRepo() {
         dir = initDir();
-        git("config", "--global", "init.defaultBranch", "master");
-        git("init");
-        setIdentity(dir);
+        // initialize with a consistent branch name without copying the installation defaults
+        // to ensure a vanilla repo that behaves the same everywhere
+        git("init", "--template=", "--initial-branch=master");
+        setInitialConfiguration();
     }
 
     /**
@@ -60,28 +64,35 @@ public class GitRepo implements Closeable {
      */
     public GitRepo(final String url) {
         dir = initDir();
-        git("clone", url, ".");
-        setIdentity(dir);
+        // clone without copying the installation defaults to ensure a vanilla repo that behaves the same everywhere
+        git("clone", "--template=", url, ".");
+        setInitialConfiguration();
     }
 
     /**
-     * Configures and identity for the repo, just in case global config is not set.
+     * Configures git defaults and the identity for the repo, just in case global config is not set.
      */
-    private void setIdentity(File dir) {
-        setIdentity("Jenkins-ATH", "jenkins-ath@example.org");
+    private void setInitialConfiguration() {
+        setInitialConfiguration("Jenkins-ATH", "jenkins-ath@example.org");
     }
 
     /**
-     * Sets the identity to be used when committing files.
+     * Sets the initial configuration and identity to be used when committing files.
      *
      * @param userName
      *         the name of the user
      * @param userMail
      *         the email of the user
      */
-    public void setIdentity(String userName, String userMail) {
+    public void setInitialConfiguration(String userName, String userMail) {
         gitDir(dir, "config", "user.name", userName);
         gitDir(dir, "config", "user.email", userMail);
+        // prevent any git maintenance kicking off, things are expected to be short lived
+        // and this would slow things down that are not fully necessary
+        gitDir(dir, "config", "maintenance.auto", "false");
+        // any signing key would be the installation/user default which is not us
+        // so do not attempt to use it
+        gitDir(dir, "config", "commit.gpgsign", "false");
     }
 
     private File initDir() {
@@ -136,29 +147,54 @@ public class GitRepo implements Closeable {
 
         String errorMessage = cmds + " failed";
         try {
+            var log = Logger.getLogger("GitRepo");
+            var start = Instant.now();
             Process p = pb.directory(dir)
                     .redirectInput(ProcessBuilder.Redirect.INHERIT)
                     .redirectError(ProcessBuilder.Redirect.INHERIT)
                     .start();
+            long pid = p.pid();
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             StringBuilder builder = new StringBuilder();
             String line;
-
             while ((line = reader.readLine()) != null) {
                 builder.append(line);
                 builder.append(System.lineSeparator());
             }
 
             int r = p.waitFor();
+            log.fine(() -> "Running " + pb.command().toString() + " (pid " + pid + ") in " + dir + " took "
+                    + java.time.Duration.between(start, Instant.now()) + " and exited with " + r);
             if (r != 0) {
                 throw new AssertionError(errorMessage + " " + builder);
             }
 
             return builder.toString();
-
         } catch (InterruptedException | IOException e) {
             throw new AssertionError(errorMessage, e);
+        }
+    }
+
+    /**
+     * Set the specified content for the given file and commit the file.
+     *
+     * @param fileName
+     *         the name of the file
+     * @param fileContent
+     *         the new content of the file
+     * @param message
+     *         the commit message to use
+     */
+    public void setAndCommitFile(String fileName, String fileContent, String message) {
+        try {
+            Path p = path(Path.of(fileName));
+            Files.writeString(p, fileContent, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            git("add", fileName);
+            // the file may not have changed, but we don't want to fail
+            git("commit", "--allow-empty", "-m", message);
+        } catch (IOException e) {
+            throw new AssertionError("Can't create/write file", e);
         }
     }
 
@@ -170,17 +206,16 @@ public class GitRepo implements Closeable {
      * @param fileContent
      *         the new content of the file
      * @param message
-     *         the commit message to ue
+     *         the commit message to use
      */
-    public void changeAndCommitFile(String fileName, String fileContent, String message) {
+    public void appendToAndCommitFile(String fileName, String fileContent, String message) {
         try {
-            try (FileWriter o = new FileWriter(new File(dir, fileName), true)) {
-                o.write(fileContent);
-            }
+            Path p = path(Path.of(fileName));
+            Files.writeString(p, fileContent, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             git("add", fileName);
             commit(message);
         } catch (IOException e) {
-            throw new AssertionError("Can't append line to file foo", e);
+            throw new AssertionError("Can't append to file", e);
         }
     }
 
@@ -190,7 +225,7 @@ public class GitRepo implements Closeable {
      * @param message commit message
      */
     public void changeAndCommitFoo(final String message) {
-        changeAndCommitFile("foo", "more", message);
+        appendToAndCommitFile("foo", "more", message);
     }
 
     /**
@@ -249,7 +284,6 @@ public class GitRepo implements Closeable {
             submoduleDir.mkdir();
 
             gitDir(submoduleDir, "init");
-            setIdentity(submoduleDir);
             try (FileWriter o = new FileWriter(new File(submoduleDir, "foo"), true)) {
                 o.write("more");
             }
