@@ -2,6 +2,8 @@ package org.jenkinsci.test.acceptance.docker.fixtures;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Map;
@@ -18,7 +20,7 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 public class GitLabContainer extends GenericContainer<GitLabContainer> {
     private static final Duration READINESS_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration READINESS_POLL_INTERVAL = Duration.ofSeconds(5);
-    // non-privaledged non-ephemeral ports that are not likely to be in use.
+    // non-privileged non-ephemeral ports that are not likely to be in use.
     private static final int FIXED_SSH_PORT = 6622;
     private static final int FIXED_HTTP_PORT = 6680;
 
@@ -87,8 +89,14 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
      * @return Authenticated Git URL ("http://username:token@host:port/username/repo.git")
      */
     public String repoUrl(String projectPath, String token) {
-        String username = projectPath.split("/")[0];
-        return "http://" + username + ":" + token + "@" + httpHost() + ":" + httpPort() + "/" + projectPath + ".git";
+        try {
+            String username = projectPath.split("/")[0];
+            URI repoUri = new URI(
+                    "http", username + ":" + token, httpHost(), httpPort(), "/" + projectPath + ".git", null, null);
+            return repoUri.toString();
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Could not compute URL for gitlab project", e);
+        }
     }
 
     /**
@@ -104,13 +112,13 @@ public class GitLabContainer extends GenericContainer<GitLabContainer> {
 
     /**
      * Call {@link #start(CapybaraPortingLayerImpl)} instead to ensure Selenium does not timeout.
-     * @throws RuntimeException whenever this method is called
+     * @throws UnsupportedOperationException whenever this method is called
      * @deprecated use {@link #start(CapybaraPortingLayerImpl)} instead.
      */
     @Override
     @Deprecated
     public void start() {
-        throw new RuntimeException("do not call start, call start(CapybaraPortingLayer)");
+        throw new UnsupportedOperationException("do not call start, call start(CapybaraPortingLayerImpl)");
     }
 
     @SuppressWarnings("resource")

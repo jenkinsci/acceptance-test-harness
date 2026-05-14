@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.plugins.gitlab_plugin;
 import java.time.Duration;
 import org.jenkinsci.test.acceptance.plugins.workflow_multibranch.BranchSource;
 import org.jenkinsci.test.acceptance.plugins.workflow_shared_library.WorkflowSharedLibrary;
-import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.WorkflowMultiBranchJob;
 import org.openqa.selenium.NoSuchElementException;
@@ -11,8 +10,6 @@ import org.openqa.selenium.StaleElementReferenceException;
 
 @Describable("GitLab Project")
 public class GitLabBranchSource extends BranchSource {
-
-    private final Control projectPath = control("projectPath");
 
     public GitLabBranchSource(WorkflowMultiBranchJob job, String path) {
         super(job, path);
