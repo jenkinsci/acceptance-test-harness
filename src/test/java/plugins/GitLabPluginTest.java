@@ -301,10 +301,20 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     new Project().withPublic(false).withPath(REPO_NAME).withNamespaceId(group.getId()));
 
             String repoUrl = CONTAINER.repoUrl(GROUP_NAME + "/" + REPO_NAME, ADMIN_TOKEN);
+
+            // on my windows box running `git` as invoked here takes 10s where-as running the same commands
+            // outside the project take ~0.1s
+            // this length of time all adds up to > 6 minutes at which point the selenium session has timeout out (5min)
+            // as an interim until I can find why this happens, just make some webdriver calls to keep the session
+            // alive.
+            // between the calls.
             setUpInitialBranchViaGit(repoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            driver.getTitle();
             setupBranchFromViaGit(repoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            driver.getTitle();
             setupBranchFromViaGit(repoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
             setupBranchFromViaGit(repoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
+            driver.getTitle();
             MergeRequest mr1 = createMergeRequestViaApi(gitlabapi, project1, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
             awaitMergeRequestMergeRefViaApi(gitlabapi, project1.getId(), mr1.getIid());
 
@@ -313,10 +323,15 @@ public class GitLabPluginTest extends AbstractJUnitTest {
                     new Project().withPublic(false).withPath(ANOTHER_REPO_NAME).withNamespaceId(group.getId()));
 
             String anotherRepoUrl = CONTAINER.repoUrl(GROUP_NAME + "/" + ANOTHER_REPO_NAME, ADMIN_TOKEN);
+            driver.getTitle();
             setUpInitialBranchViaGit(anotherRepoUrl, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            driver.getTitle();
             setupBranchFromViaGit(anotherRepoUrl, FIRST_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            driver.getTitle();
             setupBranchFromViaGit(anotherRepoUrl, SECOND_BRANCH, MAIN_BRANCH, JENKINSFILE_CONTENT);
+            driver.getTitle();
             setupBranchFromViaGit(anotherRepoUrl, FAILED_JOB, MAIN_BRANCH, BROKEN_JENKINSFILE);
+            driver.getTitle();
             MergeRequest mr2 = createMergeRequestViaApi(gitlabapi, project2, SECOND_BRANCH, MAIN_BRANCH, "test_mr");
             awaitMergeRequestMergeRefViaApi(gitlabapi, project2.getId(), mr2.getIid());
         }
