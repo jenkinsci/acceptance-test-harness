@@ -40,7 +40,7 @@
     <maven-sisu.version>0.9.0.M3</maven-sisu.version>
     <maven-resolver.version>1.9.18</maven-resolver.version>
 
-    <!-- do not pick up the java version from the parent, our compatability is against the minimum JDK used by the LTS Jenkins version -->
+    <!-- do not pick up the java version from the parent, our compatibility is against the minimum JDK used by the LTS Jenkins version -->
     <maven.compiler.release>21</maven.compiler.release>
 
     <groovy.version>3.0.25</groovy.version>
