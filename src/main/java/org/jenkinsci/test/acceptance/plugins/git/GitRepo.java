@@ -476,8 +476,6 @@ public class GitRepo implements Closeable {
                     output.append(line);
                     output.append(System.lineSeparator());
                 }
-                // EOS close the stream from our side
-                is.close();
             } catch (IOException e) {
                 throw new UncheckedIOException("failure reading git output/error", e);
             }
