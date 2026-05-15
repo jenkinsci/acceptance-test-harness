@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -149,30 +151,43 @@ public class GitRepo implements Closeable {
         try {
             var log = Logger.getLogger("GitRepo");
             var start = Instant.now();
-            Process p = pb.directory(dir).redirectErrorStream(true).start();
+            Process p = pb.directory(dir).start();
             long pid = p.pid();
 
             // we are not sending any input to the process so close the stream
             p.getOutputStream().close();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-                builder.append(System.lineSeparator());
-            }
+            final StringBuilder outBuilder = new StringBuilder();
+            final StringBuilder errBuilder = new StringBuilder();
+
+            Thread outThread =
+                    new Thread(new StreamReader(p.getInputStream(), outBuilder), "git command std.out reader");
+            Thread errThread =
+                    new Thread(new StreamReader(p.getErrorStream(), errBuilder), "git command std.err reader");
+            outThread.start();
+            errThread.start();
+            outThread.join();
+            errThread.join();
 
             int r = p.waitFor();
-            log.fine(() -> "Running " + pb.command().toString() + " (pid " + pid + ") in " + dir + " took "
-                    + java.time.Duration.between(start, Instant.now()) + " and exited with " + r);
+            log.fine(() -> "Running " + processDebugString(pb, p) + " took " + Duration.between(start, Instant.now())
+                    + " and exited with " + r);
             if (r != 0) {
-                throw new AssertionError(errorMessage + " " + builder);
+                throw new AssertionError(errorMessage + System.lineSeparator() + "output: " + outBuilder.toString()
+                        + System.lineSeparator() + "error: " + errBuilder.toString());
             }
-
-            return builder.toString();
+            String error = errBuilder.toString();
+            if (!error.isBlank()) {
+                log.warning("Git command " + processDebugString(pb, p)
+                        + " error stream was not empty (but returned success): " + error);
+            }
+            return outBuilder.toString();
         } catch (InterruptedException | IOException e) {
             throw new AssertionError(errorMessage, e);
         }
+    }
+
+    private final String processDebugString(ProcessBuilder pb, Process p) {
+        return pb.command().toString() + " (pid " + p.pid() + ") in " + pb.directory();
     }
 
     /**
@@ -441,6 +456,31 @@ public class GitRepo implements Closeable {
             return Files.createDirectories(dir.toPath().resolve(path));
         } catch (IOException e) {
             throw new AssertionError(String.format("Can't created directories %s", path), e);
+        }
+    }
+
+    private static class StreamReader implements Runnable {
+        private final InputStream is;
+        private final StringBuilder output;
+
+        StreamReader(InputStream is, StringBuilder output) {
+            this.is = is;
+            this.output = output;
+        }
+
+        @Override
+        public void run() {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line);
+                    output.append(System.lineSeparator());
+                }
+                // EOS close the stream from our side
+                is.close();
+            } catch (IOException e) {
+                throw new UncheckedIOException("failure reading git output/error", e);
+            }
         }
     }
 }
