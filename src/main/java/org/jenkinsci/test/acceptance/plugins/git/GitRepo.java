@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.git;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -13,7 +15,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -32,6 +33,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -159,14 +161,16 @@ public class GitRepo implements Closeable {
             final StringBuilder outBuilder = new StringBuilder();
             final StringBuilder errBuilder = new StringBuilder();
 
-            Thread outThread =
-                    new Thread(new StreamReader(p.getInputStream(), outBuilder), "git command std.out reader");
-            Thread errThread =
-                    new Thread(new StreamReader(p.getErrorStream(), errBuilder), "git command std.err reader");
+            StreamReader isr = new StreamReader(p.getInputStream(), outBuilder);
+            Thread outThread = new Thread(isr, "git command std.out reader");
+            StreamReader esr = new StreamReader(p.getErrorStream(), errBuilder);
+            Thread errThread = new Thread(esr, "git command std.err reader");
             outThread.start();
             errThread.start();
             outThread.join();
             errThread.join();
+            assertThat(isr.getIOException(), Matchers.nullValue());
+            assertThat(esr.getIOException(), Matchers.nullValue());
 
             int r = p.waitFor();
             log.fine(() -> "Running " + processDebugString(pb, p) + " took " + Duration.between(start, Instant.now())
@@ -462,6 +466,7 @@ public class GitRepo implements Closeable {
     private static class StreamReader implements Runnable {
         private final InputStream is;
         private final StringBuilder output;
+        private IOException e;
 
         StreamReader(InputStream is, StringBuilder output) {
             this.is = is;
@@ -477,8 +482,12 @@ public class GitRepo implements Closeable {
                     output.append(System.lineSeparator());
                 }
             } catch (IOException e) {
-                throw new UncheckedIOException("failure reading git output/error", e);
+                this.e = e;
             }
+        }
+
+        IOException getIOException() {
+            return e;
         }
     }
 }
