@@ -149,12 +149,11 @@ public class GitRepo implements Closeable {
         try {
             var log = Logger.getLogger("GitRepo");
             var start = Instant.now();
-            Process p = pb.directory(dir)
-                    .redirectInput(ProcessBuilder.Redirect.INHERIT)
-                    .redirectError(ProcessBuilder.Redirect.INHERIT)
-                    .start();
+            Process p = pb.directory(dir).redirectErrorStream(true).start();
             long pid = p.pid();
 
+            // we are not sending any input to the process so close the stream
+            p.getOutputStream().close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             StringBuilder builder = new StringBuilder();
             String line;
