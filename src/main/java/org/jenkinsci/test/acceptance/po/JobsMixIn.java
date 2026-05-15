@@ -36,10 +36,6 @@ public class JobsMixIn extends MixIn {
         // Sometimes job creation is not fast enough, so make sure it's finished before continue
         waitFor(by.name("config"), 10);
 
-        // Automatic disabling of sticky elements doesn't seem to occur after a redirect,
-        // so force it after the configuration page has loaded
-        new Scroller(driver).disableStickyElements();
-
         final T j = get(type, name);
 
         // I'm seeing occasional 404 when trying to access the page right after a job is created.
