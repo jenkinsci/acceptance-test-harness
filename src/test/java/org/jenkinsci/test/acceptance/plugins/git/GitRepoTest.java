@@ -18,11 +18,11 @@ public class GitRepoTest {
                 gr.git("config", "testing.akey" + i, "" + i);
             }
         }
-        long elaspsed = System.nanoTime() - start;
+        long elapsed = System.nanoTime() - start;
 
         assertThat(
-                "git commands should compelte within 10 seconds",
-                elaspsed,
+                "git commands should complete within 10 seconds",
+                elapsed,
                 lessThan(Duration.ofSeconds(10).toNanos()));
     }
 }
