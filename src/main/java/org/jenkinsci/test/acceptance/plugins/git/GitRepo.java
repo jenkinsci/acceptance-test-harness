@@ -1,5 +1,7 @@
 package org.jenkinsci.test.acceptance.plugins.git;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
@@ -22,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +33,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.hamcrest.Matchers;
 import org.jenkinsci.test.acceptance.docker.fixtures.GitContainer;
 import org.zeroturnaround.zip.ZipUtil;
 
@@ -149,31 +153,45 @@ public class GitRepo implements Closeable {
         try {
             var log = Logger.getLogger("GitRepo");
             var start = Instant.now();
-            Process p = pb.directory(dir)
-                    .redirectInput(ProcessBuilder.Redirect.INHERIT)
-                    .redirectError(ProcessBuilder.Redirect.INHERIT)
-                    .start();
+            Process p = pb.directory(dir).start();
             long pid = p.pid();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            StringBuilder builder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line);
-                builder.append(System.lineSeparator());
-            }
+            // we are not sending any input to the process so close the stream
+            p.getOutputStream().close();
+            final StringBuilder outBuilder = new StringBuilder();
+            final StringBuilder errBuilder = new StringBuilder();
+
+            StreamReader isr = new StreamReader(p.getInputStream(), outBuilder);
+            Thread outThread = new Thread(isr, "git command std.out reader");
+            StreamReader esr = new StreamReader(p.getErrorStream(), errBuilder);
+            Thread errThread = new Thread(esr, "git command std.err reader");
+            outThread.start();
+            errThread.start();
+            outThread.join();
+            errThread.join();
+            assertThat(isr.getIOException(), Matchers.nullValue());
+            assertThat(esr.getIOException(), Matchers.nullValue());
 
             int r = p.waitFor();
-            log.fine(() -> "Running " + pb.command().toString() + " (pid " + pid + ") in " + dir + " took "
-                    + java.time.Duration.between(start, Instant.now()) + " and exited with " + r);
+            log.fine(() -> "Running " + processDebugString(pb, p) + " took " + Duration.between(start, Instant.now())
+                    + " and exited with " + r);
             if (r != 0) {
-                throw new AssertionError(errorMessage + " " + builder);
+                throw new AssertionError(errorMessage + System.lineSeparator() + "output: " + outBuilder.toString()
+                        + System.lineSeparator() + "error: " + errBuilder.toString());
             }
-
-            return builder.toString();
+            String error = errBuilder.toString();
+            if (!error.isBlank()) {
+                log.warning("Git command " + processDebugString(pb, p)
+                        + " error stream was not empty (but returned success): " + error);
+            }
+            return outBuilder.toString();
         } catch (InterruptedException | IOException e) {
             throw new AssertionError(errorMessage, e);
         }
+    }
+
+    private final String processDebugString(ProcessBuilder pb, Process p) {
+        return pb.command().toString() + " (pid " + p.pid() + ") in " + pb.directory();
     }
 
     /**
@@ -442,6 +460,34 @@ public class GitRepo implements Closeable {
             return Files.createDirectories(dir.toPath().resolve(path));
         } catch (IOException e) {
             throw new AssertionError(String.format("Can't created directories %s", path), e);
+        }
+    }
+
+    private static class StreamReader implements Runnable {
+        private final InputStream is;
+        private final StringBuilder output;
+        private IOException e;
+
+        StreamReader(InputStream is, StringBuilder output) {
+            this.is = is;
+            this.output = output;
+        }
+
+        @Override
+        public void run() {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line);
+                    output.append(System.lineSeparator());
+                }
+            } catch (IOException e) {
+                this.e = e;
+            }
+        }
+
+        IOException getIOException() {
+            return e;
         }
     }
 }
