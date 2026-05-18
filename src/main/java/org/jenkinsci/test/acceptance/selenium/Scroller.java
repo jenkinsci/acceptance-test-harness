@@ -109,7 +109,7 @@ public class Scroller implements WebDriverListener {
 
     @Override
     public void afterClick(WebElement element) {
-        if (Objects.equals(preClickURL, driver.getCurrentUrl())) {
+        if (!Objects.equals(preClickURL, driver.getCurrentUrl())) {
             // we have performed navigation via a click
             disableStickyElements();
         }

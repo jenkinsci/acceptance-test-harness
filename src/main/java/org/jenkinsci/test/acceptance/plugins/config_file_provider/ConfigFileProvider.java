@@ -26,7 +26,6 @@ package org.jenkinsci.test.acceptance.plugins.config_file_provider;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.WebElement;
 
 public class ConfigFileProvider extends PageObject {
