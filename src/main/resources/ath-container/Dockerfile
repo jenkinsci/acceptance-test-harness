@@ -38,15 +38,21 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-# Maven in repo is not new enough for ATH
 ARG MAVEN_VERSION=3.9.16
-RUN curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
-    curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512" && \
-    echo "$(cat apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512)  apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum --check --strict && \
-    tar -xvzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz" -C /opt/ && \
-    mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven && \
-    rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
-    rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512"
+# Note: falling back to Apache archive if the release is not the latest one. But defaults to mirror distribution system is good for Apache.
+# TODO: switch from checking sha512 to verify GPG signature - https://www.apache.org/info/verification.html
+RUN { \
+  curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
+  || curl -fsSLO "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"; \
+  } && { \
+  curl -fsSLO "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512" \
+  || curl -fsSLO "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512"; \
+  } && \
+  echo "$(cat apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512)  apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum --check --strict && \
+  tar -xvzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz" -C /opt/ && \
+  mv "/opt/apache-maven-${MAVEN_VERSION}" /opt/maven && \
+  rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz" && \
+  rm "apache-maven-${MAVEN_VERSION}-bin.tar.gz.sha512"
 ENV PATH="$PATH:/opt/maven/bin"
 
 COPY run.sh /usr/bin
