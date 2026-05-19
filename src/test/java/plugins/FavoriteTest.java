@@ -25,6 +25,7 @@ public class FavoriteTest extends AbstractJUnitTest {
         realm.signup(USER);
         jenkins.login().doLogin(USER);
 
+        // TODO simplify once favoutite-plugins 2.267.vb_90d08408081 is updated in a  https://github.com/jenkinsci/bom release
         waitFor(by.css("a.favorite-toggle[data-fullname='my-project'][data-fav='false'], a.favorite-toggle[data-full-name='my-project'][data-fav='false']"))
                 .click();
         // ensure the project is now a favourite
