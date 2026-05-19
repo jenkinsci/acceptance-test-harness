@@ -352,12 +352,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         }
     }
 
-    private void keepSeleniumAlive() {
-        // just enough of a call to webdriver to keep the Selenium session alive.
-        LOGGER.warning("refreshing web page to keep Selenium session alive");
-        driver.navigate().refresh();
-    }
-
     // ==================== Helper Methods ====================
 
     /**
@@ -430,12 +424,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
             repo.setAndCommitFile("Jenkinsfile", content, "Initial commit");
             repo.git("push", "-u", "origin", branchName);
         }
-        // on my windows box running `git` as invoked here takes 10s where-as running the same commands
-        // outside the project take ~0.1s
-        // this length of time all adds up to > 6 minutes at which point the selenium session has timeout out (5min)
-        // as an interim until I can find why this happens, just make some webdriver calls to keep the session
-        // alive between the calls.
-        keepSeleniumAlive();
     }
 
     private void setupBranchFromViaGit(String repoUrl, String branchName, String sourceRef, String content)
@@ -447,12 +435,6 @@ public class GitLabPluginTest extends AbstractJUnitTest {
 
             repo.git("push", "origin", branchName);
         }
-        // on my windows box running `git` as invoked here takes 10s where-as running the same commands
-        // outside the project take ~0.1s
-        // this length of time all adds up to > 6 minutes at which point the selenium session has timeout out (5min)
-        // as an interim until I can find why this happens, just make some webdriver calls to keep the session
-        // alive between the calls.
-        keepSeleniumAlive();
     }
 
     // ==================== GitLab API ====================
