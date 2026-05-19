@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,6 +112,9 @@ public class Scroller implements WebDriverListener {
                         String cookie = extractCookieHeader(requestData);
 
                         String css;
+                        String expires;
+                        String lastModified;
+
                         try (HttpClient client = HttpClient.newHttpClient()) {
                             HttpRequest clientRequest = HttpRequest.newBuilder()
                                     .uri(URI.create(requestUrl))
@@ -119,16 +123,28 @@ public class Scroller implements WebDriverListener {
                             HttpResponse<String> clientResponse =
                                     client.send(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
                             css = clientResponse.body();
+                            lastModified = clientResponse
+                                    .headers()
+                                    .firstValue("Expires")
+                                    .get();
+                            expires = clientResponse
+                                    .headers()
+                                    .firstValue("Last-Modified")
+                                    .get();
                         }
 
                         String patchedCSS = removeStickyPositioning(css);
                         // LOGGER.warning(() -> "replaced sticky ***before:***\n" + css + "\n***after:***\n" +
                         // patchedCSS);
-                        LOGGER.warning("filtering URL: " + requestUrl);
+                        LOGGER.fine("filtering URL: " + requestUrl);
                         ProvideResponseParameters responseParams = new ProvideResponseParameters(responseId);
                         responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
-                        // TODO add expiry / last modified for caching...?
+
                         responseParams.statusCode(200);
+                        responseParams.headers(List.of(
+                                new Header("Content-Type", new BytesValue(BytesValue.Type.STRING, "text/css")),
+                                new Header("Last-Modified", new BytesValue(BytesValue.Type.STRING, lastModified)),
+                                new Header("Expires", new BytesValue(BytesValue.Type.STRING, expires))));
                         network.provideResponse(responseParams);
                         // network.continueResponse(new ContinueResponseParameters(responseId).);
                     } catch (IOException e) {
@@ -139,10 +155,21 @@ public class Scroller implements WebDriverListener {
                                 new IOException("cause", e));
                     }
                 } else {
+                    if (requestUrl.startsWith("data:")) {
+                        // XXX should not be intercepted
+                        return;
+                    }
                     try {
                         network.continueRequest(new ContinueRequestParameters(responseId));
                     } catch (Exception ignored) {
-                        LOGGER.log(Level.SEVERE, "failed to send response for " + requestUrl, ignored);
+                        if (requestUrl.endsWith("/apple-touch-icon.png") || requestUrl.endsWith("/favicon.svg")) {
+                            // these often cause errors so ignore them, it does not impact Jenkins or the browser based
+                            // testing.
+                            return;
+                        }
+                        // TODO exceptions here seem unusual, but they regularly occur with no side effect
+                        // all of the form `"no such request","message":"Blocked request with id <UUID> not found`
+                        LOGGER.log(Level.WARNING, ignored, () -> "failed to send response for " + requestUrl);
                     }
                 }
             }
