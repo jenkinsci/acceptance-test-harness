@@ -2,17 +2,29 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.net.URI;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
-import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.bidi.module.Network;
+import org.openqa.selenium.bidi.network.AddInterceptParameters;
+import org.openqa.selenium.bidi.network.BytesValue;
+import org.openqa.selenium.bidi.network.ContinueRequestParameters;
+import org.openqa.selenium.bidi.network.Header;
+import org.openqa.selenium.bidi.network.InterceptPhase;
+import org.openqa.selenium.bidi.network.ProvideResponseParameters;
+import org.openqa.selenium.bidi.network.RequestData;
+import org.openqa.selenium.bidi.network.UrlPattern;
 import org.openqa.selenium.support.events.WebDriverListener;
 
 /**
@@ -82,20 +94,106 @@ public class Scroller implements WebDriverListener {
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
+
+        Network network = new Network(driver);
+        AddInterceptParameters p = new AddInterceptParameters(InterceptPhase.BEFORE_REQUEST_SENT);
+        /**
+         * this currently does not work
+         * https://seleniumhq.slack.com/archives/C0ABCS03F/p1779116208958639
+         * https://github.com/w3c/webdriver-bidi/pull/1106
+         */
+        UrlPattern up = new UrlPattern();
+        up.protocol("http");
+        // up.pathname("/\\*context/static/\\*/{\\*:filename\\}.scss");
+        // up.pathname("\\(.\\*.css\\)");
+        p.urlPattern(up);
+
+        // https://urlpattern.spec.whatwg.org/
+        // p.urlStringPattern("http\\{s\\}?://domain.com/foo.scss");
+
+        String id = network.addIntercept(p);
+        network.onBeforeRequestSent(request -> {
+            final String responseId = request.getRequest().getRequestId();
+            final RequestData requestData = request.getRequest();
+            // if (responseDetails.getIntercepts().contains(id)) {
+            String requestUrl = requestData.getUrl();
+            if (requestUrl.endsWith(".css") && requestUrl.contains("/static/") && requestUrl.startsWith("http")) {
+                // smells like a static jenkins css file...
+                try {
+                    // extract a cookie for authentication
+                    String cookie = extractCookieHeader(requestData);
+
+                    String css;
+                    try (HttpClient client = HttpClient.newHttpClient()) {
+                        HttpRequest clientRequest = HttpRequest.newBuilder()
+                                .uri(URI.create(requestUrl))
+                                .header("Cookie", cookie)
+                                .build();
+                        HttpResponse<String> clientResponse =
+                                client.send(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
+                        css = clientResponse.body();
+                    }
+
+                    String patchedCSS = removeStickyPositioning(css);
+                    LOGGER.warning(() -> "replaced sticky ***before:***\n" + css + "\n***after:***\n" + patchedCSS);
+
+                    ProvideResponseParameters responseParams = new ProvideResponseParameters(responseId);
+                    responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
+                    // skip headers...
+                    /*
+                    List<Header> headers = new ArrayList<>();
+                    for (Map.Entry<String, List<String>> entry :
+                            con.getHeaderFields().entrySet()) {
+                        if ("Content-Length".equalsIgnoreCase(entry.getKey())) {
+                            // we are manipluating the body ignore the size.
+                            continue;
+                        }
+                        for (String v : entry.getValue()) {
+                            if (entry.getKey() == null) {
+                                LOGGER.warning(() -> "attempted to add null header with value '" + v + "'");
+                                continue;
+                            }
+                            LOGGER.warning(() -> "adding header '" + entry.getKey() + "' with value '" + v + "'");
+                            headers.add(new Header(entry.getKey(), new BytesValue(BytesValue.Type.STRING, v)));
+                        }
+                    }
+                    responseParams.headers(headers);
+                    */
+                    // TODO add expiry / last modified for caching...?
+                    responseParams.statusCode(200);
+                    network.provideResponse(responseParams);
+                    // network.continueResponse(new ContinueResponseParameters(responseId).);
+                } catch (IOException e) {
+                    throw new UncheckedIOException("Could not recieve CSS from Jenkins at URL:" + requestUrl, e);
+                } catch (InterruptedException e) {
+                    throw new UncheckedIOException(
+                            "Could not recieve CSS from Jenkins at URL: " + requestUrl, new IOException("cause", e));
+                }
+
+            } else {
+                try {
+                    network.continueRequest(new ContinueRequestParameters(responseId));
+                } catch (Exception ignored) {
+                }
+            }
+        });
     }
 
     @Override
     public void afterGet(WebDriver driver, String url) {
+        // LOGGER.warning(() -> "afterGet, driver.getCurrentUrl()=" + driver.getCurrentUrl() + " url="+url);
         disableStickyElementsIgnoringDialogs();
     }
 
     @Override
     public void afterTo(Navigation navigation, String url) {
+        // LOGGER.warning(() -> "afterTo, navigation=" + navigation + " url="+url);
         disableStickyElementsIgnoringDialogs();
     }
 
     @Override
     public void afterTo(Navigation navigation, URL url) {
+        // LOGGER.warning(() -> "afterTo, navigation=" + driver.getCurrentUrl() + " url="+url);
         disableStickyElementsIgnoringDialogs();
     }
 
@@ -133,6 +231,7 @@ public class Scroller implements WebDriverListener {
      * nature of these elements meaning that they'll no longer appear on top of other elements.
      */
     public void disableStickyElements() {
+        /*
         final JavascriptExecutor executor = (JavascriptExecutor) driver;
         try {
             executor.executeScript(disableStickyElementsJs);
@@ -143,5 +242,26 @@ public class Scroller implements WebDriverListener {
                     "Failed to disable stick elements, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown",
                     unexpected);
         }
+        */
+    }
+
+    private String extractCookieHeader(RequestData requestData) {
+        for (Header h : requestData.getHeaders()) {
+            if ("Cookie".equalsIgnoreCase(h.getName())) {
+                BytesValue v = h.getValue();
+
+                switch (v.getType()) {
+                    case BytesValue.Type.STRING:
+                        return v.getValue();
+                    default:
+                        throw new IllegalStateException("expected a String header for cookie, but got: " + v.getType());
+                }
+            }
+        }
+        return null;
+    }
+
+    private String removeStickyPositioning(String css) {
+        return css.replaceAll("position:\\s*sticky", "position: relative");
     }
 }
