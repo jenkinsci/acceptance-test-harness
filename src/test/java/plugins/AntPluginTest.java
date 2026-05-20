@@ -114,7 +114,7 @@ public class AntPluginTest extends AbstractJUnitTest {
         step.targets.set("-version");
         job.save();
 
-        String expectedVersion = "1.10.15"; // this is the version installed in the java container by ubuntu resolute
+        String expectedVersion = "1.10.15"; // this is the version installed in the java container by Ubuntu resolute
         job.startBuild().shouldSucceed().shouldContainsConsoleOutput(Pattern.quote(expectedVersion));
     }
 
@@ -128,7 +128,7 @@ public class AntPluginTest extends AbstractJUnitTest {
                 + "}";
         String antHome = setUpAntInstallation();
 
-        String expectedVersion = "1.10.15"; // this is the version installed in the java container by ubuntu resolute
+        String expectedVersion = "1.10.15"; // this is the version installed in the java container by Ubuntu resolute
 
         WorkflowJob workflowJob = jenkins.jobs.create(WorkflowJob.class);
         workflowJob.script.set(script_pipeline_ant);
