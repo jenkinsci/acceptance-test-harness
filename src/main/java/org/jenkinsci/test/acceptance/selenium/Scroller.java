@@ -19,6 +19,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.bidi.module.Network;
+import org.openqa.selenium.bidi.module.Script;
 import org.openqa.selenium.bidi.network.AddInterceptParameters;
 import org.openqa.selenium.bidi.network.BytesValue;
 import org.openqa.selenium.bidi.network.ContinueRequestParameters;
@@ -95,6 +96,16 @@ public class Scroller implements WebDriverListener {
         } catch (IOException e) {
             throw new Error("Failed to load the JavaScript file", e);
         }
+
+        Script script = new Script(driver);
+        script.addPreloadScript("""
+                () => {{
+                    document.addEventListener('DOMContentLoaded', function() {
+                        console.debug('setting scrolling style to initial');
+                        document.querySelector("html").style.scrollBehavior = "initial";
+                    });
+                }}
+                """);
 
         Network network = new Network(driver);
         AddInterceptParameters p = new AddInterceptParameters(InterceptPhase.BEFORE_REQUEST_SENT);
