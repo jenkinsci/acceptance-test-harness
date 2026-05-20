@@ -2,7 +2,7 @@
 services:
   init_video:
     container_name: init_video
-    image: ubuntu:noble
+    image: ubuntu:resolute
     command: >
       sh -c 'chown 1000:1000 /videos && chmod 0777 /videos'
     user: root

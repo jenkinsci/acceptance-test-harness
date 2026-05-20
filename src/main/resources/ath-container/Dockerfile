@@ -2,7 +2,7 @@
 #
 # see docs/DOCKER.md for usage
 
-FROM ubuntu:noble
+FROM ubuntu:resolute
 
 ENV LANG=C.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
