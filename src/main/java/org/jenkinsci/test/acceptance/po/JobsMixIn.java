@@ -86,14 +86,13 @@ public class JobsMixIn extends MixIn {
     public void copy(String from, String to) {
         visit("newJob");
 
-        // Newer versions of Jenkins have an additional radio before the 'from' input is available, so click it
-        all(by.radioButton("Duplicate an existing item")).forEach(WebElement::click);
-
-        fillIn("from", from);
-        // There is a javascript magic bound to loss of focus on 'from' field that is a pain to duplicate through
-        // selenium
-        // explicitly. Here, it is done so by setting 'to' afterwards.
         fillIn("name", to);
+
+        find(by.radioButton("Duplicate an existing item")).click();
+        fillIn("from", from);
+
+        // do not wait for the OK button to be enabled
+        // some tests check that this fails due to the job already existing.
         clickButton("OK");
     }
 
