@@ -23,14 +23,18 @@
  */
 package plugins;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Map;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.test.acceptance.AbstractPipelineTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
 import org.jenkinsci.test.acceptance.plugins.junit.TestReport;
 import org.jenkinsci.test.acceptance.plugins.maven.MavenInstallation;
 import org.jenkinsci.test.acceptance.po.Build;
+import org.jenkinsci.test.acceptance.po.StringParameter;
 import org.jenkinsci.test.acceptance.po.WorkflowJob;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +62,20 @@ public class PipelineTest extends AbstractPipelineTest {
 
         this.assertTestResult(b);
         this.assertJavadoc(job);
+    }
+
+    @Test
+    public void testParameterizedPipeline() {
+        final WorkflowJob job = createPipelineJobWithScript("node {\n"
+                + "  echo \"param is ${params.MY_PARAM}\"\n"
+                + "}");
+
+        job.configure();
+        job.addParameter(StringParameter.class).setName("MY_PARAM").setDefault("default-val");
+        job.save();
+
+        final Build b = job.startBuild(Map.of("MY_PARAM", "custom-val")).shouldSucceed();
+        assertThat(b.getConsole(), containsString("param is custom-val"));
     }
 
     @Override
