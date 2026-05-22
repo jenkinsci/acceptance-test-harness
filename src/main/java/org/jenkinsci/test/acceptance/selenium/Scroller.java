@@ -10,6 +10,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -137,11 +138,11 @@ public class Scroller implements WebDriverListener {
                             lastModified = clientResponse
                                     .headers()
                                     .firstValue("Expires")
-                                    .get();
+                                    .orElse(null);
                             expires = clientResponse
                                     .headers()
                                     .firstValue("Last-Modified")
-                                    .get();
+                                    .orElse(null);
                         }
 
                         String patchedCSS = removeStickyPositioning(css);
@@ -152,10 +153,16 @@ public class Scroller implements WebDriverListener {
                         responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
 
                         responseParams.statusCode(200);
-                        responseParams.headers(List.of(
-                                new Header("Content-Type", new BytesValue(BytesValue.Type.STRING, "text/css")),
-                                new Header("Last-Modified", new BytesValue(BytesValue.Type.STRING, lastModified)),
-                                new Header("Expires", new BytesValue(BytesValue.Type.STRING, expires))));
+                        List<Header> headers = new ArrayList<>();
+                        headers.add(new Header("Content-Type", new BytesValue(BytesValue.Type.STRING, "text/css")));
+                        if (lastModified != null) {
+                            headers.add(
+                                    new Header("Last-Modified", new BytesValue(BytesValue.Type.STRING, lastModified)));
+                        }
+                        if (expires != null) {
+                            headers.add(new Header("Expires", new BytesValue(BytesValue.Type.STRING, expires)));
+                        }
+                        responseParams.headers(headers);
                         network.provideResponse(responseParams);
                         // network.continueResponse(new ContinueResponseParameters(responseId).);
                     } catch (IOException e) {
