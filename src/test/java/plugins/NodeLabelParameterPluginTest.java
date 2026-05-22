@@ -33,7 +33,10 @@ import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.pagefactory.ByChained;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 @WithPlugins({"command-launcher", "nodelabelparameter"})
 public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
@@ -238,11 +241,14 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(j.getLastBuild().waitUntilFinished().getNumber(), is(equalTo(1)));
         assertThat(s1.getBuildHistory().getBuildsOf(j), contains(b));
 
-        try {
-            assertThat(j.open(), Matchers.hasContent(s2.getName() + "\nis offline"));
-        } catch (AssertionError e) {
-            assertThat(j.open(), Matchers.hasContent(s2.getName() + " is offline"));
-        }
+        j.open();
+        // the build executor widget is asynchronously loaded/populated.
+        By by = new ByChained(By.className("app-builds-container"), By.className("jenkins-spinner"));
+        waitFor(driver)
+                .withMessage("waiting for build widget to load")
+                .until(ExpectedConditions.invisibilityOfElementLocated(by));
+
+        assertThat(driver, Matchers.hasContent(s2.getName() + "\nis offline"));
 
         // bring second slave online again
         s2.markOnline();
