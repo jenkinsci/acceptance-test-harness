@@ -66,9 +66,8 @@ public class PipelineTest extends AbstractPipelineTest {
 
     @Test
     public void testParameterizedPipeline() {
-        final WorkflowJob job = createPipelineJobWithScript("node {\n"
-                + "  echo \"param is ${params.MY_PARAM}\"\n"
-                + "}");
+        final WorkflowJob job =
+                createPipelineJobWithScript("node {\n" + "  echo \"param is ${params.MY_PARAM}\"\n" + "}");
 
         job.configure();
         job.addParameter(StringParameter.class).setName("MY_PARAM").setDefault("default-val");
