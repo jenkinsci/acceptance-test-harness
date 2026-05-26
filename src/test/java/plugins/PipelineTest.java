@@ -47,7 +47,6 @@ import org.junit.Test;
  * 4- Assert results have been collected
  *
  */
-@WithPlugins({"git", "junit", "javadoc"})
 public class PipelineTest extends AbstractPipelineTest {
 
     @Before
@@ -56,6 +55,7 @@ public class PipelineTest extends AbstractPipelineTest {
     }
 
     @Test
+    @WithPlugins({"git", "junit", "javadoc"})
     public void testCompletePipeline() {
         final WorkflowJob job = createPipelineJobWithScript(scriptForPipeline());
         final Build b = job.startBuild().shouldBeUnstable(); // Successful build with test failures
@@ -66,8 +66,9 @@ public class PipelineTest extends AbstractPipelineTest {
 
     @Test
     public void testParameterizedPipeline() {
-        final WorkflowJob job =
-                createPipelineJobWithScript("node {\n" + "  echo \"param is ${params.MY_PARAM}\"\n" + "}");
+        final WorkflowJob job = createPipelineJobWithScript("""
+                echo "param is ${params.MY_PARAM}"
+                """);
 
         job.configure();
         job.addParameter(StringParameter.class).setName("MY_PARAM").setDefault("default-val");
