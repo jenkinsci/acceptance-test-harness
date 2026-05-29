@@ -18,6 +18,6 @@ public class SnippetGeneratorTest extends AbstractJUnitTest {
         snippetGenerator.open();
         ArtifactArchiver aa = snippetGenerator.selectStep(ArtifactArchiver.class);
         aa.includes("*.bin");
-assertThat(snippetGenerator.generateScript(), is("archiveArtifacts artifacts: '*.bin', followSymlinks: false"));
+        assertThat(snippetGenerator.generateScript(), is("archiveArtifacts artifacts: '*.bin', followSymlinks: false"));
     }
 }
