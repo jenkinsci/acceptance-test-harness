@@ -3,7 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 /**
  * @author Kohsuke Kawaguchi
  */
-@Describable("Archive the artifacts")
+@Describable({"Archive the artifacts", "archiveArtifacts: Archive the artifacts"})
 public class ArtifactArchiver extends AbstractStep implements PostBuildStep {
     public ArtifactArchiver(Job parent, String path) {
         super(parent, path);

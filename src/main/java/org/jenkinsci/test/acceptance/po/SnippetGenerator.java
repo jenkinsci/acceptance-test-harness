@@ -25,6 +25,11 @@ public class SnippetGenerator extends PageObject {
         return (WorkflowJob) super.getContext();
     }
 
+    public <T extends Step> T selectStep(Class<T> stepDescriptor) {
+        control("/").select(stepDescriptor);
+        return newInstance(stepDescriptor, getContext(), "/prototype");
+    }
+
     /**
      * Generates the sample pipeline script.
      *
