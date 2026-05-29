@@ -515,9 +515,9 @@ public class Job extends TopLevelItem {
      */
     public void waitForBuildWidgetToLoad() {
         // the builds widget is asynchronously loaded/populated.
-        By by = new ByChained(By.className("app-builds-container"), By.className("jenkins-spinner"));
+        By spinnerLocator = new ByChained(By.className("app-builds-container"), By.className("jenkins-spinner"));
         waitFor(driver)
                 .withMessage("waiting for build widget to load")
-                .until(ExpectedConditions.invisibilityOfElementLocated(by));
+                .until(ExpectedConditions.invisibilityOfElementLocated(spinnerLocator));
     }
 }
