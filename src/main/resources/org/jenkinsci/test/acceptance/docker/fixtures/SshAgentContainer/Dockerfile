@@ -4,7 +4,7 @@
 # Runs sshd and allow the 'test' user to login
 #
 
-FROM ubuntu:noble
+FROM ubuntu:resolute
 
 # install SSHD
 RUN apt-get update -y && \

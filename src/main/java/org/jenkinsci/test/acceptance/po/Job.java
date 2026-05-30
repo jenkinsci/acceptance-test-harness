@@ -514,10 +514,10 @@ public class Job extends TopLevelItem {
      * Population is defined as the initial async load has completed, the widget once loaded may or may not contain any build.
      */
     public void waitForBuildWidgetToLoad() {
-        // the build executor widget is asynchronously loaded/populated.
-        By by = new ByChained(By.className("app-builds-container"), By.className("jenkins-spinner"));
+        // the builds widget is asynchronously loaded/populated.
+        By spinnerLocator = new ByChained(By.className("app-builds-container"), By.className("jenkins-spinner"));
         waitFor(driver)
                 .withMessage("waiting for build widget to load")
-                .until(ExpectedConditions.invisibilityOfElementLocated(by));
+                .until(ExpectedConditions.invisibilityOfElementLocated(spinnerLocator));
     }
 }
