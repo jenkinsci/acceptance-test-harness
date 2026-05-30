@@ -27,16 +27,14 @@ import org.jenkinsci.test.acceptance.plugins.textfinder.TextFinderPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.jvnet.hudson.test.Issue;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.pagefactory.ByChained;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 @WithPlugins({"command-launcher", "nodelabelparameter"})
 public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
@@ -242,11 +240,7 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(s1.getBuildHistory().getBuildsOf(j), contains(b));
 
         j.open();
-        // the build executor widget is asynchronously loaded/populated.
-        By by = new ByChained(By.className("app-builds-container"), By.className("jenkins-spinner"));
-        waitFor(driver)
-                .withMessage("waiting for build widget to load")
-                .until(ExpectedConditions.invisibilityOfElementLocated(by));
+        j.waitForBuildWidgetToLoad();
 
         assertThat(driver, Matchers.hasContent(s2.getName() + "\nis offline"));
 
@@ -552,11 +546,9 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     private String getPendingBuildText(Build build) {
         // ensure to be on the job's page otherwise we do not have the build history summary
         // to get their content
-        build.job.open();
-
-        // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
-        // so if the original response doesn't contain it, we have to wait for the refresh of the build history.
-        // so give it a bigger wait.
+        Job j = build.job;
+        j.open();
+        j.waitForBuildWidgetToLoad();
         return find(by.css("#buildHistoryPage")).getText();
     }
 }
