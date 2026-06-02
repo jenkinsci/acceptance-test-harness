@@ -72,11 +72,11 @@ import org.openqa.selenium.bidi.network.RequestData;
  * <p>
  * This work around simply replaces any occurence of {@code position:\\s*sticky} with {@code position: relative}
  */
-public class StickyElementIntercepter {
+public class StickyElementInterceptor {
 
-    private final Logger LOGGER = Logger.getLogger(StickyElementIntercepter.class.getName());
+    private final Logger LOGGER = Logger.getLogger(StickyElementInterceptor.class.getName());
 
-    public StickyElementIntercepter(WebDriver driver) {
+    public StickyElementInterceptor(WebDriver driver) {
 
         @SuppressWarnings("resource")
         Network network = new Network(driver);
@@ -107,11 +107,11 @@ public class StickyElementIntercepter {
                             HttpResponse<String> clientResponse =
                                     client.send(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
                             css = clientResponse.body();
-                            lastModified = clientResponse
+                            expires = clientResponse
                                     .headers()
                                     .firstValue("Expires")
                                     .orElse(null);
-                            expires = clientResponse
+                             lastModified= clientResponse
                                     .headers()
                                     .firstValue("Last-Modified")
                                     .orElse(null);
@@ -137,6 +137,7 @@ public class StickyElementIntercepter {
                     } catch (IOException e) {
                         throw new UncheckedIOException("Could not retrieve CSS from Jenkins at URL:" + requestUrl, e);
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         throw new UncheckedIOException(
                                 "Could not retrieve CSS from Jenkins at URL: " + requestUrl,
                                 new IOException("cause", e));

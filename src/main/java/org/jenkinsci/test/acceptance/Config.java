@@ -37,7 +37,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
 import org.jenkinsci.test.acceptance.selenium.LogEntryHandler;
-import org.jenkinsci.test.acceptance.selenium.StickyElementIntercepter;
+import org.jenkinsci.test.acceptance.selenium.StickyElementInterceptor;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
@@ -374,7 +374,7 @@ public class Config extends AbstractModule {
         if (oldSize.height < 1090 || oldSize.width < 1680) {
             driver.manage().window().setSize(new Dimension(1680, 1090));
         }
-        StickyElementIntercepter scroller = new StickyElementIntercepter(driver);
+        StickyElementInterceptor scroller = new StickyElementInterceptor(driver);
 
         try {
             driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(PAGE_LOAD_TIMEOUT)));
