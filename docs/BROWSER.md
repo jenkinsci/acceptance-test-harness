@@ -7,7 +7,6 @@ The following values are available:
  * `firefox` (default)
         _(if set the binary at `FIREFOX_BIN` will be used to launch firefox)_
  * `chrome`
- * `safari`
  * `saucelabs`
  * `remote-webdriver-firefox`
         _(Requires `REMOTE_WEBDRIVER_URL` to be set to the url of the remote,
@@ -22,13 +21,13 @@ The following values are available:
  * `firefox-container` and `chrome-container`
         Running the browser inside selenium provided per-test container.
 
-For example, to run tests with Safari, you'd execute:
+For example, to run tests with firefox, (assuming you have `firefox` and `geckdriver` installed) you'd execute:
 
-    export BROWSER=safari
+    export BROWSER=firefox
     mvn install
 
     # or more concisely
-    BROWSER=safari mvn install
+    BROWSER=firefox mvn install
 
 See `Config.java` for how the browser is selected.
 

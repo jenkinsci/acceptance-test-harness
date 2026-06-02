@@ -69,8 +69,6 @@ import org.openqa.selenium.firefox.GeckoDriverService;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.safari.SafariDriver;
-import org.openqa.selenium.safari.SafariOptions;
 
 /**
  * The configuration for running tests.
@@ -123,14 +121,13 @@ public class Config extends AbstractModule {
                         cleaner, "selenium/standalone-chrome:4.35.0", buildChromeOptions(testName));
             case "chrome":
                 return new ChromeDriver(buildChromeOptions(testName));
-            case "safari":
-                return new SafariDriver(buildSafariOptions(testName));
             case "saucelabs":
             case "saucelabs-firefox":
                 FirefoxOptions caps = new FirefoxOptions();
                 caps.setCapability("version", "29");
                 caps.setCapability("platform", "Windows 7");
                 caps.setCapability("name", testName.get());
+                caps.enableBiDi();
                 if (HarRecorder.isCaptureHarEnabled()) {
                     caps.setCapability(CapabilityType.PROXY, createSeleniumProxy(testName.get()));
                 }
@@ -213,22 +210,6 @@ public class Config extends AbstractModule {
         chromeOptions.setCapability(
                 "se:recordVideo", TestRecorderRule.isRecorderEnabled() && System.getenv("VIDEO_FOLDER") != null);
         return chromeOptions;
-    }
-
-    private SafariOptions buildSafariOptions(TestName testName) throws IOException {
-        SafariOptions safariOptions = new SafariOptions();
-        safariOptions.setImplicitWaitTimeout(Duration.ofSeconds(IMPLICIT_WAIT_TIMEOUT));
-        safariOptions.setPageLoadTimeout(Duration.ofSeconds(PAGE_LOAD_TIMEOUT));
-
-        // no bidi support :(
-        // safariOptions.enableBiDi();
-        if (HarRecorder.isCaptureHarEnabled()) {
-            safariOptions.setProxy(createSeleniumProxy(testName.get()));
-        }
-        safariOptions.setCapability("se:name", testName.get());
-        safariOptions.setCapability(
-                "se:recordVideo", TestRecorderRule.isRecorderEnabled() && System.getenv("VIDEO_FOLDER") != null);
-        return safariOptions;
     }
 
     private WebDriver createContainerWebDriver(TestCleaner cleaner, String image, MutableCapabilities capabilities)
