@@ -1,9 +1,12 @@
 package org.jenkinsci.test.acceptance.plugins.junit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.jenkinsci.test.acceptance.po.Action;
 import org.jenkinsci.test.acceptance.po.ActionPageObject;
@@ -48,23 +51,28 @@ public class TestReport extends Action {
         // that at least one of the pages have the requested content
 
         final List<WebElement> rows = all(by.xpath("//tr[@data='%s']", test));
+        assertThat("No test found with name " + test, rows, not(empty()));
 
-        boolean found = false;
+        List<String> contents = new ArrayList<>();
         for (WebElement row : rows) {
             // this is a javascript expand
             WebElement link = row.findElement(By.tagName("a"));
             link.click();
             WebElement details =
                     waitFor(row).ignoring(NoSuchElementException.class).until(TestReport::getTestDetailsRow);
-            found = details.getText().contains(content);
+            String c = details.getText();
             link.click(); // hide the content
             waitFor(details).until(CapybaraPortingLayerImpl::isStale);
-            if (found) {
-                break;
+            if (c.contains(content)) {
+                // we found what we were looking for; return
+                return;
             }
+            // not our needle, save for later diagnostics
+            contents.add(c);
         }
-        assertThat("No test found with name " + test, rows, not(empty()));
-        assertThat("No test found with given content", found);
+        // if we got here we know that we have failed.
+        // but still assert so that we have a better idea of what we did find
+        assertThat("No test found with given content", contents, hasItem(containsString(content)));
     }
 
     @Override
