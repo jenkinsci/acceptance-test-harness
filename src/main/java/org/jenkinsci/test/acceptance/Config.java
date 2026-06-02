@@ -37,7 +37,7 @@ import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
 import org.jenkinsci.test.acceptance.selenium.LogEntryHandler;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
+import org.jenkinsci.test.acceptance.selenium.StickyElementIntercepter;
 import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.jenkinsci.test.acceptance.server.PooledJenkinsController;
 import org.jenkinsci.test.acceptance.slave.LocalSlaveProvider;
@@ -71,7 +71,6 @@ import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
-import org.openqa.selenium.support.events.EventFiringDecorator;
 
 /**
  * The configuration for running tests.
@@ -357,9 +356,9 @@ public class Config extends AbstractModule {
     @Provides
     @TestScope
     public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
-        WebDriver base = createWebDriver(cleaner, testName);
+        WebDriver driver = createWebDriver(cleaner, testName);
 
-        if (base instanceof RemoteWebDriver rwd) {
+        if (driver instanceof RemoteWebDriver rwd) {
             rwd.script()
                     .addConsoleMessageHandler(new LogEntryHandler<>(
                             System.getenv("BROWSER_CONSOLE_LEVEL") != null
@@ -371,20 +370,18 @@ public class Config extends AbstractModule {
 
         // Make sure the window has minimal resolution set, even when out of the visible screen.
         // Note - not maximizing here any more because that doesn't do anything.
-        Dimension oldSize = base.manage().window().getSize();
+        Dimension oldSize = driver.manage().window().getSize();
         if (oldSize.height < 1090 || oldSize.width < 1680) {
-            base.manage().window().setSize(new Dimension(1680, 1090));
+            driver.manage().window().setSize(new Dimension(1680, 1090));
         }
-        Scroller scroller = new Scroller(base);
-        final EventFiringDecorator<WebDriver> decorator = new EventFiringDecorator<>(scroller);
-        WebDriver d = decorator.decorate(base);
+        StickyElementIntercepter scroller = new StickyElementIntercepter(driver);
 
         try {
-            d.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(PAGE_LOAD_TIMEOUT)));
-            d.manage().timeouts().implicitlyWait(Duration.ofMillis(time.seconds(IMPLICIT_WAIT_TIMEOUT)));
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(PAGE_LOAD_TIMEOUT)));
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(time.seconds(IMPLICIT_WAIT_TIMEOUT)));
         } catch (UnsupportedCommandException e) {
             // sauce labs RemoteWebDriver doesn't support this
-            LOGGER.info(base + " doesn't support page load timeout");
+            LOGGER.info(driver + " doesn't support page load timeout");
         }
         String testNameStr = testName.get();
         cleaner.addTask(new Statement() {
@@ -393,7 +390,7 @@ public class Config extends AbstractModule {
                 Throwable error = null;
 
                 try {
-                    d.quit();
+                    driver.quit();
                 } catch (Throwable t) {
                     error = t;
                 }
@@ -484,7 +481,7 @@ public class Config extends AbstractModule {
                 return "Close WebDriver after test";
             }
         });
-        return d;
+        return driver;
     }
 
     @Provides

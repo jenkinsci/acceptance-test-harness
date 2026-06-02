@@ -2,10 +2,8 @@ package org.jenkinsci.test.acceptance.selenium;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -13,15 +11,10 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.Navigation;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.bidi.module.Network;
-import org.openqa.selenium.bidi.module.Script;
 import org.openqa.selenium.bidi.network.AddInterceptParameters;
 import org.openqa.selenium.bidi.network.BytesValue;
 import org.openqa.selenium.bidi.network.ContinueRequestParameters;
@@ -29,18 +22,16 @@ import org.openqa.selenium.bidi.network.Header;
 import org.openqa.selenium.bidi.network.InterceptPhase;
 import org.openqa.selenium.bidi.network.ProvideResponseParameters;
 import org.openqa.selenium.bidi.network.RequestData;
-import org.openqa.selenium.support.events.WebDriverListener;
 
 /**
- * Automatically scrolls the element into view.
- *
+ * Request intercepter that updates Jenkins CSS styles that use sticky elements.
+ * Jenkins' use of sticky elements often either prevents an element from being able to be scrolled into view, or can cause the click to go to a different element.
  * <p>
  * Especially in the configuration page, the floating DIVs at the top and
  * the bottom of the pages can interfere with WebDriver trying to click
  * the elements underneath it.
  * <p>
- * At least on Chrome (and possibly in other browsers), trying to interact
- * with an element when it's below another element causes the following error:
+ * Trying to interact with an element when it's below another element causes the following error:
  *
  * <pre>
  * {@code
@@ -79,36 +70,15 @@ import org.openqa.selenium.support.events.WebDriverListener;
  * </pre>
  *
  * <p>
- * This work around simply tries to scroll the element into a view before we interact with this.
- * Originally developed in Ruby version of selenium-tests in {@code lib/jenkins/capybara.rb}.
- *
- * @author ogondza
- * @author Kohsuke Kawaguchi
+ * This work around simply replaces any occurence of {@code position:\\s*sticky} with {@code position: relative}
  */
-public class Scroller implements WebDriverListener {
-    private final Logger LOGGER = Logger.getLogger(Scroller.class.getName());
+public class StickyElementIntercepter {
 
-    private final String disableStickyElementsJs;
-    private final WebDriver driver;
+    private final Logger LOGGER = Logger.getLogger(StickyElementIntercepter.class.getName());
 
-    public Scroller(WebDriver driver) {
-        this.driver = driver;
-        try (InputStream sticky = getClass().getResourceAsStream("disable-sticky-elements.js")) {
-            disableStickyElementsJs = new String(sticky.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new Error("Failed to load the JavaScript file", e);
-        }
+    public StickyElementIntercepter(WebDriver driver) {
 
-        Script script = new Script(driver);
-        script.addPreloadScript("""
-                () => {{
-                    document.addEventListener('DOMContentLoaded', function() {
-                        console.debug('setting scrolling style to initial');
-                        document.querySelector("html").style.scrollBehavior = "initial";
-                    });
-                }}
-                """);
-
+        @SuppressWarnings("resource")
         Network network = new Network(driver);
         AddInterceptParameters p = new AddInterceptParameters(InterceptPhase.BEFORE_REQUEST_SENT);
         String id = network.addIntercept(p);
@@ -197,72 +167,11 @@ public class Scroller implements WebDriverListener {
         });
     }
 
-    @Override
-    public void afterGet(WebDriver driver, String url) {
-        // LOGGER.warning(() -> "afterGet, driver.getCurrentUrl()=" + driver.getCurrentUrl() + " url="+url);
-        disableStickyElementsIgnoringDialogs();
-    }
-
-    @Override
-    public void afterTo(Navigation navigation, String url) {
-        // LOGGER.warning(() -> "afterTo, navigation=" + navigation + " url="+url);
-        disableStickyElementsIgnoringDialogs();
-    }
-
-    @Override
-    public void afterTo(Navigation navigation, URL url) {
-        // LOGGER.warning(() -> "afterTo, navigation=" + driver.getCurrentUrl() + " url="+url);
-        disableStickyElementsIgnoringDialogs();
-    }
-
-    private String preClickURL;
-
-    @Override
-    public void beforeClick(WebElement element) {
-        preClickURL = driver.getCurrentUrl();
-        WebDriverListener.super.beforeClick(element);
-    }
-
-    @Override
-    public void afterClick(WebElement element) {
-        if (!Objects.equals(preClickURL, driver.getCurrentUrl())) {
-            // we have performed navigation via a click
-            disableStickyElements();
-        }
-        preClickURL = null;
-    }
-
-    private void disableStickyElementsIgnoringDialogs() {
-        try {
-            // if there's an alert we can't run JavaScript
-            // if we catch the exception from running JavaScript then FormValidationTest hangs
-            // not the nicest hack, but it works
-            driver.switchTo().alert();
-        } catch (NoAlertPresentException e) {
-            disableStickyElements();
-        }
-    }
-
     /**
-     * Sometimes sticky elements (elements that are fixed in position on the page, such as the bottom app bar),
-     * appear on top of other elements, making those elements inaccessible. This method removes the sticky
-     * nature of these elements meaning that they'll no longer appear on top of other elements.
+     *
+     * @param requestData
+     * @return the raw cookie or {@code null} if the request was cookie-less.
      */
-    public void disableStickyElements() {
-        /*
-        final JavascriptExecutor executor = (JavascriptExecutor) driver;
-        try {
-            executor.executeScript(disableStickyElementsJs);
-        } catch (UnhandledAlertException unexpected) {
-            // if we're in the process of navigating but an alert is in the way we can't run JS
-            LOGGER.log(
-                    Level.WARNING,
-                    "Failed to disable stick elements, letting the test to continue anyways, but \"Element is not clickable\" error will likely be thrown",
-                    unexpected);
-        }
-        */
-    }
-
     @CheckForNull
     private String extractCookieHeader(RequestData requestData) {
         for (Header h : requestData.getHeaders()) {
@@ -280,6 +189,9 @@ public class Scroller implements WebDriverListener {
         return null;
     }
 
+    /**
+     * Update the CSS to make all {@code sticky} css positions {code relative}
+     */
     private String removeStickyPositioning(String css) {
         return css.replaceAll("position:\\s*sticky", "position: relative");
     }

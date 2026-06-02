@@ -7,7 +7,6 @@ import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import java.net.URL;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 
 public class DomainPage extends ConfigurablePageObject {
 
