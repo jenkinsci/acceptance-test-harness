@@ -3,10 +3,10 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.common.base.Joiner;
 import java.time.Duration;
 import java.util.regex.Pattern;
-import org.openqa.selenium.NoSuchElementException;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -63,7 +63,7 @@ public class Slave extends Node {
                 .withMessage("waiting for initial log")
                 .withTimeout(Duration.ofSeconds(10))
                 .ignoring(NoSuchElementException.class)
-                .until(we -> we.findElement(by.css("div")));
+                .until(we -> !we.findElements(by.css("div")).isEmpty());
         return webElement.getText();
     }
 
