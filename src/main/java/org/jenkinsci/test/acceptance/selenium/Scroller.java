@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.selenium;
 
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -120,7 +121,7 @@ public class Scroller implements WebDriverListener {
                 if (requestUrl.endsWith(".css") && requestUrl.contains("/static/") && requestUrl.startsWith("http")) {
                     // smells like a static jenkins css file...
                     try {
-                        // extract a cookie for authentication
+                        // extract a potential cookie for authentication
                         String cookie = extractCookieHeader(requestData);
 
                         String css;
@@ -128,10 +129,12 @@ public class Scroller implements WebDriverListener {
                         String lastModified;
 
                         try (HttpClient client = HttpClient.newHttpClient()) {
-                            HttpRequest clientRequest = HttpRequest.newBuilder()
-                                    .uri(URI.create(requestUrl))
-                                    .header("Cookie", cookie)
-                                    .build();
+                            HttpRequest.Builder requestBuilder =
+                                    HttpRequest.newBuilder().uri(URI.create(requestUrl));
+                            if (cookie != null) {
+                                requestBuilder.header("Cookie", cookie);
+                            }
+                            HttpRequest clientRequest = requestBuilder.build();
                             HttpResponse<String> clientResponse =
                                     client.send(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
                             css = clientResponse.body();
@@ -260,6 +263,7 @@ public class Scroller implements WebDriverListener {
         */
     }
 
+    @CheckForNull
     private String extractCookieHeader(RequestData requestData) {
         for (Header h : requestData.getHeaders()) {
             if ("Cookie".equalsIgnoreCase(h.getName())) {
