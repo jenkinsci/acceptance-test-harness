@@ -1,9 +1,9 @@
 package org.jenkinsci.test.acceptance.plugins.junit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class TestReport extends Action {
             link.click(); // hide the content
             waitFor(details).until(CapybaraPortingLayerImpl::isStale);
             if (c.contains(content)) {
-                // we found what we where looking for return
+                // we found what we were looking for; return
                 return;
             }
             // not our needle, save for later diagnostics
@@ -72,7 +72,7 @@ public class TestReport extends Action {
         }
         // if we got here we know that we have failed.
         // but still assert so that we have a better idea of what we did find
-        assertThat("No test found with given content", contents, contains(containsString(content)));
+        assertThat("No test found with given content", contents, hasItem(containsString(content)));
     }
 
     @Override
