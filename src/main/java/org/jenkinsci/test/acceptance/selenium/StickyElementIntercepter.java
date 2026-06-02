@@ -85,7 +85,6 @@ public class StickyElementIntercepter {
         network.onBeforeRequestSent(request -> {
             final String responseId = request.getRequest().getRequestId();
             final RequestData requestData = request.getRequest();
-            // if (responseDetails.getIntercepts().contains(id)) {
             String requestUrl = requestData.getUrl();
             if (request.isBlocked() && request.getIntercepts().contains(id)) {
                 if (requestUrl.endsWith(".css") && requestUrl.contains("/static/") && requestUrl.startsWith("http")) {
@@ -119,8 +118,6 @@ public class StickyElementIntercepter {
                         }
 
                         String patchedCSS = removeStickyPositioning(css);
-                        // LOGGER.warning(() -> "replaced sticky ***before:***\n" + css + "\n***after:***\n" +
-                        // patchedCSS);
                         LOGGER.fine("filtering URL: " + requestUrl);
                         ProvideResponseParameters responseParams = new ProvideResponseParameters(responseId);
                         responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
@@ -137,12 +134,11 @@ public class StickyElementIntercepter {
                         }
                         responseParams.headers(headers);
                         network.provideResponse(responseParams);
-                        // network.continueResponse(new ContinueResponseParameters(responseId).);
                     } catch (IOException e) {
-                        throw new UncheckedIOException("Could not recieve CSS from Jenkins at URL:" + requestUrl, e);
+                        throw new UncheckedIOException("Could not retrieve CSS from Jenkins at URL:" + requestUrl, e);
                     } catch (InterruptedException e) {
                         throw new UncheckedIOException(
-                                "Could not recieve CSS from Jenkins at URL: " + requestUrl,
+                                "Could not retrieve CSS from Jenkins at URL: " + requestUrl,
                                 new IOException("cause", e));
                     }
                 } else {
@@ -153,9 +149,11 @@ public class StickyElementIntercepter {
                     try {
                         network.continueRequest(new ContinueRequestParameters(responseId));
                     } catch (Exception ignored) {
-                        if (requestUrl.endsWith("/apple-touch-icon.png") || requestUrl.endsWith("/favicon.svg")) {
-                            // these often cause errors so ignore them, it does not impact Jenkins or the browser based
-                            // testing.
+                        if (requestUrl.endsWith("/apple-touch-icon.png")
+                                || requestUrl.endsWith("/favicon.svg")
+                                || requestUrl.endsWith("/favicon-dark.ico")) {
+                            // these often cause errors so ignore them.
+                            // it does not impact Jenkins or the browser based testing.
                             return;
                         }
                         // TODO exceptions here seem unusual, but they regularly occur with no side effect
