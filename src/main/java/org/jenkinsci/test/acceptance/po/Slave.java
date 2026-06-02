@@ -52,7 +52,10 @@ public class Slave extends Node {
 
     public String getLog() {
         visit("log");
-        return find(by.css("pre#out")).getText();
+        // population of the log is asynchronous
+        // before population we just have the placeholder `<pre id="out"></pre>`
+        // after population we have an extra div with the content <pre id="out"><div>...</div></pre>
+        return find(by.css("pre#out div")).getText();
     }
 
     public boolean isOffline() {
