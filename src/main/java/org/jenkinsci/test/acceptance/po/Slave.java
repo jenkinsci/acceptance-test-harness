@@ -2,8 +2,8 @@ package org.jenkinsci.test.acceptance.po;
 
 import com.google.common.base.Joiner;
 import java.time.Duration;
-import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
+import org.openqa.selenium.NoSuchElementException;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
