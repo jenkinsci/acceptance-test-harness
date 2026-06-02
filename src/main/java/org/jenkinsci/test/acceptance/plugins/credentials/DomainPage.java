@@ -24,8 +24,6 @@ public class DomainPage extends ConfigurablePageObject {
     public Domain addDomain() {
         clickButton("Add domain");
 
-        new Scroller(driver).disableStickyElements();
-
         waitFor(by.xpath("//form[contains(@name, 'newDomain')]"), 10);
 
         String path = find(by.name("newDomain")).getAttribute("path");
@@ -43,8 +41,6 @@ public class DomainPage extends ConfigurablePageObject {
         visit(url);
 
         clickButton("Update domain");
-
-        new Scroller(driver).disableStickyElements();
 
         waitFor(by.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
         waitFor(SAVE_BUTTON, 5);

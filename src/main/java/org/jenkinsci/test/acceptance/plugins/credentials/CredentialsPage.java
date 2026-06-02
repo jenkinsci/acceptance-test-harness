@@ -54,7 +54,6 @@ public class CredentialsPage extends ConfigurablePageObject {
         WebElement nextButton = find(by.id("cr-dialog-next"));
         nextButton.click();
         waitFor(by.id("cr-dialog-submit"));
-        new Scroller(driver).disableStickyElements();
 
         // If the credential has a scope field, wait for the options to load.
         // Otherwise, sometimes the JS doesn't run fast enough to fill in the options
@@ -115,8 +114,6 @@ public class CredentialsPage extends ConfigurablePageObject {
         }
 
         clickButton("Update credential");
-
-        new Scroller(driver).disableStickyElements();
 
         waitFor(by.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
         waitFor(SAVE_BUTTON, 5);
