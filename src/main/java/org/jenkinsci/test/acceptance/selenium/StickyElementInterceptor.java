@@ -1,8 +1,6 @@
 package org.jenkinsci.test.acceptance.selenium;
 
 import edu.umd.cs.findbugs.annotations.CheckForNull;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,6 +14,7 @@ import java.util.logging.Logger;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.bidi.module.Network;
 import org.openqa.selenium.bidi.network.AddInterceptParameters;
+import org.openqa.selenium.bidi.network.BeforeRequestSent;
 import org.openqa.selenium.bidi.network.BytesValue;
 import org.openqa.selenium.bidi.network.ContinueRequestParameters;
 import org.openqa.selenium.bidi.network.Header;
@@ -72,106 +71,106 @@ import org.openqa.selenium.bidi.network.RequestData;
  * <p>
  * This work around simply replaces any occurence of {@code position:\\s*sticky} with {@code position: relative}
  */
-public class StickyElementInterceptor {
+public class StickyElementInterceptor implements AutoCloseable {
 
     private final Logger LOGGER = Logger.getLogger(StickyElementInterceptor.class.getName());
 
+    private final Network network;
+    private final String interceptId;
+    private final HttpClient client = HttpClient.newHttpClient();
+
     public StickyElementInterceptor(WebDriver driver) {
-
-        @SuppressWarnings("resource")
-        Network network = new Network(driver);
+        network = new Network(driver);
         AddInterceptParameters p = new AddInterceptParameters(InterceptPhase.BEFORE_REQUEST_SENT);
-        String id = network.addIntercept(p);
-        network.onBeforeRequestSent(request -> {
-            final String responseId = request.getRequest().getRequestId();
-            final RequestData requestData = request.getRequest();
-            String requestUrl = requestData.getUrl();
-            if (request.isBlocked() && request.getIntercepts().contains(id)) {
-                if (requestUrl.endsWith(".css") && requestUrl.contains("/static/") && requestUrl.startsWith("http")) {
-                    // smells like a static jenkins css file...
-                    try {
-                        // extract a potential cookie for authentication
-                        String cookie = extractCookieHeader(requestData);
+        interceptId = network.addIntercept(p);
+        network.onBeforeRequestSent(this::handleRequest);
+    }
 
-                        String css;
-                        String expires;
-                        String lastModified;
+    private void handleRequest(BeforeRequestSent request) {
+        final String requestId = request.getRequest().getRequestId();
+        final RequestData requestData = request.getRequest();
+        String requestUrl = requestData.getUrl();
+        if (request.isBlocked() && request.getIntercepts().contains(interceptId)) {
+            if (requestUrl.endsWith(".css") && requestUrl.contains("/static/") && requestUrl.startsWith("http")) {
+                // smells like a static jenkins css file...
+                // extract a potential cookie for authentication
+                String cookie = extractCookieHeader(requestData);
 
-                        try (HttpClient client = HttpClient.newHttpClient()) {
-                            HttpRequest.Builder requestBuilder =
-                                    HttpRequest.newBuilder().uri(URI.create(requestUrl));
-                            if (cookie != null) {
-                                requestBuilder.header("Cookie", cookie);
-                            }
-                            HttpRequest clientRequest = requestBuilder.build();
-                            HttpResponse<String> clientResponse =
-                                    client.send(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
-                            int responseCode = clientResponse.statusCode();
-                            if (responseCode != 200) {
-                                // if we do not have a 200 response then we would not have CSS to patch.
-                                // We could just allow the browser to make the request, but there is likely a bug
-                                // either here or in Jenkins, and so the exception would make the call to action obvious
-                                throw new IOException(
-                                        "Unexpected HTTP " + responseCode + " fetching CSS at " + requestUrl);
-                            }
-                            css = clientResponse.body();
-                            expires = clientResponse
-                                    .headers()
-                                    .firstValue("Expires")
-                                    .orElse(null);
-                            lastModified = clientResponse
-                                    .headers()
-                                    .firstValue("Last-Modified")
-                                    .orElse(null);
-                        }
-
-                        String patchedCSS = removeStickyPositioning(css);
-                        LOGGER.fine("filtering URL: " + requestUrl);
-                        ProvideResponseParameters responseParams = new ProvideResponseParameters(responseId);
-                        responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
-
-                        responseParams.statusCode(200);
-                        List<Header> headers = new ArrayList<>();
-                        headers.add(new Header("Content-Type", new BytesValue(BytesValue.Type.STRING, "text/css")));
-                        if (lastModified != null) {
-                            headers.add(
-                                    new Header("Last-Modified", new BytesValue(BytesValue.Type.STRING, lastModified)));
-                        }
-                        if (expires != null) {
-                            headers.add(new Header("Expires", new BytesValue(BytesValue.Type.STRING, expires)));
-                        }
-                        responseParams.headers(headers);
-                        network.provideResponse(responseParams);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException("Could not retrieve CSS from Jenkins at URL:" + requestUrl, e);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new UncheckedIOException(
-                                "Could not retrieve CSS from Jenkins at URL: " + requestUrl,
-                                new IOException("cause", e));
-                    }
-                } else {
-                    if (requestUrl.startsWith("data:")) {
-                        // XXX should not be intercepted
+                HttpRequest.Builder requestBuilder = HttpRequest.newBuilder().uri(URI.create(requestUrl));
+                if (cookie != null) {
+                    requestBuilder.header("Cookie", cookie);
+                }
+                HttpRequest clientRequest = requestBuilder.build();
+                // Fetch and patch asynchronously so we do not block the BiDi event-dispatch thread on a
+                // synchronous HTTP round-trip (which would delay processing of subsequent network events).
+                client.sendAsync(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8))
+                        .thenAccept(clientResponse -> providePatchedCss(requestId, requestUrl, clientResponse))
+                        .exceptionally(t -> {
+                            // The request stays blocked and will fail with a page-load timeout. A failure here
+                            // likely indicates a bug either in this interceptor or in Jenkins, so surface it.
+                            LOGGER.log(
+                                    Level.WARNING,
+                                    t,
+                                    () -> "Could not retrieve CSS from Jenkins at URL: " + requestUrl);
+                            return null;
+                        });
+            } else {
+                if (requestUrl.startsWith("data:")) {
+                    // XXX should not be intercepted
+                    return;
+                }
+                try {
+                    network.continueRequest(new ContinueRequestParameters(requestId));
+                } catch (Exception ignored) {
+                    if (requestUrl.endsWith("/apple-touch-icon.png")
+                            || requestUrl.endsWith("/favicon.svg")
+                            || requestUrl.endsWith("/favicon-dark.ico")) {
+                        // these often cause errors so ignore them.
+                        // it does not impact Jenkins or the browser based testing.
                         return;
                     }
-                    try {
-                        network.continueRequest(new ContinueRequestParameters(responseId));
-                    } catch (Exception ignored) {
-                        if (requestUrl.endsWith("/apple-touch-icon.png")
-                                || requestUrl.endsWith("/favicon.svg")
-                                || requestUrl.endsWith("/favicon-dark.ico")) {
-                            // these often cause errors so ignore them.
-                            // it does not impact Jenkins or the browser based testing.
-                            return;
-                        }
-                        // TODO exceptions here seem unusual, but they regularly occur with no side effect
-                        // all of the form `"no such request","message":"Blocked request with id <UUID> not found`
-                        LOGGER.log(Level.WARNING, ignored, () -> "failed to send response for " + requestUrl);
-                    }
+                    // XXX exceptions here seem unusual, but they regularly occur with no side effect
+                    // all of the form `"no such request","message":"Blocked request with id <UUID> not found`
+                    // but log them all the same incase we have one that does have an impact.
+                    LOGGER.log(Level.WARNING, ignored, () -> "failed to send response for " + requestUrl);
                 }
             }
-        });
+        }
+    }
+
+    /**
+     * Patches the CSS body of the given response (removing sticky positioning) and provides it to the browser
+     * in place of the originally intercepted request.
+     */
+    private void providePatchedCss(String requestId, String requestUrl, HttpResponse<String> clientResponse) {
+        int responseCode = clientResponse.statusCode();
+        if (responseCode != 200) {
+            // if we do not have a 200 response then we would not have CSS to patch.
+            // We could just allow the browser to make the request, but there is likely a bug
+            // either here or in Jenkins, and so the exception would make the call to action obvious
+            throw new IllegalStateException("Unexpected HTTP " + responseCode + " fetching CSS at " + requestUrl);
+        }
+        String css = clientResponse.body();
+        String expires = clientResponse.headers().firstValue("Expires").orElse(null);
+        String lastModified =
+                clientResponse.headers().firstValue("Last-Modified").orElse(null);
+
+        String patchedCSS = removeStickyPositioning(css);
+        LOGGER.fine("filtering URL: " + requestUrl);
+        ProvideResponseParameters responseParams = new ProvideResponseParameters(requestId);
+        responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
+
+        responseParams.statusCode(200);
+        List<Header> headers = new ArrayList<>();
+        headers.add(new Header("Content-Type", new BytesValue(BytesValue.Type.STRING, "text/css")));
+        if (lastModified != null) {
+            headers.add(new Header("Last-Modified", new BytesValue(BytesValue.Type.STRING, lastModified)));
+        }
+        if (expires != null) {
+            headers.add(new Header("Expires", new BytesValue(BytesValue.Type.STRING, expires)));
+        }
+        responseParams.headers(headers);
+        network.provideResponse(responseParams);
     }
 
     /**
@@ -201,5 +200,13 @@ public class StickyElementInterceptor {
      */
     private String removeStickyPositioning(String css) {
         return css.replaceAll("position:\\s*sticky", "position: relative");
+    }
+
+    @Override
+    public void close() throws Exception {
+        try (network;
+                client) {
+            // ensure the resources are closed
+        }
     }
 }

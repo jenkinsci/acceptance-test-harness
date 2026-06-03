@@ -355,7 +355,7 @@ public class Config extends AbstractModule {
         if (oldSize.height < 1090 || oldSize.width < 1680) {
             driver.manage().window().setSize(new Dimension(1680, 1090));
         }
-        StickyElementInterceptor scroller = new StickyElementInterceptor(driver);
+        StickyElementInterceptor interceptor = new StickyElementInterceptor(driver);
 
         try {
             driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(time.seconds(PAGE_LOAD_TIMEOUT)));
@@ -371,6 +371,7 @@ public class Config extends AbstractModule {
                 Throwable error = null;
 
                 try {
+                    interceptor.close();
                     driver.quit();
                 } catch (Throwable t) {
                     error = t;
