@@ -93,7 +93,6 @@ public class StickyElementInterceptor {
                         // extract a potential cookie for authentication
                         String cookie = extractCookieHeader(requestData);
 
-                        int responseCode;
                         String css;
                         String expires;
                         String lastModified;
@@ -107,9 +106,11 @@ public class StickyElementInterceptor {
                             HttpRequest clientRequest = requestBuilder.build();
                             HttpResponse<String> clientResponse =
                                     client.send(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
-                            responseCode = clientResponse.statusCode();
-                            if (responseCode < 400 && responseCode != 200) {
-                                // we are not handling redirects (3xx) and anything OK should be 200.
+                            int responseCode = clientResponse.statusCode();
+                            if (responseCode != 200) {
+                                // if we do not have a 200 response then we would not have CSS to patch.
+                                // We could just allow the browser to make the request, but there is likely a bug
+                                // either here or in Jenkins, and so the exception would make the call to action obvious
                                 throw new IOException(
                                         "Unexpected HTTP " + responseCode + " fetching CSS at " + requestUrl);
                             }
@@ -129,7 +130,7 @@ public class StickyElementInterceptor {
                         ProvideResponseParameters responseParams = new ProvideResponseParameters(responseId);
                         responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
 
-                        responseParams.statusCode(responseCode);
+                        responseParams.statusCode(200);
                         List<Header> headers = new ArrayList<>();
                         headers.add(new Header("Content-Type", new BytesValue(BytesValue.Type.STRING, "text/css")));
                         if (lastModified != null) {
