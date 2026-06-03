@@ -93,6 +93,7 @@ public class StickyElementInterceptor {
                         // extract a potential cookie for authentication
                         String cookie = extractCookieHeader(requestData);
 
+                        int responseCode;
                         String css;
                         String expires;
                         String lastModified;
@@ -106,12 +107,18 @@ public class StickyElementInterceptor {
                             HttpRequest clientRequest = requestBuilder.build();
                             HttpResponse<String> clientResponse =
                                     client.send(clientRequest, BodyHandlers.ofString(StandardCharsets.UTF_8));
+                            responseCode = clientResponse.statusCode();
+                            if (responseCode < 400 && responseCode != 200) {
+                                // we are not handling redirects (3xx) and anything OK should be 200.
+                                throw new IOException(
+                                        "Unexpected HTTP " + responseCode + " fetching CSS at " + requestUrl);
+                            }
                             css = clientResponse.body();
                             expires = clientResponse
                                     .headers()
                                     .firstValue("Expires")
                                     .orElse(null);
-                             lastModified= clientResponse
+                            lastModified = clientResponse
                                     .headers()
                                     .firstValue("Last-Modified")
                                     .orElse(null);
@@ -122,7 +129,7 @@ public class StickyElementInterceptor {
                         ProvideResponseParameters responseParams = new ProvideResponseParameters(responseId);
                         responseParams.body(new BytesValue(BytesValue.Type.STRING, patchedCSS));
 
-                        responseParams.statusCode(200);
+                        responseParams.statusCode(responseCode);
                         List<Header> headers = new ArrayList<>();
                         headers.add(new Header("Content-Type", new BytesValue(BytesValue.Type.STRING, "text/css")));
                         if (lastModified != null) {
