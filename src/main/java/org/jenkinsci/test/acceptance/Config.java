@@ -372,9 +372,17 @@ public class Config extends AbstractModule {
 
                 try {
                     interceptor.close();
-                    driver.quit();
                 } catch (Throwable t) {
                     error = t;
+                }
+                try {
+                    driver.quit();
+                } catch (Throwable t) {
+                    if (error == null) {
+                        error = t;
+                    } else {
+                        error.addSuppressed(t);
+                    }
                 }
 
                 /*
