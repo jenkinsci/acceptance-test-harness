@@ -23,7 +23,7 @@ import org.openqa.selenium.bidi.network.ProvideResponseParameters;
 import org.openqa.selenium.bidi.network.RequestData;
 
 /**
- * Request intercepter that updates Jenkins CSS styles that use sticky elements.
+ * Request interceptor that updates Jenkins CSS styles that use sticky elements.
  * Jenkins' use of sticky elements often either prevents an element from being able to be scrolled into view, or can cause the click to go to a different element.
  * <p>
  * Especially in the configuration page, the floating DIVs at the top and
@@ -69,7 +69,7 @@ import org.openqa.selenium.bidi.network.RequestData;
  * </pre>
  *
  * <p>
- * This work around simply replaces any occurence of {@code position:\\s*sticky} with {@code position: relative}
+ * This workaround simply replaces any occurrence of {@code position:\s*sticky} with {@code position: relative}
  */
 public class StickyElementInterceptor implements AutoCloseable {
 
@@ -196,7 +196,7 @@ public class StickyElementInterceptor implements AutoCloseable {
     }
 
     /**
-     * Update the CSS to make all {@code sticky} css positions {code relative}
+     * Update the CSS to make all {@code sticky} CSS positions {@code relative}
      */
     private String removeStickyPositioning(String css) {
         return css.replaceAll("position:\\s*sticky", "position: relative");

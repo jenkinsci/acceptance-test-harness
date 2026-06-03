@@ -21,7 +21,7 @@ The following values are available:
  * `firefox-container` and `chrome-container`
         Running the browser inside selenium provided per-test container.
 
-For example, to run tests with firefox, (assuming you have `firefox` and `geckdriver` installed) you'd execute:
+For example, to run tests with firefox (assuming you have `firefox` and `geckdriver` installed), you'd execute:
 
     export BROWSER=firefox
     mvn install
