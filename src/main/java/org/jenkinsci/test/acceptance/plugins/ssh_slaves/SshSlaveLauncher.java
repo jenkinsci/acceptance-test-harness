@@ -11,7 +11,6 @@ import org.jenkinsci.test.acceptance.po.ComputerLauncher;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.PageObject;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.jenkinsci.test.acceptance.selenium.UselessFileDetectorReplacement;
 import org.openqa.selenium.WebElement;
 
@@ -59,7 +58,6 @@ public class SshSlaveLauncher extends ComputerLauncher {
         WebElement nextButton = find(by.id("cr-dialog-next"));
         nextButton.click();
         waitFor(by.id("cr-dialog-submit"));
-        new Scroller(driver).disableStickyElements();
 
         // If the credential has a scope field, wait for the options to load.
         // Otherwise, sometimes the JS doesn't run fast enough to fill in the options
@@ -84,8 +82,6 @@ public class SshSlaveLauncher extends ComputerLauncher {
     }
 
     private void ensureAdvancedOpen() {
-        new Scroller(driver).disableStickyElements();
-
         control("advanced-button").click();
     }
 

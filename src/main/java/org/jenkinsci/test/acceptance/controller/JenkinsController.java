@@ -16,6 +16,8 @@ import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.NullPrinter;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.WebDriver;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -29,6 +31,9 @@ import org.jenkinsci.test.acceptance.log.NullPrinter;
  */
 @ExtensionPoint // TODO is it not the JenkinsControllerFactory that is the extension point?
 public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
+
+    private static final Logger LOGGER = Logger.getLogger(JenkinsController.class.getName());
+
     @Inject
     @Named("quite")
     protected boolean isQuite;
@@ -36,6 +41,9 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     @Inject
     @Named("WORKSPACE")
     protected String WORKSPACE;
+
+    @Inject
+    protected WebDriver driver;
 
     public static final int STARTUP_TIMEOUT;
 
@@ -88,6 +96,26 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
             populateJenkinsHome(IOUtils.toByteArray(url), false);
             startNow();
             isRunning = true;
+        }
+        try {
+            LOGGER.warning("*** ABOUT TO INJECT COOKIE ***");
+            URL url = getUrl();
+            // inject the cookie to disable sticky elements
+            Cookie c = new Cookie.Builder("disableStickyPositioning", "true")
+                    .isSecure(false)
+                    .sameSite("Lax")
+                    .domain(url.getHost())
+                    .path(url.getPath())
+                    .build();
+            // we may have multiple JenkinsControllers and be starting them in parallel
+            // so we need to ensure we are on the right page when setting the cookie
+            synchronized (JenkinsController.class) {
+                driver.navigate().to(url);
+                driver.manage().addCookie(c);
+            }
+            LOGGER.warning("*** COOKIE Injected ***");
+        } catch (Throwable t) {
+            LOGGER.log(Level.WARNING, "*** exception from injecting COOKIE ***", t);
         }
     }
 
