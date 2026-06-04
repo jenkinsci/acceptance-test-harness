@@ -70,20 +70,19 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
     private MavenSettingsConfig createMavenSettingsConfig(final String serverId, final String credId) {
         final MavenSettingsConfig mvnConfig = new ConfigFileProvider(jenkins).addFile(MavenSettingsConfig.class);
 
-        mvnConfig.content(String.format(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" \n"
-                        + "          xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
-                        + "          xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">\n"
-                        + "  \n"
-                        + "  <servers>\n"
-                        + "    <server>\n"
-                        + "      <id>%s</id>\n"
-                        + "    </server>\n"
-                        + "  </servers>\n"
-                        + "\n"
-                        + "</settings>",
-                serverId));
+        mvnConfig.content(String.format("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+                  <servers>
+                    <server>
+                      <id>%s</id>
+                    </server>
+                  </servers>
+
+                </settings>""", serverId));
 
         final ServerCredentialMapping serverCred = mvnConfig.addServerCredentialMapping();
         serverCred.serverId(serverId);
@@ -188,23 +187,22 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
         final MavenSettingsConfig mvnConfig = new ConfigFileProvider(jenkins).addFile(MavenSettingsConfig.class);
 
         mvnConfig.replaceAll(false);
-        mvnConfig.content(String.format(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        + "<settings xmlns=\"http://maven.apache.org/SETTINGS/1.0.0\" \n"
-                        + "          xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" \n"
-                        + "          xsi:schemaLocation=\"http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd\">\n"
-                        + "  \n"
-                        + "  <servers>\n"
-                        + "    <server>\n"
-                        + "      <id>%s</id>\n"
-                        + "    </server>\n"
-                        + "    <server>\n"
-                        + "      <id>%s</id>\n"
-                        + "    </server>\n"
-                        + "  </servers>\n"
-                        + "\n"
-                        + "</settings>",
-                serverWithCreds, serverWithoutCreds));
+        mvnConfig.content(String.format("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+                          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+                  <servers>
+                    <server>
+                      <id>%s</id>
+                    </server>
+                    <server>
+                      <id>%s</id>
+                    </server>
+                  </servers>
+
+                </settings>""", serverWithCreds, serverWithoutCreds));
 
         final ServerCredentialMapping serverCred = mvnConfig.addServerCredentialMapping();
         serverCred.serverId(serverWithCreds);
@@ -247,21 +245,25 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
     public String scriptForPipeline() {
         if (SystemUtils.IS_OS_UNIX) {
-            return "node {\n" + "    configFileProvider(\n"
-                    + "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),\n"
-                    + "         configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n"
-                    + "        sh 'cat $MAVEN_SETTINGS '\n"
-                    + "        sh 'cat $CUSTOM_SETTINGS '\n"
-                    + "    }\n"
-                    + "}";
+            return """
+                    node {
+                        configFileProvider(
+                            [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),
+                             configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {
+                            sh 'cat $MAVEN_SETTINGS '
+                            sh 'cat $CUSTOM_SETTINGS '
+                        }
+                    }""";
         } else {
-            return "node {\n" + "    configFileProvider(\n"
-                    + "        [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),\n"
-                    + "         configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {\n"
-                    + "        bat '@type %%MAVEN_SETTINGS%% '\n"
-                    + "        bat '@type %%CUSTOM_SETTINGS%% '\n"
-                    + "    }\n"
-                    + "}";
+            return """
+                    node {
+                        configFileProvider(
+                            [configFile(fileId: '%s', variable: 'MAVEN_SETTINGS'),
+                             configFile(fileId: '%s', variable: 'CUSTOM_SETTINGS')]) {
+                            bat '@type %%MAVEN_SETTINGS%% '
+                            bat '@type %%CUSTOM_SETTINGS%% '
+                        }
+                    }""";
         }
     }
 

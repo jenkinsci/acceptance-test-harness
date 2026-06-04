@@ -39,17 +39,19 @@ public class MatrixPluginTest extends AbstractJUnitTest {
      *   [3,2]: Not built
      *   [3,3]: Built
      */
-    private static final String GROOVY_SELECTOR_SCRIPT = "combinations.each{\n" + "   def x = it.axis_x as Integer\n"
-            + "   def y = it.axis_y as Integer\n"
-            + "   def i = (x * y) % 2\n"
-            + "   if(i == 0) {\n"
-            + "      return \n"
-            + "   }\n"
-            + "   result[it.axis_y] = result[it.axis_y] ?: []\n"
-            + "   result[it.axis_y] << it\n"
-            + "}\n"
-            + " \n"
-            + "[result, true]";
+    private static final String GROOVY_SELECTOR_SCRIPT = """
+            combinations.each{
+               def x = it.axis_x as Integer
+               def y = it.axis_y as Integer
+               def i = (x * y) % 2
+               if(i == 0) {
+                  return
+               }
+               result[it.axis_y] = result[it.axis_y] ?: []
+               result[it.axis_y] << it
+            }
+
+            [result, true]""";
     private static final String STRATEGY = "Groovy Script Matrix Executor Strategy";
     private static final int AXIS_MAX_VALUE = 3;
     private static final int AXIS_X_TEST_NOT_BUILT = 1;
