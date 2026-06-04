@@ -57,12 +57,11 @@ public class TomcatController extends LocalController {
             if (context.exists()) {
                 FileUtils.forceDelete(context);
             }
-            Files.writeString(
-                    context.toPath(),
-                    "<Context>\n"
-                            + "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n"
-                            + "</Context>",
-                    StandardCharsets.UTF_8);
+            Files.writeString(context.toPath(), """
+                        <Context>
+                            <Parameter name="jenkins.formelementpath.FormElementPathPageDecorator.enabled" value="true"/>
+                            <Parameter name="hudson.Functions.disableStickyPositioning" value="true"/>
+                        </Context>""", StandardCharsets.UTF_8);
 
             CommandBuilder cb = new CommandBuilder(catalinaHome + "/bin/startup.sh");
             cb.env.putAll(commonLaunchEnv());

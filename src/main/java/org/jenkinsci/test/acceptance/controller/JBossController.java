@@ -63,12 +63,12 @@ public class JBossController extends LocalController {
         if (context.exists()) {
             org.apache.commons.io.FileUtils.forceDelete(context);
         }
-        Files.writeString(
-                context.toPath(),
-                "<Context>\n"
-                        + "    <Parameter name=\"jenkins.formelementpath.FormElementPathPageDecorator.enabled\" value=\"true\"/>\n"
-                        + "</Context>",
-                StandardCharsets.UTF_8);
+        Files.writeString(context.toPath(), """
+                    <Context>
+                        <Parameter name="jenkins.formelementpath.FormElementPathPageDecorator.enabled" value="true"/>
+                        <Parameter name="hudson.Functions.disableStickyPositioning" value="true"/>
+
+                    </Context>""", StandardCharsets.UTF_8);
 
         CommandBuilder cb = new CommandBuilder(jbossHome + "/bin/standalone.sh");
         cb.env.putAll(commonLaunchEnv());

@@ -78,7 +78,10 @@ public class WinstoneController extends LocalController {
         CommandBuilder cb = new CommandBuilder(java);
         cb.addAll(JENKINS_JAVA_OPTS);
         cb.addAll(JAVA_OPTS);
-        cb.add("-Duser.language=en", "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true");
+        cb.add(
+                "-Duser.language=en",
+                "-Djenkins.formelementpath.FormElementPathPageDecorator.enabled=true",
+                "-Dhudson.Functions.disableStickyPositioning=true");
         portFile = File.createTempFile("jenkins-port", ".txt");
         portFile.deleteOnExit();
         cb.add("-Dwinstone.portFileName=" + portFile.getAbsolutePath());
