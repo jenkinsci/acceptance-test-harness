@@ -172,23 +172,6 @@ and
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
-    <!-- dependency use range so we want to avoid weird resolution -->
-    <dependency>
-      <groupId>com.github.jnr</groupId>
-      <artifactId>jffi</artifactId>
-      <version>${jffi.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jnr</groupId>
-      <artifactId>jffi</artifactId>
-      <version>${jffi.version}</version>
-      <classifier>native</classifier>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jnr</groupId>
-      <artifactId>jnr-unixsocket</artifactId>
-      <version>0.38.25</version>
-    </dependency>
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
@@ -378,6 +361,10 @@ and
       <version>1.9</version>
     </dependency>
     <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-api</artifactId>
       <version>${selenium.version}</version>
@@ -507,6 +494,8 @@ and
         <artifactId>appassembler-maven-plugin</artifactId>
         <version>2.1.0</version>
         <configuration>
+          <repositoryLayout>flat</repositoryLayout>
+          <useWildcardClassPath>true</useWildcardClassPath>
           <programs>
             <program>
               <mainClass>org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess</mainClass>
