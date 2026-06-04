@@ -120,7 +120,9 @@ public class Slave extends Node {
             try {
                 clickButton("Mark this node temporarily offline");
             } catch (NoSuchElementException e) {
-                clickButton("Mark temporarily offline");
+                WebElement b = find(by.button("Mark temporarily offline"));
+                waitFor(b);
+                b.click();
             }
         }
     }
