@@ -126,7 +126,7 @@ public class JenkinsControllerPoolProcess {
 
         try (ServerSocketChannel server = ServerSocketChannel.open(StandardProtocolFamily.UNIX)) {
             server.configureBlocking(true);
-            ServerSocketChannel sock = server.bind(UnixDomainSocketAddress.of(socket.toPath()));
+            server.bind(UnixDomainSocketAddress.of(socket.toPath()));
             System.out.println("JUT Server is ready and listening at " + socket.getAbsolutePath());
 
             while (true) {
