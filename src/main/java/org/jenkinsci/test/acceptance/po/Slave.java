@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -120,9 +122,10 @@ public class Slave extends Node {
             try {
                 clickButton("Mark this node temporarily offline");
             } catch (NoSuchElementException e) {
-                WebElement b = find(by.button("Mark temporarily offline"));
-                waitFor(b);
-                b.click();
+                // Use JS click because the submit button is inside a <dialog> with a
+                // sticky bottom bar, which GeckoDriver cannot scroll into view
+                WebElement submitBtn = find(By.cssSelector("dialog.jenkins-dialog button.jenkins-submit-button"));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitBtn);
             }
         }
     }
@@ -134,7 +137,11 @@ public class Slave extends Node {
 
         if (isOffline()) {
             open();
-            clickButton("Bring this node back online");
+            try {
+                clickButton("Bring this node back online");
+            } catch (NoSuchElementException e) {
+                clickButton("Bring back online");
+            }
         }
     }
 
