@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.inject.Provider;
 import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
@@ -43,7 +44,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     protected String WORKSPACE;
 
     @Inject
-    protected WebDriver driver;
+    protected Provider<WebDriver> driver;
 
     public static final int STARTUP_TIMEOUT;
 
@@ -97,25 +98,28 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
             startNow();
             isRunning = true;
         }
+        if (org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess.MAIN) {
+            return;
+        }
         try {
-            LOGGER.warning("*** ABOUT TO INJECT COOKIE ***");
             URL url = getUrl();
-            // inject the cookie to disable sticky elements
+            // Inject the cookie to disable sticky elements.
             Cookie c = new Cookie.Builder("disableStickyPositioning", "true")
-                    .isSecure(false)
+                    .isSecure("https".equalsIgnoreCase(url.getProtocol()))
                     .sameSite("Lax")
-                    .domain(url.getHost())
-                    .path(url.getPath())
+                    .path("/")
                     .build();
-            // we may have multiple JenkinsControllers and be starting them in parallel
-            // so we need to ensure we are on the right page when setting the cookie
-            synchronized (JenkinsController.class) {
-                driver.navigate().to(url);
-                driver.manage().addCookie(c);
+
+            WebDriver d = driver.get();
+            synchronized (d) {
+                d.navigate().to(url);
+                d.manage().addCookie(c);
             }
-            LOGGER.warning("*** COOKIE Injected ***");
-        } catch (Throwable t) {
-            LOGGER.log(Level.WARNING, "*** exception from injecting COOKIE ***", t);
+        } catch (Exception e) {
+            LOGGER.log(
+                    Level.WARNING,
+                    "Failed to inject disableStickyPositioning cookie; continuing without sticky disabling",
+                    e);
         }
     }
 
