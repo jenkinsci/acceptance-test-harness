@@ -17,6 +17,7 @@ import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.NullPrinter;
+import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 
@@ -98,7 +99,8 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
             startNow();
             isRunning = true;
         }
-        if (org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess.MAIN) {
+        if (JenkinsControllerPoolProcess.MAIN) {
+            // this is a pooled controller running outside of tests
             return;
         }
         try {
@@ -111,7 +113,9 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
                     .build();
 
             WebDriver d = driver.get();
-            synchronized (d) {
+            synchronized (JenkinsController.class) {
+                // we want to allow parallel startup of controllers, 
+                // but this part needs to ensure it runs against one controller at once
                 d.navigate().to(url);
                 d.manage().addCookie(c);
             }
