@@ -114,7 +114,7 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
 
             WebDriver d = driver.get();
             synchronized (JenkinsController.class) {
-                // we want to allow parallel startup of controllers, 
+                // we want to allow parallel startup of controllers,
                 // but this part needs to ensure it runs against one controller at once
                 d.navigate().to(url);
                 d.manage().addCookie(c);
