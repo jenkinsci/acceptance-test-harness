@@ -3,9 +3,8 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 import java.time.Duration;
 import java.util.concurrent.Callable;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
  * Mix-in for {@link PageObject}s that own a group of jobs, like
@@ -28,24 +27,13 @@ public class JobsMixIn extends MixIn {
 
         findTypeCaption(type).click();
 
-        // since 2.7, a bug in Firefox webdriver may prevent the blur event from triggering
-        // properly, so we manually execute a blur event here, see: JENKINS-37232
-        // See: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/7346
-        try {
-            blur(find(By.name("name")));
-        } catch (Exception e) {
-            // This should rarely fail on modern browsers,
-            // we don't really care if it does since Firefox was
-            // the only one that seemed to exhibit the issue
-        }
+        // the OK button is enabled in reaction to the click on the type
+        // so wait to ensure the click goes to an enabled button
+        WebElement okButton = waitFor(driver).until(ExpectedConditions.elementToBeClickable(by.button("OK")));
+        okButton.click();
 
-        clickButton("OK");
         // Sometimes job creation is not fast enough, so make sure it's finished before continue
         waitFor(by.name("config"), 10);
-
-        // Automatic disabling of sticky elements doesn't seem to occur after a redirect,
-        // so force it after the configuration page has loaded
-        new Scroller(driver).disableStickyElements();
 
         final T j = get(type, name);
 
@@ -98,14 +86,13 @@ public class JobsMixIn extends MixIn {
     public void copy(String from, String to) {
         visit("newJob");
 
-        // Newer versions of Jenkins have an additional radio before the 'from' input is available, so click it
-        all(by.radioButton("Duplicate an existing item")).forEach(WebElement::click);
-
-        fillIn("from", from);
-        // There is a javascript magic bound to loss of focus on 'from' field that is a pain to duplicate through
-        // selenium
-        // explicitly. Here, it is done so by setting 'to' afterwards.
         fillIn("name", to);
+
+        find(by.radioButton("Duplicate an existing item")).click();
+        fillIn("from", from);
+
+        // do not wait for the OK button to be enabled
+        // some tests check that this fails due to the job already existing.
         clickButton("OK");
     }
 

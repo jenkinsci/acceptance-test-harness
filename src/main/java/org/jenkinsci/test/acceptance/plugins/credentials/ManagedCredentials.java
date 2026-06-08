@@ -41,7 +41,8 @@ public class ManagedCredentials extends ContainerPageObject {
      * Check if the given credential is part of the domain.
      */
     public Control checkIfCredentialsExist(String name) {
-        By xpath = by.xpath("//td[contains(text(),'" + name + "')] | //a[contains(text(), '" + name + "')]");
+        By xpath = by.xpath("//span[contains(text(), '" + name
+                + "')]/parent::div/parent::div | //div[contains(text(), '" + name + "')]/parent::div");
         return control(xpath);
     }
 

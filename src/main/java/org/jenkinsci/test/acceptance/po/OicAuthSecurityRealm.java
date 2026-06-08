@@ -5,7 +5,7 @@ import org.openqa.selenium.WebElement;
 /**
  * Security Realm provided by oic-auth plugin
  */
-@Describable("Login with Openid Connect")
+@Describable({"Login with OpenID Connect", "Login with Openid Connect"})
 public class OicAuthSecurityRealm extends SecurityRealm {
 
     public OicAuthSecurityRealm(GlobalSecurityConfig context, String path) {

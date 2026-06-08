@@ -40,6 +40,8 @@ import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.pagefactory.ByChained;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.zeroturnaround.zip.ZipUtil;
 
 /**
@@ -505,5 +507,17 @@ public class Job extends TopLevelItem {
 
     private String xCopy(final String source, final String destination) {
         return "xcopy " + source + " " + destination + " /E /Y";
+    }
+
+    /**
+     * Waits for the build history widget to populate.
+     * Population is defined as the initial async load has completed, the widget once loaded may or may not contain any build.
+     */
+    public void waitForBuildWidgetToLoad() {
+        // the builds widget is asynchronously loaded/populated.
+        By spinnerLocator = new ByChained(By.className("app-builds-container"), By.className("jenkins-spinner"));
+        waitFor(driver)
+                .withMessage("waiting for build widget to load")
+                .until(ExpectedConditions.invisibilityOfElementLocated(spinnerLocator));
     }
 }

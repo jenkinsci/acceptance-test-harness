@@ -2,7 +2,7 @@
 services:
   init_video:
     container_name: init_video
-    image: ubuntu:noble
+    image: ubuntu:resolute
     command: >
       sh -c 'chown 1000:1000 /videos && chmod 0777 /videos'
     user: root
@@ -17,7 +17,7 @@ services:
       - SE_SCREEN_WIDTH=1680
     extra_hosts:
       - host.docker.internal:host-gateway
-    image: selenium/standalone-firefox:4.41.0@sha256:e08c04689533e1c279c5b91d60903c245e723b55996f7f3278cc695db4b0dff5
+    image: selenium/standalone-firefox:4.44.0@sha256:48b316658347e270ec82b68aaeb0b22a212622a8a9f6389de99464093a0c111d
     networks:
       - ath-network
     ports:

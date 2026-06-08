@@ -30,7 +30,6 @@ registry['enable'] = false
 gitlab_pages['enable'] = false
 gitlab_kas['enable'] = false
 sentinel['enable'] = false
-mattermost['enable'] = false
 storage_check['enable'] = false
 gitlab_sshd['enable'] = false
 logrotate['enable'] = false
