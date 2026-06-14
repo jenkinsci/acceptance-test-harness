@@ -397,6 +397,7 @@ public class Job extends TopLevelItem {
                                 by.xpath(
                                         "//button[normalize-space(string(.)) = 'Add Parameter' and not(contains(@class, 'hetero-list-add-top'))]"))
                         .selectDropdownMenu(type));
+        waitFor(by.path("%s/name", path), 10);
 
         T p = newInstance(type, this, path);
         parameters.add(p);
