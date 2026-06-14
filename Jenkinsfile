@@ -15,10 +15,28 @@ if (env.BRANCH_IS_PRIMARY) {
 }
 
 def branches = [:]
-def splits = [[]]
-def singleTest = 'core.FreestyleJobTest#buildParametrized'
+def splits
+def needSplittingFromWorkspace = true
 
-echo "Running single ATH test on CI: ${singleTest}"
+// TODO could use launchable split-subset to split this into bins
+
+for (build = currentBuild.previousCompletedBuild; build != null; build = build.previousCompletedBuild) {
+  if (build.resultIsBetterOrEqualTo('UNSTABLE')) {
+    // we have a reference build
+    echo "not splitting from workspace, reference build should be : ${build.projectName}:${build.number}, with state ${build.result}"
+    needSplittingFromWorkspace = false
+    break
+  }
+}
+
+if (needSplittingFromWorkspace) {
+  node { // When there are no previous build, we need to estimate splits from files which require workspace
+    checkout scm
+    splits = splitTests estimateTestsFromFiles: true, parallelism: count(10)
+  }
+} else {
+  splits = splitTests count(10)
+}
 
 def axes = [
   jenkinsVersions: ['latest'],
@@ -116,7 +134,6 @@ for (int i = 0; i < splits.size(); i++) {
                     // but not letting the build to fail will cause next build not to try those tests again.
                     allowEmptyResults: true
                     ) {
-                      env.MAVEN_ARGS = "-Dtest=${singleTest}"
                       sh "./ci.sh ${jdk} ${browser} ${jenkinsVersion}"
                     }
             }

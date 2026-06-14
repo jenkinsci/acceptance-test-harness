@@ -22,7 +22,7 @@ docker-compose run -e "MAVEN_ARGS=${MAVEN_ARGS}" --name mvn -T --rm -v "${MAVEN_
 	java -version
 	mvn -v
 
-	run.sh remote-webdriver-${browser} ${jenkinsVersion} -Dmaven.test.failure.ignore=true -Dcsp.rule -DforkCount=1 -B ${MAVEN_ARGS:-}
+	run.sh remote-webdriver-${browser} ${jenkinsVersion} -Dmaven.test.failure.ignore=true -Dcsp.rule -DforkCount=1 -B
 INSIDE
 status=$?
 
