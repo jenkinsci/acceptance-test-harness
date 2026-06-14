@@ -398,6 +398,14 @@ public class Job extends TopLevelItem {
                                 "//button[normalize-space(string(.)) = 'Add Parameter' and not(contains(@class, 'hetero-list-add-top'))]"))
                 .selectDropdownMenu(type);
 
+        System.out.println("=== ATH page source begin ===");
+        System.out.println("=== ATH page source begin ===");
+        System.out.println("=== ATH page source begin ===");
+        System.out.println(getPageSource());
+        System.out.println("=== ATH page source end ===");
+        System.out.println("=== ATH page source end ===");
+        System.out.println("=== ATH page source end ===");
+
         // TODO selectDropdownMenu should not need this sleep - try and remove it
         elasticSleep(500);
 
