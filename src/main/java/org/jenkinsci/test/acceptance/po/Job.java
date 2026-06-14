@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -393,43 +391,12 @@ public class Job extends TopLevelItem {
 
         control(by.checkbox("This project is parameterized")).check();
 
-        control(
-                        by.xpath(
-                                "//button[normalize-space(string(.)) = 'Add Parameter' and not(contains(@class, 'hetero-list-add-top'))]"))
-                .selectDropdownMenu(type);
-
-        System.out.println("=== ATH page source begin ===");
-        System.out.println("=== ATH page source begin ===");
-        System.out.println("=== ATH page source begin ===");
-        System.out.println(getPageSource());
-        System.out.println("=== ATH page source end ===");
-        System.out.println("=== ATH page source end ===");
-        System.out.println("=== ATH page source end ===");
-
-        // TODO selectDropdownMenu should not need this sleep - try and remove it
-        elasticSleep(500);
-
-        // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions  for the first
-        // /properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions[n] for subsequent ones
-        // if we have another descriptor inside the descriptor inside the parameterDefinition we select the that instead
-        // of the actual parameter. (e.g NodeParameter)
-        // as all browsers do not support matches in xpath 2.0 we need to do this ourselves (find the last match and
-        // then extract the correct part even if we match the wrong thing originally
-        String path = last(by.xpath(
-                        "//div[starts-with(@path,'/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions')]"))
-                .getAttribute("path");
-
-        Pattern pattern = Pattern.compile(
-                "^(/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions([^/]*))(/.*)?$");
-        Matcher m = pattern.matcher(path);
-        // for some as yet unknown reason the matcher sometimes failed to match throwing an illegalStateException with
-        // no information to help diagnose
-        // after I added this I never reproduced the issue - but still having what failed to match will at least help in
-        // the future
-        if (!m.matches()) {
-            throw new IllegalStateException("No match for path in regexp : " + path);
-        }
-        path = m.group(1);
+        // Wait for the newly inserted parameter block and its path annotation instead of racing a fixed sleep.
+        String path = createPageArea(
+                "/properties/hudson-model-ParametersDefinitionProperty/parameterDefinitions", () -> control(
+                                by.xpath(
+                                        "//button[normalize-space(string(.)) = 'Add Parameter' and not(contains(@class, 'hetero-list-add-top'))]"))
+                        .selectDropdownMenu(type));
 
         T p = newInstance(type, this, path);
         parameters.add(p);
