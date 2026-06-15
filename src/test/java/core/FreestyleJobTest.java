@@ -335,6 +335,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     @Test
     public void copy_a_simple_job() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class, "simple-job");
+        j.save();
         jenkins.jobs.copy(j, "simple-job-copy");
         assertThat(driver, hasContent("simple-job-copy"));
 
