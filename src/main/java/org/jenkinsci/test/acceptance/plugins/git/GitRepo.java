@@ -108,7 +108,7 @@ public class GitRepo implements Closeable {
     public void updateIdentity(String name, String email) {
         gitDir(dir, "config", "user.name", name);
         gitDir(dir, "config", "user.email", email);
-    }        
+    }
 
     private File initDir() {
         try {
