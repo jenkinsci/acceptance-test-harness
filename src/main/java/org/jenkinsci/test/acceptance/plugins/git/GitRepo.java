@@ -89,8 +89,7 @@ public class GitRepo implements Closeable {
      *         the email of the user
      */
     public void setInitialConfiguration(String userName, String userMail) {
-        gitDir(dir, "config", "user.name", userName);
-        gitDir(dir, "config", "user.email", userMail);
+        updateIdentity(userName, userMail);
         // prevent any git maintenance kicking off, things are expected to be short lived
         // and this would slow things down that are not fully necessary
         gitDir(dir, "config", "maintenance.auto", "false");
@@ -98,6 +97,16 @@ public class GitRepo implements Closeable {
         // so do not attempt to use it
         gitDir(dir, "config", "commit.gpgsign", "false");
     }
+
+    /**
+     * Updates the identity of the user used to commit files from the current values.
+     * You would not normally call this as the defaults are set when creating a gitRepo, but in some
+     * cases it is required to make commits as a different user.
+     */
+    public void updateIdentity(String username, String email) {
+        gitDir(dir, "config", "user.name", username);
+        gitDir(dir, "config", "user.email", email);
+    }        
 
     private File initDir() {
         try {
