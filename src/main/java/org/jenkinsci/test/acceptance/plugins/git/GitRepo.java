@@ -100,7 +100,7 @@ public class GitRepo implements Closeable {
 
     /**
      * Updates the identity of the user used to commit files to the specified values.
-     * You would not normally call this as the defaults are set when constructing a new {@code GitRepo}, 
+     * You would not normally call this as the defaults are set when constructing a new {@code GitRepo},
      * but in some cases it is required to make commits as a different user.
      * @param name the name to set as {@code user.name} in git configuration.
      * @param email the address to set as {@code user.email} in git configuration.
