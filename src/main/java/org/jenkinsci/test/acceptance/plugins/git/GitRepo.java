@@ -100,11 +100,13 @@ public class GitRepo implements Closeable {
 
     /**
      * Updates the identity of the user used to commit files to the specified values.
-     * You would not normally call this as the defaults are set when creating a gitRepo, but in some
-     * cases it is required to make commits as a different user.
+     * You would not normally call this as the defaults are set when constructing a new {@code GitRepo}, 
+     * but in some cases it is required to make commits as a different user.
+     * @param name the name to set as {@code user.name} in git configuration.
+     * @param email the address to set as {@code user.email} in git configuration.
      */
-    public void updateIdentity(String username, String email) {
-        gitDir(dir, "config", "user.name", username);
+    public void updateIdentity(String name, String email) {
+        gitDir(dir, "config", "user.name", name);
         gitDir(dir, "config", "user.email", email);
     }        
 
