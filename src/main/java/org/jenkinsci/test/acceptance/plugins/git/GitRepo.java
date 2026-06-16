@@ -99,7 +99,7 @@ public class GitRepo implements Closeable {
     }
 
     /**
-     * Updates the identity of the user used to commit files from the current values.
+     * Updates the identity of the user used to commit files to the specified values.
      * You would not normally call this as the defaults are set when creating a gitRepo, but in some
      * cases it is required to make commits as a different user.
      */
