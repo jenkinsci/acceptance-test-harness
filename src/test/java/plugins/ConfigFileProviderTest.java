@@ -173,8 +173,8 @@ public class ConfigFileProviderTest extends AbstractJUnitTest {
 
         // We want to delete the config file and re-run the job to see it fail
         jenkins.visit("configfiles");
-        // this won't age well
-        runThenHandleDialog(() -> driver.findElement(by.xpath("//td[.='%s']/parent::tr/td[2]/a[1]", mvnConfig.id()))
+        runThenHandleDialog(() -> driver.findElement(
+                        by.xpath("//td[.='%s']/parent::tr//a[contains(@data-url,'removeConfig')]", mvnConfig.id()))
                 .click());
 
         jobLog = this.buildJobAndGetConsole(job, false);
