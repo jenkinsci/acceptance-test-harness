@@ -584,7 +584,8 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
      * Get visible text on the page.
      */
     public static String getPageContent(WebDriver driver) {
-        return driver.findElement(by.css("html")).getText();
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        return (String) js.executeScript("return document.body ? document.body.innerText : '';");
     }
 
     /**
