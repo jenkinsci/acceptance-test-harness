@@ -177,8 +177,9 @@ public class Job extends TopLevelItem {
     private <T extends Step> T addStep(final Class<T> type, final String section) {
         ensureConfigPage();
 
-        String path = createPageArea('/' + section, () -> control(by.path("/hetero-list-add[%s]", section))
-                .selectDropdownMenu(type));
+        String path = createPageArea(
+                '/' + section,
+                () -> control(by.path("/hetero-list-add[%s]", section)).selectDropdownMenu(type));
         return newInstance(type, this, path);
     }
 

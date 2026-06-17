@@ -337,8 +337,9 @@ public class GitLabPluginTest extends AbstractJUnitTest {
         assertThat(organizationFolder.getCheckLog(), containsString("Finished: SUCCESS"));
 
         organizationFolder.open();
-        waitFor().withTimeout(PAGE_LOAD_TIMEOUT).until(() -> driver.getPageSource()
-                .contains("Scan GitLab Group Now"));
+        waitFor()
+                .withTimeout(PAGE_LOAD_TIMEOUT)
+                .until(() -> driver.getPageSource().contains("Scan GitLab Group Now"));
 
         var projects = List.of(
                 organizationFolder.getJobs().get(WorkflowMultiBranchJob.class, GROUP_NAME + "%2F" + REPO_NAME),

@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci</groupId>
     <artifactId>jenkins</artifactId>
-    <version>2.1328.vfd10e2339a_19</version>
+    <version>2.1376.vb_7813a_893286</version>
     <relativePath />
   </parent>
 
@@ -31,7 +31,7 @@
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
     <jenkins.version>2.570-rc38421.a_c43cb_5d95ed</jenkins.version>
-    <selenium.version>4.44.0</selenium.version>
+    <selenium.version>4.45.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.6.0-jre</guava.version>
 
