@@ -157,11 +157,11 @@ public class FreestyleJobTest extends AbstractJUnitTest {
     public void buildParametrized() {
         FreeStyleJob j = jenkins.jobs.create(FreeStyleJob.class);
         j.configure();
+        j.addParameter(StringParameter.class).setName("text").setDefault("foo").setDescription("Bar");
         j.addParameter(PasswordParameter.class)
                 .setName("password")
                 .setDefault("foopass")
                 .setDescription("apass");
-        j.addParameter(StringParameter.class).setName("text").setDefault("foo").setDescription("Bar");
         j.addShellStep("echo \">$text<\"");
         j.save();
 
