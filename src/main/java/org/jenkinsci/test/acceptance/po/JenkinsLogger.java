@@ -25,12 +25,15 @@ public class JenkinsLogger extends PageObject {
         j.visit("log");
 
         // This can be simplified to clicking the Add recorder button once the baseline is high enough
-        j.find(by.xpath(
-            "//button[normalize-space(.)='Add recorder'] | //a[normalize-space(.)='Add recorder']"
-        )).click();
-        j.waitFor(by.xpath("//form[contains(@name, 'configSubmit')]"), 10);
-        j.find(by.path("/name")).sendKeys(name);
-        j.clickButton("Create");
+        if (j.getElement(by.button("Add recorder")) != null) {
+            j.runThenHandleInputDialog(() -> j.clickButton("Add recorder"), name);
+        } else {
+            j.clickLink("Add recorder");
+            j.find(by.path("/name")).sendKeys(name);
+            j.clickButton("Create");
+        }
+
+        j.waitFor(by.button("Add"), 10);
 
         for (Entry<String, Level> e : levels.entrySet()) {
             j.clickButton("Add");
