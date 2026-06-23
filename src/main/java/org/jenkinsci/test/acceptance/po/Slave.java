@@ -1,10 +1,13 @@
 package org.jenkinsci.test.acceptance.po;
 
 import com.google.common.base.Joiner;
+import java.time.Duration;
 import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 /**
  * An agent page object.
@@ -52,7 +55,16 @@ public class Slave extends Node {
 
     public String getLog() {
         visit("log");
-        return find(by.css("pre#out")).getText();
+        // population of the log is asynchronous
+        // before population we just have the placeholder `<pre id="out"></pre>`
+        // after population we have an extra div with the content <pre id="out"><div>...</div></pre>
+        WebElement webElement = find(by.css("pre#out"));
+        waitFor(webElement)
+                .withMessage("waiting for initial log")
+                .withTimeout(Duration.ofSeconds(10))
+                .ignoring(NoSuchElementException.class)
+                .until(we -> !we.findElements(by.css("div")).isEmpty());
+        return webElement.getText();
     }
 
     public boolean isOffline() {

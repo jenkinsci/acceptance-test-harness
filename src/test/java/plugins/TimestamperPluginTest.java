@@ -3,6 +3,7 @@ package plugins;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
 
+import java.time.Duration;
 import java.util.List;
 import org.jenkinsci.test.acceptance.junit.AbstractJUnitTest;
 import org.jenkinsci.test.acceptance.junit.WithPlugins;
@@ -10,7 +11,9 @@ import org.jenkinsci.test.acceptance.plugins.timestamper.TimstamperGlobalConfig;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 @WithPlugins("timestamper")
 public class TimestamperPluginTest extends AbstractJUnitTest {
@@ -27,6 +30,11 @@ public class TimestamperPluginTest extends AbstractJUnitTest {
 
     private void setTimestamp(String mode) {
         visit(job.getLastBuild().getConsoleUrl());
+        // timestamper panel is loaded asynchronously
+        waitFor(driver)
+                .withTimeout(Duration.ofSeconds(10))
+                .pollingEvery(Duration.ofMillis(250))
+                .until(ExpectedConditions.visibilityOfElementLocated(By.id("timestamper-pane")));
         driver.findElement(by.radioButton(mode)).click();
     }
 

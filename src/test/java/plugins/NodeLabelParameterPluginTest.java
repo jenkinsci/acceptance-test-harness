@@ -27,6 +27,7 @@ import org.jenkinsci.test.acceptance.plugins.textfinder.TextFinderPublisher;
 import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.JUnitPublisher;
+import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.Node;
 import org.jenkinsci.test.acceptance.po.Slave;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
@@ -238,11 +239,10 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
         assertThat(j.getLastBuild().waitUntilFinished().getNumber(), is(equalTo(1)));
         assertThat(s1.getBuildHistory().getBuildsOf(j), contains(b));
 
-        try {
-            assertThat(j.open(), Matchers.hasContent(s2.getName() + "\nis offline"));
-        } catch (AssertionError e) {
-            assertThat(j.open(), Matchers.hasContent(s2.getName() + " is offline"));
-        }
+        j.open();
+        j.waitForBuildWidgetToLoad();
+
+        assertThat(driver, Matchers.hasContent(s2.getName() + "\nis offline"));
 
         // bring second slave online again
         s2.markOnline();
@@ -546,11 +546,9 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     private String getPendingBuildText(Build build) {
         // ensure to be on the job's page otherwise we do not have the build history summary
         // to get their content
-        build.job.open();
-
-        // pending message comes from the queue, and queue's maintenance is asynchronous to UI threads.
-        // so if the original response doesn't contain it, we have to wait for the refresh of the build history.
-        // so give it a bigger wait.
+        Job j = build.job;
+        j.open();
+        j.waitForBuildWidgetToLoad();
         return find(by.css("#buildHistoryPage")).getText();
     }
 }

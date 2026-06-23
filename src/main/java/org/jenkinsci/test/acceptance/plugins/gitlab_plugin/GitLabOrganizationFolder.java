@@ -26,6 +26,10 @@ public class GitLabOrganizationFolder extends Folder {
         return driver.getPageSource();
     }
 
+    public void setCheckoutCredentials(String credentialId) {
+        control("/navigators/credentialsId").select(credentialId);
+    }
+
     public GitLabOrganizationFolder waitForCheckFinished(Duration timeout) {
         waitFor()
                 .withMessage("Waiting for GitLab group scan to finish in %s", this.name)

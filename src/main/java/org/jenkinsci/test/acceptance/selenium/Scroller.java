@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openqa.selenium.JavascriptExecutor;
@@ -11,6 +12,7 @@ import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.events.WebDriverListener;
 
 /**
@@ -95,6 +97,23 @@ public class Scroller implements WebDriverListener {
     @Override
     public void afterTo(Navigation navigation, URL url) {
         disableStickyElementsIgnoringDialogs();
+    }
+
+    private String preClickURL;
+
+    @Override
+    public void beforeClick(WebElement element) {
+        preClickURL = driver.getCurrentUrl();
+        WebDriverListener.super.beforeClick(element);
+    }
+
+    @Override
+    public void afterClick(WebElement element) {
+        if (!Objects.equals(preClickURL, driver.getCurrentUrl())) {
+            // we have performed navigation via a click
+            disableStickyElements();
+        }
+        preClickURL = null;
     }
 
     private void disableStickyElementsIgnoringDialogs() {
