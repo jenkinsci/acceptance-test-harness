@@ -24,7 +24,7 @@ public class JenkinsLogger extends PageObject {
     public static JenkinsLogger create(Jenkins j, String name, Map<String, Level> levels) {
         j.visit("log");
 
-        // This can be simplified to clicking the Add recorder button once the baseline is high enough
+        // TODO: This can be simplified to clicking the Add recorder button once the baseline is higher than 2.571
         if (j.getElement(by.button("Add recorder")) != null) {
             j.runThenHandleInputDialog(() -> j.clickButton("Add recorder"), name);
         } else {
