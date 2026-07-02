@@ -14,7 +14,7 @@ public class JenkinsConfig extends ConfigurablePageObject {
     public final Control quietPeriod = control("/jenkins-model-GlobalQuietPeriodConfiguration/quietPeriod");
 
     public JenkinsConfig(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url("configure"));
+        super(jenkins, jenkins.url("configure"));
         this.jenkins = jenkins;
     }
 

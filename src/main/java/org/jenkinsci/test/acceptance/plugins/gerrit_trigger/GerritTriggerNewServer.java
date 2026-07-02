@@ -38,7 +38,7 @@ public class GerritTriggerNewServer extends PageObject {
     public final Control modeDefault = control("/mode[com.sonyericsson.hudson.plugins.gerrit.trigger.GerritServer]");
 
     public GerritTriggerNewServer(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url("gerrit-trigger/newServer"));
+        super(jenkins, jenkins.url("gerrit-trigger/newServer"));
         this.jenkins = jenkins;
     }
 
