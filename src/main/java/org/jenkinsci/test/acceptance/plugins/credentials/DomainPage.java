@@ -69,7 +69,7 @@ public class DomainPage extends ConfigurablePageObject {
     public void delete() {
         visit(url);
 
-        clickButton("More actions");
+        find(by.id("more-domain-actions")).click();
 
         clickLink("Delete domain");
         clickButton("Yes");

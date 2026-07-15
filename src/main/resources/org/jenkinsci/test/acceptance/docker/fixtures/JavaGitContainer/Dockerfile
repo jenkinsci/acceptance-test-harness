@@ -3,7 +3,7 @@
 # and prepares for execution of Java compile jobs on slaves.
 #
 
-FROM ubuntu:noble
+FROM ubuntu:resolute
 
 RUN mkdir -p /var/run/sshd
 
