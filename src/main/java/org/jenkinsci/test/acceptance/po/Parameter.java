@@ -53,6 +53,11 @@ public abstract class Parameter extends PageAreaImpl {
             return super.path(rel);
         }
 
+        if (Boolean.getBoolean("new-job-page.flag.defaultValue")) {
+            return by.xpath(
+                    "//input[@name='name' and @value='%s']/parent::div[@name='parameter']//*[@name='%s']", name, rel);
+        }
+
         String np = driver.findElement(by.xpath("//input[@name='name' and @value='%s']", name))
                 .getAttribute("path");
         String path = np.replaceAll("/name$", "") + "/" + rel;
