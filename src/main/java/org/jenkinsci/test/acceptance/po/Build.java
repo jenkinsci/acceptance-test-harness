@@ -38,17 +38,17 @@ public class Build extends ContainerPageObject {
     private boolean success;
 
     public Build(Job job, int buildNumber) {
-        super(job.injector, job.url("%d/", buildNumber));
+        super(job, job.url("%d/", buildNumber));
         this.job = job;
     }
 
     public Build(Job job, String permalink) {
-        super(job.injector, job.url(permalink + "/"));
+        super(job, job.url(permalink + "/"));
         this.job = job;
     }
 
     public Build(Job job, URL url) {
-        super(job.injector, url);
+        super(job, url);
         this.job = job;
     }
 
