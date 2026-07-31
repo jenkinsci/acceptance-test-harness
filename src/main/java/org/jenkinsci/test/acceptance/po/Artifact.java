@@ -19,7 +19,7 @@ public class Artifact extends PageObject {
     private final @NonNull String path;
 
     public Artifact(@NonNull Build build, @NonNull String path) {
-        super(build.injector, build.url("artifact/%s", path));
+        super(build, build.url("artifact/%s", path));
         this.build = build;
         this.path = path;
     }

@@ -42,7 +42,7 @@ import org.openqa.selenium.WebElement;
 public class WizardCustomizeJenkins extends PageObject {
 
     public WizardCustomizeJenkins(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url(""));
+        super(jenkins, jenkins.url(""));
     }
 
     public WizardCustomizeJenkins doInstallSuggested() {

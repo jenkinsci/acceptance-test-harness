@@ -49,7 +49,7 @@ public class WizardCreateAdminUser extends PageObject {
     JenkinsController controller;
 
     public WizardCreateAdminUser(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url(""));
+        super(jenkins, jenkins.url(""));
     }
 
     public WizardCreateAdminUser createAdminUser(String userName, String password, String fullName, String email) {

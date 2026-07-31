@@ -28,7 +28,7 @@ import org.jenkinsci.test.acceptance.po.Job;
 public class MavenModule extends Job {
 
     public MavenModule(MavenModuleSet job, String name) {
-        super(job.injector, job.url("./%s/", name), name);
+        super(job, job.url("./%s/", name), name);
     }
 
     @Override

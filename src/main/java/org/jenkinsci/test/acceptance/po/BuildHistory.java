@@ -16,11 +16,11 @@ public class BuildHistory extends PageObject {
     private static final Pattern CONSOLE_LINK_PATTERN = Pattern.compile("/job/(.+?)/(\\d+)/console");
 
     public BuildHistory(Node parent) {
-        super(parent.injector, parent.url("builds"));
+        super(parent, parent.url("builds"));
     }
 
     public BuildHistory(View parent) {
-        super(parent.injector, parent.url("builds"));
+        super(parent, parent.url("builds"));
     }
 
     public Set<Build> getBuilds() {
