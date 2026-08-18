@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.inject.Provider;
 import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
@@ -16,6 +17,9 @@ import org.jenkinsci.test.acceptance.guice.AutoCleaned;
 import org.jenkinsci.test.acceptance.log.LogListener;
 import org.jenkinsci.test.acceptance.log.LogPrinter;
 import org.jenkinsci.test.acceptance.log.NullPrinter;
+import org.jenkinsci.test.acceptance.server.JenkinsControllerPoolProcess;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.WebDriver;
 
 /**
  * Starts/stops Jenkins and exposes where it is running.
@@ -29,6 +33,9 @@ import org.jenkinsci.test.acceptance.log.NullPrinter;
  */
 @ExtensionPoint // TODO is it not the JenkinsControllerFactory that is the extension point?
 public abstract class JenkinsController implements IJenkinsController, AutoCleaned {
+
+    private static final Logger LOGGER = Logger.getLogger(JenkinsController.class.getName());
+
     @Inject
     @Named("quite")
     protected boolean isQuite;
@@ -36,6 +43,9 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
     @Inject
     @Named("WORKSPACE")
     protected String WORKSPACE;
+
+    @Inject
+    protected Provider<WebDriver> driver;
 
     public static final int STARTUP_TIMEOUT;
 
@@ -88,6 +98,32 @@ public abstract class JenkinsController implements IJenkinsController, AutoClean
             populateJenkinsHome(IOUtils.toByteArray(url), false);
             startNow();
             isRunning = true;
+        }
+        if (JenkinsControllerPoolProcess.MAIN) {
+            // this is a pooled controller running outside of tests
+            return;
+        }
+        try {
+            URL url = getUrl();
+            // Inject the cookie to disable sticky elements.
+            Cookie c = new Cookie.Builder("disableStickyPositioning", "true")
+                    .isSecure("https".equalsIgnoreCase(url.getProtocol()))
+                    .sameSite("Lax")
+                    .path("/")
+                    .build();
+
+            WebDriver d = driver.get();
+            synchronized (JenkinsController.class) {
+                // we want to allow parallel startup of controllers,
+                // but this part needs to ensure it runs against one controller at once
+                d.navigate().to(url);
+                d.manage().addCookie(c);
+            }
+        } catch (Exception e) {
+            LOGGER.log(
+                    Level.WARNING,
+                    "Failed to inject disableStickyPositioning cookie; continuing without sticky disabling",
+                    e);
         }
     }
 

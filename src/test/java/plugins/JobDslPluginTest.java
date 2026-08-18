@@ -381,26 +381,30 @@ public class JobDslPluginTest extends AbstractJUnitTest {
     private FreeStyleJob executeRemovedConfigFilesAction(JobDslRemovedConfigFilesAction action) {
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("configFiles {\n" + "  customConfig {\n"
-                + "    id('123456789')\n"
-                + "    name('Old_Config_File')\n"
-                + "    comment('This is a comment.')\n"
-                + "    content('My Content')\n"
-                + "    providerId('')\n"
-                + "  }\n"
-                + "}");
+        jobDsl.setScript("""
+                configFiles {
+                  customConfig {
+                    id('123456789')
+                    name('Old_Config_File')
+                    comment('This is a comment.')
+                    content('My Content')
+                    providerId('')
+                  }
+                }""");
         seedJob.save();
         seedJob.scheduleBuild().shouldSucceed();
 
         seedJob.configure(() -> {
-            jobDsl.setScript("configFiles {\n" + "  customConfig {\n"
-                    + "    id('456789123')\n"
-                    + "    name('New_Config_File')\n"
-                    + "    comment('This is a comment.')\n"
-                    + "    content('My Content')\n"
-                    + "    providerId('')\n"
-                    + "  }\n"
-                    + "}");
+            jobDsl.setScript("""
+                    configFiles {
+                      customConfig {
+                        id('456789123')
+                        name('New_Config_File')
+                        comment('This is a comment.')
+                        content('My Content')
+                        providerId('')
+                      }
+                    }""");
             jobDsl.setRemovedConfigFilesAction(action);
         });
         return seedJob;
@@ -469,7 +473,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         FreeStyleJob seedJob = createSeedJob();
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("job('New_Job') {\n" + "   publishers {\n" + "      chucknorris()\n" + "   }\n" + "}");
+        jobDsl.setScript("""
+                job('New_Job') {
+                   publishers {
+                      chucknorris()
+                   }
+                }""");
         seedJob.save();
         Build build = seedJob.scheduleBuild().shouldBeUnstable();
         assertThat(build.getConsole(), containsString("plugin 'chucknorris' needs to be installed"));
@@ -490,13 +499,15 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         seedJob.copyResource(resource("/job_dsl_plugin/MyUtilities.groovy"), "src/utilities/MyUtilities.groovy");
         seedJob.copyResource(resource("/job_dsl_plugin/Utility.jar"));
         JobDslBuildStep jobDsl = seedJob.addBuildStep(JobDslBuildStep.class);
-        jobDsl.setScript("import utilities.MyUtilities\n" + "import utilities.MyUtilitiesFromJar\n"
-                + "\n"
-                + "def job_folder = job('job_src_folder')\n"
-                + "MyUtilities.addDescription(job_folder)\n"
-                + "\n"
-                + "def job_jar = job('job_jar_file')\n"
-                + "MyUtilitiesFromJar.addDescription(job_jar)");
+        jobDsl.setScript("""
+                import utilities.MyUtilities
+                import utilities.MyUtilitiesFromJar
+
+                def job_folder = job('job_src_folder')
+                MyUtilities.addDescription(job_folder)
+
+                def job_jar = job('job_jar_file')
+                MyUtilitiesFromJar.addDescription(job_jar)""");
 
         seedJob.save();
         Build build = seedJob.scheduleBuild().shouldFail();

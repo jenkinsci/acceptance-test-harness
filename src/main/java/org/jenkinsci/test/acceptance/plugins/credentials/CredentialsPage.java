@@ -9,7 +9,6 @@ import java.net.URL;
 import org.jenkinsci.test.acceptance.po.ConfigurablePageObject;
 import org.jenkinsci.test.acceptance.po.Folder;
 import org.jenkinsci.test.acceptance.po.Jenkins;
-import org.jenkinsci.test.acceptance.selenium.Scroller;
 import org.openqa.selenium.UnhandledAlertException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -54,7 +53,6 @@ public class CredentialsPage extends ConfigurablePageObject {
         WebElement nextButton = find(by.id("cr-dialog-next"));
         nextButton.click();
         waitFor(by.id("cr-dialog-submit"));
-        new Scroller(driver).disableStickyElements();
 
         // If the credential has a scope field, wait for the options to load.
         // Otherwise, sometimes the JS doesn't run fast enough to fill in the options
@@ -115,8 +113,6 @@ public class CredentialsPage extends ConfigurablePageObject {
         }
 
         clickButton("Update credential");
-
-        new Scroller(driver).disableStickyElements();
 
         waitFor(by.xpath("//form[contains(@name, '" + getFormName() + "')]"), 10);
         waitFor(SAVE_BUTTON, 5);

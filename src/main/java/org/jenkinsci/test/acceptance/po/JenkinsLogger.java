@@ -22,9 +22,18 @@ public class JenkinsLogger extends PageObject {
      * @see Jenkins#createLogger(String, Map)
      */
     public static JenkinsLogger create(Jenkins j, String name, Map<String, Level> levels) {
-        j.visit("log/new");
-        j.find(by.path("/name")).sendKeys(name);
-        j.clickButton("Create");
+        j.visit("log");
+
+        // TODO: This can be simplified to clicking the Add recorder button once the baseline is higher than 2.571
+        if (j.getElement(by.button("Add recorder")) != null) {
+            j.runThenHandleInputDialog(() -> j.clickButton("Add recorder"), name);
+        } else {
+            j.clickLink("Add recorder");
+            j.find(by.path("/name")).sendKeys(name);
+            j.clickButton("Create");
+        }
+
+        j.waitFor(by.button("Add"), 10);
 
         for (Entry<String, Level> e : levels.entrySet()) {
             j.clickButton("Add");

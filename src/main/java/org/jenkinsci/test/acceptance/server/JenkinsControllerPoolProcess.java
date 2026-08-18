@@ -11,15 +11,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.StandardProtocolFamily;
+import java.net.UnixDomainSocketAddress;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.SynchronousQueue;
-import jnr.unixsocket.UnixServerSocketChannel;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
 import org.jenkinsci.test.acceptance.Config;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -123,14 +124,13 @@ public class JenkinsControllerPoolProcess {
         socket.deleteOnExit();
         socket.delete();
 
-        try (UnixServerSocketChannel channel = UnixServerSocketChannel.open()) {
-            channel.configureBlocking(true);
-            channel.socket().bind(new UnixSocketAddress(socket));
-
+        try (ServerSocketChannel server = ServerSocketChannel.open(StandardProtocolFamily.UNIX)) {
+            server.configureBlocking(true);
+            server.bind(UnixDomainSocketAddress.of(socket.toPath()));
             System.out.println("JUT Server is ready and listening at " + socket.getAbsolutePath());
 
             while (true) {
-                final UnixSocketChannel c = channel.accept();
+                final SocketChannel c = server.accept();
                 System.out.println("Accepted");
                 final QueueItem qi = queue.take();
                 final JenkinsController j = qi.controller;
@@ -158,7 +158,7 @@ public class JenkinsControllerPoolProcess {
     /**
      * Serve individual connection to the test harness.
      */
-    private void processConnection(UnixSocketChannel c, JenkinsController j) {
+    private void processConnection(SocketChannel c, JenkinsController j) {
         try {
             try (c) {
                 try (InputStream in = ChannelStream.in(c);

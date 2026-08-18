@@ -43,17 +43,24 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
     }
 
     public User signup(String name) {
-        return signup().password(name)
+        return signup().username(name)
                 .fullname(name)
                 .email(name + "@mailinator.com", false)
-                .signup(name);
+                .password(name)
+                .signup();
     }
 
     public User signup(String name, String pwd, String fullName, String email) {
-        return signup().password(pwd).fullname(fullName).email(email).signup(name);
+        return signup().username(name)
+                .fullname(fullName)
+                .email(email)
+                .password(pwd)
+                .signup();
     }
 
     public static final class Signup extends PageObject {
+
+        private String username;
 
         protected Signup(Jenkins context) {
             super(context, context.url("signup"));
@@ -89,6 +96,22 @@ public class JenkinsDatabaseSecurityRealm extends SecurityRealm {
             return email(mail, true);
         }
 
+        public Signup username(String username) {
+            control(by.input("username")).set(username);
+            this.username = username;
+            return this;
+        }
+
+        public User signup() {
+            control(by.name("Submit")).clickAndWaitToBecomeStale();
+
+            return new User(getJenkins(), username);
+        }
+
+        /**
+         * @deprecated use {@link #username(String)} and {@link #signup()} instead
+         */
+        @Deprecated
         public User signup(String name) {
             control(by.input("username")).set(name);
             control(by.name("Submit")).clickAndWaitToBecomeStale();

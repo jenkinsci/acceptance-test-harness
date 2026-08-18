@@ -10,11 +10,11 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.UnixDomainSocketAddress;
+import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executors;
-import jnr.unixsocket.UnixSocketAddress;
-import jnr.unixsocket.UnixSocketChannel;
 import org.jenkinsci.remoting.RoleChecker;
 import org.jenkinsci.test.acceptance.controller.IJenkinsController;
 import org.jenkinsci.test.acceptance.controller.JenkinsController;
@@ -31,7 +31,7 @@ import org.jenkinsci.test.acceptance.log.LogSplitter;
 public class PooledJenkinsController extends JenkinsController implements LogListenable {
     private URL url;
     private final File socket;
-    private UnixSocketChannel conn;
+    private SocketChannel conn;
     private final LogSplitter splitter = new LogSplitter();
     private Channel channel;
     private IJenkinsController controller;
@@ -58,8 +58,8 @@ public class PooledJenkinsController extends JenkinsController implements LogLis
         }
 
         System.out.println("Requesting jut instance using socket " + socket.getAbsolutePath());
-        UnixSocketAddress address = new UnixSocketAddress(socket);
-        conn = UnixSocketChannel.open(address);
+        UnixDomainSocketAddress address = UnixDomainSocketAddress.of(socket.toPath());
+        conn = SocketChannel.open(address);
 
         channel = new ChannelBuilder("JenkinsPool", Executors.newCachedThreadPool())
                 .withMode(Mode.BINARY)

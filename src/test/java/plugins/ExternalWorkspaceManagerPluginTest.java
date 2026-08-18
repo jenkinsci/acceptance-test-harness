@@ -64,19 +64,19 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @Test
     public void shareWorkspaceOneJobTwoNodes() {
-        WorkflowJob job = createWorkflowJob(String.format(
-                "def extWorkspace = exwsAllocate '%s' \n" + "node ('linux') { \n"
-                        + "   exws (extWorkspace) { \n"
-                        + "      writeFile file: 'marker', text: 'content' \n"
-                        + "   } \n"
-                        + "} \n"
-                        + "node ('test') { \n"
-                        + "   exws (extWorkspace) { \n"
-                        + "       def content = readFile(file: 'marker') \n"
-                        + "       if (content != 'content') error('Content mismatch: ' + content) \n"
-                        + "   } \n"
-                        + "}",
-                DISK_POOL_ID));
+        WorkflowJob job = createWorkflowJob(String.format("""
+                def extWorkspace = exwsAllocate '%s'
+                node ('linux') {
+                   exws (extWorkspace) {
+                      writeFile file: 'marker', text: 'content'
+                   }
+                }
+                node ('test') {
+                   exws (extWorkspace) {
+                       def content = readFile(file: 'marker')
+                       if (content != 'content') error('Content mismatch: ' + content)
+                   }
+                }""", DISK_POOL_ID));
 
         Build build = job.startBuild();
         build.shouldSucceed();
@@ -90,13 +90,13 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @Test
     public void shareWorkspaceTwoJobsTwoNodes() {
-        WorkflowJob upstreamJob = createWorkflowJob(String.format(
-                "def extWorkspace = exwsAllocate '%s' \n" + "node ('linux') { \n"
-                        + "   exws (extWorkspace) { \n"
-                        + "      writeFile file: 'marker', text: 'content' \n "
-                        + "   } \n"
-                        + "}",
-                DISK_POOL_ID));
+        WorkflowJob upstreamJob = createWorkflowJob(String.format("""
+                def extWorkspace = exwsAllocate '%s'
+                node ('linux') {
+                   exws (extWorkspace) {
+                      writeFile file: 'marker', text: 'content'
+                   }
+                }""", DISK_POOL_ID));
 
         Build upstreamBuild = upstreamJob.startBuild();
         upstreamBuild.shouldSucceed();
@@ -106,16 +106,15 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
                         "Running in %s/%s/%s", fakeNodeMountingPoint, upstreamJob.name, upstreamBuild.getNumber())));
         verifyExternalWorkspacesAction(upstreamJob.name, upstreamBuild);
 
-        WorkflowJob downstreamJob = createWorkflowJob(String.format(
-                "def run = selectRun '%s' \n"
-                        + "def extWorkspace = exwsAllocate selectedRun: run \n"
-                        + "node ('test') { \n"
-                        + "   exws (extWorkspace) { \n"
-                        + "       def content = readFile(file: 'marker') \n"
-                        + "       if (content != 'content') error('Content mismatch: ' + content) \n"
-                        + "   } \n"
-                        + "}",
-                upstreamJob.name));
+        WorkflowJob downstreamJob = createWorkflowJob(String.format("""
+                def run = selectRun '%s'
+                def extWorkspace = exwsAllocate selectedRun: run
+                node ('test') {
+                   exws (extWorkspace) {
+                       def content = readFile(file: 'marker')
+                       if (content != 'content') error('Content mismatch: ' + content)
+                   }
+                }""", upstreamJob.name));
 
         Build downstreamBuild = downstreamJob.startBuild();
         downstreamBuild.shouldSucceed();
@@ -128,18 +127,17 @@ public class ExternalWorkspaceManagerPluginTest extends AbstractJUnitTest {
 
     @Test
     public void externalWorkspaceCleanup() {
-        WorkflowJob job = createWorkflowJob(String.format(
-                "def extWorkspace = exwsAllocate '%s' \n"
-                        + "node ('linux') { \n"
-                        + "	exws (extWorkspace) { \n"
-                        + "		try { \n"
-                        + "           writeFile file: 'foobar.txt', text: 'any' \n"
-                        + "		} finally { \n"
-                        + "			step ([$class: 'WsCleanup']) \n"
-                        + "		} \n"
-                        + "	} \n"
-                        + "}",
-                DISK_POOL_ID));
+        WorkflowJob job = createWorkflowJob(String.format("""
+                def extWorkspace = exwsAllocate '%s'
+                node ('linux') {
+                    exws (extWorkspace) {
+                        try {
+                            writeFile file: 'foobar.txt', text: 'any'
+                        } finally {
+                            step ([$class: 'WsCleanup'])
+                        }
+                    }
+                }""", DISK_POOL_ID));
 
         Build build = job.startBuild();
         build.shouldSucceed();

@@ -2,6 +2,7 @@ package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 
 import org.jenkinsci.test.acceptance.po.PageArea;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.openqa.selenium.WebElement;
 
 /**
  * Represents a single row in the matrix permission table.
@@ -22,12 +23,21 @@ public class MatrixRow extends PageAreaImpl {
     }
 
     public MatrixRow _check(boolean enable, Object... permissions) {
+        openCardIfRequired();
+
         for (Object p : permissions) {
             if (p != null) {
                 control(p.toString()).check(enable);
             }
         }
         return this;
+    }
+
+    private void openCardIfRequired() {
+        WebElement card = control("").resolve();
+        if (!Boolean.parseBoolean(card.getAttribute("aria-expanded"))) {
+            card.click();
+        }
     }
 
     /**
