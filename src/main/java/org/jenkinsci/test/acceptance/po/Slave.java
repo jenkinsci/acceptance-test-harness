@@ -151,7 +151,13 @@ public class Slave extends Node {
     public void disconnect(String message) {
         if (isOnline()) {
             open();
-            find(by.link("Disconnect")).click();
+            try {
+                find(by.link("Disconnect")).click();
+            } catch (NoSuchElementException e) {
+                find(by.id("agent-offline-overflow-button")).click();
+                clickButton("Disconnect");
+            }
+
             find(by.input("offlineMessage")).clear();
             find(by.input("offlineMessage")).sendKeys(message);
             try {
