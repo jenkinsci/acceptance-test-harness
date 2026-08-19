@@ -162,7 +162,14 @@ public class Slave extends Node {
     public void launch() {
         if (isOffline()) {
             open();
-            clickButton("Launch agent");
+            try {
+                clickButton("Launch agent");
+            } catch (NoSuchElementException e) {
+                // The agent may have reconnected automatically
+                if (isOffline()) {
+                    throw e;
+                }
+            }
         }
     }
 }
