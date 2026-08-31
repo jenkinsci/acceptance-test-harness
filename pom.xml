@@ -33,7 +33,7 @@
     <jenkins.version>2.583</jenkins.version>
     <selenium.version>4.49.0</selenium.version>
     <!-- aligned with selenium -->
-    <guava.version>33.6.0-jre</guava.version>
+    <guava.version>33.7.1-jre</guava.version>
 
     <!-- Keep them aligned to Maven version -->
     <maven.version>3.9.6</maven.version>
@@ -98,7 +98,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.18.11-jdk5</version>
+        <version>1.18.13</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -134,6 +134,12 @@ and
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
         <version>3.32.0-GA</version>
+      </dependency>
+      <!-- RequireUpperBoundDeps between JSpecify and Selenium -->
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>1.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
