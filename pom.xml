@@ -135,6 +135,12 @@ and
         <artifactId>javassist</artifactId>
         <version>3.32.0-GA</version>
       </dependency>
+      <!-- RequireUpperBoundDeps between Guava and Selenium -->
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>1.0.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
