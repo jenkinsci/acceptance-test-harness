@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Job;
 import org.jenkinsci.test.acceptance.po.PageAreaImpl;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
@@ -10,8 +11,6 @@ import org.jenkinsci.test.acceptance.po.PageAreaImpl;
 public class ProjectMatrixProperty extends PageAreaImpl {
 
     private final Control useProjectSecurity = control("useProjectSecurity");
-
-    private final Control table = control("useProjectSecurity/data");
 
     public ProjectMatrixProperty(Job job) {
         super(job, "/properties/hudson-security-AuthorizationMatrixProperty");
@@ -21,8 +20,8 @@ public class ProjectMatrixProperty extends PageAreaImpl {
      * Adds a new user/group to this matrix.
      */
     public MatrixRow addUser(String name) {
-        runThenHandleInputDialog(
-                () -> this.table.resolve().findElement(by.button("Add user")).click(), name);
+        WebElement table = waitFor(path("useProjectSecurity/data"));
+        runThenHandleInputDialog(() -> table.findElement(by.button("Add user")).click(), name);
         return getUser(name);
     }
 

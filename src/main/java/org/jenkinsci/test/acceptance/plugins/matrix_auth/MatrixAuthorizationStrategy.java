@@ -1,16 +1,15 @@
 package org.jenkinsci.test.acceptance.plugins.matrix_auth;
 
 import org.jenkinsci.test.acceptance.po.AuthorizationStrategy;
-import org.jenkinsci.test.acceptance.po.Control;
 import org.jenkinsci.test.acceptance.po.Describable;
 import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Kohsuke Kawaguchi
  */
 @Describable("Matrix-based security")
 public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
-    private final Control table = control("/data");
 
     public MatrixAuthorizationStrategy(GlobalSecurityConfig context, String path) {
         super(context, path);
@@ -20,8 +19,8 @@ public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
      * Adds a new user to this matrix.
      */
     public MatrixRow addUser(String name) {
-        runThenHandleInputDialog(
-                () -> this.table.resolve().findElement(by.button("Add user")).click(), name);
+        WebElement table = waitFor(path("data"));
+        runThenHandleInputDialog(() -> table.findElement(by.button("Add user")).click(), name);
         return getUser(name);
     }
 
