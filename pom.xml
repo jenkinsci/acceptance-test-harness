@@ -30,8 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <!-- TODO https://github.com/jenkinsci/jenkins/pull/26999 -->
-    <jenkins.version>2.571-rc38427.19fc5f119734</jenkins.version>
+    <jenkins.version>2.573</jenkins.version>
     <selenium.version>4.45.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.6.0-jre</guava.version>
@@ -209,7 +208,7 @@ and
     <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
-      <version>1.22.0</version>
+      <version>1.22.1</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
@@ -290,7 +289,7 @@ and
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>1.84</version>
+      <version>1.85</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
@@ -339,7 +338,7 @@ and
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3383.vc8881d4b_0e76</version>
+      <version>3384.v60d89463d9e0</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
@@ -423,7 +422,7 @@ and
     <dependency>
       <groupId>com.github.dasniko</groupId>
       <artifactId>testcontainers-keycloak</artifactId>
-      <version>4.2.1</version>
+      <version>4.3.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -777,7 +776,7 @@ and
       <id>lts</id>
       <properties>
         <!--RENOVATE-LTS-->
-        <jenkins.version>2.555.3</jenkins.version>
+        <jenkins.version>2.568.1</jenkins.version>
       </properties>
     </profile>
   </profiles>
