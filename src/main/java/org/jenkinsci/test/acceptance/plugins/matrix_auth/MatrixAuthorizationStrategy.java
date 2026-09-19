@@ -10,7 +10,7 @@ import org.jenkinsci.test.acceptance.po.GlobalSecurityConfig;
  */
 @Describable("Matrix-based security")
 public class MatrixAuthorizationStrategy extends AuthorizationStrategy {
-    private final Control table = control("/data");
+    private final Control table = control("/authorizationStrategy/data");
 
     public MatrixAuthorizationStrategy(GlobalSecurityConfig context, String path) {
         super(context, path);
