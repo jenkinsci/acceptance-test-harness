@@ -1218,6 +1218,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
             MatrixAuthorizationStrategy mas = sc.useAuthorizationStrategy(MatrixAuthorizationStrategy.class);
 
+            System.out.println("=======");
+            System.out.println("=======");
+            System.out.println(driver.getPageSource());
+            System.out.println("=======");
+            System.out.println("=======");
+
             MatrixRow a = mas.addUser(ADMIN);
             a.admin();
 
