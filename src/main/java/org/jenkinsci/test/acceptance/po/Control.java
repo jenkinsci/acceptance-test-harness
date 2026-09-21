@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Duration;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.openqa.selenium.By;
@@ -28,6 +29,8 @@ import org.openqa.selenium.support.ui.Select;
  * @see PageAreaImpl#control(String...)
  */
 public class Control extends CapybaraPortingLayerImpl {
+    private static final Logger LOGGER = Logger.getLogger(Control.class.getName());
+
     private final Owner parent;
     private final String[] relativePaths;
 
@@ -63,16 +66,34 @@ public class Control extends CapybaraPortingLayerImpl {
         }
         // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
         // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
+        LOGGER.info(() -> "Unable to resolve " + describe() + " in " + driver.getCurrentUrl()
+                + ", recomputing form element paths");
         if (recomputeFormElementPaths()) {
             for (String p : relativePaths) {
                 try {
-                    return find(parent.path(p));
+                    WebElement element = find(parent.path(p));
+                    LOGGER.info(() -> "Resolved " + parent.path(p) + " after recomputing form element paths");
+                    return element;
                 } catch (NoSuchElementException e) {
                     problem = e;
                 }
             }
+            LOGGER.warning(() -> "Still unable to resolve " + describe() + " after recomputing form element paths");
+        } else {
+            LOGGER.warning("Unable to recompute form element paths, window.recomputeFormElementPath is unavailable");
         }
         throw problem;
+    }
+
+    private String describe() {
+        StringBuilder sb = new StringBuilder();
+        for (String p : relativePaths) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(parent.path(p));
+        }
+        return sb.toString();
     }
 
     private boolean recomputeFormElementPaths() {
