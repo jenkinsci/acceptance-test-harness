@@ -56,6 +56,8 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     public WebElement resolve() {
+        LOGGER.info(() -> "Ello ello! Resolving " + describe() + " in " + driver.getCurrentUrl());
+
         NoSuchElementException problem = new NoSuchElementException("No relative path specified!");
         for (String p : relativePaths) {
             try {
@@ -65,10 +67,11 @@ public class Control extends CapybaraPortingLayerImpl {
             }
         }
         LOGGER.info(() -> "Unable to resolve " + describe() + " in " + driver.getCurrentUrl());
+        LOGGER.info(() -> "Available paths:\n" + availablePaths());
         // // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
         // // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
         // if (recomputeFormElementPaths()) {
-        //     for (String p : relativePaths) {
+        //     for (String p : relaticvePaths) {
         //         try {
         //             WebElement element = find(parent.path(p));
         //             LOGGER.info(() -> "Resolved " + parent.path(p) + " after recomputing form element paths");
@@ -82,6 +85,17 @@ public class Control extends CapybaraPortingLayerImpl {
         //     LOGGER.warning("Unable to recompute form element paths, window.recomputeFormElementPath is unavailable");
         // }
         throw problem;
+    }
+
+    private String availablePaths() {
+        try {
+            return String.valueOf(
+                    ((JavascriptExecutor) driver)
+                            .executeScript(
+                                    "return Array.from(document.querySelectorAll('[path]')).map(e => e.getAttribute('path')).join('\\n');"));
+        } catch (WebDriverException e) {
+            return "(unable to read paths: " + e.getMessage() + ")";
+        }
     }
 
     private String describe() {
