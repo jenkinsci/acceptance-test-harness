@@ -9,6 +9,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -60,7 +61,31 @@ public class Control extends CapybaraPortingLayerImpl {
                 problem = e;
             }
         }
+        // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
+        // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
+        if (recomputeFormElementPaths()) {
+            for (String p : relativePaths) {
+                try {
+                    return find(parent.path(p));
+                } catch (NoSuchElementException e) {
+                    problem = e;
+                }
+            }
+        }
         throw problem;
+    }
+
+    private boolean recomputeFormElementPaths() {
+        try {
+            return Boolean.TRUE.equals(((JavascriptExecutor) driver).executeScript("""
+                            if (typeof window.recomputeFormElementPath === 'function') {
+                                window.recomputeFormElementPath();
+                                return true;
+                            }
+                            return false;"""));
+        } catch (WebDriverException e) {
+            return false;
+        }
     }
 
     public void sendKeys(String t) {
