@@ -3,6 +3,7 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Duration;
+import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -67,6 +68,9 @@ public class Control extends CapybaraPortingLayerImpl {
             }
         }
         LOGGER.info(() -> "Unable to resolve " + describe() + " in " + driver.getCurrentUrl());
+        for (String p : relativePaths) {
+            LOGGER.info(() -> "State of " + parent.path(p) + " now: " + stateOf(parent.path(p)));
+        }
         LOGGER.info(() -> "Available paths:\n" + availablePaths());
         // // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
         // // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
@@ -85,6 +89,31 @@ public class Control extends CapybaraPortingLayerImpl {
         //     LOGGER.warning("Unable to recompute form element paths, window.recomputeFormElementPath is unavailable");
         // }
         throw problem;
+    }
+
+    /**
+     * Reports whether the element is in the DOM at all, and if so whether it is visible, so a failure caused by the
+     * path arriving late can be told apart from one caused by the element being hidden.
+     */
+    private String stateOf(By selector) {
+        try {
+            List<WebElement> matches = driver.findElements(selector);
+            if (matches.isEmpty()) {
+                return "not in the DOM";
+            }
+            StringBuilder sb = new StringBuilder(matches.size() + " match(es)");
+            for (WebElement match : matches) {
+                sb.append("; displayed=").append(match.isDisplayed());
+                sb.append(", rect=").append(match.getRect());
+                sb.append(", css=").append(((JavascriptExecutor) driver).executeScript("""
+                                        var s = getComputedStyle(arguments[0]);
+                                        return s.display + '/' + s.visibility + '/' + s.opacity
+                                            + ' offsetParentNull=' + (arguments[0].offsetParent === null);""", match));
+            }
+            return sb.toString();
+        } catch (WebDriverException e) {
+            return "(unable to inspect: " + e.getMessage() + ")";
+        }
     }
 
     private String availablePaths() {
