@@ -32,6 +32,9 @@ import org.openqa.selenium.support.ui.Select;
 public class Control extends CapybaraPortingLayerImpl {
     private static final Logger LOGGER = Logger.getLogger(Control.class.getName());
 
+    /** Marker for the temporary form element path diagnostics, so they can be grepped out of CI logs. */
+    private static final String PATHDEBUG = "[PATHDEBUG] ";
+
     private final Owner parent;
     private final String[] relativePaths;
 
@@ -57,7 +60,11 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     public WebElement resolve() {
-        LOGGER.info(() -> "Ello ello! Resolving " + describe() + " in " + driver.getCurrentUrl());
+        LOGGER.info(() -> PATHDEBUG + "Resolving " + describe() + " in " + driver.getCurrentUrl());
+        for (String p : relativePaths) {
+            LOGGER.info(() -> PATHDEBUG + "State of " + parent.path(p) + " before: " + stateOf(parent.path(p)));
+        }
+        LOGGER.info(() -> PATHDEBUG + "Available paths before:\n" + availablePaths());
 
         NoSuchElementException problem = new NoSuchElementException("No relative path specified!");
         for (String p : relativePaths) {
@@ -67,11 +74,11 @@ public class Control extends CapybaraPortingLayerImpl {
                 problem = e;
             }
         }
-        LOGGER.info(() -> "Unable to resolve " + describe() + " in " + driver.getCurrentUrl());
+        LOGGER.info(() -> PATHDEBUG + "Unable to resolve " + describe() + " in " + driver.getCurrentUrl());
         for (String p : relativePaths) {
-            LOGGER.info(() -> "State of " + parent.path(p) + " now: " + stateOf(parent.path(p)));
+            LOGGER.info(() -> PATHDEBUG + "State of " + parent.path(p) + " now: " + stateOf(parent.path(p)));
         }
-        LOGGER.info(() -> "Available paths:\n" + availablePaths());
+        LOGGER.info(() -> PATHDEBUG + "Available paths:\n" + availablePaths());
         // // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
         // // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
         // if (recomputeFormElementPaths()) {
