@@ -79,22 +79,24 @@ public class Control extends CapybaraPortingLayerImpl {
             LOGGER.info(() -> PATHDEBUG + "State of " + parent.path(p) + " now: " + stateOf(parent.path(p)));
         }
         LOGGER.info(() -> PATHDEBUG + "Available paths:\n" + availablePaths());
-        // // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
-        // // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
-        // if (recomputeFormElementPaths()) {
-        //     for (String p : relaticvePaths) {
-        //         try {
-        //             WebElement element = find(parent.path(p));
-        //             LOGGER.info(() -> "Resolved " + parent.path(p) + " after recomputing form element paths");
-        //             return element;
-        //         } catch (NoSuchElementException e) {
-        //             problem = e;
-        //         }
-        //     }
-        //     LOGGER.warning(() -> "Still unable to resolve " + describe() + " after recomputing form element paths");
-        // } else {
-        //     LOGGER.warning("Unable to recompute form element paths, window.recomputeFormElementPath is unavailable");
-        // }
+
+        // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
+        // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
+        if (recomputeFormElementPaths()) {
+            for (String p : relaticvePaths) {
+                try {
+                    WebElement element = find(parent.path(p));
+                    LOGGER.info(() -> "Resolved " + parent.path(p) + " after recomputing form element paths");
+                    return element;
+                } catch (NoSuchElementException e) {
+                    problem = e;
+                }
+            }
+            LOGGER.warning(() -> "Still unable to resolve " + describe() + " after recomputing form element paths");
+        } else {
+            LOGGER.warning("Unable to recompute form element paths, window.recomputeFormElementPath is unavailable");
+        }
+
         throw problem;
     }
 
