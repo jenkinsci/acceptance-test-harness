@@ -83,7 +83,7 @@ public class Control extends CapybaraPortingLayerImpl {
         // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
         // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
         if (recomputeFormElementPaths()) {
-            for (String p : relaticvePaths) {
+            for (String p : relativePaths) {
                 try {
                     WebElement element = find(parent.path(p));
                     LOGGER.info(() -> "Resolved " + parent.path(p) + " after recomputing form element paths");
