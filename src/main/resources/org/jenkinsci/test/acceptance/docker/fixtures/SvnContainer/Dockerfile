@@ -1,7 +1,7 @@
 # Sets up
 FROM debian:bookworm
 
-RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion viewvc && apt-get clean
+RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion && apt-get clean
 
 # Create a repo
 # Debain defaults subversion repos to /var/lib/svn
