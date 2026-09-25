@@ -348,7 +348,7 @@ and
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20250517</version>
+      <version>20260814</version>
     </dependency>
     <dependency>
       <groupId>org.jvnet.winp</groupId>
