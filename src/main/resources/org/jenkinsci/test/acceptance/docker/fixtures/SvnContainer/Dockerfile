@@ -18,12 +18,10 @@ RUN addgroup subversion && \
 
 
 
-# Configure /viewvc and subversion in apache
-RUN /usr/sbin/a2enmod cgi
+# Configure subversion in apache
 ADD ./config/dav_svn.conf /etc/apache2/mods-available/dav_svn.conf
 # password files. Pre-created with "svnUser"/"test" username and password.
 ADD ./config/passwd.htpasswd /etc/subversion/passwd.htpasswd
-ADD ./config/viewvc.conf /etc/viewvc/viewvc.conf
 
 
 # Apache needs its directories creating which the apachectl script will do (as well as validating our config!)
