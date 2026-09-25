@@ -1,8 +1,5 @@
 # Sets up
-FROM debian/eol:bullseye
-
-# Viewvc is not part of bullseye repos anymore but oldstable https://github.com/viewvc/viewvc/issues/310
-RUN echo 'deb http://archive.debian.org/debian-security buster/updates main' > /etc/apt/sources.list.d/oldstable.list
+FROM debian:bookworm
 
 RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion viewvc && apt-get clean
 
