@@ -1,10 +1,7 @@
 # Sets up
-FROM debian/eol:bullseye
+FROM debian:bookworm
 
-# Viewvc is not part of bullseye repos anymore but oldstable https://github.com/viewvc/viewvc/issues/310
-RUN echo 'deb http://archive.debian.org/debian-security buster/updates main' > /etc/apt/sources.list.d/oldstable.list
-
-RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion viewvc && apt-get clean
+RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion && apt-get clean
 
 # Create a repo
 # Debain defaults subversion repos to /var/lib/svn
@@ -21,12 +18,10 @@ RUN addgroup subversion && \
 
 
 
-# Configure /viewvc and subversion in apache
-RUN /usr/sbin/a2enmod cgi
+# Configure subversion in apache
 ADD ./config/dav_svn.conf /etc/apache2/mods-available/dav_svn.conf
 # password files. Pre-created with "svnUser"/"test" username and password.
 ADD ./config/passwd.htpasswd /etc/subversion/passwd.htpasswd
-ADD ./config/viewvc.conf /etc/viewvc/viewvc.conf
 
 
 # Apache needs its directories creating which the apachectl script will do (as well as validating our config!)
