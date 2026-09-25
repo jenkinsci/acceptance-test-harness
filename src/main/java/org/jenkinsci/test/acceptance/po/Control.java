@@ -3,7 +3,6 @@ package org.jenkinsci.test.acceptance.po;
 import com.google.inject.Injector;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.time.Duration;
-import java.util.List;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.test.acceptance.junit.Resource;
@@ -32,9 +31,6 @@ import org.openqa.selenium.support.ui.Select;
 public class Control extends CapybaraPortingLayerImpl {
     private static final Logger LOGGER = Logger.getLogger(Control.class.getName());
 
-    /** Marker for the temporary form element path diagnostics, so they can be grepped out of CI logs. */
-    private static final String PATHDEBUG = "[PATHDEBUG] ";
-
     private final Owner parent;
     private final String[] relativePaths;
 
@@ -60,12 +56,6 @@ public class Control extends CapybaraPortingLayerImpl {
     }
 
     public WebElement resolve() {
-        LOGGER.info(() -> PATHDEBUG + "Resolving " + describe() + " in " + driver.getCurrentUrl());
-        for (String p : relativePaths) {
-            LOGGER.info(() -> PATHDEBUG + "State of " + parent.path(p) + " before: " + stateOf(parent.path(p)));
-        }
-        LOGGER.info(() -> PATHDEBUG + "Available paths before:\n" + availablePaths());
-
         NoSuchElementException problem = new NoSuchElementException("No relative path specified!");
         for (String p : relativePaths) {
             try {
@@ -74,11 +64,6 @@ public class Control extends CapybaraPortingLayerImpl {
                 problem = e;
             }
         }
-        LOGGER.info(() -> PATHDEBUG + "Unable to resolve " + describe() + " in " + driver.getCurrentUrl());
-        for (String p : relativePaths) {
-            LOGGER.info(() -> PATHDEBUG + "State of " + parent.path(p) + " now: " + stateOf(parent.path(p)));
-        }
-        LOGGER.info(() -> PATHDEBUG + "Available paths:\n" + availablePaths());
 
         // Jenkins assigns the form element paths from JavaScript, and only reapplies them on a delay once
         // scripts such as CodeMirror have rearranged the DOM. Ask for a recompute before giving up.
@@ -100,46 +85,10 @@ public class Control extends CapybaraPortingLayerImpl {
         throw problem;
     }
 
-    /**
-     * Reports whether the element is in the DOM at all, and if so whether it is visible, so a failure caused by the
-     * path arriving late can be told apart from one caused by the element being hidden.
-     */
-    private String stateOf(By selector) {
-        try {
-            List<WebElement> matches = driver.findElements(selector);
-            if (matches.isEmpty()) {
-                return "not in the DOM";
-            }
-            StringBuilder sb = new StringBuilder(matches.size() + " match(es)");
-            for (WebElement match : matches) {
-                sb.append("; displayed=").append(match.isDisplayed());
-                sb.append(", rect=").append(match.getRect());
-                sb.append(", css=").append(((JavascriptExecutor) driver).executeScript("""
-                                        var s = getComputedStyle(arguments[0]);
-                                        return s.display + '/' + s.visibility + '/' + s.opacity
-                                            + ' offsetParentNull=' + (arguments[0].offsetParent === null);""", match));
-            }
-            return sb.toString();
-        } catch (WebDriverException e) {
-            return "(unable to inspect: " + e.getMessage() + ")";
-        }
-    }
-
-    private String availablePaths() {
-        try {
-            return String.valueOf(
-                    ((JavascriptExecutor) driver)
-                            .executeScript(
-                                    "return Array.from(document.querySelectorAll('[path]')).map(e => e.getAttribute('path')).join('\\n');"));
-        } catch (WebDriverException e) {
-            return "(unable to read paths: " + e.getMessage() + ")";
-        }
-    }
-
     private String describe() {
         StringBuilder sb = new StringBuilder();
         for (String p : relativePaths) {
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(", ");
             }
             sb.append(parent.path(p));
