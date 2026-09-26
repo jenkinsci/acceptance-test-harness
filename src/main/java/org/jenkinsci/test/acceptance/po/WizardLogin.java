@@ -47,7 +47,7 @@ public class WizardLogin extends PageObject {
     private Control cLogin = control("/Continue");
 
     public WizardLogin(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url(""));
+        super(jenkins, jenkins.url(""));
     }
 
     /**
