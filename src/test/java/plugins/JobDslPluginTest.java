@@ -867,7 +867,12 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         assertThat(build.getDisplayName(), containsString("custom-name"));
 
         build.open();
-        driver.findElement(By.partialLinkText("Environment Variables")).click();
+        // TODO(legacy-run-ui): keep only the new Run UI branch once the legacy Run UI is removed
+        if (build.usesNewRunUi()) {
+            build.clickRunAction("Environment Variables");
+        } else {
+            driver.findElement(By.partialLinkText("Environment Variables")).click();
+        }
         assertThat(driver, hasElement(by.xpath(String.format("//tr/td[contains(text(), '%s')]", "varname"))));
 
         assertThat(build.getConsole(), containsString("/tmp/custom-workspace"));

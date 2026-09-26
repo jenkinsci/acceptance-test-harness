@@ -286,10 +286,66 @@ public class Build extends ContainerPageObject {
 
     public void keepForever(boolean keep) {
         open();
-        if (keep) {
+        // TODO(legacy-run-ui): keep only the new Run UI branch once the legacy Run UI is removed
+        if (usesNewRunUi()) {
+            clickRunAction(keep ? "Keep build forever" : "Don't keep this build forever");
+        } else if (keep) {
             clickButton("Keep this build forever");
         } else {
             clickButton("Don't keep this build forever");
+        }
+        waitFor()
+                .withMessage("Build %s keepLog is %s", this, keep)
+                .until(() -> getJson().get("keepLog").asBoolean() == keep);
+    }
+
+    /**
+     * Whether the page currently shown for this build is rendered by the experimental Run UI
+     * ({@code jenkins.model.experimentalflags.NewBuildPageUserExperimentalFlag}), enabled by default since Jenkins 2.584.
+     * The caller is responsible for having opened a page of this build.
+     * <p>
+     * TODO(legacy-run-ui): remove this method, and every legacy branch tagged {@code TODO(legacy-run-ui)},
+     * once the minimum Jenkins version tested renders runs with the new Run UI only.
+     */
+    public boolean usesNewRunUi() {
+        return !all(by.css(".app-build-bar")).isEmpty();
+    }
+
+    /**
+     * Clicks an action of this build in the new Run UI, either shown directly in the app bar or in its
+     * "More actions" overflow menu. Replaces the side panel links of the legacy Run UI.
+     */
+    public void clickRunAction(String displayName) {
+        WebElement action = findRunAction(displayName);
+        if (action == null) {
+            throw new NoSuchElementException("Unable to locate run action '" + displayName + "' in " + url);
+        }
+        action.click();
+    }
+
+    /**
+     * Whether this build has the given action in the new Run UI app bar or its "More actions" overflow menu.
+     */
+    public boolean hasRunAction(String displayName) {
+        return findRunAction(displayName) != null;
+    }
+
+    private WebElement findRunAction(String displayName) {
+        String inAppBar = String.format(
+                "//div[@class='app-build-bar__controls']/*[contains(@class, 'jenkins-button')][normalize-space(.)=\"%s\"]",
+                displayName);
+        WebElement action = getElement(by.xpath(inAppBar));
+        if (action != null) {
+            return action;
+        }
+        find(by.css(".app-build-bar__controls [data-testid='app-bar-overflow-button']"))
+                .click();
+        try {
+            return find(by.xpath(
+                    "//div[contains(@class, 'jenkins-dropdown')]/*[contains(@class, 'jenkins-dropdown__item')][normalize-space(.)=\"%s\"]",
+                    displayName));
+        } catch (NoSuchElementException e) {
+            return null;
         }
     }
 
@@ -319,8 +375,13 @@ public class Build extends ContainerPageObject {
         open();
 
         if (isInProgress()) {
-            WebElement stopButton = find(by.href("stop"));
-            runThenHandleDialog(stopButton::click);
+            // TODO(legacy-run-ui): keep only the new Run UI branch once the legacy Run UI is removed
+            if (usesNewRunUi()) {
+                runThenHandleDialog(() -> clickRunAction("Cancel"));
+            } else {
+                WebElement stopButton = find(by.href("stop"));
+                runThenHandleDialog(stopButton::click);
+            }
         }
     }
 
