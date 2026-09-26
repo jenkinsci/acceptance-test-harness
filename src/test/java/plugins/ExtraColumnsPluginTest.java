@@ -1,8 +1,9 @@
 package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.iterableWithSize;
-import static org.jenkinsci.test.acceptance.Matchers.hasContent;
+import static org.jenkinsci.test.acceptance.Matchers.hasElement;
 import static org.jenkinsci.test.acceptance.po.PageObject.createRandomName;
 
 import java.util.List;
@@ -43,6 +44,7 @@ public class ExtraColumnsPluginTest extends AbstractJUnitTest {
 
         links.get(0).click();
 
-        assertThat(driver, hasContent("Console Output"));
+        assertThat(driver.getCurrentUrl(), containsString("/lastBuild/console"));
+        assertThat(driver, hasElement(by.id("out")));
     }
 }

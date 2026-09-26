@@ -101,7 +101,16 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         b.open();
         assertThat("Permalink link is current URL", driver.getCurrentUrl(), is(expectedUrl));
         assertThat("Build number is correct", b.getNumber(), is(1));
-        assertThat("Build has no changes", driver, hasContent("No changes"));
+        // TODO(legacy-run-ui): the new Run UI does not show "No changes" for builds without SCM,
+        // keep only the new Run UI branch once the legacy Run UI is removed
+        if (b.usesNewRunUi()) {
+            assertThat(
+                    "Build has no changes",
+                    b.getJson().get("changeSet").get("items").size(),
+                    is(0));
+        } else {
+            assertThat("Build has no changes", driver, hasContent("No changes"));
+        }
         assertThat("Build is success", b.getResult(), is(Build.Result.SUCCESS.name()));
     }
 

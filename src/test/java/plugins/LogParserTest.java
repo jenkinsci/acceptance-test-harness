@@ -26,7 +26,10 @@ import org.openqa.selenium.WebElement;
 @WithPlugins("log-parser")
 public class LogParserTest extends AbstractJUnitTest {
 
-    private static final String SUMMARY_XPATH = "//div[@id='main-panel']/table/tbody";
+    // TODO(legacy-run-ui): keep only the new Run UI path (summary table inside a card) once the legacy Run UI is
+    // removed
+    private static final String SUMMARY_XPATH = "//div[@id='main-panel']/table/tbody"
+            + " | //div[@class='app-build__grid']/div[contains(@class, 'jenkins-card')]/div[@class='jenkins-card__content']/table/tbody";
 
     private LogParserGlobalConfig config;
 

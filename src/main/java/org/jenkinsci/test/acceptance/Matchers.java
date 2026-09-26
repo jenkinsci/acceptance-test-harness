@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Description;
+import org.jenkinsci.test.acceptance.po.Build;
 import org.jenkinsci.test.acceptance.po.CapybaraPortingLayerImpl;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.po.Login;
@@ -100,6 +101,11 @@ public class Matchers {
             public boolean matchesSafely(PageObject po) {
                 try {
                     po.open();
+                    // TODO(legacy-run-ui): builds have no side panel in the new Run UI, drop the side panel lookup
+                    // for builds once the legacy Run UI is removed
+                    if (po instanceof Build build && build.usesNewRunUi()) {
+                        return build.hasRunAction(displayName);
+                    }
                     po.find(by.xpath(
                                     "//div[@id='tasks']/div/span/a/span[text()='%s'] | //div[@id='tasks']/div/a[text()='%s']",
                                     displayName, displayName))
