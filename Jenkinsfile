@@ -67,7 +67,7 @@ stage('Record builds and sessions') {
       def labels = (env.CHANGE_ID) ? pullRequest.labels.toList() : []
       weeklyTestMarkerFile = fileExists 'weekly-test'
       ltsTestMarkerFile = fileExists 'lts-test'
-      javaVersionMarkerFiles = findFiles(glob: 'java-*').collect { it.name }.findAll { it ==~ /java-\d+/ }
+      javaVersionMarkerFiles = sh(script: 'ls -1 java-* 2>/dev/null || true', returnStdout: true).trim().tokenize('\n').findAll { it ==~ /java-\d+/ }
 
       def weeklyTest = weeklyTestMarkerFile || labels.contains('weekly-test')
       def ltsTest = ltsTestMarkerFile || labels.contains('lts-test')
