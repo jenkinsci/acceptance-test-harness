@@ -36,7 +36,7 @@ The harness provides a variety of ways to configure the execution including:
 * [Debugging tests in container](docs/DOCKER.md#debugging-tests-in-a-docker-container)
 * [Capture a support bundle](docs/SUPPORT-BUNDLE.md)
 * Selecting tests based on plugins they cover (TODO)
-* [Controlling what gets tested on ci.jenkins.io](docs/CI.md)
+* [Controlling what gets tested on ci.jenkins.io](#controlling-what-gets-tested-on-cijenkinsio)
 
 ## Creating tests
 
