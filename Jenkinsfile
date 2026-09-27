@@ -178,15 +178,15 @@ for (int i = 0; i < splits.size(); i++) {
                           // but not letting the build to fail will cause next build not to try those tests again.
                           allowEmptyResults: true
                           ) {
-                            sh "echo ./ci.sh ${jdk} ${browser} ${jenkinsVersion}"
+                            sh "./ci.sh ${jdk} ${browser} ${jenkinsVersion}"
                           }
                   }
-//                   withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-//                     def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
-//                     unstash sessionFile
-//                     def session = readFile(sessionFile).trim()
-//                     sh "launchable verify && launchable record tests --session ${session} maven './target/surefire-reports'"
-//                   }
+                  withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+                    def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
+                    unstash sessionFile
+                    def session = readFile(sessionFile).trim()
+                    sh "launchable verify && launchable record tests --session ${session} maven './target/surefire-reports'"
+                  }
                 }
               }
             }
