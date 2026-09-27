@@ -1,5 +1,5 @@
 # Sets up
-FROM debian:bookworm
+FROM debian:trixie
 
 RUN apt-get update && apt-get install -yq apache2 libapache2-mod-svn subversion && apt-get clean
 
