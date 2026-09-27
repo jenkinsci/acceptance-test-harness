@@ -89,7 +89,15 @@ JDK 25. Adding only `weekly-test` will test the `latest` line on all of its defa
 
 If none of these labels are present, the default full matrix described above is tested.
 
-## Renovate
+### Marker files
+
+Contributors without permission to add labels to the pull request (e.g. from a fork) can achieve the same effect by
+committing an empty marker file at the repository root, named after the label: `weekly-test`, `lts-test`, or
+`java-$version` (e.g. `java-25`; multiple `java-*` marker files can be added at once, same as multiple `java-*`
+labels). The build will mark itself unstable as a reminder to remove the marker file(s) (`git rm <file>`) before the
+pull request is merged.
+
+### Renovate
 
 [Renovate](https://github.com/jenkinsci/acceptance-test-harness/blob/master/.github/renovate.json) automatically adds
 the `weekly-test` label to the pull requests it opens, so that dependency bumps are, by default, only tested against

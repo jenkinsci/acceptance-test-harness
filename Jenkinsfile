@@ -44,45 +44,59 @@ def jenkinsVersionJdks = [
   latest: [21, 25],
 ]
 
-// Labels on the PR (weekly-test, lts-test, java-$version) allow overriding what gets tested.
-// See docs/CI.md for details.
-def labels = (env.CHANGE_ID) ? pullRequest.labels : []
-def weeklyTestLabel = labels.contains('weekly-test')
-def ltsTestLabel = labels.contains('lts-test')
-def javaVersionLabels = labels.findAll { it ==~ /java-\d+/ }.collect { (it - 'java-') as Integer }
-
-def jenkinsVersions = []
-if (weeklyTestLabel) {
-  jenkinsVersions << 'latest'
-}
-if (ltsTestLabel) {
-  jenkinsVersions << 'lts'
-}
-if (jenkinsVersions.isEmpty()) {
-  // No override label present, test the default set of Jenkins version lines.
-  jenkinsVersions = jenkinsVersionJdks.keySet() as List
-}
+// Labels on the PR (weekly-test, lts-test, java-$version), or marker files of the same name at the
+// repository root for contributors without permission to add labels, allow overriding what gets
+// tested.
+def weeklyTestMarkerFile
+def ltsTestMarkerFile
+def javaVersionMarkerFiles
+def jenkinsVersions
+def jdksFor
 
 def axes = [
-  jenkinsVersions: jenkinsVersions,
   platforms: ['linux'],
   browsers: ['firefox'],
 ]
-
-// jdk(s) to test a given Jenkins version line with, honoring the java-$version label(s) if present.
-def jdksFor = { String jenkinsVersion ->
-  javaVersionLabels ?: jenkinsVersionJdks[jenkinsVersion]
-}
 
 stage('Record builds and sessions') {
   retry(conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()], count: 2) {
     node('maven-25') {
       infra.checkoutSCM()
+
+      // pullRequest.labels returns a one-shot Stream, materialize it so it can be queried more than once.
+      def labels = (env.CHANGE_ID) ? pullRequest.labels.toList() : []
+      weeklyTestMarkerFile = fileExists 'weekly-test'
+      ltsTestMarkerFile = fileExists 'lts-test'
+      javaVersionMarkerFiles = findFiles(glob: 'java-*').collect { it.name }.findAll { it ==~ /java-\d+/ }
+
+      def weeklyTest = weeklyTestMarkerFile || labels.contains('weekly-test')
+      def ltsTest = ltsTestMarkerFile || labels.contains('lts-test')
+      def javaVersions = (
+        javaVersionMarkerFiles + labels.findAll { it ==~ /java-\d+/ }
+      ).collect { (it - 'java-') as Integer }.unique()
+
+      jenkinsVersions = []
+      if (weeklyTest) {
+        jenkinsVersions << 'latest'
+      }
+      if (ltsTest) {
+        jenkinsVersions << 'lts'
+      }
+      if (jenkinsVersions.isEmpty()) {
+        // No override label/marker file present, test the default set of Jenkins version lines.
+        jenkinsVersions = jenkinsVersionJdks.keySet() as List
+      }
+
+      // jdk(s) to test a given Jenkins version line with, honoring the java-$version label(s)/marker file(s) if present.
+      jdksFor = { String jenkinsVersion ->
+        javaVersions ?: jenkinsVersionJdks[jenkinsVersion]
+      }
+
       def athCommit = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
         sh 'launchable verify && launchable record commit'
       }
-      axes['jenkinsVersions'].each { jenkinsVersion ->
+      jenkinsVersions.each { jenkinsVersion ->
         infra.withArtifactCachingProxy {
             sh "rm -rf target && DISPLAY=:0 ./src/main/resources/ath-container/run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
         }
@@ -96,7 +110,7 @@ stage('Record builds and sessions') {
         }
       }
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-        axes.jenkinsVersions.each { jenkinsVersion ->
+        jenkinsVersions.each { jenkinsVersion ->
           axes.platforms.each { platform ->
             jdksFor(jenkinsVersion).each { jdk ->
               axes.browsers.each { browser ->
@@ -133,7 +147,7 @@ branches['CI'] = {
 
 for (int i = 0; i < splits.size(); i++) {
   int index = i
-  axes.jenkinsVersions.each { jenkinsVersion ->
+  jenkinsVersions.each { jenkinsVersion ->
     axes.platforms.each { platform ->
       jdksFor(jenkinsVersion).each { jdk ->
         axes.browsers.each { browser ->
@@ -183,4 +197,17 @@ for (int i = 0; i < splits.size(); i++) {
   }
 }
 parallel branches
+
+stage('checks') {
+  if (weeklyTestMarkerFile) {
+    unstable 'Remember to `git rm weekly-test` before merging'
+  }
+  if (ltsTestMarkerFile) {
+    unstable 'Remember to `git rm lts-test` before merging'
+  }
+  if (javaVersionMarkerFiles) {
+    unstable "Remember to `git rm ${javaVersionMarkerFiles.join(' ')}` before merging"
+  }
+}
+
 infra.maybePublishIncrementals()
