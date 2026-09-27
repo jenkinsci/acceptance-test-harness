@@ -38,12 +38,41 @@ if (needSplittingFromWorkspace) {
   splits = splitTests count(10)
 }
 
+// Default jdk(s) tested for each Jenkins version line.
+def jenkinsVersionJdks = [
+  lts: [21],
+  latest: [21, 25],
+]
+
+// Labels on the PR (weekly-test, lts-test, java-$version) allow overriding what gets tested.
+// See docs/CI.md for details.
+def labels = (env.CHANGE_ID) ? pullRequest.labels : []
+def weeklyTestLabel = labels.contains('weekly-test')
+def ltsTestLabel = labels.contains('lts-test')
+def javaVersionLabels = labels.findAll { it ==~ /java-\d+/ }.collect { (it - 'java-') as Integer }
+
+def jenkinsVersions = []
+if (weeklyTestLabel) {
+  jenkinsVersions << 'latest'
+}
+if (ltsTestLabel) {
+  jenkinsVersions << 'lts'
+}
+if (jenkinsVersions.isEmpty()) {
+  // No override label present, test the default set of Jenkins version lines.
+  jenkinsVersions = jenkinsVersionJdks.keySet() as List
+}
+
 def axes = [
-  jenkinsVersions: ['lts', 'latest'],
+  jenkinsVersions: jenkinsVersions,
   platforms: ['linux'],
-  jdks: [21, 25],
   browsers: ['firefox'],
 ]
+
+// jdk(s) to test a given Jenkins version line with, honoring the java-$version label(s) if present.
+def jdksFor = { String jenkinsVersion ->
+  javaVersionLabels ?: jenkinsVersionJdks[jenkinsVersion]
+}
 
 stage('Record builds and sessions') {
   retry(conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()], count: 2) {
@@ -67,11 +96,16 @@ stage('Record builds and sessions') {
         }
       }
       withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-        axes.values().combinations {
-          def (jenkinsVersion, platform, jdk, browser) = it
-          def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
-          sh "launchable record session --build ${env.BUILD_TAG}-${jenkinsVersion} --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} >${sessionFile}"
-          stash name: sessionFile, includes: sessionFile
+        axes.jenkinsVersions.each { jenkinsVersion ->
+          axes.platforms.each { platform ->
+            jdksFor(jenkinsVersion).each { jdk ->
+              axes.browsers.each { browser ->
+                def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
+                sh "launchable record session --build ${env.BUILD_TAG}-${jenkinsVersion} --flavor platform=${platform} --flavor jdk=${jdk} --flavor browser=${browser} >${sessionFile}"
+                stash name: sessionFile, includes: sessionFile
+              }
+            }
+          }
         }
       }
     }
@@ -99,49 +133,48 @@ branches['CI'] = {
 
 for (int i = 0; i < splits.size(); i++) {
   int index = i
-  axes.values().combinations {
-    def (jenkinsVersion, platform, jdk, browser) = it
-    if (jenkinsVersion == 'latest' && !(jdk in [21, 25])) {
-      return
-    }
-    if (jenkinsVersion == 'lts' && jdk != 21) {
-      return
-    }
-    def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
-    branches[name] = {
-      stage(name) {
-        int retryCounts = 1
-        retry(count: 2, conditions: [agent(), nonresumable()]) {
-          String nodeLabel = 'docker-highmem && nonspot'
-          if (retryCounts == 1) {
-            // Use a spot instance for the first try
-            nodeLabel = 'docker-highmem && spot'
-          }
-          retryCounts = retryCounts + 1 // increment the retry count before allocating a node in case it fails
-          node(nodeLabel) {
-            checkout scm
-              sh './build-image.sh'
-              def exclusions = splits.get(index).join('\n')
-              writeFile file: 'excludes.txt', text: exclusions
-              infra.withArtifactCachingProxy {
-                realtimeJUnit(
-                    testResults: 'target/surefire-reports/TEST-*.xml',
-                    testDataPublishers: [[$class: 'AttachmentPublisher']],
-                    // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
-                    // The build failure prevents parallel tests executor to realize the tests are gone so same
-                    // split is run to execute and report zero tests - which fails the build. Permit the test
-                    // results to be empty to break the circle: build after removal executes one empty split
-                    // but not letting the build to fail will cause next build not to try those tests again.
-                    allowEmptyResults: true
-                    ) {
-                      sh "./ci.sh ${jdk} ${browser} ${jenkinsVersion}"
-                    }
-            }
-            withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
-              def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
-              unstash sessionFile
-              def session = readFile(sessionFile).trim()
-              sh "launchable verify && launchable record tests --session ${session} maven './target/surefire-reports'"
+  axes.jenkinsVersions.each { jenkinsVersion ->
+    axes.platforms.each { platform ->
+      jdksFor(jenkinsVersion).each { jdk ->
+        axes.browsers.each { browser ->
+          def name = "${jenkinsVersion}-${platform}-jdk${jdk}-${browser}-split${index}"
+          branches[name] = {
+            stage(name) {
+              int retryCounts = 1
+              retry(count: 2, conditions: [agent(), nonresumable()]) {
+                String nodeLabel = 'docker-highmem && nonspot'
+                if (retryCounts == 1) {
+                  // Use a spot instance for the first try
+                  nodeLabel = 'docker-highmem && spot'
+                }
+                retryCounts = retryCounts + 1 // increment the retry count before allocating a node in case it fails
+                node(nodeLabel) {
+                  checkout scm
+                    sh './build-image.sh'
+                    def exclusions = splits.get(index).join('\n')
+                    writeFile file: 'excludes.txt', text: exclusions
+                    infra.withArtifactCachingProxy {
+                      realtimeJUnit(
+                          testResults: 'target/surefire-reports/TEST-*.xml',
+                          testDataPublishers: [[$class: 'AttachmentPublisher']],
+                          // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
+                          // The build failure prevents parallel tests executor to realize the tests are gone so same
+                          // split is run to execute and report zero tests - which fails the build. Permit the test
+                          // results to be empty to break the circle: build after removal executes one empty split
+                          // but not letting the build to fail will cause next build not to try those tests again.
+                          allowEmptyResults: true
+                          ) {
+                            sh "./ci.sh ${jdk} ${browser} ${jenkinsVersion}"
+                          }
+                  }
+                  withCredentials([string(credentialsId: 'launchable-jenkins-acceptance-test-harness', variable: 'LAUNCHABLE_TOKEN')]) {
+                    def sessionFile = "launchable-session-${jenkinsVersion}-${platform}-jdk${jdk}-${browser}.txt"
+                    unstash sessionFile
+                    def session = readFile(sessionFile).trim()
+                    sh "launchable verify && launchable record tests --session ${session} maven './target/surefire-reports'"
+                  }
+                }
+              }
             }
           }
         }

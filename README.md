@@ -36,6 +36,7 @@ The harness provides a variety of ways to configure the execution including:
 * [Debugging tests in container](docs/DOCKER.md#debugging-tests-in-a-docker-container)
 * [Capture a support bundle](docs/SUPPORT-BUNDLE.md)
 * Selecting tests based on plugins they cover (TODO)
+* [Controlling what gets tested on ci.jenkins.io](docs/CI.md)
 
 ## Creating tests
 
@@ -64,3 +65,34 @@ Areas where acceptance-tests-harness is more suitable than jenkins-test-harness 
 - Installing plugins for cross-plugin integration
 - Running tests in a realistic classloader environment
 - Verifying UI behaviour in an actual web browser
+
+## Controlling what gets tested on ci.jenkins.io
+
+Every build (branch or pull request) on [ci.jenkins.io](https://ci.jenkins.io/job/Core/job/acceptance-test-harness/)
+runs the acceptance test suite against a matrix of:
+
+* Jenkins version lines: `lts` and `latest` (weekly)
+* JDKs: `21` for the `lts` line, `21` and `25` for the `latest` line
+
+By default, the full matrix above is tested. On pull requests, this default can be overridden by adding one or more
+of the following labels, which is useful to save build resources when only a subset of the matrix is relevant to
+the change:
+
+| Label | Effect |
+|-------|--------|
+| `weekly-test` | Restricts testing to the `latest` (weekly) Jenkins version line. |
+| `lts-test` | Restricts testing to the `lts` Jenkins version line. |
+| `java-$version` (e.g. `java-25`) | Restricts testing to the given JDK version, across whichever Jenkins version line(s) are selected. |
+
+Labels can be combined. For example, adding both `weekly-test` and `java-25` will only test the `latest` line on
+JDK 25. Adding only `weekly-test` will test the `latest` line on all of its default JDKs (`21` and `25`).
+
+If none of these labels are present, the default full matrix described above is tested.
+
+## Renovate
+
+[Renovate](https://github.com/jenkinsci/acceptance-test-harness/blob/master/.github/renovate.json) automatically adds
+the `weekly-test` label to the pull requests it opens, so that dependency bumps are, by default, only tested against
+the `latest` (weekly) Jenkins version line. The exception is the pull request bumping the Jenkins LTS baseline
+(the `<!--RENOVATE-LTS-->` marked `jenkins.version` property in `pom.xml`), which instead gets the `lts-test` label
+so it is tested against the `lts` line.
