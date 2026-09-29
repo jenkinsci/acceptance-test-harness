@@ -40,6 +40,13 @@
       "description": "Confusing dual versioning scheme"
     },
     {
+      "allowedVersions": "!/-jdk5$/",
+      "matchPackageNames": [
+        "net.bytebuddy:byte-buddy"
+      ],
+      "description": "Exclude the -jdk5 classifier, we want the regular package"
+    },
+    {
       "groupName": "Selenium",
       "matchPackageNames": [
         "/selenium/"
