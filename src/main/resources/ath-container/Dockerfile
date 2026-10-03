@@ -38,7 +38,7 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-ARG MAVEN_VERSION=3.9.16
+ARG MAVEN_VERSION=3.10.0
 # Note: falling back to Apache archive if the release is not the latest one. But defaults to mirror distribution system is good for Apache.
 # TODO: switch from checking sha512 to verify GPG signature - https://www.apache.org/info/verification.html
 RUN { \
