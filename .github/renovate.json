@@ -5,6 +5,10 @@
     "schedule:daily"
   ],
   "automerge": true,
+  "labels": [
+    "weekly-test",
+    "java-25"
+  ],
   "ignorePaths": [
     "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/FtpdContainer/Dockerfile",
     "src/main/resources/org/jenkinsci/test/acceptance/docker/fixtures/SMBContainer/Dockerfile"
@@ -36,9 +40,26 @@
       "description": "Confusing dual versioning scheme"
     },
     {
+      "allowedVersions": "!/-jdk5$/",
+      "matchPackageNames": [
+        "net.bytebuddy:byte-buddy"
+      ],
+      "description": "Exclude the -jdk5 classifier, we want the regular package"
+    },
+    {
       "groupName": "Selenium",
       "matchPackageNames": [
         "/selenium/"
+      ]
+    },
+    {
+      "description": "Bumps of the Jenkins LTS baseline should be tested against the lts line instead of weekly",
+      "matchDepNames": [
+        "jenkins-lts-profile"
+      ],
+      "labels": [
+        "lts-test",
+        "java-21"
       ]
     }
   ],
