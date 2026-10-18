@@ -54,7 +54,6 @@ def jenkinsVersions
 def jdksFor
 
 def axes = [
-  jenkinsVersions: ['latest'],
   platforms: ['linux'],
   browsers: ['firefox'],
 ]
