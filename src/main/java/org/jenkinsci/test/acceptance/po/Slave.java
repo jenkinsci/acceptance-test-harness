@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -108,12 +110,23 @@ public class Slave extends Node {
 
         if (isOnline()) {
             open();
-            clickButton("Mark this node temporarily offline");
+            try {
+                clickButton("Mark this node temporarily offline");
+            } catch (NoSuchElementException e) {
+                clickButton("Mark temporarily offline");
+            }
 
             find(by.input("offlineMessage")).clear();
             find(by.input("offlineMessage")).sendKeys(message);
 
-            clickButton("Mark this node temporarily offline");
+            try {
+                clickButton("Mark this node temporarily offline");
+            } catch (NoSuchElementException e) {
+                // Use JS click because the submit button is inside a <dialog> with a
+                // sticky bottom bar, which GeckoDriver cannot scroll into view
+                WebElement submitBtn = find(By.cssSelector("dialog.jenkins-dialog button.jenkins-submit-button"));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitBtn);
+            }
         }
     }
 
@@ -124,7 +137,11 @@ public class Slave extends Node {
 
         if (isOffline()) {
             open();
-            clickButton("Bring this node back online");
+            try {
+                clickButton("Bring this node back online");
+            } catch (NoSuchElementException e) {
+                clickButton("Bring back online");
+            }
         }
     }
 
@@ -134,10 +151,20 @@ public class Slave extends Node {
     public void disconnect(String message) {
         if (isOnline()) {
             open();
-            find(by.link("Disconnect")).click();
+            try {
+                find(by.link("Disconnect")).click();
+            } catch (NoSuchElementException e) {
+                find(by.id("agent-offline-overflow-button")).click();
+                clickButton("Disconnect");
+            }
+
             find(by.input("offlineMessage")).clear();
             find(by.input("offlineMessage")).sendKeys(message);
-            clickButton("Yes");
+            try {
+                clickButton("Yes");
+            } catch (NoSuchElementException e) {
+                clickButton("Disconnect");
+            }
         }
     }
 
@@ -165,9 +192,13 @@ public class Slave extends Node {
             try {
                 clickButton("Launch agent");
             } catch (NoSuchElementException e) {
-                // The agent may have reconnected automatically
-                if (isOffline()) {
-                    throw e;
+                try {
+                    clickButton("Launch");
+                } catch (NoSuchElementException ex) {
+                    // The agent may have reconnected automatically
+                    if (isOffline()) {
+                        throw ex;
+                    }
                 }
             }
         }
