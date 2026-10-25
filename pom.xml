@@ -30,7 +30,7 @@
   <properties>
     <changelist>999999-SNAPSHOT</changelist>
     <spotbugs.skip>true</spotbugs.skip>
-    <jenkins.version>2.586</jenkins.version>
+    <jenkins.version>2.587</jenkins.version>
     <selenium.version>4.51.0</selenium.version>
     <!-- aligned with selenium -->
     <guava.version>33.7.2-jre</guava.version>
@@ -53,7 +53,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.22.3</version>
+        <version>2.22.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -68,7 +68,7 @@
       <dependency>
         <groupId>org.ow2.asm</groupId>
         <artifactId>asm-bom</artifactId>
-        <version>9.11</version>
+        <version>9.11.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -98,7 +98,7 @@
       <dependency>
         <groupId>net.bytebuddy</groupId>
         <artifactId>byte-buddy</artifactId>
-        <version>1.18.15</version>
+        <version>1.18.16</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -418,7 +418,7 @@ and
     <dependency>
       <groupId>org.zeroturnaround</groupId>
       <artifactId>zt-zip</artifactId>
-      <version>1.18.2</version>
+      <version>1.18.3</version>
     </dependency>
     <!--
     testcontainers
