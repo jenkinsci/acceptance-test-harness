@@ -122,10 +122,10 @@ public class Slave extends Node {
             try {
                 clickButton("Mark this node temporarily offline");
             } catch (NoSuchElementException e) {
-                // Use JS click because the submit button is inside a <dialog> with a
-                // sticky bottom bar, which GeckoDriver cannot scroll into view
+                // Find the submit button in the dialog and click it
+                // We can't find the button by text because it finds the button in the overflow menu first, which is not visible
                 WebElement submitBtn = find(By.cssSelector("dialog.jenkins-dialog button.jenkins-submit-button"));
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", submitBtn);
+                submitBtn.click();
             }
         }
     }
