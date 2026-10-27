@@ -7,7 +7,6 @@ import org.jenkinsci.test.acceptance.Matcher;
 import org.jenkinsci.test.acceptance.junit.Wait;
 import org.jenkinsci.test.acceptance.slave.SlaveController;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
@@ -123,7 +122,8 @@ public class Slave extends Node {
                 clickButton("Mark this node temporarily offline");
             } catch (NoSuchElementException e) {
                 // Find the submit button in the dialog and click it
-                // We can't find the button by text because it finds the button in the overflow menu first, which is not visible
+                // We can't find the button by text because it finds the button in the overflow menu first, which is not
+                // visible
                 WebElement submitBtn = find(By.cssSelector("dialog.jenkins-dialog button.jenkins-submit-button"));
                 submitBtn.click();
             }
