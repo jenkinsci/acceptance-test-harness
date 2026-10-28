@@ -33,6 +33,7 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.OpenTestReportListener;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
@@ -438,7 +439,7 @@ public class Config extends AbstractModule {
                     waitUntilLastFramesAreRecorded(src);
                     Path dest = diagnostics.resolve("ui-recording.mp4");
                     Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
-                    System.out.printf("[[ATTACHMENT|%s]]%n", dest.toAbsolutePath());
+                    OpenTestReportListener.attach(dest);
                 } else {
                     Files.delete(src);
                 }

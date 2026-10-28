@@ -27,8 +27,6 @@ import org.junit.runner.Description;
 @TestScope
 public class FailureDiagnostics extends TestWatcher {
 
-    private static String JUNIT_ATTACHMENT = "[[ATTACHMENT|%s]]";
-
     private final File dir;
 
     @Inject
@@ -108,8 +106,7 @@ public class FailureDiagnostics extends TestWatcher {
             try (Stream<Path> stream = Files.walk(dir.toPath())) {
                 stream.forEach(p -> {
                     if (Files.isRegularFile(p)) {
-                        // https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin#JUnitAttachmentsPlugin-ByprintingoutthefilenameinaformatthatJenkinswillunderstand
-                        System.out.printf((JUNIT_ATTACHMENT) + "%n", p.toAbsolutePath());
+                        OpenTestReportListener.attach(p);
                     }
                 });
             } catch (IOException x) {
