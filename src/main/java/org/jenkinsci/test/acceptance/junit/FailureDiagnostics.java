@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -18,7 +20,8 @@ import org.junit.runner.Description;
 /**
  * Attach diagnostic file related to a test failure.
  * <p>
- * The harness can attach any number of diagnostic files to be stored in /target/diagnostics/$TEST_NAME/.
+ * The harness can attach any number of diagnostic files to be stored in /target/diagnostics/$TEST_NAME/, or
+ * /target/diagnostics/$TEST_NAME-run$N/ when the test is rerun, so the files of each run can be told apart.
  * The same 'kind' of diagnostic information is expected to use the same file/subdir name.
  *
  * @author ogondza
@@ -27,11 +30,22 @@ import org.junit.runner.Description;
 @TestScope
 public class FailureDiagnostics extends TestWatcher {
 
+    /** How many times each test ran in this JVM, e.g. when failing tests are rerun. */
+    private static final Map<String, Integer> RUNS = new ConcurrentHashMap<>();
+
     private final File dir;
 
     @Inject
     public FailureDiagnostics(TestName test) {
-        this.dir = new File("target/diagnostics/" + test.get());
+        int run = RUNS.merge(test.get(), 1, Integer::sum);
+        this.dir = new File("target/diagnostics/" + test.get() + (run == 1 ? "" : "-run" + run));
+    }
+
+    /**
+     * Get test specific diagnostic directory, without creating it.
+     */
+    public Path getPath() {
+        return dir.toPath();
     }
 
     /**
