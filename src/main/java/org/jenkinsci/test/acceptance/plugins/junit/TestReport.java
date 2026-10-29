@@ -50,7 +50,7 @@ public class TestReport extends Action {
         // Given that there may be several tests with the same name, we assert
         // that at least one of the pages have the requested content
 
-        final List<WebElement> rows = all(by.xpath("//tr[@data='%s']", test));
+        final List<WebElement> rows = all(by.xpath("//tr[td[@data='%s']]", test));
         assertThat("No test found with name " + test, rows, not(empty()));
 
         List<String> contents = new ArrayList<>();
