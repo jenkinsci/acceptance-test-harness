@@ -53,8 +53,6 @@ public class CredentialsTest extends AbstractJUnitTest {
         cp.setConfigUrl(href);
         verifyValueForCredential(cp, sc.username, CRED_USER);
         verifyValueForCredentialKey(sc, CRED_PWD, false);
-
-        assertTrue(false);
     }
 
     @Test

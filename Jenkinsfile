@@ -41,7 +41,7 @@ if (needSplittingFromWorkspace) {
 // Default jdk(s) tested for each Jenkins version line.
 def jenkinsVersionJdks = [
   lts: [21],
-  latest: [25],
+  latest: [21, 25],
 ]
 
 // Labels on the PR (weekly-test, lts-test, java-$version), or marker files of the same name at the
@@ -78,6 +78,9 @@ stage('Record builds and sessions') {
       jenkinsVersions = []
       if (weeklyTest) {
         jenkinsVersions << 'latest'
+      }
+      if (ltsTest) {
+        jenkinsVersions << 'lts'
       }
       if (jenkinsVersions.isEmpty()) {
         // No override label/marker file present, test the default set of Jenkins version lines.
@@ -118,6 +121,25 @@ stage('Record builds and sessions') {
             }
           }
         }
+      }
+    }
+  }
+}
+
+branches['CI'] = {
+  stage('CI') {
+    retry(count: 2, conditions: [kubernetesAgent(handleNonKubernetes: true), nonresumable()]) {
+      node('maven-25') {
+        checkout scm
+        def mavenOptions = [
+          '-Dset.changelist',
+          '-DskipTests',
+          '-U',
+          'clean',
+          'install',
+        ]
+        infra.runMaven(mavenOptions, 25)
+        infra.prepareToPublishIncrementals()
       }
     }
   }
