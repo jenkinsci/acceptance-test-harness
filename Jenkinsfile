@@ -168,9 +168,9 @@ for (int i = 0; i < splits.size(); i++) {
                     def exclusions = splits.get(index).join('\n')
                     writeFile file: 'excludes.txt', text: exclusions
                     infra.withArtifactCachingProxy {
-                      realtimeJUnit(
-                          testResults: 'target/surefire-reports/TEST-*.xml',
-                          testDataPublishers: [[$class: 'AttachmentPublisher']],
+                      // ci.sh relays the socket into the container and enables streaming itself
+                      withOpenTestReporting(
+                          javaToolOptions: false,
                           // Slow test(s) removal can causes a split to get empty which otherwise fails the build.
                           // The build failure prevents parallel tests executor to realize the tests are gone so same
                           // split is run to execute and report zero tests - which fails the build. Permit the test

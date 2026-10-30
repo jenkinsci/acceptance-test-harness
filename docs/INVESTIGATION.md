@@ -10,7 +10,9 @@ You can also add a call to `InteractiveConsole.execute(this)` in the code to sto
 ## Diagnostic information
 
 Test harness keeps track of test diagnostic information in `/target/diagnostics/<TESTNAME>` directory.
-For every reported file there is a [JUnit Attachments](https://wiki.jenkins-ci.org/display/JENKINS/JUnit+Attachments+Plugin) marker line
+When the tests run in the [`withOpenTestReporting`](https://plugins.jenkins.io/junit/#plugin-content-streaming-test-results) step of the JUnit plugin,
+the files of a failing test are attached to its result, see `OpenTestReportListener`.
+Otherwise, for every reported file there is a [JUnit Attachments](https://plugins.jenkins.io/junit-attachments/) marker line
 printed in order to attach the diagnostic information to the test result when run in Jenkins.
 
 All executed tests are screen recorded by default, but only videos of failing tests are persited to the `target` directory.
