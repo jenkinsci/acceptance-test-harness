@@ -39,4 +39,13 @@ docker-compose run -e "MAVEN_ARGS=${MAVEN_ARGS}" --name mvn -T --rm -v "${MAVEN_
 
 	run.sh remote-webdriver-${browser} ${jenkinsVersion} ${otr_args} -Dmaven.test.failure.ignore=true -Dcsp.rule -DforkCount=1 -B
 INSIDE
-exit $?
+status=$?
+
+if [[ -d target/surefire-reports ]]; then
+	find target/surefire-reports -type f -name 'TEST-*.xml' -print0 |
+		xargs -0 sed -i 's!\[\[ATTACHMENT|/home/ath-user/sources/target\(/[^]]*\)\]\]![[ATTACHMENT|'"$PWD"'/target\1]]!g'
+else
+	echo 'No test results to be saved'
+fi
+
+exit $status
