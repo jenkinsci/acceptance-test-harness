@@ -33,6 +33,8 @@ import org.jenkinsci.test.acceptance.docker.Docker;
 import org.jenkinsci.test.acceptance.guice.TestCleaner;
 import org.jenkinsci.test.acceptance.guice.TestName;
 import org.jenkinsci.test.acceptance.guice.TestScope;
+import org.jenkinsci.test.acceptance.junit.FailureDiagnostics;
+import org.jenkinsci.test.acceptance.junit.OpenTestReportListener;
 import org.jenkinsci.test.acceptance.po.Jenkins;
 import org.jenkinsci.test.acceptance.recorder.HarRecorder;
 import org.jenkinsci.test.acceptance.recorder.TestRecorderRule;
@@ -354,7 +356,9 @@ public class Config extends AbstractModule {
      */
     @Provides
     @TestScope
-    public WebDriver createWebDriver(TestCleaner cleaner, TestName testName, ElasticTime time) throws IOException {
+    public WebDriver createWebDriver(
+            TestCleaner cleaner, TestName testName, ElasticTime time, FailureDiagnostics failureDiagnostics)
+            throws IOException {
         WebDriver d = createWebDriver(cleaner, testName);
 
         if (d instanceof RemoteWebDriver rwd) {
@@ -430,7 +434,7 @@ public class Config extends AbstractModule {
                  * retain or delete the video in the common case where we only retain the video if the test failed. When
                  * the test passed and we want to retain all videos, the directory won't exist, so we create it.
                  */
-                Path diagnostics = Paths.get("target").resolve("diagnostics").resolve(testNameStr);
+                Path diagnostics = failureDiagnostics.getPath();
                 if (TestRecorderRule.saveAllExecutions()) {
                     Files.createDirectories(diagnostics);
                 }
@@ -438,7 +442,7 @@ public class Config extends AbstractModule {
                     waitUntilLastFramesAreRecorded(src);
                     Path dest = diagnostics.resolve("ui-recording.mp4");
                     Files.move(src, dest, StandardCopyOption.REPLACE_EXISTING);
-                    System.out.printf("[[ATTACHMENT|%s]]%n", dest.toAbsolutePath());
+                    OpenTestReportListener.attach(dest);
                 } else {
                     Files.delete(src);
                 }

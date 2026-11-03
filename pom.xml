@@ -357,6 +357,19 @@ and
       <version>20260814</version>
     </dependency>
     <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
+    </dependency>
+    <dependency>
+      <!-- streams results to the withOpenTestReporting step, see OpenTestReportListener -->
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-reporting</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jvnet.winp</groupId>
       <artifactId>winp</artifactId>
       <version>1.31</version>
@@ -490,6 +503,11 @@ and
             <jdk.xml.xpathExprOpLimit>200</jdk.xml.xpathExprOpLimit>
             <mavenRepoPath>${settings.localRepository}</mavenRepoPath>
             <listener>org.jenkinsci.test.acceptance.junit.JUnitProgressReporter</listener>
+            <!--
+              replaced by OpenTestReportListener, which can also attach files to JUnit 4 tests.
+              A system property as listeners are filtered before configurationParameters are read.
+            -->
+            <junit.platform.execution.listeners.deactivate>org.junit.platform.reporting.open.xml.OpenTestReportGeneratingListener</junit.platform.execution.listeners.deactivate>
           </systemPropertyVariables>
           <!-- SUREFIRE-1588 workaround; too late for systemProperties: -->
           <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>

@@ -19,6 +19,7 @@ RUN apt-get update \
     openjdk-21-jdk \
     openjdk-25-jdk \
     openssh-client \
+    socat \
     unzip \
     xfonts-base \
   && apt-get clean \

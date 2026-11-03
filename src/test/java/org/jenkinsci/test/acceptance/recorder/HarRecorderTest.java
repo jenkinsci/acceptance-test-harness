@@ -22,7 +22,9 @@ public class HarRecorderTest {
         HarRecorder.State orgValue = HarRecorder.CAPTURE_HAR;
         try {
             Description desc = description();
-            HarRecorder harRecorder = rule(desc);
+            FailureDiagnostics diagnostics =
+                    new FailureDiagnostics(new org.jenkinsci.test.acceptance.guice.TestName(desc.getDisplayName()));
+            HarRecorder harRecorder = new HarRecorder(diagnostics);
             HarRecorder.CAPTURE_HAR = HarRecorder.State.FAILURES_ONLY;
             BrowserUpProxy proxy = HarRecorder.getProxy(InetAddress.getLoopbackAddress(), "anything-here");
             proxy.newHar("jenkins");
@@ -30,7 +32,7 @@ public class HarRecorderTest {
             System.out.println("Good Bye World");
             harRecorder.failed(new Exception(), desc);
 
-            File outputFile = outputFile(desc);
+            File outputFile = diagnostics.getPath().resolve("jenkins.har").toFile();
             assertThat(outputFile, is(existingFile()));
 
             outputFile.delete();
@@ -39,16 +41,7 @@ public class HarRecorderTest {
         }
     }
 
-    private HarRecorder rule(Description desc) {
-        return new HarRecorder(
-                new FailureDiagnostics(new org.jenkinsci.test.acceptance.guice.TestName(desc.getDisplayName())));
-    }
-
     private Description description() {
         return Description.createTestDescription(getClass(), name.getMethodName());
-    }
-
-    private File outputFile(Description desc) {
-        return new File("target/diagnostics/" + desc + "/jenkins.har");
     }
 }
