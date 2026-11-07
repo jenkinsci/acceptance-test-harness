@@ -1,5 +1,6 @@
 package org.jenkinsci.test.acceptance.po;
 
+import hudson.util.VersionNumber;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,9 +27,12 @@ public class BuildHistory extends PageObject {
     public Set<Build> getBuilds() {
         open();
 
-        // build history is progressively rendered so wait until that is complete
-        WebElement progressiveRendering = findIfNotVisible(by.xpath("//*[@tooltip='Computation in progress.']"));
-        waitFor(progressiveRendering).until(we -> !we.isDisplayed());
+        // build history is no longer progressively rendered on newer Jenkins versions
+        // TODO: Remove this code block when tested Jenkins LTS is more than 2.589
+        if (!getJenkins().getVersion().isNewerThan(new VersionNumber("2.589"))) {
+            WebElement progressiveRendering = findIfNotVisible(by.xpath("//*[@tooltip='Computation in progress.']"));
+            waitFor(progressiveRendering).until(we -> !we.isDisplayed());
+        }
 
         LinkedHashSet<Build> builds = new LinkedHashSet<>();
         for (WebElement element : all(by.xpath(
