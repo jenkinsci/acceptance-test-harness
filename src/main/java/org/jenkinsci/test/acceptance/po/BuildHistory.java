@@ -26,9 +26,13 @@ public class BuildHistory extends PageObject {
     public Set<Build> getBuilds() {
         open();
 
-        // build history is progressively rendered so wait until that is complete
-        WebElement progressiveRendering = findIfNotVisible(by.xpath("//*[@tooltip='Computation in progress.']"));
-        waitFor(progressiveRendering).until(we -> !we.isDisplayed());
+        // build history is loaded asynchronously so wait until that is complete:
+        // newer cores fetch it page by page and show a spinner while loading (jenkinsci/jenkins#27636),
+        // older ones use progressive rendering
+        // TODO drop the progressive rendering selector once the minimum supported core no longer uses it
+        WebElement loading = findIfNotVisible(
+                by.css(".jenkins-runs__loading, [tooltip='Computation in progress.']"));
+        waitFor(loading).until(we -> !we.isDisplayed());
 
         LinkedHashSet<Build> builds = new LinkedHashSet<>();
         for (WebElement element : all(by.xpath(
