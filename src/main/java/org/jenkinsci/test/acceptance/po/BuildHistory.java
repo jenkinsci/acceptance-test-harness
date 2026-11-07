@@ -30,8 +30,7 @@ public class BuildHistory extends PageObject {
         // newer cores fetch it page by page and show a spinner while loading (jenkinsci/jenkins#27636),
         // older ones use progressive rendering
         // TODO drop the progressive rendering selector once the minimum supported core no longer uses it
-        WebElement loading = findIfNotVisible(
-                by.css(".jenkins-runs__loading, [tooltip='Computation in progress.']"));
+        WebElement loading = findIfNotVisible(by.css(".jenkins-runs__loading, [tooltip='Computation in progress.']"));
         waitFor(loading).until(we -> !we.isDisplayed());
 
         LinkedHashSet<Build> builds = new LinkedHashSet<>();
