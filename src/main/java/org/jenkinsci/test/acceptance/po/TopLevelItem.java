@@ -62,42 +62,29 @@ public abstract class TopLevelItem extends ContainerPageObject {
     }
 
     /**
-     * Clicks the sidepanel link with the given label when present (legacy UI),
-     * otherwise the app bar button with that label (new job page).
-     *
-     * @param label the visible label of the action
-     */
-    protected void clickLinkOrButton(String label) {
-        if (all(by.link(label)).isEmpty()) {
-            clickButton(label);
-        } else {
-            clickLink(label);
-        }
-    }
-
-    /**
-     * Clicks an action of the current item: the sidepanel link with the given label when present (legacy UI),
-     * otherwise the item with that label in the app bar's overflow ("More actions") menu.
-     *
-     * @param label the visible label of the action
+     * Clicks the action with the given label, trying in order: a link on the page (sidepanel or app bar),
+     * an app bar button, then an item in the app bar's overflow ("More actions") menu.
      */
     protected void clickAction(String label) {
-        if (all(by.link(label)).isEmpty()) {
+        if (!all(by.link(label)).isEmpty()) {
+            clickLink(label);
+            return;
+        }
+        List<WebElement> buttons = all(by.button(label));
+        if (buttons.isEmpty()) {
             clickAppBarMenuItem(label);
         } else {
-            clickLink(label);
+            buttons.get(0).click();
         }
     }
 
     /**
      * Opens the app bar's overflow ("More actions") menu and clicks the item with the given label.
-     *
-     * @param label the visible label of the menu item
      */
     protected void clickAppBarMenuItem(String label) {
         find(by.css("[data-testid='app-bar-overflow-button']")).click();
         find(by.xpath(
-                        "//div[contains(@class, 'jenkins-dropdown')]//*[self::a or self::button][contains(normalize-space(.), '%s')]",
+                        "//div[contains(@class, 'jenkins-dropdown')]//*[self::a or self::button][normalize-space(.)='%s']",
                         label))
                 .click();
     }

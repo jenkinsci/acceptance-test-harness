@@ -365,13 +365,12 @@ public class Job extends TopLevelItem {
         open();
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
-            clickLinkOrButton("Build Now");
+            clickAction("Build Now");
             // the notification bar can place itslef over other elements
             // so wait for it to be added and then disappear
             waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
         } else {
-            // The new job page opens the parameters in a dialog rather than a separate page
-            clickLinkOrButton("Build with Parameters");
+            clickAction("Build with Parameters");
             try {
                 BuildWithParameters paramsPage = new BuildWithParameters(this, new URL(driver.getCurrentUrl()));
                 paramsPage.enter(parameters, params).start();

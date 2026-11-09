@@ -34,13 +34,14 @@ import org.openqa.selenium.By;
  * @author ogondza.
  */
 public class BuildWithParameters extends PageObject {
+    private static final By PARAMETERS_FORM = By.cssSelector("form[name='parameters']");
+
     public BuildWithParameters(Job job, URL url) {
         super(job, url);
     }
 
     public BuildWithParameters enter(List<Parameter> definitions, Map<String, ?> values) {
-        waitFor(by.xpath("//form[@name='parameters']"), 5);
-        ensureFormElementPaths();
+        waitFor(PARAMETERS_FORM, 5);
         for (Parameter def : definitions) {
             Object v = values.get(def.getName());
             if (v != null) {
@@ -52,24 +53,6 @@ public class BuildWithParameters extends PageObject {
 
     public void start() {
         // Scope to the form, as the new job page shows it in a dialog on top of other build controls
-        find(by.xpath("//form[@name='parameters']"))
-                .findElement(by.button("Build"))
-                .click();
-    }
-
-    /**
-     * When the form is loaded into a dialog, it is added after Jenkins assigned the form element paths,
-     * so ask for them to be recomputed and wait until the parameter inputs carry one.
-     */
-    private void ensureFormElementPaths() {
-        By unassigned = by.xpath("//form[@name='parameters']//input[@name='name'][not(@path)]");
-        if (all(unassigned).isEmpty()) {
-            return;
-        }
-        waitFor().until(() -> {
-            executeScript("if (typeof window.recomputeFormElementPath === 'function') {"
-                    + " window.recomputeFormElementPath(); }");
-            return all(unassigned).isEmpty();
-        });
+        find(PARAMETERS_FORM).findElement(by.button("Build")).click();
     }
 }
