@@ -71,7 +71,7 @@ public class Folder extends TopLevelItem implements Container {
     @Override
     public void delete() {
         open();
-        runThenHandleDialog(() -> clickLink("Delete Folder"));
+        runThenHandleDialog(() -> clickAction("Delete Folder"));
     }
 
     public void setEnvironmentalVariables(final Map<String, String> envVbles) {

@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -43,7 +44,12 @@ public abstract class TopLevelItem extends ContainerPageObject {
     public <T extends TopLevelItem> T renameTo(final String newName) {
         String oldName = name;
         open();
-        control(by.href(url.getPath() + "confirm-rename")).click();
+        By legacyRenameLink = by.href(url.getPath() + "confirm-rename");
+        if (all(legacyRenameLink).isEmpty()) {
+            clickAppBarMenuItem("Rename");
+        } else {
+            control(legacyRenameLink).click();
+        }
         WebElement renameButton = waitFor(by.button("Rename"), 5);
         control(by.name("newName")).set(newName);
         renameButton.click();
@@ -53,6 +59,47 @@ public abstract class TopLevelItem extends ContainerPageObject {
         } catch (MalformedURLException e) {
             throw new AssertionError("Not a valid url: " + newName, e);
         }
+    }
+
+    /**
+     * Clicks the sidepanel link with the given label when present (legacy UI),
+     * otherwise the app bar button with that label (new job page).
+     *
+     * @param label the visible label of the action
+     */
+    protected void clickLinkOrButton(String label) {
+        if (all(by.link(label)).isEmpty()) {
+            clickButton(label);
+        } else {
+            clickLink(label);
+        }
+    }
+
+    /**
+     * Clicks an action of the current item: the sidepanel link with the given label when present (legacy UI),
+     * otherwise the item with that label in the app bar's overflow ("More actions") menu.
+     *
+     * @param label the visible label of the action
+     */
+    protected void clickAction(String label) {
+        if (all(by.link(label)).isEmpty()) {
+            clickAppBarMenuItem(label);
+        } else {
+            clickLink(label);
+        }
+    }
+
+    /**
+     * Opens the app bar's overflow ("More actions") menu and clicks the item with the given label.
+     *
+     * @param label the visible label of the menu item
+     */
+    protected void clickAppBarMenuItem(String label) {
+        find(by.css("[data-testid='app-bar-overflow-button']")).click();
+        find(by.xpath(
+                        "//div[contains(@class, 'jenkins-dropdown')]//*[self::a or self::button][contains(normalize-space(.), '%s')]",
+                        label))
+                .click();
     }
 
     public String getDescription() {

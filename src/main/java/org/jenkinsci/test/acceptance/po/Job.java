@@ -365,12 +365,13 @@ public class Job extends TopLevelItem {
         open();
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
-            clickLink("Build Now");
+            clickLinkOrButton("Build Now");
             // the notification bar can place itslef over other elements
             // so wait for it to be added and then disappear
             waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
         } else {
-            clickLink("Build with Parameters");
+            // The new job page opens the parameters in a dialog rather than a separate page
+            clickLinkOrButton("Build with Parameters");
             try {
                 BuildWithParameters paramsPage = new BuildWithParameters(this, new URL(driver.getCurrentUrl()));
                 paramsPage.enter(parameters, params).start();
@@ -495,7 +496,7 @@ public class Job extends TopLevelItem {
     @Override
     public void delete() {
         open();
-        runThenHandleDialog(() -> clickLink("Delete Project"));
+        runThenHandleDialog(() -> clickAction("Delete Project"));
     }
 
     public static org.hamcrest.Matcher<WebDriver> disabled() {

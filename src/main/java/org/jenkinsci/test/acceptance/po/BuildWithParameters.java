@@ -26,6 +26,7 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import org.openqa.selenium.By;
 
 /**
  * PO for `/build` page that wait for user to specify parameters.
@@ -38,7 +39,8 @@ public class BuildWithParameters extends PageObject {
     }
 
     public BuildWithParameters enter(List<Parameter> definitions, Map<String, ?> values) {
-        waitFor(by.xpath("//form[@name='parameters']"), 2);
+        waitFor(by.xpath("//form[@name='parameters']"), 5);
+        ensureFormElementPaths();
         for (Parameter def : definitions) {
             Object v = values.get(def.getName());
             if (v != null) {
@@ -49,6 +51,25 @@ public class BuildWithParameters extends PageObject {
     }
 
     public void start() {
-        clickButton("Build");
+        // Scope to the form, as the new job page shows it in a dialog on top of other build controls
+        find(by.xpath("//form[@name='parameters']"))
+                .findElement(by.button("Build"))
+                .click();
+    }
+
+    /**
+     * When the form is loaded into a dialog, it is added after Jenkins assigned the form element paths,
+     * so ask for them to be recomputed and wait until the parameter inputs carry one.
+     */
+    private void ensureFormElementPaths() {
+        By unassigned = by.xpath("//form[@name='parameters']//input[@name='name'][not(@path)]");
+        if (all(unassigned).isEmpty()) {
+            return;
+        }
+        waitFor().until(() -> {
+            executeScript("if (typeof window.recomputeFormElementPath === 'function') {"
+                    + " window.recomputeFormElementPath(); }");
+            return all(unassigned).isEmpty();
+        });
     }
 }
