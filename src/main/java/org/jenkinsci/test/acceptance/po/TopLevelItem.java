@@ -7,7 +7,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.pagefactory.ByChained;
 
 /**
  * Super class for top level items.
@@ -62,31 +64,31 @@ public abstract class TopLevelItem extends ContainerPageObject {
     }
 
     /**
-     * Clicks the action with the given label, trying in order: a link on the page (sidepanel or app bar),
-     * an app bar button, then an item in the app bar's overflow ("More actions") menu.
+     * Clicks the action with the given label: a visible link or button on the page (sidepanel or app bar),
+     * otherwise the item in the app bar's overflow ("More actions") menu.
      */
     protected void clickAction(String label) {
-        if (!all(by.link(label)).isEmpty()) {
-            clickLink(label);
-            return;
-        }
-        List<WebElement> buttons = all(by.button(label));
-        if (buttons.isEmpty()) {
+        WebElement action = all(by.action(label)).stream()
+                .filter(WebElement::isDisplayed)
+                .findFirst()
+                .orElse(null);
+        if (action == null) {
             clickAppBarMenuItem(label);
         } else {
-            buttons.get(0).click();
+            action.click();
         }
     }
 
     /**
      * Opens the app bar's overflow ("More actions") menu and clicks the item with the given label.
      */
-    protected void clickAppBarMenuItem(String label) {
-        find(by.css("[data-testid='app-bar-overflow-button']")).click();
-        find(by.xpath(
-                        "//div[contains(@class, 'jenkins-dropdown')]//*[self::a or self::button][normalize-space(.)='%s']",
-                        label))
-                .click();
+    private void clickAppBarMenuItem(String label) {
+        WebElement overflowButton = getElement(by.css("[data-testid='app-bar-overflow-button']"));
+        if (overflowButton == null) {
+            throw new NoSuchElementException("Unable to locate action '" + label + "'");
+        }
+        overflowButton.click();
+        find(new ByChained(by.css(".jenkins-dropdown"), by.action(label))).click();
     }
 
     public String getDescription() {
