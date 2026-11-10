@@ -119,7 +119,8 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         new Actions(driver)
                 .moveToElement(job.find(new ByChained(by.css(".jenkins-dropdown"), by.button("Permalinks"))))
                 .perform();
-        return job.find(by.css(".jenkins-dropdown a[href$='/lastBuild']"));
+        // Submenu items link relative to the job, e.g. "lastBuild"
+        return job.find(by.css(".jenkins-dropdown a[href$='lastBuild']"));
     }
 
     @Test

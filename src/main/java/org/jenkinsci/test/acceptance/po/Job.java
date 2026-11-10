@@ -369,7 +369,7 @@ public class Job extends TopLevelItem {
         open();
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
-            clickAction("Build Now");
+            clickBuildNow();
             // The new job page attaches the button's click handler from a script loaded after the button is
             // rendered, so an early click is lost. Click again from the job page until Jenkins has accepted the
             // build.
@@ -386,13 +386,21 @@ public class Job extends TopLevelItem {
                             }
                             if (polls.getAndIncrement() > 0) {
                                 open();
-                                clickAction("Build Now");
+                                clickBuildNow();
                             }
                             return false;
                         });
             } catch (TimeoutException e) {
+                String lastUrl = driver.getCurrentUrl();
+                open();
+                String candidates = all(by.action("Build Now")).stream()
+                        .map(el -> el.getAttribute("outerHTML"))
+                        .map(html -> html.length() > 300 ? html.substring(0, 300) + "…" : html)
+                        .collect(Collectors.joining("\n"));
                 throw new TimeoutException(
-                        "Build of " + name + " was not scheduled, last at " + driver.getCurrentUrl(), e);
+                        "Build of " + name + " was not scheduled, last at " + lastUrl
+                                + "; elements matching 'Build Now' on the job page:\n" + candidates,
+                        e);
             }
             // the notification bar can place itslef over other elements
             // so wait for it to be added and then disappear
@@ -407,6 +415,19 @@ public class Job extends TopLevelItem {
             }
         }
         return build(nb);
+    }
+
+    /**
+     * Clicks "Build Now": the new job page's app bar button, which schedules the build from JavaScript, otherwise
+     * the sidepanel link (legacy UI).
+     */
+    private void clickBuildNow() {
+        WebElement button = getElement(by.css("button[data-type='build-now']"));
+        if (button != null && button.isDisplayed()) {
+            button.click();
+        } else {
+            clickAction("Build Now");
+        }
     }
 
     public Build build(int buildNumber) {

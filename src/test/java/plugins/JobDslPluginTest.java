@@ -774,6 +774,10 @@ public class JobDslPluginTest extends AbstractJUnitTest {
 
         seedJob.configure(() -> seedJob.addBuildStep(JobDslBuildStep.class));
 
+        if (getElement(by.href(hrefLocator)) == null) {
+            // The new job page lists the link in the app bar's overflow ("More actions") menu
+            find(by.appBarOverflowButton()).click();
+        }
         find(by.href(hrefLocator)).click();
         assertThat(driver, hasElement(by.link("Jenkins Job DSL Plugin")));
 
