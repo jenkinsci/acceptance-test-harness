@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -17,12 +18,14 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -366,6 +369,24 @@ public class Job extends TopLevelItem {
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
             clickAction("Build Now");
+            // The new job page attaches the button's click handler from a script loaded after the button is
+            // rendered, so an early click is lost. Click again until Jenkins has accepted the build.
+            AtomicInteger polls = new AtomicInteger();
+            waitFor()
+                    .withMessage("Build of %s to be scheduled", name)
+                    .withTimeout(Duration.ofSeconds(30))
+                    .pollingEvery(Duration.ofSeconds(3))
+                    .until(() -> {
+                        JsonNode json = getJson();
+                        if (json.get("inQueue").asBoolean()
+                                || json.get("nextBuildNumber").intValue() > nb) {
+                            return true;
+                        }
+                        if (polls.getAndIncrement() > 0) {
+                            clickAction("Build Now");
+                        }
+                        return false;
+                    });
             // the notification bar can place itslef over other elements
             // so wait for it to be added and then disappear
             waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());

@@ -180,6 +180,13 @@ public class ByFactory {
             ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][./@id = '%1$s' or ./@name = '%1$s' or ./@value = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s'] | .//button[./@id = '%1$s' or ./@value = '%1$s' or normalize-space(.) = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s']";
 
     /**
+     * Finds the app bar's overflow ("More actions") menu button.
+     */
+    public By appBarOverflowButton() {
+        return css("[data-testid='app-bar-overflow-button']");
+    }
+
+    /**
      * Finds an action: a {@link #link(String) link} or a {@link #button(String) button}.
      */
     public By action(String locator) {

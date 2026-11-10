@@ -83,7 +83,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
      * Opens the app bar's overflow ("More actions") menu and clicks the item with the given label.
      */
     private void clickAppBarMenuItem(String label) {
-        WebElement overflowButton = getElement(by.css("[data-testid='app-bar-overflow-button']"));
+        WebElement overflowButton = getElement(by.appBarOverflowButton());
         if (overflowButton == null) {
             throw new NoSuchElementException("Unable to locate action '" + label + "'");
         }

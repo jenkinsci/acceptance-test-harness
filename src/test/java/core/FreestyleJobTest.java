@@ -43,6 +43,8 @@ import org.junit.experimental.categories.Category;
 import org.jvnet.hudson.test.Issue;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.pagefactory.ByChained;
 
 public class FreestyleJobTest extends AbstractJUnitTest {
     @Test
@@ -84,8 +86,7 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         assertThat(driver, not(hasContent(last)));
 
         job.scheduleBuild().waitUntilFinished();
-        job.open();
-        assertThat(driver, hasContent(last));
+        assertThat(findLastBuildPermalink(job).getText(), containsString("#1"));
     }
 
     @Test
@@ -93,9 +94,8 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         FreeStyleJob job = jenkins.jobs.create(FreeStyleJob.class);
 
         Build build = job.scheduleBuild().shouldSucceed();
-        job.open();
-        WebElement link = job.find(By.partialLinkText("Last build (#1)"));
-        String expectedUrl = link.getAttribute("href");
+        findLastBuildPermalink(job).click();
+        String expectedUrl = driver.getCurrentUrl();
 
         Build b = new Build(job, "lastBuild");
         b.open();
@@ -103,6 +103,23 @@ public class FreestyleJobTest extends AbstractJUnitTest {
         assertThat("Build number is correct", b.getNumber(), is(1));
         assertThat("Build has no changes", driver, hasContent("No changes"));
         assertThat("Build is success", b.getResult(), is(Build.Result.SUCCESS.name()));
+    }
+
+    /**
+     * Finds the "Last build" permalink: on the job page (legacy UI), otherwise in the "Permalinks" submenu of the
+     * app bar's overflow ("More actions") menu.
+     */
+    private WebElement findLastBuildPermalink(Job job) {
+        job.open();
+        WebElement legacy = job.getElement(By.partialLinkText("Last build ("));
+        if (legacy != null) {
+            return legacy;
+        }
+        job.find(by.appBarOverflowButton()).click();
+        new Actions(driver)
+                .moveToElement(job.find(new ByChained(by.css(".jenkins-dropdown"), by.button("Permalinks"))))
+                .perform();
+        return job.find(by.css(".jenkins-dropdown a[href$='/lastBuild']"));
     }
 
     @Test
