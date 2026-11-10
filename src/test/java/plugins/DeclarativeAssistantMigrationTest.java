@@ -47,7 +47,7 @@ public class DeclarativeAssistantMigrationTest extends AbstractJUnitTest {
         j.apply();
         j.save();
 
-        clickLink("To Declarative");
+        j.clickAction("To Declarative");
         assertThat(driver, hasElement(By.className("rectangle-conversion-success")));
         assertThat(driver, hasElement(By.className("review-converted")));
         assertThat(driver, hasElement(By.id("jenkinsfile-content")));

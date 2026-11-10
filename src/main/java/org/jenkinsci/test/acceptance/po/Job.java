@@ -41,6 +41,7 @@ import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.pagefactory.ByChained;
@@ -370,23 +371,29 @@ public class Job extends TopLevelItem {
         if (parameters.isEmpty()) {
             clickAction("Build Now");
             // The new job page attaches the button's click handler from a script loaded after the button is
-            // rendered, so an early click is lost. Click again until Jenkins has accepted the build.
+            // rendered, so an early click is lost. Click again from the job page until Jenkins has accepted the
+            // build.
             AtomicInteger polls = new AtomicInteger();
-            waitFor()
-                    .withMessage("Build of %s to be scheduled", name)
-                    .withTimeout(Duration.ofSeconds(30))
-                    .pollingEvery(Duration.ofSeconds(3))
-                    .until(() -> {
-                        JsonNode json = getJson();
-                        if (json.get("inQueue").asBoolean()
-                                || json.get("nextBuildNumber").intValue() > nb) {
-                            return true;
-                        }
-                        if (polls.getAndIncrement() > 0) {
-                            clickAction("Build Now");
-                        }
-                        return false;
-                    });
+            try {
+                waitFor()
+                        .withTimeout(Duration.ofSeconds(30))
+                        .pollingEvery(Duration.ofSeconds(3))
+                        .until(() -> {
+                            JsonNode json = getJson();
+                            if (json.get("inQueue").asBoolean()
+                                    || json.get("nextBuildNumber").intValue() > nb) {
+                                return true;
+                            }
+                            if (polls.getAndIncrement() > 0) {
+                                open();
+                                clickAction("Build Now");
+                            }
+                            return false;
+                        });
+            } catch (TimeoutException e) {
+                throw new TimeoutException(
+                        "Build of " + name + " was not scheduled, last at " + driver.getCurrentUrl(), e);
+            }
             // the notification bar can place itslef over other elements
             // so wait for it to be added and then disappear
             waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());

@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.containsRegexp;
+import static org.jenkinsci.test.acceptance.Matchers.hasAction;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.jenkinsci.test.acceptance.Matchers.hasElement;
 import static org.jenkinsci.test.acceptance.Matchers.pageObjectDoesNotExist;
@@ -846,6 +847,8 @@ public class JobDslPluginTest extends AbstractJUnitTest {
         job.open();
         assertThat(job.getDescription(), containsString(jobDescription));
         assertThat(job.getDisplayName(), containsString(jobDisplayName));
+        // The new job page lists the link in the app bar's overflow menu, which hasAction opens
+        assertThat(job, hasAction(linkLabel));
         assertThat(driver, hasElement(by.href(linkUrl)));
 
         job.configure();

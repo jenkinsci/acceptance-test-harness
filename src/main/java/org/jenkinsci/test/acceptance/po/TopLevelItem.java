@@ -67,7 +67,7 @@ public abstract class TopLevelItem extends ContainerPageObject {
      * Clicks the action with the given label: a visible link or button on the page (sidepanel or app bar),
      * otherwise the item in the app bar's overflow ("More actions") menu.
      */
-    protected void clickAction(String label) {
+    public void clickAction(String label) {
         WebElement action = all(by.action(label)).stream()
                 .filter(WebElement::isDisplayed)
                 .findFirst()
