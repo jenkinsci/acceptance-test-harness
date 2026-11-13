@@ -1,1 +1,7 @@
 * @jenkinsci/acceptance-test-harness-developers
+
+# Routine Renovate dependency bumps only ever touch pom.xml and are merged
+# automatically, so skip the review request noise for them. CODEOWNERS has no
+# negation operator, but a later, more specific pattern with no owners
+# overrides the broader `*` pattern above for just this path.
+/pom.xml
