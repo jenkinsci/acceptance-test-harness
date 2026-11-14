@@ -6,6 +6,6 @@ package org.jenkinsci.test.acceptance.po;
  */
 public class Logout extends PageObject {
     public Logout(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url("logout"));
+        super(jenkins, jenkins.url("logout"));
     }
 }

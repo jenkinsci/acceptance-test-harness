@@ -63,7 +63,7 @@ public class PluginManager extends ContainerPageObject {
     public MockUpdateCenter mockUpdateCenter;
 
     public PluginManager(Jenkins jenkins) {
-        super(jenkins.injector, jenkins.url("pluginManager/"));
+        super(jenkins, jenkins.url("pluginManager/"));
         this.jenkins = jenkins;
         mockUpdateCenter.ensureRunning(jenkins);
     }
