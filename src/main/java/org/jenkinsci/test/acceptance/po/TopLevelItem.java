@@ -6,7 +6,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.pagefactory.ByChained;
 
 /**
  * Super class for top level items.
@@ -43,7 +46,12 @@ public abstract class TopLevelItem extends ContainerPageObject {
     public <T extends TopLevelItem> T renameTo(final String newName) {
         String oldName = name;
         open();
-        control(by.href(url.getPath() + "confirm-rename")).click();
+        By legacyRenameLink = by.href(url.getPath() + "confirm-rename");
+        if (all(legacyRenameLink).isEmpty()) {
+            clickAppBarMenuItem("Rename");
+        } else {
+            control(legacyRenameLink).click();
+        }
         WebElement renameButton = waitFor(by.button("Rename"), 5);
         control(by.name("newName")).set(newName);
         renameButton.click();
@@ -53,6 +61,34 @@ public abstract class TopLevelItem extends ContainerPageObject {
         } catch (MalformedURLException e) {
             throw new AssertionError("Not a valid url: " + newName, e);
         }
+    }
+
+    /**
+     * Clicks the action with the given label: a visible link or button on the page (sidepanel or app bar),
+     * otherwise the item in the app bar's overflow ("More actions") menu.
+     */
+    public void clickAction(String label) {
+        WebElement action = all(by.action(label)).stream()
+                .filter(WebElement::isDisplayed)
+                .findFirst()
+                .orElse(null);
+        if (action == null) {
+            clickAppBarMenuItem(label);
+        } else {
+            action.click();
+        }
+    }
+
+    /**
+     * Opens the app bar's overflow ("More actions") menu and clicks the item with the given label.
+     */
+    private void clickAppBarMenuItem(String label) {
+        WebElement overflowButton = getElement(by.appBarOverflowButton());
+        if (overflowButton == null) {
+            throw new NoSuchElementException("Unable to locate action '" + label + "'");
+        }
+        overflowButton.click();
+        find(new ByChained(by.css(".jenkins-dropdown"), by.action(label))).click();
     }
 
     public String getDescription() {

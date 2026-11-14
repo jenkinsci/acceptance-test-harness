@@ -1,11 +1,9 @@
 package plugins;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -535,9 +533,8 @@ public class NodeLabelParameterPluginTest extends AbstractJUnitTest {
     }
 
     private org.hamcrest.Matcher<String> isPending(String nodename) {
-        return allOf(
-                containsString("Job triggered without a valid online node, given where: " + nodename),
-                containsStringIgnoringCase("Pending"));
+        // The new job page shows the queue reason without a "pending" label; callers also assert not started
+        return containsString("Job triggered without a valid online node, given where: " + nodename);
     }
 
     /**

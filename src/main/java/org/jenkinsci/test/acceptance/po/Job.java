@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.not;
 import static org.jenkinsci.test.acceptance.Matchers.hasContent;
 import static org.junit.Assert.assertTrue;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import jakarta.inject.Inject;
 import java.io.ByteArrayOutputStream;
@@ -17,12 +18,14 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +41,7 @@ import org.jenkinsci.test.acceptance.controller.LocalController;
 import org.jenkinsci.test.acceptance.junit.Resource;
 import org.junit.AssumptionViolatedException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.pagefactory.ByChained;
@@ -365,12 +369,44 @@ public class Job extends TopLevelItem {
         open();
         int nb = getJson().get("nextBuildNumber").intValue();
         if (parameters.isEmpty()) {
-            clickLink("Build Now");
+            clickBuildNow();
+            // The new job page attaches the button's click handler from a script loaded after the button is
+            // rendered, so an early click is lost. Click again from the job page until Jenkins has accepted the
+            // build.
+            AtomicInteger polls = new AtomicInteger();
+            try {
+                waitFor()
+                        .withTimeout(Duration.ofSeconds(30))
+                        .pollingEvery(Duration.ofSeconds(3))
+                        .until(() -> {
+                            JsonNode json = getJson();
+                            if (json.get("inQueue").asBoolean()
+                                    || json.get("nextBuildNumber").intValue() > nb) {
+                                return true;
+                            }
+                            if (polls.getAndIncrement() > 0) {
+                                open();
+                                clickBuildNow();
+                            }
+                            return false;
+                        });
+            } catch (TimeoutException e) {
+                String lastUrl = driver.getCurrentUrl();
+                open();
+                String candidates = all(by.action("Build Now")).stream()
+                        .map(el -> el.getAttribute("outerHTML"))
+                        .map(html -> html.length() > 300 ? html.substring(0, 300) + "…" : html)
+                        .collect(Collectors.joining("\n"));
+                throw new TimeoutException(
+                        "Build of " + name + " was not scheduled, last at " + lastUrl
+                                + "; elements matching 'Build Now' on the job page:\n" + candidates,
+                        e);
+            }
             // the notification bar can place itslef over other elements
             // so wait for it to be added and then disappear
             waitFor(waitFor(By.id("notification-bar"))).until(bar -> !bar.isDisplayed());
         } else {
-            clickLink("Build with Parameters");
+            clickAction("Build with Parameters");
             try {
                 BuildWithParameters paramsPage = new BuildWithParameters(this, new URL(driver.getCurrentUrl()));
                 paramsPage.enter(parameters, params).start();
@@ -379,6 +415,19 @@ public class Job extends TopLevelItem {
             }
         }
         return build(nb);
+    }
+
+    /**
+     * Clicks "Build Now": the new job page's app bar button, which schedules the build from JavaScript, otherwise
+     * the sidepanel link (legacy UI).
+     */
+    private void clickBuildNow() {
+        WebElement button = getElement(by.css("button[data-type='build-now']"));
+        if (button != null && button.isDisplayed()) {
+            button.click();
+        } else {
+            clickAction("Build Now");
+        }
     }
 
     public Build build(int buildNumber) {
@@ -495,7 +544,7 @@ public class Job extends TopLevelItem {
     @Override
     public void delete() {
         open();
-        runThenHandleDialog(() -> clickLink("Delete Project"));
+        runThenHandleDialog(() -> clickAction("Delete Project"));
     }
 
     public static org.hamcrest.Matcher<WebDriver> disabled() {

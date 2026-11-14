@@ -115,10 +115,11 @@ public class ByFactory {
      *      Text, id, title, or image alt attribute of the link
      */
     public By link(String locator) {
-        return xpath(
-                ".//A[@href][@id='%1$s' or normalize-space(.)='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]",
-                locator);
+        return xpath(LINK_XPATH, locator);
     }
+
+    private static final String LINK_XPATH =
+            ".//A[@href][@id='%1$s' or normalize-space(.)='%1$s' or @title='%1$s' or .//img[@alt='%1$s']]";
 
     /**
      * Link href selector.
@@ -172,9 +173,24 @@ public class ByFactory {
      * Finds a button
      */
     public By button(String locator) {
-        return xpath(
-                ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][./@id = '%1$s' or ./@name = '%1$s' or ./@value = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s'] | .//button[./@id = '%1$s' or ./@value = '%1$s' or normalize-space(.) = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s']",
-                locator);
+        return xpath(BUTTON_XPATH, locator);
+    }
+
+    private static final String BUTTON_XPATH =
+            ".//input[./@type = 'submit' or ./@type = 'reset' or ./@type = 'image' or ./@type = 'button'][./@id = '%1$s' or ./@name = '%1$s' or ./@value = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s'] | .//button[./@id = '%1$s' or ./@value = '%1$s' or normalize-space(.) = '%1$s' or ./@title = '%1$s'] | .//input[./@type = 'image'][./@alt = '%1$s']";
+
+    /**
+     * Finds the app bar's overflow ("More actions") menu button.
+     */
+    public By appBarOverflowButton() {
+        return css("[data-testid='app-bar-overflow-button']");
+    }
+
+    /**
+     * Finds an action: a {@link #link(String) link} or a {@link #button(String) button}.
+     */
+    public By action(String locator) {
+        return xpath(LINK_XPATH + " | " + BUTTON_XPATH, locator);
     }
 
     public By css(String css, Object... args) {

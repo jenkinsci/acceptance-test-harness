@@ -10,7 +10,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.ElementClickInterceptedException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -94,19 +93,6 @@ public class Control extends CapybaraPortingLayerImpl {
             sb.append(parent.path(p));
         }
         return sb.toString();
-    }
-
-    private boolean recomputeFormElementPaths() {
-        try {
-            return Boolean.TRUE.equals(((JavascriptExecutor) driver).executeScript("""
-                            if (typeof window.recomputeFormElementPath === 'function') {
-                                window.recomputeFormElementPath();
-                                return true;
-                            }
-                            return false;"""));
-        } catch (WebDriverException e) {
-            return false;
-        }
     }
 
     public void sendKeys(String t) {
