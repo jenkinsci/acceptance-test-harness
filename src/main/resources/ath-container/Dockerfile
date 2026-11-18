@@ -26,8 +26,8 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 
 # Docker installation according to https://docs.docker.com/engine/install/ubuntu/
-ARG DOCKER_BUILDX_VERSION=0.38.1
-ARG DOCKER_VERSION=29.9.3
+ARG DOCKER_BUILDX_VERSION=0.39.0
+ARG DOCKER_VERSION=29.10.0
 RUN install -m 0755 -d /etc/apt/keyrings \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc \
   && printf 'deb [arch=%s signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu %s stable\n' "$(dpkg --print-architecture)" "$(lsb_release -cs)" > /etc/apt/sources.list.d/docker.list \
@@ -39,7 +39,7 @@ RUN install -m 0755 -d /etc/apt/keyrings \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-ARG MAVEN_VERSION=3.10.0
+ARG MAVEN_VERSION=3.10.1
 # Note: falling back to Apache archive if the release is not the latest one. But defaults to mirror distribution system is good for Apache.
 # TODO: switch from checking sha512 to verify GPG signature - https://www.apache.org/info/verification.html
 RUN { \
