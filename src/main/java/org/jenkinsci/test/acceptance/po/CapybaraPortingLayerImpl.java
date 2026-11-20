@@ -24,6 +24,7 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.bidi.browsingcontext.BrowsingContext;
 import org.openqa.selenium.bidi.browsingcontext.UserPromptType;
@@ -381,6 +382,24 @@ public class CapybaraPortingLayerImpl implements CapybaraPortingLayer {
             return !we.isDisplayed();
         } catch (StaleElementReferenceException ser) {
             return true;
+        }
+    }
+
+    /**
+     * Asks Jenkins to recompute the form element paths, e.g. after content was loaded into the page later.
+     *
+     * @return {@code false} if {@code window.recomputeFormElementPath} is unavailable
+     */
+    protected boolean recomputeFormElementPaths() {
+        try {
+            return Boolean.TRUE.equals(executeScript("""
+                            if (typeof window.recomputeFormElementPath === 'function') {
+                                window.recomputeFormElementPath();
+                                return true;
+                            }
+                            return false;"""));
+        } catch (WebDriverException e) {
+            return false;
         }
     }
 

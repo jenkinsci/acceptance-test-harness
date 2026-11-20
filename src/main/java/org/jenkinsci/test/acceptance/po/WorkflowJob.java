@@ -100,7 +100,7 @@ public class WorkflowJob extends Job {
     @Override
     public void delete() {
         open();
-        runThenHandleDialog(() -> clickLink("Delete Pipeline"));
+        runThenHandleDialog(() -> clickAction("Delete Pipeline"));
     }
 
     /**
