@@ -98,7 +98,7 @@ stage('Record builds and sessions') {
       }
       jenkinsVersions.each { jenkinsVersion ->
         infra.withArtifactCachingProxy {
-            sh "rm -rf target && DISPLAY=:0 ./src/main/resources/ath-container/run.sh firefox ${jenkinsVersion} -Dmaven.repo.local=${WORKSPACE_TMP}/m2repo -B clean process-test-resources"
+            sh "rm -rf target && DISPLAY=:0 ./src/main/resources/ath-container/run.sh firefox ${jenkinsVersion} -B clean process-test-resources"
         }
         def coreCommit = sh(script: './core-commit.sh', returnStdout: true).trim()
         /*
