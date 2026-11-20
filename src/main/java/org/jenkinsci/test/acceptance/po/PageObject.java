@@ -47,6 +47,11 @@ public abstract class PageObject extends CapybaraPortingLayerImpl {
 
     private static final RandomNameGenerator RND = new RandomNameGenerator();
 
+    /**
+     * @deprecated Use {@link #PageObject(PageObject, URL)} instead to preserve context.
+     *             This constructor should only be used for top-level objects like {@link Jenkins}.
+     */
+    @Deprecated
     public PageObject(Injector injector, URL url) {
         super(injector);
         this.url = url;

@@ -41,7 +41,7 @@ public class LogParserOutputPage extends PageObject {
      * @param po The page of the logparser.
      */
     public LogParserOutputPage(PageObject po) {
-        super(po.injector, po.url("parsed_console"));
+        super(po, po.url("parsed_console"));
     }
 
     /**
