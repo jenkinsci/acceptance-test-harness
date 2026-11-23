@@ -9,7 +9,6 @@ import org.jenkinsci.test.acceptance.plugins.nested_view.NestedView;
 import org.jenkinsci.test.acceptance.po.FreeStyleJob;
 import org.jenkinsci.test.acceptance.po.ListView;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -44,7 +43,6 @@ public class NestedViewPluginTest extends AbstractJUnitTest {
     }
 
     @Test
-    @Ignore("Broken by changes from https://github.com/jenkinsci/nested-view-plugin/pull/82")
     public void set_default_view_of_a_nested_view() {
         v.views.create(ListView.class, "list");
         v.views.create(ListView.class, "list2");
