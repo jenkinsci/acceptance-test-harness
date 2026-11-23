@@ -19,7 +19,12 @@ public class NestedView extends View {
 
     public void setDefaultView(String name) {
         configure();
-        find(by.input("defaultView")).findElement(by.option(name)).click();
+        // nested-view before 4ce2f3c (PR #82) used name="defaultView"; newer versions use databinding
+        // (_.defaultViewName) and fill the options via AJAX, so wait for the option itself to appear.
+        find(by.xpath(
+                        "//select[@name='defaultView' or @name='_.defaultViewName']/option[normalize-space(.)='%1$s' or @value='%1$s']",
+                        name))
+                .click();
         save();
     }
 
