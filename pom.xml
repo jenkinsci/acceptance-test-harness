@@ -344,7 +344,7 @@ and
     <dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>remoting</artifactId>
-      <version>3395.v6e5377b_0fb_3c</version>
+      <version>3396.ve02b_5cde31b_2</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.test</groupId>
