@@ -26,6 +26,8 @@ package org.jenkinsci.test.acceptance.po;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * PO for `/build` page that wait for user to specify parameters.
@@ -33,12 +35,18 @@ import java.util.Map;
  * @author ogondza.
  */
 public class BuildWithParameters extends PageObject {
+    private static final By PARAMETERS_FORM = By.cssSelector("form[name='parameters']");
+
+    private WebElement form;
+
     public BuildWithParameters(Job job, URL url) {
         super(job, url);
     }
 
     public BuildWithParameters enter(List<Parameter> definitions, Map<String, ?> values) {
-        waitFor(by.xpath("//form[@name='parameters']"), 2);
+        form = waitFor(PARAMETERS_FORM, 5);
+        // The new job page loads the form into a dialog, after Jenkins assigned the form element paths
+        recomputeFormElementPaths();
         for (Parameter def : definitions) {
             Object v = values.get(def.getName());
             if (v != null) {
@@ -49,6 +57,9 @@ public class BuildWithParameters extends PageObject {
     }
 
     public void start() {
-        clickButton("Build");
+        // Scope to the form, as the new job page shows it in a dialog on top of other build controls
+        (form != null ? form : find(PARAMETERS_FORM))
+                .findElement(by.button("Build"))
+                .click();
     }
 }

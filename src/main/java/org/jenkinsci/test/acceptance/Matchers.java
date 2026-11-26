@@ -19,6 +19,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.pagefactory.ByChained;
 
 /**
  * Hamcrest matchers.
@@ -98,12 +99,22 @@ public class Matchers {
         return new Matcher<>("contains action titled %s", displayName) {
             @Override
             public boolean matchesSafely(PageObject po) {
+                po.open();
+                if (po.getElement(by.xpath(
+                                        "//div[@id='tasks']/div/span/a/span[text()='%s'] | //div[@id='tasks']/div/a[text()='%s']",
+                                        displayName, displayName))
+                                != null
+                        || po.getElement(by.action(displayName)) != null) {
+                    return true;
+                }
+                // The new job page lists secondary actions in the app bar's overflow ("More actions") menu
+                WebElement overflowButton = po.getElement(by.appBarOverflowButton());
+                if (overflowButton == null) {
+                    return false;
+                }
+                overflowButton.click();
                 try {
-                    po.open();
-                    po.find(by.xpath(
-                                    "//div[@id='tasks']/div/span/a/span[text()='%s'] | //div[@id='tasks']/div/a[text()='%s']",
-                                    displayName, displayName))
-                            .getText();
+                    po.find(new ByChained(by.css(".jenkins-dropdown"), by.action(displayName)));
                     return true;
                 } catch (NoSuchElementException ignored) {
                     return false;

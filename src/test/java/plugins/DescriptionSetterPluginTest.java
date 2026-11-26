@@ -37,8 +37,13 @@ public class DescriptionSetterPluginTest extends AbstractJUnitTest {
         assertThat(find(by.css("div#description div")).getText(), is(equalTo(msg)));
 
         j.open();
+        // The build history is loaded asynchronously; the new job page renders descriptions as
+        // .app-build-item__description
         assertThat(
-                find(by.css("#buildHistoryPage .desc, #buildHistoryPage .app-builds-container__item__description"))
+                waitFor(
+                                by.css(
+                                        "#buildHistoryPage .desc, #buildHistoryPage .app-builds-container__item__description, #buildHistoryPage .app-build-item__description"),
+                                10)
                         .getText(),
                 is(equalTo(msg)));
     }
